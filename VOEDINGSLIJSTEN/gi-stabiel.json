@@ -1,0 +1,66 @@
+{
+  "type": "product_import",
+  "name": "GI-stabiel",
+  "products": [
+    {
+      "name": "Volkoren pasta",
+      "categoryId": "cat-brood",
+      "portion": "150 g",
+      "portionGram": 150,
+      "kh100": 25,
+      "protein100": 5,
+      "fat100": 1.5,
+      "kcal100": 124,
+      "favorite": true,
+      "packName": "GI-stabiel"
+    },
+    {
+      "name": "Linzen",
+      "categoryId": "cat-maaltijden",
+      "portion": "150 g",
+      "portionGram": 150,
+      "kh100": 20,
+      "protein100": 9,
+      "fat100": 0.4,
+      "kcal100": 116,
+      "favorite": true,
+      "packName": "GI-stabiel"
+    },
+    {
+      "name": "Kikkererwten",
+      "categoryId": "cat-maaltijden",
+      "portion": "150 g",
+      "portionGram": 150,
+      "kh100": 27,
+      "protein100": 9,
+      "fat100": 3,
+      "kcal100": 164,
+      "favorite": false,
+      "packName": "GI-stabiel"
+    },
+    {
+      "name": "Notenmix",
+      "categoryId": "cat-snacks",
+      "portion": "30 g",
+      "portionGram": 30,
+      "kh100": 20,
+      "protein100": 20,
+      "fat100": 50,
+      "kcal100": 600,
+      "favorite": true,
+      "packName": "GI-stabiel"
+    },
+    {
+      "name": "Avocado",
+      "categoryId": "cat-vetten",
+      "portion": "100 g",
+      "portionGram": 100,
+      "kh100": 9,
+      "protein100": 2,
+      "fat100": 15,
+      "kcal100": 160,
+      "favorite": true,
+      "packName": "GI-stabiel"
+    }
+  ]
+}

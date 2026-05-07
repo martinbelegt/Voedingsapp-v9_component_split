@@ -1,0 +1,105 @@
+Inhoud:
+
+korte app-omschrijving (die samenvatting)
+belangrijkste structuren (zoals products, rows)
+evt. naming-afspraken
+
+👉 Die plak je bij elke nieuwe chat
+
+voorts code app.js en hooks en services bestanden doorgeven
+
+# PROJECT CONTEXT – Voedingsapp
+
+Ik werk aan een React app voor voedings- en insuline ondersteuning (persoonlijk gebruik).
+
+## Doel van de app
+
+* stabiele bloedsuikers
+* beter inzicht in voeding
+* insulineadvies
+* Creon (enzymen) ondersteuning
+* rekening houden met GI en timing
+
+## Belangrijkste functionaliteiten
+
+* maaltijden invoeren (meerdere regels)
+* automatische berekening:
+
+  * KH / eiwit / vet / kcal
+  * insuline
+  * GI (weighted)
+  * timing
+  * Creon advies
+* maaltijden opslaan
+* dag/archief bijhouden
+* productbeheer (incl. GI en timing)
+
+## Technische structuur
+
+React met hooks:
+
+* products
+* categories
+* settings
+* mealRows
+* savedMeals
+* dailyLog
+
+Belangrijke files:
+
+* App.js
+* useMealRows.ts
+* mealService.ts
+* (eventueel useProducts)
+
+## Productmodel (belangrijk)
+
+Producten bevatten o.a.:
+
+* id
+* categoryId
+* name
+* portion
+* portionGram
+* kh100
+* protein100
+* fat100
+* kcal100
+* GI velden (class/value/note)
+* timing velden
+* favorite
+* packName (voor voedingslijsten)
+
+## Huidige status
+
+* basis werkt stabiel
+* packs/lijsten werken
+* import/export werkt
+* UI deels opgeschoond
+* zit in test- en verfijnfase
+
+## Werkwijze (BELANGRIJK)
+
+Ik ben geen ervaren programmeur, dus:
+
+* geef concrete instructies
+* zeg exact:
+
+  * waar code staat
+  * wat vervangen moet worden
+* werk stap voor stap
+* hou het overzichtelijk
+
+## Wat ik nu wil doen
+
+[HIER JOUW HUIDIGE VRAAG OF DOEL]
+We waren in ch05 (de chat hiervoor) bezig met maken van een uitgebreide voedingslijst speciaal gericht op krachtsport.
+De bedoeling is om meerdere soorten voedingslijsten te gaan maken in de toekomst die ikzelf maar ook andere gebruikers
+in de toekomst kunnen in laden tesamen met andere lijsten waaruit naar hartelust gekozen kan worden. Je had al bij diverse grote instanties gekeken en er twee 
+uitgezocht die ik vrij mag gebruiken.
+
+## Relevante code
+
+[HIER plak ik de belangrijkste bestanden of stukken code]
+
+

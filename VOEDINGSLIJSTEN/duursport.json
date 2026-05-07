@@ -1,0 +1,66 @@
+{
+  "type": "product_import",
+  "name": "Duursport",
+  "products": [
+    {
+      "name": "Banaan rijp",
+      "categoryId": "cat-fruit",
+      "portion": "1 stuk",
+      "portionGram": 120,
+      "kh100": 23,
+      "protein100": 1,
+      "fat100": 0.3,
+      "kcal100": 96,
+      "favorite": true,
+      "packName": "Duursport"
+    },
+    {
+      "name": "Krentenbol",
+      "categoryId": "cat-brood",
+      "portion": "1 stuk",
+      "portionGram": 80,
+      "kh100": 50,
+      "protein100": 8,
+      "fat100": 3,
+      "kcal100": 260,
+      "favorite": true,
+      "packName": "Duursport"
+    },
+    {
+      "name": "Sportdrank",
+      "categoryId": "cat-dranken",
+      "portion": "500 ml",
+      "portionGram": 500,
+      "kh100": 6,
+      "protein100": 0,
+      "fat100": 0,
+      "kcal100": 24,
+      "favorite": true,
+      "packName": "Duursport"
+    },
+    {
+      "name": "Dextrose",
+      "categoryId": "cat-snacks",
+      "portion": "10 g",
+      "portionGram": 10,
+      "kh100": 100,
+      "protein100": 0,
+      "fat100": 0,
+      "kcal100": 400,
+      "favorite": true,
+      "packName": "Duursport"
+    },
+    {
+      "name": "Mueslireep",
+      "categoryId": "cat-snacks",
+      "portion": "1 stuk",
+      "portionGram": 40,
+      "kh100": 65,
+      "protein100": 8,
+      "fat100": 7,
+      "kcal100": 350,
+      "favorite": false,
+      "packName": "Duursport"
+    }
+  ]
+}

@@ -1,0 +1,246 @@
+{
+  "type": "product_import",
+  "name": "Krachtsport basislijst",
+  "products": [
+    {
+      "name": "Kipfilet (gegrild)",
+      "categoryId": "cat-maaltijden",
+      "portion": "100 g",
+      "portionGram": 100,
+      "kh100": 0,
+      "protein100": 31,
+      "fat100": 3,
+      "kcal100": 165
+    },
+    {
+      "name": "Rundergehakt (mager)",
+      "categoryId": "cat-maaltijden",
+      "portion": "100 g",
+      "portionGram": 100,
+      "kh100": 0,
+      "protein100": 26,
+      "fat100": 10,
+      "kcal100": 217
+    },
+    {
+      "name": "Zalm",
+      "categoryId": "cat-maaltijden",
+      "portion": "100 g",
+      "portionGram": 100,
+      "kh100": 0,
+      "protein100": 25,
+      "fat100": 13,
+      "kcal100": 208
+    },
+    {
+      "name": "Tonijn (blik, op water)",
+      "categoryId": "cat-maaltijden",
+      "portion": "100 g",
+      "portionGram": 100,
+      "kh100": 0,
+      "protein100": 26,
+      "fat100": 1,
+      "kcal100": 116
+    },
+    {
+      "name": "Eieren",
+      "categoryId": "cat-maaltijden",
+      "portion": "1 ei",
+      "portionGram": 60,
+      "kh100": 1,
+      "protein100": 13,
+      "fat100": 11,
+      "kcal100": 155
+    },
+    {
+      "name": "Magere kwark",
+      "categoryId": "cat-zuivel",
+      "portion": "250 g",
+      "portionGram": 250,
+      "kh100": 4,
+      "protein100": 10,
+      "fat100": 0,
+      "kcal100": 50
+    },
+    {
+      "name": "Griekse yoghurt (10%)",
+      "categoryId": "cat-zuivel",
+      "portion": "150 g",
+      "portionGram": 150,
+      "kh100": 4,
+      "protein100": 9,
+      "fat100": 10,
+      "kcal100": 120
+    },
+    {
+      "name": "Whey protein",
+      "categoryId": "cat-sport",
+      "portion": "30 g scoop",
+      "portionGram": 30,
+      "kh100": 8,
+      "protein100": 75,
+      "fat100": 5,
+      "kcal100": 390
+    },
+    {
+      "name": "Havermout",
+      "categoryId": "cat-brood",
+      "portion": "50 g",
+      "portionGram": 50,
+      "kh100": 60,
+      "protein100": 13,
+      "fat100": 7,
+      "kcal100": 370
+    },
+    {
+      "name": "Witte rijst (gekookt)",
+      "categoryId": "cat-maaltijden",
+      "portion": "150 g",
+      "portionGram": 150,
+      "kh100": 28,
+      "protein100": 3,
+      "fat100": 0,
+      "kcal100": 130
+    },
+    {
+      "name": "Zilvervliesrijst",
+      "categoryId": "cat-maaltijden",
+      "portion": "150 g",
+      "portionGram": 150,
+      "kh100": 23,
+      "protein100": 3,
+      "fat100": 1,
+      "kcal100": 110
+    },
+    {
+      "name": "Pasta volkoren",
+      "categoryId": "cat-maaltijden",
+      "portion": "100 g",
+      "portionGram": 100,
+      "kh100": 70,
+      "protein100": 13,
+      "fat100": 2,
+      "kcal100": 350
+    },
+    {
+      "name": "Aardappelen",
+      "categoryId": "cat-maaltijden",
+      "portion": "200 g",
+      "portionGram": 200,
+      "kh100": 17,
+      "protein100": 2,
+      "fat100": 0,
+      "kcal100": 77
+    },
+    {
+      "name": "Zoete aardappel",
+      "categoryId": "cat-maaltijden",
+      "portion": "200 g",
+      "portionGram": 200,
+      "kh100": 20,
+      "protein100": 2,
+      "fat100": 0,
+      "kcal100": 86
+    },
+    {
+      "name": "Banaan",
+      "categoryId": "cat-fruit",
+      "portion": "1 stuk",
+      "portionGram": 120,
+      "kh100": 23,
+      "protein100": 1,
+      "fat100": 0,
+      "kcal100": 96
+    },
+    {
+      "name": "Appel",
+      "categoryId": "cat-fruit",
+      "portion": "1 stuk",
+      "portionGram": 150,
+      "kh100": 14,
+      "protein100": 0,
+      "fat100": 0,
+      "kcal100": 52
+    },
+    {
+      "name": "Blauwe bessen",
+      "categoryId": "cat-fruit",
+      "portion": "100 g",
+      "portionGram": 100,
+      "kh100": 14,
+      "protein100": 1,
+      "fat100": 0,
+      "kcal100": 57
+    },
+    {
+      "name": "Broccoli",
+      "categoryId": "cat-groente",
+      "portion": "150 g",
+      "portionGram": 150,
+      "kh100": 7,
+      "protein100": 3,
+      "fat100": 0,
+      "kcal100": 35
+    },
+    {
+      "name": "Spinazie",
+      "categoryId": "cat-groente",
+      "portion": "100 g",
+      "portionGram": 100,
+      "kh100": 4,
+      "protein100": 3,
+      "fat100": 0,
+      "kcal100": 23
+    },
+    {
+      "name": "Paprika",
+      "categoryId": "cat-groente",
+      "portion": "100 g",
+      "portionGram": 100,
+      "kh100": 6,
+      "protein100": 1,
+      "fat100": 0,
+      "kcal100": 31
+    },
+    {
+      "name": "Avocado",
+      "categoryId": "cat-vetten",
+      "portion": "100 g",
+      "portionGram": 100,
+      "kh100": 9,
+      "protein100": 2,
+      "fat100": 15,
+      "kcal100": 160
+    },
+    {
+      "name": "Olijfolie",
+      "categoryId": "cat-vetten",
+      "portion": "10 ml",
+      "portionGram": 10,
+      "kh100": 0,
+      "protein100": 0,
+      "fat100": 100,
+      "kcal100": 900
+    },
+    {
+      "name": "Amandelen",
+      "categoryId": "cat-snacks",
+      "portion": "30 g",
+      "portionGram": 30,
+      "kh100": 22,
+      "protein100": 21,
+      "fat100": 49,
+      "kcal100": 579
+    },
+    {
+      "name": "Pindakaas",
+      "categoryId": "cat-snacks",
+      "portion": "20 g",
+      "portionGram": 20,
+      "kh100": 20,
+      "protein100": 25,
+      "fat100": 50,
+      "kcal100": 588
+    }
+  ]
+}
