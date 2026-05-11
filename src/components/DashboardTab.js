@@ -4,6 +4,7 @@ import { SavedMealCard } from "./SavedMealCard";
 import { MealRowCard } from "./MealRowCard";
 import { getCategoryColor, getCategoryName } from "../services/productHelpers";
 import { TestLogSection } from "./TestLogSection";
+import { SavedMealsSection } from "./SavedMealsSection";
 
 export function DashboardTab(props) {
   const {
@@ -70,78 +71,21 @@ export function DashboardTab(props) {
       >
         <ResultCard totals={totals} rowsWithCalc={rowsWithCalc} />
 
-        <div style={{ ...cardStyle, marginBottom: 16 }}>
-          <button
-            onClick={() => setShowSavedMeals((v) => !v)}
-            style={{
-              ...buttonStyle,
-              width: "100%",
-              textAlign: "left",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              background: getCategoryColor(categories, "cat-maaltijden"),
-              border: "1px solid #d8b4fe",
-              color: "#4c1d95",
-              fontWeight: 700,
-            }}
-          >
-            <span>Standaardmaaltijden ({savedMeals.length})</span>
-            <span>{showSavedMeals ? "▲" : "▼"}</span>
-          </button>
-
-          {showSavedMeals && (
-            <div style={{ marginTop: 12 }}>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "2fr auto",
-                  gap: 8,
-                  marginBottom: 12,
-                }}
-              >
-                <input
-                  value={mealName}
-                  onChange={(e) => setMealName(e.target.value)}
-                  style={inputStyle}
-                  placeholder="Naam van maaltijd, bv. Ontbijt standaard"
-                />
-                <button
-                  onClick={saveCurrentMeal}
-                  style={{
-                    ...buttonStyle,
-                    background: "#dcfce7",
-                    color: "#166534",
-                    border: "1px solid #86efac",
-                    fontWeight: 700,
-                  }}
-                >
-                  Opslaan huidige maaltijd
-                </button>
-              </div>
-
-              <div style={{ display: "grid", gap: 8 }}>
-                {savedMeals.length === 0 && (
-                  <div style={{ color: "#64748b", fontSize: 14 }}>
-                    Nog geen standaardmaaltijden opgeslagen.
-                  </div>
-                )}
-
-                {savedMeals.map((meal, index) => (
-                  <SavedMealCard
-                    key={meal.id}
-                    meal={meal}
-                    index={index}
-                    products={products}
-                    onLoad={loadSavedMeal}
-                    onDelete={deleteSavedMeal}
-                    buttonStyle={buttonStyle}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        <SavedMealsSection
+          categories={categories}
+          savedMeals={savedMeals}
+          showSavedMeals={showSavedMeals}
+          setShowSavedMeals={setShowSavedMeals}
+          mealName={mealName}
+          setMealName={setMealName}
+          saveCurrentMeal={saveCurrentMeal}
+          loadSavedMeal={loadSavedMeal}
+          deleteSavedMeal={deleteSavedMeal}
+          products={products}
+          cardStyle={cardStyle}
+          buttonStyle={buttonStyle}
+          inputStyle={inputStyle}
+        />
 
         <div style={{ ...cardStyle, marginBottom: 16 }}>
           <button
