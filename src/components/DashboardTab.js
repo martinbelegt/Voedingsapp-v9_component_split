@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { ResultCard } from "./ResultCard";
 import { SavedMealCard } from "./SavedMealCard";
-import { MealRowCard } from "./MealRowCard";
 import { getCategoryColor, getCategoryName } from "../services/productHelpers";
 import { TestLogSection } from "./TestLogSection";
 import { SavedMealsSection } from "./SavedMealsSection";
 import { FavoritesSection } from "./FavoritesSection";
+import { QuickAddSection } from "./QuickAddSection";
+import { MealRowsSection } from "./MealRowsSection";
 
 export function DashboardTab(props) {
   const {
@@ -98,134 +99,39 @@ export function DashboardTab(props) {
           buttonStyle={buttonStyle}
         />
 
-        <div style={cardStyle}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "2fr 1fr 1fr",
-              gap: 8,
-              alignItems: "center",
-            }}
-          >
-            <input
-              value={dayMealName}
-              onChange={(e) => setDayMealName(e.target.value)}
-              style={inputStyle}
-              placeholder="Naam voor daglog, bv. Ontbijt / Lunch / Avondeten"
-            />
-
-            <button
-              onClick={addCurrentMealToSelectedDay}
-              style={{
-                ...buttonStyle,
-                background: "#dcfce7",
-                color: "#166534",
-                border: "1px solid #86efac",
-                fontWeight: 700,
-              }}
-            >
-              Voeg toe aan dag
-            </button>
-
-            <button
-              onClick={addCurrentMealToSelectedDayAndClear}
-              style={{
-                ...buttonStyle,
-                background: "#eff6ff",
-                color: "#1d4ed8",
-                border: "1px solid #bfdbfe",
-                fontWeight: 700,
-              }}
-            >
-              Voeg toe en start nieuwe maaltijd
-            </button>
-          </div>
-
-          <div style={{ marginTop: 10 }}>
-            <input
-              value={quickSearch}
-              onChange={(e) => setQuickSearch(e.target.value)}
-              placeholder="Snel product toevoegen..."
-              style={inputStyle}
-            />
-
-            {quickSearch && (
-              <div style={{ marginTop: 6, display: "grid", gap: 4 }}>
-                {quickSearchResults.length === 0 && (
-                  <div style={{ fontSize: 12, color: "#64748b" }}>
-                    Geen resultaten
-                  </div>
-                )}
-
-                {quickSearchResults.map((p) => (
-                  <button
-                    key={p.id}
-                    onClick={() => {
-                      quickAddProduct(p.id);
-                      setQuickSearch("");
-                    }}
-                    style={{
-                      ...buttonStyle,
-                      textAlign: "left",
-                      padding: "6px 8px",
-                      fontSize: 13,
-                      background: getCategoryColor(categories, p.categoryId),
-                    }}
-                  >
-                    {getCategoryName(categories, p.categoryId)} | {p.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        <QuickAddSection
+          dayMealName={dayMealName}
+          setDayMealName={setDayMealName}
+          addCurrentMealToSelectedDay={addCurrentMealToSelectedDay}
+          addCurrentMealToSelectedDayAndClear={
+            addCurrentMealToSelectedDayAndClear
+          }
+          quickSearch={quickSearch}
+          setQuickSearch={setQuickSearch}
+          quickSearchResults={quickSearchResults}
+          quickAddProduct={quickAddProduct}
+          categories={categories}
+          cardStyle={cardStyle}
+          inputStyle={inputStyle}
+          buttonStyle={buttonStyle}
+        />
       </div>
 
       <div style={{ display: "grid", gap: 16 }}>
-        {rowsWithCalc.map((r, idx) => (
-          <MealRowCard
-            key={r.id}
-            index={idx}
-            row={r}
-            products={filteredProducts}
-            categories={categories}
-            onChange={updateRow}
-            onRemove={removeRow}
-            newRowRef={newRowRef}
-            isLastRow={idx === rowsWithCalc.length - 1}
-            labelStyle={labelStyle}
-            inputStyle={inputStyle}
-            buttonStyle={buttonStyle}
-            getCategoryColor={getCategoryColor}
-          />
-        ))}
-
-        <div style={cardStyle}>
-          <div
-            style={{
-              display: "flex",
-              gap: 8,
-              flexWrap: "wrap",
-              justifyContent: "flex-start",
-            }}
-          >
-            <button onClick={addRow} style={buttonStyle}>
-              Rij toevoegen
-            </button>
-            <button
-              onClick={clearMeal}
-              style={{
-                ...buttonStyle,
-                background: "#dbeafe",
-                color: "#1d4ed8",
-                border: "1px solid #93c5fd",
-                fontWeight: 700,
-              }}
-            >
-              Nieuwe maaltijd
-            </button>
-          </div>
-        </div>
+        <MealRowsSection
+          rowsWithCalc={rowsWithCalc}
+          filteredProducts={filteredProducts}
+          categories={categories}
+          updateRow={updateRow}
+          removeRow={removeRow}
+          addRow={addRow}
+          clearMeal={clearMeal}
+          newRowRef={newRowRef}
+          cardStyle={cardStyle}
+          buttonStyle={buttonStyle}
+          inputStyle={inputStyle}
+          labelStyle={labelStyle}
+        />
 
         <div style={cardStyle}>
           <button
