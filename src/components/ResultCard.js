@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { CreonResultCard } from "../CreonResultCard";
+import { getMealInterpretation } from "../services/mealAnalysisService";
 
 export function ResultCard({ totals, rowsWithCalc }) {
   const [showResultDetail, setShowResultDetail] = useState(false);
@@ -318,16 +319,7 @@ export function ResultCard({ totals, rowsWithCalc }) {
                 >
                   <div style={{ fontWeight: 800 }}>Korte interpretatie</div>
 
-                  <div>
-                    {totals.fat > totals.kh && totals.fat > totals.protein
-                      ? "Deze maaltijd lijkt vooral vet-gedreven. Creon wordt hier waarschijnlijk vooral door vetbelasting bepaald."
-                      : totals.protein > totals.fat &&
-                          totals.protein > totals.kh
-                        ? "Deze maaltijd lijkt relatief eiwit-zwaar. Let mogelijk ook op latere glucose-invloed."
-                        : totals.kh > totals.fat && totals.kh > totals.protein
-                          ? "Deze maaltijd lijkt relatief KH-zwaar. Timing en GI kunnen hier extra belangrijk zijn."
-                          : "Deze maaltijd heeft een gemengd profiel. De uitkomst is gebaseerd op meerdere bijdragen tegelijk."}
-                  </div>
+                  <div>{getMealInterpretation(totals)}</div>
 
                   {totals.needsLightMealSupport && (
                     <div>
