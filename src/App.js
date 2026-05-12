@@ -48,6 +48,8 @@ import {
   getFallbackGiValue,
 } from "./services/giService";
 
+import { getBaseTimingAdvice } from "./services/timingService";
+
 const MEAL_MOMENTS = [
   { id: "neutral", label: "Algemeen" },
   { id: "breakfast", label: "Ontbijt" },
@@ -1195,15 +1197,7 @@ export default function App() {
 
     const mealGiLabel = getMealGiLabel(weightedGi);
 
-    let timingAdvice = "Bij eerste hap";
-    let timingMinutes = 0;
-    if (giClass === "hoog") {
-      timingAdvice = "10 min vóór eten";
-      timingMinutes = 10;
-    } else if (giClass === "gemiddeld") {
-      timingAdvice = "5 min vóór eten";
-      timingMinutes = 5;
-    }
+    let { timingAdvice, timingMinutes } = getBaseTimingAdvice(giClass);
 
     if (fat > 20 && giClass !== "hoog") {
       timingAdvice = "Bij eerste hap (vet vertraagt opname)";
