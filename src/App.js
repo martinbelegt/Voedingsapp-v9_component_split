@@ -39,6 +39,11 @@ import {
   buttonStyle,
   primaryButtonStyle,
 } from "./styles/uiStyles";
+import {
+  getGiClassFromValue,
+  getGiLabelFromClass,
+  getGiClassLabelFromValue,
+} from "./services/giService";
 
 const MEAL_MOMENTS = [
   { id: "neutral", label: "Algemeen" },
@@ -1183,9 +1188,14 @@ export default function App() {
           )
         : 0;
 
-    let giClass = "laag";
-    if (weightedGi >= 70) giClass = "hoog";
-    else if (weightedGi >= 55) giClass = "gemiddeld";
+    const giClassKey = getGiClassFromValue(weightedGi);
+
+    const giClass =
+      giClassKey === "high"
+        ? "hoog"
+        : giClassKey === "medium"
+          ? "gemiddeld"
+          : "laag";
 
     let mealGiLabel = "Onbekend / gemengd";
     if (weightedGi > 0 && weightedGi < 45) mealGiLabel = "Laag / geleidelijk";
