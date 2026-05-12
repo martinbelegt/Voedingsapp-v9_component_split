@@ -54,6 +54,11 @@ import {
   getPersonalTimingAnalysis,
 } from "./services/timingService";
 
+import {
+  getCreonModeLabel,
+  getCreonInputNumber,
+} from "./services/creonService";
+
 const MEAL_MOMENTS = [
   { id: "neutral", label: "Algemeen" },
   { id: "breakfast", label: "Ontbijt" },
@@ -1294,8 +1299,7 @@ export default function App() {
       minEnzymeLoadValue,
       includeProteinGlucoseInCreon,
       best,
-      creonModeLabel:
-        creonMode === "extended" ? "Persoonlijk uitgebreid" : "Standaard",
+      creonModeLabel: getCreonModeLabel(creonMode),
       baseFatDrivenText: `${baseFatDriven25} x 25k + ${baseFatDriven10} x 10k`,
     };
   }, [rowsWithCalc, settings]);
