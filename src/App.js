@@ -48,7 +48,10 @@ import {
   getFallbackGiValue,
 } from "./services/giService";
 
-import { getBaseTimingAdvice } from "./services/timingService";
+import {
+  getBaseTimingAdvice,
+  applyFatDelayToTiming,
+} from "./services/timingService";
 
 const MEAL_MOMENTS = [
   { id: "neutral", label: "Algemeen" },
@@ -1199,10 +1202,12 @@ export default function App() {
 
     let { timingAdvice, timingMinutes } = getBaseTimingAdvice(giClass);
 
-    if (fat > 20 && giClass !== "hoog") {
-      timingAdvice = "Bij eerste hap (vet vertraagt opname)";
-      timingMinutes = 0;
-    }
+    ({ timingAdvice, timingMinutes } = applyFatDelayToTiming({
+      fat,
+      giClass,
+      timingAdvice,
+      timingMinutes,
+    }));
 
     const personalTimingRows = rowsWithCalc.filter(
       (r) => r.product && r.kh > 0,

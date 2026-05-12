@@ -18,3 +18,21 @@ export function getBaseTimingAdvice(giClass) {
     timingMinutes: 0,
   };
 }
+export function applyFatDelayToTiming({
+  fat,
+  giClass,
+  timingAdvice,
+  timingMinutes,
+}) {
+  if (fat > 20 && giClass !== "hoog") {
+    return {
+      timingAdvice: "Bij eerste hap (vet vertraagt opname)",
+      timingMinutes: 0,
+    };
+  }
+
+  return {
+    timingAdvice,
+    timingMinutes,
+  };
+}
