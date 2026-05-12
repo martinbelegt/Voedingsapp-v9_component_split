@@ -31,3 +31,13 @@ export function getMealInterpretation(totals) {
       return "Deze maaltijd heeft een gemengd profiel. De uitkomst is gebaseerd op meerdere bijdragen tegelijk.";
   }
 }
+
+export function getMealFlags(totals) {
+  return {
+    hasDelayedCarbs: totals.mealHasDelayedCarbs,
+
+    needsLightMealSupport: totals.needsLightMealSupport,
+
+    delayedItemsText: totals.delayedItemsText || "",
+  };
+}

@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 import { CreonResultCard } from "../CreonResultCard";
-import { getMealInterpretation } from "../services/mealAnalysisService";
+import {
+  getMealInterpretation,
+  getMealFlags,
+} from "../services/mealAnalysisService";
 
 export function ResultCard({ totals, rowsWithCalc }) {
   const [showResultDetail, setShowResultDetail] = useState(false);
+
+  const mealFlags = getMealFlags(totals);
 
   const cardBox = {
     borderRadius: 10,
@@ -321,7 +326,7 @@ export function ResultCard({ totals, rowsWithCalc }) {
 
                   <div>{getMealInterpretation(totals)}</div>
 
-                  {totals.needsLightMealSupport && (
+                  {mealFlags.needsLightMealSupport && (
                     <div>
                       Lichte maaltijd-ondersteuning was actief. Dat betekent dat
                       de app extra rekening hield met KH/eiwit ondanks lage
@@ -329,10 +334,10 @@ export function ResultCard({ totals, rowsWithCalc }) {
                     </div>
                   )}
 
-                  {totals.mealHasDelayedCarbs && (
+                  {mealFlags.hasDelayedCarbs && (
                     <div>
                       Er zitten producten met vertraagde opname in deze
-                      maaltijd: <strong>{totals.delayedItemsText}</strong>
+                      maaltijd: <strong>{mealFlags.delayedItemsText}</strong>
                     </div>
                   )}
                 </div>
