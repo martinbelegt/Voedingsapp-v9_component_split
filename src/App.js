@@ -39,11 +39,13 @@ import {
   buttonStyle,
   primaryButtonStyle,
 } from "./styles/uiStyles";
+
 import {
   getGiClassFromValue,
   getGiLabelFromClass,
   getGiClassLabelFromValue,
   getMealGiLabel,
+  getFallbackGiValue,
 } from "./services/giService";
 
 const MEAL_MOMENTS = [
@@ -1175,14 +1177,7 @@ export default function App() {
         ? round2(
             giWeightedRows.reduce((a, r) => {
               const gi = Number(r.product.giValue);
-              const fallback =
-                r.product.giClass === "high"
-                  ? 75
-                  : r.product.giClass === "medium"
-                    ? 60
-                    : r.product.giClass === "low"
-                      ? 35
-                      : 50;
+              const fallback = getFallbackGiValue(r.product.giClass);
               const useGi = Number.isFinite(gi) && gi >= 0 ? gi : fallback;
               return a + useGi * r.kh;
             }, 0) / totalGiWeight,

@@ -49,3 +49,15 @@ export function getMealGiLabel(weightedGi) {
 
   return "Hoog / sneller";
 }
+export function getFallbackGiValue(giClass) {
+  switch (giClass) {
+    case "high":
+      return 75;
+    case "medium":
+      return 60;
+    case "low":
+      return 35;
+    default:
+      return 50;
+  }
+}
