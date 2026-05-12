@@ -43,6 +43,7 @@ import {
   getGiClassFromValue,
   getGiLabelFromClass,
   getGiClassLabelFromValue,
+  getMealGiLabel,
 } from "./services/giService";
 
 const MEAL_MOMENTS = [
@@ -1197,11 +1198,7 @@ export default function App() {
           ? "gemiddeld"
           : "laag";
 
-    let mealGiLabel = "Onbekend / gemengd";
-    if (weightedGi > 0 && weightedGi < 45) mealGiLabel = "Laag / geleidelijk";
-    else if (weightedGi >= 45 && weightedGi < 60)
-      mealGiLabel = "Midden / normaal";
-    else if (weightedGi >= 60) mealGiLabel = "Hoog / sneller";
+    const mealGiLabel = getMealGiLabel(weightedGi);
 
     let timingAdvice = "Bij eerste hap";
     let timingMinutes = 0;
