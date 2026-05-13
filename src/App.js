@@ -37,8 +37,6 @@ import {
 
 import {
   getGiClassFromValue,
-  getGiLabelFromClass,
-  getGiClassLabelFromValue,
   getMealGiLabel,
   getFallbackGiValue,
 } from "./services/giService";
@@ -49,10 +47,7 @@ import {
   getPersonalTimingAnalysis,
 } from "./services/timingService";
 
-import {
-  getCreonModeLabel,
-  getCreonInputNumber,
-} from "./services/creonService";
+import { getCreonModeLabel } from "./services/creonService";
 
 const MEAL_MOMENTS = [
   { id: "neutral", label: "Algemeen" },
