@@ -15,6 +15,7 @@ import { starterProducts } from "./data/starterProducts";
 import { starterCategories } from "./data/starterCategories";
 import { giStarterData } from "./data/giStarterData";
 import { defaultSettings } from "./data/defaults";
+import { MEAL_MOMENTS } from "./data/mealMoments";
 import {
   getCategoryById,
   getCategoryName,
@@ -48,17 +49,6 @@ import {
 } from "./services/timingService";
 
 import { getCreonModeLabel } from "./services/creonService";
-
-const MEAL_MOMENTS = [
-  { id: "neutral", label: "Algemeen" },
-  { id: "breakfast", label: "Ontbijt" },
-  { id: "lunch", label: "Lunch" },
-  { id: "dinner", label: "Diner" },
-  { id: "snack", label: "Tussendoor" },
-  { id: "sport", label: "Sport" },
-  { id: "dessert", label: "Toetje" },
-  { id: "fruit", label: "Fruit" },
-];
 
 const STORAGE_KEYS = {
   settings: "dc_settings_v2",
