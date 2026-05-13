@@ -19,7 +19,6 @@ import {
   getCategoryById,
   getCategoryName,
   getCategoryColor,
-  getProductById,
 } from "./services/productHelpers";
 import {
   getGiClassMeta,
@@ -30,7 +29,6 @@ import {
 import {
   sectionBadgeStyle,
   cardStyle,
-  compactCardStyle,
   labelStyle,
   inputStyle,
   buttonStyle,
