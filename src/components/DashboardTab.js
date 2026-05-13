@@ -1,7 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
 import { ResultCard } from "./ResultCard";
-import { SavedMealCard } from "./SavedMealCard";
-import { getCategoryColor, getCategoryName } from "../services/productHelpers";
 import { TestLogSection } from "./TestLogSection";
 import { SavedMealsSection } from "./SavedMealsSection";
 import { FavoritesSection } from "./FavoritesSection";
