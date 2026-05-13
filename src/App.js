@@ -17,6 +17,7 @@ import { giStarterData } from "./data/giStarterData";
 import { defaultSettings } from "./data/defaults";
 import { MEAL_MOMENTS } from "./data/mealMoments";
 import { calculateMealTotals } from "./services/mealTotalsService";
+import { defaultNewProduct } from "./data/productDefaults";
 import {
   getCategoryById,
   getCategoryName,
@@ -724,27 +725,7 @@ export default function App() {
   const [giSearch, setGiSearch] = useState("");
   const [activePackFilter, setActivePackFilter] = useState("all");
 
-  const [newProduct, setNewProduct] = useState({
-    name: "",
-    categoryId: "cat-brood",
-    portion: "1 portie",
-    portionGram: "",
-    inputMode: "per100",
-    khInput: "",
-    proteinInput: "",
-    fatInput: "",
-    kcalInput: "",
-    giClass: "unknown",
-    giValue: "",
-    timingTag: "meal",
-    giNotes: "",
-    personalTimingTag: "meal",
-    personalTimingNotes: "",
-    absorptionProfile: "steady",
-    favorite: false,
-    packName: "Martin",
-    mealMoment: "neutral",
-  });
+  const [newProduct, setNewProduct] = useState(defaultNewProduct);
 
   const [productModalOpen, setProductModalOpen] = useState(false);
 
@@ -1016,26 +997,10 @@ export default function App() {
 
   function resetNewProductForm() {
     setNewProduct({
-      name: "",
+      ...defaultNewProduct,
       categoryId: categories[0]?.id || "cat-overig",
-      portion: "1 portie",
-      portionGram: "",
-      inputMode: "per100",
-      khInput: "",
-      proteinInput: "",
-      fatInput: "",
-      kcalInput: "",
-      giClass: "unknown",
-      giValue: "",
-      timingTag: "meal",
-      giNotes: "",
-      personalTimingTag: "meal",
-      personalTimingNotes: "",
-      absorptionProfile: "steady",
-      favorite: false,
-      packName: "Martin",
-      mealMoment: "neutral",
     });
+
     setEditingProductId(null);
   }
 
