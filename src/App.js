@@ -62,6 +62,11 @@ import {
 
 import { CATEGORY_FALLBACK_COLORS } from "./data/categoryColors";
 
+import {
+  createNewProductForm,
+  createProductEditForm,
+} from "./services/productFormService";
+
 const STORAGE_KEYS = {
   settings: "dc_settings_v2",
   products: "dc_products_v2",
@@ -996,11 +1001,7 @@ export default function App() {
   }
 
   function resetNewProductForm() {
-    setNewProduct({
-      ...defaultNewProduct,
-      categoryId: categories[0]?.id || "cat-overig",
-    });
-
+    setNewProduct(createNewProductForm(categories));
     setEditingProductId(null);
   }
 
@@ -1012,29 +1013,7 @@ export default function App() {
   function openEditProductModal(product) {
     setEditingProductId(product.id);
 
-    const portionGram = Number(product.portionGram) || 0;
-
-    setNewProduct({
-      name: product.name,
-      categoryId: product.categoryId,
-      portion: product.portion,
-      portionGram: String(product.portionGram),
-      inputMode: "per100",
-      khInput: String(product.kh100),
-      proteinInput: String(product.protein100),
-      fatInput: String(product.fat100),
-      kcalInput: String(product.kcal100),
-      giClass: product.giClass || "unknown",
-      giValue: String(product.giValue ?? ""),
-      timingTag: product.timingTag || "meal",
-      giNotes: product.giNotes || "",
-      personalTimingTag:
-        product.personalTimingTag || product.timingTag || "meal",
-      personalTimingNotes: product.personalTimingNotes || "",
-      absorptionProfile: product.absorptionProfile || "steady",
-      favorite: !!product.favorite,
-      mealMoment: product.mealMoment || "neutral",
-    });
+    setNewProduct(createProductEditForm(product));
 
     setProductModalOpen(true);
   }
