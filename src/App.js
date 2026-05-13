@@ -18,6 +18,7 @@ import { defaultSettings } from "./data/defaults";
 import { MEAL_MOMENTS } from "./data/mealMoments";
 import { calculateMealTotals } from "./services/mealTotalsService";
 import { defaultNewProduct } from "./data/productDefaults";
+import { TestLogSection } from "./components/TestLogSection";
 import {
   getCategoryById,
   getCategoryName,
@@ -1773,6 +1774,13 @@ Producten uit deze categorie gaan naar "Overig".`);
             GI / Timing
           </button>
           <button
+            onClick={() => setActiveTab("testlog")}
+            style={activeTab === "testlog" ? primaryButtonStyle : buttonStyle}
+          >
+            Testlogboek
+          </button>
+
+          <button
             onClick={() => setActiveTab("daily")}
             style={activeTab === "daily" ? primaryButtonStyle : buttonStyle}
           >
@@ -1819,12 +1827,6 @@ Producten uit deze categorie gaan naar "Overig".`);
             quickSearch={quickSearch}
             setQuickSearch={setQuickSearch}
             quickSearchResults={quickSearchResults}
-            testLog={testLog}
-            testLogForm={testLogForm}
-            setTestLogForm={setTestLogForm}
-            bristolOptions={BRISTOL_OPTIONS}
-            addTestLogEntry={addTestLogEntry}
-            deleteTestLogEntry={deleteTestLogEntry}
             selectedDate={selectedDate}
             dayMealName={dayMealName}
             setDayMealName={setDayMealName}
@@ -1834,7 +1836,6 @@ Producten uit deze categorie gaan naar "Overig".`);
             }
             cardStyle={cardStyle}
             buttonStyle={buttonStyle}
-            primaryButtonStyle={primaryButtonStyle}
             inputStyle={inputStyle}
             labelStyle={labelStyle}
           />
@@ -1929,6 +1930,22 @@ Producten uit deze categorie gaan naar "Overig".`);
             buttonStyle={buttonStyle}
             cardStyle={cardStyle}
             round2={round2}
+          />
+        )}
+
+        {activeTab === "testlog" && (
+          <TestLogSection
+            testLog={testLog}
+            testLogForm={testLogForm}
+            setTestLogForm={setTestLogForm}
+            bristolOptions={BRISTOL_OPTIONS}
+            addTestLogEntry={addTestLogEntry}
+            deleteTestLogEntry={deleteTestLogEntry}
+            cardStyle={cardStyle}
+            inputStyle={inputStyle}
+            buttonStyle={buttonStyle}
+            primaryButtonStyle={primaryButtonStyle}
+            labelStyle={labelStyle}
           />
         )}
 

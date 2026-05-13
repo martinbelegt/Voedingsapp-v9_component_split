@@ -1,6 +1,5 @@
 import React from "react";
 import { ResultCard } from "./ResultCard";
-import { TestLogSection } from "./TestLogSection";
 import { SavedMealsSection } from "./SavedMealsSection";
 import { FavoritesSection } from "./FavoritesSection";
 import { QuickAddSection } from "./QuickAddSection";
@@ -41,15 +40,8 @@ export function DashboardTab(props) {
     quickSearch,
     setQuickSearch,
     quickSearchResults,
-    testLog,
-    testLogForm,
-    setTestLogForm,
-    bristolOptions,
-    addTestLogEntry,
-    deleteTestLogEntry,
     cardStyle,
     buttonStyle,
-    primaryButtonStyle,
     inputStyle,
     labelStyle,
   } = props;
@@ -136,20 +128,6 @@ export function DashboardTab(props) {
           categoryFilterOptions={categoryFilterOptions}
           cardStyle={cardStyle}
           buttonStyle={buttonStyle}
-        />
-
-        <TestLogSection
-          testLog={testLog}
-          testLogForm={testLogForm}
-          setTestLogForm={setTestLogForm}
-          bristolOptions={bristolOptions}
-          addTestLogEntry={addTestLogEntry}
-          deleteTestLogEntry={deleteTestLogEntry}
-          cardStyle={cardStyle}
-          inputStyle={inputStyle}
-          buttonStyle={buttonStyle}
-          primaryButtonStyle={primaryButtonStyle}
-          labelStyle={labelStyle}
         />
       </div>
     </>
