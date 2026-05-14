@@ -47,3 +47,8 @@ export function findExistingProductMatch(products, newProduct) {
       p.name.toLowerCase() === name && p.categoryId === newProduct.categoryId,
   );
 }
+export function confirmOverwriteProduct(existing) {
+  return window.confirm(
+    `Er bestaat al een product met de naam "${existing.name}" in deze categorie.\n\nWil je dit bestaande product overschrijven?`,
+  );
+}

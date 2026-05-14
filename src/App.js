@@ -79,6 +79,7 @@ import {
 import {
   createProductPayload,
   findExistingProductMatch,
+  confirmOverwriteProduct,
 } from "./services/productPayloadService";
 
 const STORAGE_KEYS = {
@@ -1215,9 +1216,7 @@ export default function App() {
       const existing = findExistingProductMatch(products, newProduct);
 
       if (existing) {
-        const shouldOverwrite = window.confirm(
-          `Er bestaat al een product met de naam "${existing.name}" in deze categorie.\n\nWil je dit bestaande product overschrijven?`,
-        );
+        const shouldOverwrite = confirmOverwriteProduct(existing);
 
         if (!shouldOverwrite) return;
 
