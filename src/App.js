@@ -83,6 +83,11 @@ import {
   confirmOverwriteProduct,
 } from "./services/productPayloadService";
 
+import {
+  addEmptyMealRow,
+  removeMealRowById,
+} from "./services/mealRowStateService";
+
 const STORAGE_KEYS = {
   settings: "dc_settings_v2",
   products: "dc_products_v2",
@@ -1147,14 +1152,11 @@ export default function App() {
   }
 
   function addRow() {
-    setRows((prev) => [...prev, makeRow()]);
+    setRows((prev) => addEmptyMealRow(prev, makeRow));
   }
 
   function removeRow(id) {
-    setRows((prev) => {
-      const filtered = prev.filter((r) => r.id !== id);
-      return filtered.length ? ensureLastEmptyRow(filtered) : [makeRow()];
-    });
+    setRows((prev) => removeMealRowById(prev, id, makeRow, ensureLastEmptyRow));
   }
 
   function addProduct() {
