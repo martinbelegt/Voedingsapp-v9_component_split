@@ -753,17 +753,15 @@ export default function App() {
   }, [rows]);
 
   useEffect(() => {
-    const snapshot = {
-      exportedAt: new Date().toISOString(),
-      app: "diabetes-creon-webapp",
-      version: 2,
+    const snapshot = createFullBackupSnapshot({
       categories,
       products,
       rows,
       settings,
       savedMeals,
       testLog,
-    };
+    });
+
     localStorage.setItem("dc_emergency_backup_v1", JSON.stringify(snapshot));
   }, [categories, products, rows, settings, savedMeals, testLog]);
 
