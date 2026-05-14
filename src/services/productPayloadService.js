@@ -39,11 +39,6 @@ export function createProductPayload({
     mealMoment: newProduct.mealMoment || "neutral",
   });
 }
-const existing = products.find(
-  (p) =>
-    p.name.toLowerCase() === newProduct.name.trim().toLowerCase() &&
-    p.categoryId === newProduct.categoryId,
-);
 export function findExistingProductMatch(products, newProduct) {
   const name = newProduct.name.trim().toLowerCase();
 

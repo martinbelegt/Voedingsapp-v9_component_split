@@ -20,6 +20,7 @@ import { calculateMealTotals } from "./services/mealTotalsService";
 import { defaultNewProduct } from "./data/productDefaults";
 import { TestLogSection } from "./components/TestLogSection";
 import { parseDecimalInput } from "./utils/numberUtils";
+import { createId } from "./services/idService";
 
 import {
   getCategoryById,
@@ -1214,10 +1215,16 @@ export default function App() {
       const existing = findExistingProductMatch(products, newProduct);
 
       if (existing) {
+        const shouldOverwrite = window.confirm(
+          `Er bestaat al een product met de naam "${existing.name}" in deze categorie.\n\nWil je dit bestaande product overschrijven?`,
+        );
+
+        if (!shouldOverwrite) return;
+
         updateProduct(existing.id, payload);
       } else {
         addProductToStore({
-          id: `prod-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          id: createId("prod"),
           ...payload,
         });
       }
