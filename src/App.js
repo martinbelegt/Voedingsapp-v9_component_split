@@ -19,6 +19,7 @@ import { MEAL_MOMENTS } from "./data/mealMoments";
 import { calculateMealTotals } from "./services/mealTotalsService";
 import { defaultNewProduct } from "./data/productDefaults";
 import { TestLogSection } from "./components/TestLogSection";
+import { parseDecimalInput } from "./utils/numberUtils";
 import {
   getCategoryById,
   getCategoryName,
@@ -1096,6 +1097,7 @@ export default function App() {
   }
 
   function addCurrentMealToSelectedDay() {
+    ush;
     const snapshot = createMealSnapshot(dayMealName);
     if (!snapshot) {
       alert("Er is nog geen maaltijd ingevuld.");
@@ -1170,20 +1172,17 @@ export default function App() {
   function addProduct() {
     if (!newProduct.name.trim()) return;
 
-    const portionGram =
-      Number(String(newProduct.portionGram).replace(",", ".")) || 0;
+    const portionGram = parseDecimalInput(newProduct.portionGram);
 
     if (newProduct.inputMode === "perPortion" && portionGram <= 0) {
       alert("Vul bij invoer per portie een geldig portiegewicht in.");
       return;
     }
 
-    const khInput = Number(String(newProduct.khInput).replace(",", ".")) || 0;
-    const proteinInput =
-      Number(String(newProduct.proteinInput).replace(",", ".")) || 0;
-    const fatInput = Number(String(newProduct.fatInput).replace(",", ".")) || 0;
-    const kcalInput =
-      Number(String(newProduct.kcalInput).replace(",", ".")) || 0;
+    const khInput = parseDecimalInput(newProduct.khInput);
+    const proteinInput = parseDecimalInput(newProduct.proteinInput);
+    const fatInput = parseDecimalInput(newProduct.fatInput);
+    const kcalInput = parseDecimalInput(newProduct.kcalInput);
     const giValue = String(newProduct.giValue).trim();
 
     const convertTo100 = (value) => {
