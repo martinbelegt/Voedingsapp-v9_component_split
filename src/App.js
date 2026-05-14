@@ -77,6 +77,8 @@ import {
   createFullBackupSnapshot,
   downloadJsonFile,
   createBackupFileName,
+  createPackExportObject,
+  createPackExportFileName,
 } from "./services/backupService";
 
 const STORAGE_KEYS = {
@@ -1320,60 +1322,10 @@ Producten uit deze categorie gaan naar "Overig".`);
   }
 
   function exportCurrentPack() {
-    const data =
-      activePackFilter === "all"
-        ? products
-        : activePackFilter === "__base__"
-          ? products.filter(
-              (p) => !p.packName || String(p.packName).trim() === "",
-            )
-          : products.filter((p) => p.packName === activePackFilter);
+    const exportObject = createPackExportObject(products, activePackFilter);
+    const fileName = createPackExportFileName(activePackFilter);
 
-    const exportObject = {
-      type: "product_import",
-      name:
-        activePackFilter === "all"
-          ? "Alles"
-          : activePackFilter === "__base__"
-            ? "Basis"
-            : activePackFilter,
-      products: data.map((p) => ({
-        name: p.name,
-        categoryId: p.categoryId,
-        portion: p.portion,
-        portionGram: p.portionGram,
-        kh100: p.kh100,
-        protein100: p.protein100,
-        fat100: p.fat100,
-        kcal100: p.kcal100,
-        favorite: !!p.favorite,
-        packName:
-          activePackFilter === "all"
-            ? p.packName || ""
-            : activePackFilter === "__base__"
-              ? ""
-              : activePackFilter,
-      })),
-    };
-
-    const blob = new Blob([JSON.stringify(exportObject, null, 2)], {
-      type: "application/json",
-    });
-
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-
-    const fileName =
-      activePackFilter === "all"
-        ? "export_alles.json"
-        : activePackFilter === "__base__"
-          ? "export_basis.json"
-          : `export_${String(activePackFilter).toLowerCase()}.json`;
-
-    a.href = url;
-    a.download = fileName;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadJsonFile(exportObject, fileName);
   }
 
   function importBackupFromFile(event) {
