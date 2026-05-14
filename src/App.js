@@ -1417,9 +1417,7 @@ Producten uit deze categorie gaan naar "Overig".`);
               })
               .map((p) =>
                 normalizeProduct({
-                  id: `prod-${Date.now()}-${Math.random()
-                    .toString(36)
-                    .slice(2, 7)}`,
+                  id: createId("prod"),
                   ...p,
                 }),
               );
