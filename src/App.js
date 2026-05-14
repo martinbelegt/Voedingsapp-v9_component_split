@@ -68,6 +68,11 @@ import {
   createProductEditForm,
 } from "./services/productFormService";
 
+import {
+  getFilledMealRows,
+  buildMealSnapshot,
+} from "./services/mealSnapshotService";
+
 const STORAGE_KEYS = {
   settings: "dc_settings_v2",
   products: "dc_products_v2",
@@ -1080,52 +1085,18 @@ export default function App() {
     );
   }
 
-  function getFilledMealRows() {
-    return rowsWithCalc.filter(
-      (r) => r.product && String(r.amount).trim() !== "",
-    );
-  }
-
-  function buildMealSnapshot(customName) {
-    const filledRows = getFilledMealRows();
-    if (filledRows.length === 0) return null;
-
-    return {
-      id: `meal-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      name:
-        customName?.trim() ||
-        mealName?.trim() ||
-        dayMealName?.trim() ||
-        `Maaltijd ${new Date().toLocaleTimeString("nl-NL", {
-          hour: "2-digit",
-          minute: "2-digit",
-        })}`,
-      createdAt: new Date().toLocaleString("nl-NL"),
-      rows: filledRows.map((r) => ({
-        id: r.id,
-        productId: r.productId,
-        mode: r.mode,
-        amount: r.amount,
-      })),
-      totals: {
-        kh: totals.kh,
-        protein: totals.protein,
-        fat: totals.fat,
-        kcal: totals.kcal,
-        insulin: totals.insulin,
-        weightedGi: totals.weightedGi,
-        giClass: totals.giClass,
-        timingAdvice: totals.timingAdvice,
-        personalTimingAdvice: totals.personalTimingAdvice,
-        effectiveFat: totals.effectiveFat,
-        creon25: totals.best.c25,
-        creon10: totals.best.c10,
-      },
-    };
+  function createMealSnapshot(customName) {
+    return buildMealSnapshot({
+      rowsWithCalc,
+      customName,
+      mealName,
+      dayMealName,
+      totals,
+    });
   }
 
   function addCurrentMealToSelectedDay() {
-    const snapshot = buildMealSnapshot(dayMealName);
+    const snapshot = createMealSnapshot(dayMealName);
     if (!snapshot) {
       alert("Er is nog geen maaltijd ingevuld.");
       return;
@@ -1143,7 +1114,7 @@ export default function App() {
   }
 
   function addCurrentMealToSelectedDayAndClear() {
-    const snapshot = buildMealSnapshot(dayMealName);
+    const snapshot = createMealSnapshot(dayMealName);
     if (!snapshot) {
       alert("Er is nog geen maaltijd ingevuld.");
       return;
