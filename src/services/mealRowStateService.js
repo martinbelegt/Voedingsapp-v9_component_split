@@ -9,3 +9,24 @@ export function removeMealRowById(rows, id, makeRow, ensureLastEmptyRow) {
 export function createEmptyMealRows(makeRow, count = 3) {
   return Array.from({ length: count }, () => makeRow());
 }
+export function quickAddProductToRows(
+  rows,
+  productId,
+  makeRow,
+  ensureLastEmptyRow,
+) {
+  const copy = [...rows];
+  const filledCount = copy.filter((r) => r.productId).length;
+  const targetIndex = filledCount;
+
+  if (!copy[targetIndex]) copy.push(makeRow());
+
+  copy[targetIndex] = {
+    ...copy[targetIndex],
+    productId,
+    mode: "portion",
+    amount: "1",
+  };
+
+  return ensureLastEmptyRow(copy);
+}

@@ -87,6 +87,7 @@ import {
   addEmptyMealRow,
   removeMealRowById,
   createEmptyMealRows,
+  quickAddProductToRows,
 } from "./services/mealRowStateService";
 
 const STORAGE_KEYS = {
@@ -1066,19 +1067,10 @@ export default function App() {
   }
 
   function quickAddProduct(productId) {
-    setRows((prev) => {
-      const copy = [...prev];
-      const filledCount = copy.filter((r) => r.productId).length;
-      const targetIndex = filledCount;
-      if (!copy[targetIndex]) copy.push(makeRow());
-      copy[targetIndex] = {
-        ...copy[targetIndex],
-        productId,
-        mode: "portion",
-        amount: "1",
-      };
-      return ensureLastEmptyRow(copy);
-    });
+    setRows((prev) =>
+      quickAddProductToRows(prev, productId, makeRow, ensureLastEmptyRow),
+    );
+
     scrollRefIntoView(newRowRef);
   }
 
