@@ -20,7 +20,7 @@ import { calculateMealTotals } from "./services/mealTotalsService";
 import { defaultNewProduct } from "./data/productDefaults";
 import { TestLogSection } from "./components/TestLogSection";
 import { parseDecimalInput } from "./utils/numberUtils";
-import { createProductPayload } from "./services/productPayloadService";
+
 import {
   getCategoryById,
   getCategoryName,
@@ -74,6 +74,11 @@ import {
   getFilledMealRows,
   buildMealSnapshot,
 } from "./services/mealSnapshotService";
+
+import {
+  createProductPayload,
+  findExistingProductMatch,
+} from "./services/productPayloadService";
 
 const STORAGE_KEYS = {
   settings: "dc_settings_v2",
@@ -1206,11 +1211,7 @@ export default function App() {
     if (editingProductId) {
       updateProduct(editingProductId, payload);
     } else {
-      const existing = products.find(
-        (p) =>
-          p.name.toLowerCase() === newProduct.name.trim().toLowerCase() &&
-          p.categoryId === newProduct.categoryId,
-      );
+      const existing = findExistingProductMatch(products, newProduct);
 
       if (existing) {
         updateProduct(existing.id, payload);
