@@ -20,6 +20,7 @@ import { TestLogSection } from "./components/TestLogSection";
 import { parseDecimalInput } from "./utils/numberUtils";
 import { createId } from "./services/idService";
 import { scrollRefIntoView } from "./services/scrollService";
+import { useTestLog } from "./hooks/useTestLog";
 
 import {
   getCategoryById,
@@ -688,19 +689,14 @@ export default function App() {
     }
   }, [products, categories]);
 
-  const [testLog, setTestLog] = useState(() => {
-    const saved = localStorage.getItem("dc_test_log_v1");
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [testLogForm, setTestLogForm] = useState({
-    mealLabel: "",
-    insulin: "",
-    creon: "",
-    stoolType: "4",
-    outcome: "",
-    notes: "",
-  });
+  const {
+    testLog,
+    setTestLog,
+    testLogForm,
+    setTestLogForm,
+    addTestLogEntry,
+    deleteTestLogEntry,
+  } = useTestLog();
 
   const [mealName, setMealName] = useState("");
   const [dayMealName, setDayMealName] = useState("");
@@ -1302,37 +1298,6 @@ Producten uit deze categorie gaan naar "Overig".`);
 
     setProducts((prev) => prev.filter((p) => p.packName !== activePackFilter));
     setActivePackFilter("all");
-  }
-  function addTestLogEntry() {
-    if (!testLogForm.mealLabel.trim()) return;
-
-    const stamp = new Date().toLocaleString("nl-NL");
-
-    const payload = {
-      id: String(Date.now()) + Math.random(),
-      loggedAt: stamp,
-      mealLabel: testLogForm.mealLabel.trim(),
-      insulin: testLogForm.insulin.trim(),
-      creon: testLogForm.creon.trim(),
-      stoolType: testLogForm.stoolType || "4",
-      outcome: testLogForm.outcome.trim(),
-      notes: testLogForm.notes.trim(),
-    };
-
-    setTestLog((prev) => [payload, ...prev]);
-
-    setTestLogForm({
-      mealLabel: "",
-      insulin: "",
-      creon: "",
-      stoolType: "4",
-      outcome: "",
-      notes: "",
-    });
-  }
-
-  function deleteTestLogEntry(id) {
-    setTestLog((prev) => prev.filter((entry) => entry.id !== id));
   }
 
   function exportBackup() {
