@@ -20,6 +20,7 @@ import { calculateMealTotals } from "./services/mealTotalsService";
 import { defaultNewProduct } from "./data/productDefaults";
 import { TestLogSection } from "./components/TestLogSection";
 import { parseDecimalInput } from "./utils/numberUtils";
+import { createProductPayload } from "./services/productPayloadService";
 import {
   getCategoryById,
   getCategoryName,
@@ -1190,31 +1191,16 @@ export default function App() {
       return round2((value / portionGram) * 100);
     };
 
-    const payload = normalizeProduct({
-      categoryId: newProduct.categoryId || "cat-overig",
-      name: newProduct.name.trim(),
-      portion: newProduct.portion || "1 portie",
+    const payload = createProductPayload({
+      newProduct,
       portionGram,
       kh100: convertTo100(khInput),
       protein100: convertTo100(proteinInput),
       fat100: convertTo100(fatInput),
       kcal100: convertTo100(kcalInput),
-      giClass: newProduct.giClass || "unknown",
       giValue,
-      timingTag: newProduct.timingTag || "meal",
-      giNotes: newProduct.giNotes || "",
-      personalTimingTag:
-        newProduct.personalTimingTag || newProduct.timingTag || "meal",
-      personalTimingNotes: newProduct.personalTimingNotes || "",
-      absorptionProfile: newProduct.absorptionProfile || "steady",
-      favorite: !!newProduct.favorite,
-      packId: null,
-      packName:
-        activePackFilter === "all" || activePackFilter === "__base__"
-          ? "Martin"
-          : activePackFilter,
-      sourceType: "manual",
-      mealMoment: newProduct.mealMoment || "neutral",
+      activePackFilter,
+      normalizeProduct,
     });
 
     if (editingProductId) {
