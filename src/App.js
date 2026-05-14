@@ -88,6 +88,7 @@ import {
   removeMealRowById,
   createEmptyMealRows,
   quickAddProductToRows,
+  updateMealRowById,
 } from "./services/mealRowStateService";
 
 const STORAGE_KEYS = {
@@ -1046,17 +1047,7 @@ export default function App() {
   }
 
   function updateRow(id, patch) {
-    setRows((prev) =>
-      ensureLastEmptyRow(
-        prev.map((r) => {
-          if (r.id !== id) return r;
-          const next = { ...r, ...patch };
-          if (patch.productId && !next.amount) next.amount = "1";
-          if (patch.productId === "") next.amount = "";
-          return next;
-        }),
-      ),
-    );
+    setRows((prev) => updateMealRowById(prev, id, patch, ensureLastEmptyRow));
   }
 
   function updateProductGi(id, patch) {

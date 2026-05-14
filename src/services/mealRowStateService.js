@@ -30,3 +30,17 @@ export function quickAddProductToRows(
 
   return ensureLastEmptyRow(copy);
 }
+export function updateMealRowById(rows, id, patch, ensureLastEmptyRow) {
+  return ensureLastEmptyRow(
+    rows.map((r) => {
+      if (r.id !== id) return r;
+
+      const next = { ...r, ...patch };
+
+      if (patch.productId && !next.amount) next.amount = "1";
+      if (patch.productId === "") next.amount = "";
+
+      return next;
+    }),
+  );
+}
