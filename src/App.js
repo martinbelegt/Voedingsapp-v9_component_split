@@ -73,6 +73,12 @@ import {
   updateMealRowById,
 } from "./services/mealRowStateService";
 
+import {
+  createFullBackupSnapshot,
+  downloadJsonFile,
+  createBackupFileName,
+} from "./services/backupService";
+
 const STORAGE_KEYS = {
   settings: "dc_settings_v2",
   products: "dc_products_v2",
@@ -1301,27 +1307,16 @@ Producten uit deze categorie gaan naar "Overig".`);
   }
 
   function exportBackup() {
-    const snapshot = {
-      exportedAt: new Date().toISOString(),
-      app: "diabetes-creon-webapp",
-      version: 2,
+    const snapshot = createFullBackupSnapshot({
       categories,
       products,
       rows,
       settings,
       savedMeals,
       testLog,
-    };
-    const blob = new Blob([JSON.stringify(snapshot, null, 2)], {
-      type: "application/json",
     });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    const stamp = new Date().toISOString().slice(0, 19).replace(/[T:]/g, "-");
-    a.href = url;
-    a.download = `diabetes-creon-backup-${stamp}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+
+    downloadJsonFile(snapshot, createBackupFileName());
   }
 
   function exportCurrentPack() {
