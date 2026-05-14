@@ -16,7 +16,6 @@ import { giStarterData } from "./data/giStarterData";
 import { defaultSettings } from "./data/defaults";
 import { MEAL_MOMENTS } from "./data/mealMoments";
 import { calculateMealTotals } from "./services/mealTotalsService";
-import { defaultNewProduct } from "./data/productDefaults";
 import { TestLogSection } from "./components/TestLogSection";
 import { parseDecimalInput } from "./utils/numberUtils";
 import { createId } from "./services/idService";
@@ -736,7 +735,9 @@ export default function App() {
   const [giSearch, setGiSearch] = useState("");
   const [activePackFilter, setActivePackFilter] = useState("all");
 
-  const [newProduct, setNewProduct] = useState(defaultNewProduct);
+  const [newProduct, setNewProduct] = useState(() =>
+    createNewProductForm(categories),
+  );
 
   const [productModalOpen, setProductModalOpen] = useState(false);
 
