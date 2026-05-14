@@ -86,6 +86,7 @@ import {
 import {
   addEmptyMealRow,
   removeMealRowById,
+  createEmptyMealRows,
 } from "./services/mealRowStateService";
 
 const STORAGE_KEYS = {
@@ -1082,7 +1083,7 @@ export default function App() {
   }
 
   function clearMeal() {
-    setRows([makeRow(), makeRow(), makeRow()]);
+    setRows(createEmptyMealRows(makeRow, 3));
     scrollRefIntoView(newRowRef);
   }
 
@@ -1097,7 +1098,7 @@ export default function App() {
   }
 
   function addCurrentMealToSelectedDay() {
-    ush;
+    push;
     const snapshot = createMealSnapshot(dayMealName);
     if (!snapshot) {
       alert("Er is nog geen maaltijd ingevuld.");
