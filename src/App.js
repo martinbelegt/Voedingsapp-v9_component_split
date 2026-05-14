@@ -964,7 +964,7 @@ export default function App() {
   const rowsWithCalc = useMemo(() => {
     return rows.map((r) => {
       const p = products.find((x) => x.id === r.productId);
-      const amount = Number(String(r.amount).replace(",", ".")) || 0;
+      const amount = parseDecimalInput(r.amount);
       if (!p) return { ...r, grams: 0, kh: 0, protein: 0, fat: 0, kcal: 0 };
       const grams = r.mode === "portion" ? amount * p.portionGram : amount;
       return {
