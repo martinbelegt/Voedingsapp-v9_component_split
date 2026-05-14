@@ -21,6 +21,7 @@ import { defaultNewProduct } from "./data/productDefaults";
 import { TestLogSection } from "./components/TestLogSection";
 import { parseDecimalInput } from "./utils/numberUtils";
 import { createId } from "./services/idService";
+import { scrollRefIntoView } from "./services/scrollService";
 
 import {
   getCategoryById,
@@ -1072,26 +1073,12 @@ export default function App() {
       };
       return ensureLastEmptyRow(copy);
     });
-    setTimeout(
-      () =>
-        newRowRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        }),
-      80,
-    );
+    scrollRefIntoView(newRowRef);
   }
 
   function clearMeal() {
     setRows([makeRow(), makeRow(), makeRow()]);
-    setTimeout(
-      () =>
-        newRowRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        }),
-      80,
-    );
+    scrollRefIntoView(newRowRef);
   }
 
   function createMealSnapshot(customName) {
@@ -1156,14 +1143,7 @@ export default function App() {
 
     setRows(ensureLastEmptyRow(normalizeMealRows(meal.rows)));
 
-    setTimeout(
-      () =>
-        newRowRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        }),
-      80,
-    );
+    scrollRefIntoView(newRowRef);
   }
 
   function addRow() {
