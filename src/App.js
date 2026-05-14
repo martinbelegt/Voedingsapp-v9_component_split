@@ -10,7 +10,6 @@ import { useProducts } from "./hooks/useProducts";
 import { useCategories } from "./hooks/useCategories";
 import { useSettings } from "./hooks/useSettings";
 import { useMealRows } from "./hooks/useMealRows";
-import { calculateCreon } from "./creonCalculator2.js";
 import { starterProducts } from "./data/starterProducts";
 import { starterCategories } from "./data/starterCategories";
 import { giStarterData } from "./data/giStarterData";
@@ -44,20 +43,6 @@ import {
 } from "./styles/uiStyles";
 
 import {
-  getGiClassFromValue,
-  getMealGiLabel,
-  getFallbackGiValue,
-} from "./services/giService";
-
-import {
-  getBaseTimingAdvice,
-  applyFatDelayToTiming,
-  getPersonalTimingAnalysis,
-} from "./services/timingService";
-
-import { getCreonModeLabel } from "./services/creonService";
-
-import {
   giClassOptions,
   timingOptions,
   absorptionProfileOptions,
@@ -72,10 +57,7 @@ import {
   createProductEditForm,
 } from "./services/productFormService";
 
-import {
-  getFilledMealRows,
-  buildMealSnapshot,
-} from "./services/mealSnapshotService";
+import { buildMealSnapshot } from "./services/mealSnapshotService";
 
 import {
   createProductPayload,
