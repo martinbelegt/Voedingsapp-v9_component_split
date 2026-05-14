@@ -87,3 +87,6 @@ export function createPackExportFileName(activePackFilter) {
   if (activePackFilter === "__base__") return "export_basis.json";
   return `export_${String(activePackFilter).toLowerCase()}.json`;
 }
+export function isFullBackupObject(raw) {
+  return !!raw && raw.app === "diabetes-creon-webapp";
+}

@@ -79,6 +79,7 @@ import {
   createBackupFileName,
   createPackExportObject,
   createPackExportFileName,
+  isFullBackupObject,
 } from "./services/backupService";
 
 const STORAGE_KEYS = {
@@ -1385,7 +1386,7 @@ Producten uit deze categorie gaan naar "Overig".`);
         }
 
         // 2. Volledige backup-import
-        if (!raw || raw.app !== "diabetes-creon-webapp") {
+        if (!isFullBackupObject(raw)) {
           alert("Dit lijkt geen geldige backup van deze app.");
           return;
         }
