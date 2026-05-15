@@ -81,6 +81,8 @@ import {
   createPackExportFileName,
   isFullBackupObject,
   isProductImportObject,
+  getProductImportKey,
+  createExistingProductKeySet,
 } from "./services/backupService";
 
 const STORAGE_KEYS = {
@@ -1346,21 +1348,11 @@ Producten uit deze categorie gaan naar "Overig".`);
           if (!confirmImport) return;
 
           setProducts((prev) => {
-            const existingKeys = new Set(
-              prev.map(
-                (p) =>
-                  `${String(p.name).trim().toLowerCase()}__${
-                    p.categoryId || ""
-                  }`,
-              ),
-            );
+            const existingKeys = createExistingProductKeySet(prev);
 
             const productsToAdd = raw.products
               .filter((p) => {
-                const key = `${String(p.name).trim().toLowerCase()}__${
-                  p.categoryId || ""
-                }`;
-                return !existingKeys.has(key);
+                return !existingKeys.has(getProductImportKey(p));
               })
               .map((p) =>
                 normalizeProduct({

@@ -93,3 +93,12 @@ export function isFullBackupObject(raw) {
 export function isProductImportObject(raw) {
   return raw?.type === "product_import" && Array.isArray(raw.products);
 }
+export function getProductImportKey(product) {
+  return `${String(product.name).trim().toLowerCase()}__${
+    product.categoryId || ""
+  }`;
+}
+
+export function createExistingProductKeySet(products) {
+  return new Set(products.map(getProductImportKey));
+}
