@@ -85,6 +85,8 @@ import {
   createExistingProductKeySet,
   normalizeImportedProducts,
   createProductImportResultMessage,
+  getBackupCategories,
+  getBackupProducts,
 } from "./services/backupService";
 
 const STORAGE_KEYS = {
@@ -1387,14 +1389,14 @@ Producten uit deze categorie gaan naar "Overig".`);
         );
         if (!confirmImport) return;
 
-        setCategories(
-          Array.isArray(raw.categories) ? raw.categories : starterCategories,
-        );
+        setCategories(getBackupCategories(raw, starterCategories));
 
         setProducts(
-          Array.isArray(raw.products)
-            ? raw.products.map(normalizeProduct)
-            : applyGiToProducts(starterProducts),
+          getBackupProducts(raw, {
+            starterProducts,
+            normalizeProduct,
+            applyGiToProducts,
+          }),
         );
 
         setRows(
@@ -1435,16 +1437,14 @@ Producten uit deze categorie gaan naar "Overig".`);
       );
       if (!confirmRestore) return;
 
-      setCategories(
-        Array.isArray(backup.categories)
-          ? backup.categories
-          : starterCategories,
-      );
+      setCategories(getBackupCategories(backup, starterCategories));
 
       setProducts(
-        Array.isArray(backup.products)
-          ? backup.products.map(normalizeProduct)
-          : applyGiToProducts(starterProducts),
+        getBackupProducts(backup, {
+          starterProducts,
+          normalizeProduct,
+          applyGiToProducts,
+        }),
       );
 
       setRows(

@@ -121,3 +121,17 @@ export function createProductImportResultMessage(importedCount, skippedCount) {
       : "")
   );
 }
+export function getBackupCategories(backup, starterCategories) {
+  return Array.isArray(backup.categories)
+    ? backup.categories
+    : starterCategories;
+}
+
+export function getBackupProducts(
+  backup,
+  { starterProducts, normalizeProduct, applyGiToProducts },
+) {
+  return Array.isArray(backup.products)
+    ? backup.products.map(normalizeProduct)
+    : applyGiToProducts(starterProducts);
+}
