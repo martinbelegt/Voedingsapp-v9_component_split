@@ -1451,9 +1451,11 @@ Producten uit deze categorie gaan naar "Overig".`);
       );
 
       setRows(
-        Array.isArray(backup.rows)
-          ? ensureLastEmptyRow(normalizeMealRows(backup.rows))
-          : [makeRow(), makeRow(), makeRow()],
+        getBackupRows(backup, {
+          normalizeMealRows,
+          ensureLastEmptyRow,
+          makeRow,
+        }),
       );
 
       setSettings(migrateSettings(backup.settings));
