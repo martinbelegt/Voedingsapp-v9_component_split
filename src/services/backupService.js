@@ -113,3 +113,11 @@ export function normalizeImportedProducts(
     }),
   );
 }
+export function createProductImportResultMessage(importedCount, skippedCount) {
+  return (
+    `${importedCount} producten geïmporteerd.` +
+    (skippedCount > 0
+      ? ` ${skippedCount} product(en) overgeslagen omdat ze al bestonden.`
+      : "")
+  );
+}

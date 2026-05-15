@@ -84,6 +84,7 @@ import {
   getProductImportKey,
   createExistingProductKeySet,
   normalizeImportedProducts,
+  createProductImportResultMessage,
 } from "./services/backupService";
 
 const STORAGE_KEYS = {
@@ -1362,10 +1363,10 @@ Producten uit deze categorie gaan naar "Overig".`);
 
             setTimeout(() => {
               alert(
-                `${productsToAdd.length} producten geïmporteerd.` +
-                  (skippedCount > 0
-                    ? ` ${skippedCount} product(en) overgeslagen omdat ze al bestonden.`
-                    : ""),
+                createProductImportResultMessage(
+                  productsToAdd.length,
+                  skippedCount,
+                ),
               );
             }, 0);
 
