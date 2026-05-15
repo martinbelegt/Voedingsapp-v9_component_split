@@ -90,3 +90,6 @@ export function createPackExportFileName(activePackFilter) {
 export function isFullBackupObject(raw) {
   return !!raw && raw.app === "diabetes-creon-webapp";
 }
+export function isProductImportObject(raw) {
+  return raw?.type === "product_import" && Array.isArray(raw.products);
+}

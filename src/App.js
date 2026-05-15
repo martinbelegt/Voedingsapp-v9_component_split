@@ -80,6 +80,7 @@ import {
   createPackExportObject,
   createPackExportFileName,
   isFullBackupObject,
+  isProductImportObject,
 } from "./services/backupService";
 
 const STORAGE_KEYS = {
@@ -1338,7 +1339,7 @@ Producten uit deze categorie gaan naar "Overig".`);
         const raw = JSON.parse(String(reader.result || "{}"));
 
         // 1. Productlijst-import
-        if (raw.type === "product_import" && Array.isArray(raw.products)) {
+        if (isProductImportObject(raw)) {
           const confirmImport = window.confirm(
             `Productlijst "${raw.name}" importeren?`,
           );
