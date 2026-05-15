@@ -102,3 +102,14 @@ export function getProductImportKey(product) {
 export function createExistingProductKeySet(products) {
   return new Set(products.map(getProductImportKey));
 }
+export function normalizeImportedProducts(
+  products,
+  { normalizeProduct, createId },
+) {
+  return products.map((p) =>
+    normalizeProduct({
+      id: createId("prod"),
+      ...p,
+    }),
+  );
+}

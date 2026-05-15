@@ -83,6 +83,7 @@ import {
   isProductImportObject,
   getProductImportKey,
   createExistingProductKeySet,
+  normalizeImportedProducts,
 } from "./services/backupService";
 
 const STORAGE_KEYS = {
@@ -1350,16 +1351,12 @@ Producten uit deze categorie gaan naar "Overig".`);
           setProducts((prev) => {
             const existingKeys = createExistingProductKeySet(prev);
 
-            const productsToAdd = raw.products
-              .filter((p) => {
-                return !existingKeys.has(getProductImportKey(p));
-              })
-              .map((p) =>
-                normalizeProduct({
-                  id: createId("prod"),
-                  ...p,
-                }),
-              );
+            const productsToAdd = normalizeImportedProducts(
+              raw.products.filter(
+                (p) => !existingKeys.has(getProductImportKey(p)),
+              ),
+              { normalizeProduct, createId },
+            );
 
             const skippedCount = raw.products.length - productsToAdd.length;
 
