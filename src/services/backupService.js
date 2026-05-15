@@ -135,3 +135,11 @@ export function getBackupProducts(
     ? backup.products.map(normalizeProduct)
     : applyGiToProducts(starterProducts);
 }
+export function getBackupRows(
+  backup,
+  { normalizeMealRows, ensureLastEmptyRow, makeRow },
+) {
+  return Array.isArray(backup.rows)
+    ? ensureLastEmptyRow(normalizeMealRows(backup.rows))
+    : [makeRow(), makeRow(), makeRow()];
+}

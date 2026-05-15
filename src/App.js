@@ -87,6 +87,7 @@ import {
   createProductImportResultMessage,
   getBackupCategories,
   getBackupProducts,
+  getBackupRows,
 } from "./services/backupService";
 
 const STORAGE_KEYS = {
@@ -1400,9 +1401,11 @@ Producten uit deze categorie gaan naar "Overig".`);
         );
 
         setRows(
-          Array.isArray(raw.rows)
-            ? ensureLastEmptyRow(normalizeMealRows(raw.rows))
-            : [makeRow(), makeRow(), makeRow()],
+          getBackupRows(raw, {
+            normalizeMealRows,
+            ensureLastEmptyRow,
+            makeRow,
+          }),
         );
 
         setSettings(migrateSettings(raw.settings));
