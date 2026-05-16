@@ -143,3 +143,15 @@ export function getBackupRows(
     ? ensureLastEmptyRow(normalizeMealRows(backup.rows))
     : [makeRow(), makeRow(), makeRow()];
 }
+
+export function getBackupSettings(backup, migrateSettings) {
+  return migrateSettings(backup.settings);
+}
+
+export function getBackupSavedMeals(backup) {
+  return Array.isArray(backup.savedMeals) ? backup.savedMeals : [];
+}
+
+export function getBackupTestLog(backup) {
+  return Array.isArray(backup.testLog) ? backup.testLog : [];
+}

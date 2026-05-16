@@ -88,6 +88,9 @@ import {
   getBackupCategories,
   getBackupProducts,
   getBackupRows,
+  getBackupSettings,
+  getBackupSavedMeals,
+  getBackupTestLog,
 } from "./services/backupService";
 
 const STORAGE_KEYS = {
@@ -1408,10 +1411,10 @@ Producten uit deze categorie gaan naar "Overig".`);
           }),
         );
 
-        setSettings(migrateSettings(raw.settings));
+        setSettings(getBackupSettings(raw, migrateSettings));
 
-        setSavedMeals(Array.isArray(raw.savedMeals) ? raw.savedMeals : []);
-        setTestLog(Array.isArray(raw.testLog) ? raw.testLog : []);
+        setSavedMeals(getBackupSavedMeals(raw));
+        setTestLog(getBackupTestLog(raw));
         setMealName("");
         setEditingProductId(null);
 
@@ -1458,10 +1461,10 @@ Producten uit deze categorie gaan naar "Overig".`);
         }),
       );
 
-      setSettings(migrateSettings(backup.settings));
+      setSettings(getBackupSettings(backup, migrateSettings));
 
-      setSavedMeals(Array.isArray(backup.savedMeals) ? backup.savedMeals : []);
-      setTestLog(Array.isArray(backup.testLog) ? backup.testLog : []);
+      setSavedMeals(getBackupSavedMeals(backup));
+      setTestLog(getBackupTestLog(backup));
       setMealName("");
       setEditingProductId(null);
 
