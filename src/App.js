@@ -92,6 +92,11 @@ import {
   prepareRestoredBackupData,
 } from "./services/backupService";
 
+import {
+  removeBaseProducts,
+  removeProductsFromPack,
+} from "./services/productPackService";
+
 const STORAGE_KEYS = {
   settings: "dc_settings_v2",
   products: "dc_products_v2",
@@ -1301,10 +1306,7 @@ Producten uit deze categorie gaan naar "Overig".`);
       );
       if (!ok) return;
 
-      setProducts((prev) =>
-        prev.filter((p) => p.packName && String(p.packName).trim() !== ""),
-      );
-
+      setProducts((prev) => removeBaseProducts(prev));
       return;
     }
 
@@ -1313,7 +1315,7 @@ Producten uit deze categorie gaan naar "Overig".`);
     );
     if (!ok) return;
 
-    setProducts((prev) => prev.filter((p) => p.packName !== activePackFilter));
+    setProducts((prev) => removeProductsFromPack(prev, activePackFilter));
     setActivePackFilter("all");
   }
 
