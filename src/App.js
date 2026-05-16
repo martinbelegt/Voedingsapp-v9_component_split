@@ -81,9 +81,6 @@ import {
   createPackExportFileName,
   isFullBackupObject,
   isProductImportObject,
-  getProductImportKey,
-  createExistingProductKeySet,
-  normalizeImportedProducts,
   createProductImportResultMessage,
   getBackupCategories,
   getBackupProducts,
@@ -91,6 +88,7 @@ import {
   getBackupSettings,
   getBackupSavedMeals,
   getBackupTestLog,
+  getNewProductsFromImport,
 } from "./services/backupService";
 
 const STORAGE_KEYS = {
@@ -1356,23 +1354,21 @@ Producten uit deze categorie gaan naar "Overig".`);
           if (!confirmImport) return;
 
           setProducts((prev) => {
-            const existingKeys = createExistingProductKeySet(prev);
-
-            const productsToAdd = normalizeImportedProducts(
-              raw.products.filter(
-                (p) => !existingKeys.has(getProductImportKey(p)),
-              ),
-              { normalizeProduct, createId },
+            const productsToAdd = getNewProductsFromImport(
+              raw.products,
+              prev,
+              normalizeProduct,
+              createId,
             );
 
             const skippedCount = raw.products.length - productsToAdd.length;
 
             setTimeout(() => {
               alert(
-                createProductImportResultMessage(
-                  productsToAdd.length,
-                  skippedCount,
-                ),
+                `${productsToAdd.length} producten geïmporteerd.` +
+                  (skippedCount > 0
+                    ? ` ${skippedCount} product(en) overgeslagen omdat ze al bestonden.`
+                    : ""),
               );
             }, 0);
 

@@ -155,3 +155,24 @@ export function getBackupSavedMeals(backup) {
 export function getBackupTestLog(backup) {
   return Array.isArray(backup.testLog) ? backup.testLog : [];
 }
+export function createProductImportKey(product) {
+  return `${String(product.name).trim().toLowerCase()}__${product.categoryId || ""}`;
+}
+
+export function getNewProductsFromImport(
+  rawProducts,
+  existingProducts,
+  normalizeProduct,
+  createId,
+) {
+  const existingKeys = new Set(existingProducts.map(createProductImportKey));
+
+  return rawProducts
+    .filter((p) => !existingKeys.has(createProductImportKey(p)))
+    .map((p) =>
+      normalizeProduct({
+        id: createId("prod"),
+        ...p,
+      }),
+    );
+}
