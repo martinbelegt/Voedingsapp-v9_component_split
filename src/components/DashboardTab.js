@@ -49,10 +49,7 @@ export function DashboardTab(props) {
     setQuickSearch,
     quickSearchResults,
 
-    timers,
-    startTimer,
-    deleteTimer,
-    clearTimers,
+    timerProps,
 
     uiStyles,
   } = props;
@@ -77,11 +74,12 @@ export function DashboardTab(props) {
         <ResultCard totals={totals} rowsWithCalc={rowsWithCalc} />
 
         <MealTimersCard
-          timers={timers}
-          startTimer={startTimer}
-          deleteTimer={deleteTimer}
-          clearTimers={clearTimers}
-          uiStyles={uiStyles}
+          {...timerProps}
+          cardStyle={cardStyle}
+          buttonStyle={buttonStyle}
+          primaryButtonStyle={primaryButtonStyle}
+          inputStyle={inputStyle}
+          labelStyle={labelStyle}
         />
 
         <SavedMealsSection

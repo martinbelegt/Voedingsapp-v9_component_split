@@ -1495,6 +1495,13 @@ Producten uit deze categorie gaan naar "Overig".`);
     labelStyle,
   };
 
+  const timerProps = {
+    timers,
+    startTimer,
+    deleteTimer,
+    clearTimers,
+  };
+
   return (
     <div
       style={{
@@ -1608,10 +1615,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             addCurrentMealToSelectedDayAndClear={
               addCurrentMealToSelectedDayAndClear
             }
-            timers={timers}
-            startTimer={startTimer}
-            deleteTimer={deleteTimer}
-            clearTimers={clearTimers}
+            timerProps={timerProps}
             uiStyles={uiStyles}
           />
         )}
