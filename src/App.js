@@ -1488,75 +1488,6 @@ Producten uit deze categorie gaan naar "Overig".`);
             snelle productzoeker, uitgebreider Creon-model, GI / Timing-tabblad,
             testlogboek en backupfunctie.
           </p>
-
-          <div
-            style={{
-              marginTop: 12,
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 8,
-              alignItems: "center",
-            }}
-          >
-            <button
-              onClick={exportBackup}
-              style={{
-                ...buttonStyle,
-                background: "#dcfce7",
-                border: "1px solid #86efac",
-                color: "#166534",
-              }}
-            >
-              Backup exporteren
-            </button>
-
-            <button
-              onClick={() => backupFileRef.current?.click()}
-              style={buttonStyle}
-            >
-              Backup importeren
-            </button>
-
-            <button
-              onClick={restoreEmergencyBackup}
-              style={{
-                ...buttonStyle,
-                background: "#eff6ff",
-                border: "1px solid #bfdbfe",
-                color: "#1d4ed8",
-              }}
-            >
-              Laatste noodkopie herstellen
-            </button>
-
-            <button
-              onClick={resetAppData}
-              style={{
-                ...buttonStyle,
-                background: "#fee2e2",
-                border: "1px solid #fecaca",
-                color: "#991b1b",
-                fontWeight: 700,
-              }}
-            >
-              Reset app / wis alle data
-            </button>
-
-            <input
-              ref={backupFileRef}
-              type="file"
-              accept="application/json"
-              onChange={importBackupFromFile}
-              style={{ display: "none" }}
-            />
-          </div>
-
-          <div style={{ marginTop: 8, fontSize: 12, color: "#64748b" }}>
-            Tip: exporteer geregeld een backupbestand naar je pc. De app bewaart
-            ook automatisch een lokale noodkopie in deze browser. Reset wist
-            instellingen, opgeslagen maaltijden en daglog. Voedingslijsten
-            blijven bewaard.
-          </div>
         </div>
 
         <div
@@ -1713,13 +1644,15 @@ Producten uit deze categorie gaan naar "Overig".`);
             setSettings={setSettings}
             resetSettings={resetSettings}
             resetAppData={resetAppData}
-            settings={settings}
-            setSettings={setSettings}
-            resetSettings={resetSettings}
-            resetAppData={resetAppData}
+            exportBackup={exportBackup}
+            importBackupFromFile={importBackupFromFile}
+            restoreEmergencyBackup={restoreEmergencyBackup}
+            backupFileRef={backupFileRef}
             cardStyle={cardStyle}
             labelStyle={labelStyle}
             inputStyle={inputStyle}
+            buttonStyle={buttonStyle}
+            primaryButtonStyle={primaryButtonStyle}
             enzymeTriggerPresets={enzymeTriggerPresets}
           />
         )}

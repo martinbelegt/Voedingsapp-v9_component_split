@@ -6,9 +6,15 @@ export function SettingsTab({
   setSettings,
   resetSettings,
   resetAppData,
+  exportBackup,
+  importBackupFromFile,
+  restoreEmergencyBackup,
+  backupFileRef,
   cardStyle,
   labelStyle,
   inputStyle,
+  buttonStyle,
+  primaryButtonStyle,
   enzymeTriggerPresets,
 }) {
   const settingsCardBase = {
@@ -164,6 +170,63 @@ export function SettingsTab({
               inputStyle={inputStyle}
               enzymeTriggerPresets={enzymeTriggerPresets}
             />
+            <div
+              style={{
+                ...settingsCardBase,
+                background: "#f8fafc",
+                border: "1px solid #cbd5e1",
+              }}
+            >
+              <div style={{ fontWeight: 800, fontSize: 16, color: "#334155" }}>
+                Backup & herstel
+              </div>
+
+              <div style={softInfoBoxStyle}>
+                Hier beheer je de volledige app-backup. Dit gaat dus niet alleen
+                over productlijsten, maar ook over instellingen, maaltijden,
+                daglogboek en testlogboek.
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: 8,
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                }}
+              >
+                <button onClick={exportBackup} style={buttonStyle}>
+                  App-backup exporteren
+                </button>
+
+                <button
+                  onClick={() => backupFileRef.current?.click()}
+                  style={buttonStyle}
+                >
+                  App-backup importeren
+                </button>
+
+                <button onClick={restoreEmergencyBackup} style={buttonStyle}>
+                  Laatste noodkopie herstellen
+                </button>
+
+                <button onClick={resetSettings} style={buttonStyle}>
+                  Alleen instellingen resetten
+                </button>
+
+                <button onClick={resetAppData} style={primaryButtonStyle}>
+                  Reset app / wis alle data
+                </button>
+
+                <input
+                  ref={backupFileRef}
+                  type="file"
+                  accept="application/json"
+                  onChange={importBackupFromFile}
+                  style={{ display: "none" }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
