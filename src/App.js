@@ -764,6 +764,7 @@ export default function App() {
 
   const newRowRef = useRef(null);
   const backupFileRef = useRef(null);
+  const productImportFileRef = useRef(null);
 
   useEffect(() => {
     localStorage.setItem("dc_rows_v4", JSON.stringify(rows));
@@ -1618,6 +1619,8 @@ Producten uit deze categorie gaan naar "Overig".`);
             packFilteredProducts={packFilteredProducts}
             deleteCurrentPackList={deleteCurrentPackList}
             exportCurrentPack={exportCurrentPack}
+            productImportFileRef={productImportFileRef}
+            importBackupFromFile={importBackupFromFile}
             getCategoryColor={getCategoryColor}
             getCategoryName={getCategoryName}
             getGiClassMeta={getGiClassMeta}

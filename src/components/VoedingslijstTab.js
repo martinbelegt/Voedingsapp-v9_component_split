@@ -34,6 +34,8 @@ function VoedingslijstTab({
   packFilteredProducts,
   deleteCurrentPackList,
   exportCurrentPack,
+  productImportFileRef,
+  importBackupFromFile,
   getCategoryColor,
   getCategoryName,
   getGiClassMeta,
@@ -291,6 +293,20 @@ function VoedingslijstTab({
               </div>
             )}
 
+            <button
+              onClick={() => productImportFileRef.current?.click()}
+              style={buttonStyle}
+            >
+              Productlijst importeren
+            </button>
+
+            <input
+              ref={productImportFileRef}
+              type="file"
+              accept="application/json"
+              onChange={importBackupFromFile}
+              style={{ display: "none" }}
+            />
             <button
               onClick={exportCurrentPack}
               style={{
