@@ -18,9 +18,7 @@ export function DashboardTab(props) {
 
     favoritesProps,
 
-    categoryFilter,
-    setCategoryFilter,
-    categoryFilterOptions,
+    categoryFilterProps,
 
     mealRowsProps,
 
@@ -89,9 +87,7 @@ export function DashboardTab(props) {
 
       <div style={{ display: "grid", gap: 16 }}>
         <CategoryFilterSection
-          categoryFilter={categoryFilter}
-          setCategoryFilter={setCategoryFilter}
-          categoryFilterOptions={categoryFilterOptions}
+          {...categoryFilterProps}
           cardStyle={cardStyle}
           buttonStyle={buttonStyle}
         />

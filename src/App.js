@@ -1543,6 +1543,12 @@ Producten uit deze categorie gaan naar "Overig".`);
     newRowRef,
   };
 
+  const categoryFilterProps = {
+    categoryFilter,
+    setCategoryFilter,
+    categoryFilterOptions,
+  };
+
   return (
     <div
       style={{
@@ -1622,9 +1628,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             products={products}
             savedMealProps={savedMealProps}
             favoritesProps={favoritesProps}
-            categoryFilter={categoryFilter}
-            setCategoryFilter={setCategoryFilter}
-            categoryFilterOptions={categoryFilterOptions}
+            categoryFilterProps={categoryFilterProps}
             mealRowsProps={mealRowsProps}
             settings={settings}
             setSettings={setSettings}
