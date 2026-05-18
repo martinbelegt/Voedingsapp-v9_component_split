@@ -14,14 +14,7 @@ export function DashboardTab(props) {
     categories,
     products,
 
-    savedMeals,
-    showSavedMeals,
-    setShowSavedMeals,
-    mealName,
-    setMealName,
-    saveCurrentMeal,
-    loadSavedMeal,
-    deleteSavedMeal,
+    savedMealProps,
 
     favoriteProducts,
     showFavorites,
@@ -81,14 +74,7 @@ export function DashboardTab(props) {
 
         <SavedMealsSection
           categories={categories}
-          savedMeals={savedMeals}
-          showSavedMeals={showSavedMeals}
-          setShowSavedMeals={setShowSavedMeals}
-          mealName={mealName}
-          setMealName={setMealName}
-          saveCurrentMeal={saveCurrentMeal}
-          loadSavedMeal={loadSavedMeal}
-          deleteSavedMeal={deleteSavedMeal}
+          {...savedMealProps}
           products={products}
           cardStyle={cardStyle}
           buttonStyle={buttonStyle}

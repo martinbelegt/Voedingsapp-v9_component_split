@@ -1508,6 +1508,17 @@ Producten uit deze categorie gaan naar "Overig".`);
     addCurrentMealToSelectedDayAndClear,
   };
 
+  const savedMealProps = {
+    savedMeals,
+    showSavedMeals,
+    setShowSavedMeals,
+    mealName,
+    setMealName,
+    saveCurrentMeal,
+    loadSavedMeal,
+    deleteSavedMeal,
+  };
+
   return (
     <div
       style={{
@@ -1585,14 +1596,7 @@ Producten uit deze categorie gaan naar "Overig".`);
           <DashboardTab
             categories={categories}
             products={products}
-            savedMeals={savedMeals}
-            showSavedMeals={showSavedMeals}
-            setShowSavedMeals={setShowSavedMeals}
-            mealName={mealName}
-            setMealName={setMealName}
-            saveCurrentMeal={saveCurrentMeal}
-            loadSavedMeal={loadSavedMeal}
-            deleteSavedMeal={deleteSavedMeal}
+            savedMealProps={savedMealProps}
             favoriteProducts={favoriteProducts}
             showFavorites={showFavorites}
             setShowFavorites={setShowFavorites}
