@@ -21,6 +21,7 @@ import { parseDecimalInput } from "./utils/numberUtils";
 import { createId } from "./services/idService";
 import { scrollRefIntoView } from "./services/scrollService";
 import { useTestLog } from "./hooks/useTestLog";
+import { useMealTimers } from "./hooks/useMealTimers";
 
 import {
   getCategoryById,
@@ -722,6 +723,8 @@ export default function App() {
     addTestLogEntry,
     deleteTestLogEntry,
   } = useTestLog();
+
+  const { timers, startTimer, deleteTimer, clearTimers } = useMealTimers();
 
   const [mealName, setMealName] = useState("");
   const [dayMealName, setDayMealName] = useState("");
@@ -1600,6 +1603,11 @@ Producten uit deze categorie gaan naar "Overig".`);
             buttonStyle={buttonStyle}
             inputStyle={inputStyle}
             labelStyle={labelStyle}
+            timers={timers}
+            startTimer={startTimer}
+            deleteTimer={deleteTimer}
+            clearTimers={clearTimers}
+            primaryButtonStyle={primaryButtonStyle}
           />
         )}
 

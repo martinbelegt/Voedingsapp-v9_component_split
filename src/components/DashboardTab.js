@@ -5,6 +5,7 @@ import { FavoritesSection } from "./FavoritesSection";
 import { QuickAddSection } from "./QuickAddSection";
 import { MealRowsSection } from "./MealRowsSection";
 import { CategoryFilterSection } from "./CategoryFilterSection";
+import { MealTimersCard } from "./MealTimersCard";
 
 export function DashboardTab(props) {
   const {
@@ -44,6 +45,11 @@ export function DashboardTab(props) {
     buttonStyle,
     inputStyle,
     labelStyle,
+    timers,
+    startTimer,
+    deleteTimer,
+    clearTimers,
+    primaryButtonStyle,
   } = props;
 
   return (
@@ -61,6 +67,18 @@ export function DashboardTab(props) {
         }}
       >
         <ResultCard totals={totals} rowsWithCalc={rowsWithCalc} />
+
+        <MealTimersCard
+          timers={timers}
+          startTimer={startTimer}
+          deleteTimer={deleteTimer}
+          clearTimers={clearTimers}
+          cardStyle={cardStyle}
+          buttonStyle={buttonStyle}
+          primaryButtonStyle={primaryButtonStyle}
+          inputStyle={inputStyle}
+          labelStyle={labelStyle}
+        />
 
         <SavedMealsSection
           categories={categories}
