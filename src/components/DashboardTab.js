@@ -13,8 +13,10 @@ export function DashboardTab(props) {
     setDayMealName,
     addCurrentMealToSelectedDay,
     addCurrentMealToSelectedDayAndClear,
+
     categories,
     products,
+
     savedMeals,
     showSavedMeals,
     setShowSavedMeals,
@@ -23,13 +25,16 @@ export function DashboardTab(props) {
     saveCurrentMeal,
     loadSavedMeal,
     deleteSavedMeal,
+
     favoriteProducts,
     showFavorites,
     setShowFavorites,
     quickAddProduct,
+
     categoryFilter,
     setCategoryFilter,
     categoryFilterOptions,
+
     rowsWithCalc,
     filteredProducts,
     updateRow,
@@ -37,20 +42,23 @@ export function DashboardTab(props) {
     addRow,
     clearMeal,
     newRowRef,
+
     totals,
+
     quickSearch,
     setQuickSearch,
     quickSearchResults,
-    cardStyle,
-    buttonStyle,
-    inputStyle,
-    labelStyle,
+
     timers,
     startTimer,
     deleteTimer,
     clearTimers,
-    primaryButtonStyle,
+
+    uiStyles,
   } = props;
+
+  const { cardStyle, buttonStyle, primaryButtonStyle, inputStyle, labelStyle } =
+    uiStyles;
 
   return (
     <>
@@ -73,11 +81,7 @@ export function DashboardTab(props) {
           startTimer={startTimer}
           deleteTimer={deleteTimer}
           clearTimers={clearTimers}
-          cardStyle={cardStyle}
-          buttonStyle={buttonStyle}
-          primaryButtonStyle={primaryButtonStyle}
-          inputStyle={inputStyle}
-          labelStyle={labelStyle}
+          uiStyles={uiStyles}
         />
 
         <SavedMealsSection

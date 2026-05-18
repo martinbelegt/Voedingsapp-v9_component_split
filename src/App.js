@@ -1486,6 +1486,15 @@ Producten uit deze categorie gaan naar "Overig".`);
       boxShadow: isActive ? "0 2px 8px rgba(15, 23, 42, 0.16)" : "none",
     };
   }
+
+  const uiStyles = {
+    cardStyle,
+    buttonStyle,
+    primaryButtonStyle,
+    inputStyle,
+    labelStyle,
+  };
+
   return (
     <div
       style={{
@@ -1599,15 +1608,11 @@ Producten uit deze categorie gaan naar "Overig".`);
             addCurrentMealToSelectedDayAndClear={
               addCurrentMealToSelectedDayAndClear
             }
-            cardStyle={cardStyle}
-            buttonStyle={buttonStyle}
-            inputStyle={inputStyle}
-            labelStyle={labelStyle}
             timers={timers}
             startTimer={startTimer}
             deleteTimer={deleteTimer}
             clearTimers={clearTimers}
-            primaryButtonStyle={primaryButtonStyle}
+            uiStyles={uiStyles}
           />
         )}
 
