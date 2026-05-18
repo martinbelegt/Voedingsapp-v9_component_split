@@ -1468,7 +1468,21 @@ Producten uit deze categorie gaan naar "Overig".`);
       alert("De lokale noodkopie kon niet worden gelezen.");
     }
   }
+  function getTabButtonStyle(tabKey, color) {
+    const isActive = activeTab === tabKey;
 
+    return {
+      ...(isActive ? primaryButtonStyle : buttonStyle),
+      padding: "10px 16px",
+      fontSize: 14,
+      fontWeight: 800,
+      borderRadius: 999,
+      background: isActive ? color : "#ffffff",
+      border: `1px solid ${color}`,
+      color: isActive ? "#ffffff" : color,
+      boxShadow: isActive ? "0 2px 8px rgba(15, 23, 42, 0.16)" : "none",
+    };
+  }
   return (
     <div
       style={{
@@ -1487,7 +1501,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             Nu met standaardmaaltijden, categorieën met ids, porties of gram,
             favorieten, opslag in je browser, sticky kopregel, categoriebeheer,
             snelle productzoeker, uitgebreider Creon-model, GI / Timing-tabblad,
-            testlogboek en backupfunctie.
+            testlogboek en backup/herstel via Instellingen.
           </p>
         </div>
 
@@ -1501,40 +1515,42 @@ Producten uit deze categorie gaan naar "Overig".`);
         >
           <button
             onClick={() => setActiveTab("dashboard")}
-            style={activeTab === "dashboard" ? primaryButtonStyle : buttonStyle}
+            style={getTabButtonStyle("dashboard", "#2563eb")}
           >
             Dashboard
           </button>
+
           <button
             onClick={() => setActiveTab("voedingslijst")}
-            style={
-              activeTab === "voedingslijst" ? primaryButtonStyle : buttonStyle
-            }
+            style={getTabButtonStyle("voedingslijst", "#16a34a")}
           >
             Voedingslijst
           </button>
+
           <button
             onClick={() => setActiveTab("gi")}
-            style={activeTab === "gi" ? primaryButtonStyle : buttonStyle}
+            style={getTabButtonStyle("gi", "#9333ea")}
           >
             GI / Timing
           </button>
+
           <button
             onClick={() => setActiveTab("testlog")}
-            style={activeTab === "testlog" ? primaryButtonStyle : buttonStyle}
+            style={getTabButtonStyle("testlog", "#ea580c")}
           >
             Testlogboek
           </button>
 
           <button
             onClick={() => setActiveTab("daily")}
-            style={activeTab === "daily" ? primaryButtonStyle : buttonStyle}
+            style={getTabButtonStyle("daily", "#0891b2")}
           >
             Dag / Archief
           </button>
+
           <button
             onClick={() => setActiveTab("settings")}
-            style={activeTab === "settings" ? primaryButtonStyle : buttonStyle}
+            style={getTabButtonStyle("settings", "#475569")}
           >
             Instellingen
           </button>
