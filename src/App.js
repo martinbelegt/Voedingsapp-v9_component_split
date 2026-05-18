@@ -1526,6 +1526,13 @@ Producten uit deze categorie gaan naar "Overig".`);
     quickAddProduct,
   };
 
+  const quickAddProps = {
+    quickSearch,
+    setQuickSearch,
+    quickSearchResults,
+    quickAddProduct,
+  };
+
   return (
     <div
       style={{
@@ -1619,9 +1626,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             setSettings={setSettings}
             resetAppData={resetAppData}
             totals={totals}
-            quickSearch={quickSearch}
-            setQuickSearch={setQuickSearch}
-            quickSearchResults={quickSearchResults}
+            quickAddProps={quickAddProps}
             selectedDate={selectedDate}
             dailyMealProps={dailyMealProps}
             timerProps={timerProps}

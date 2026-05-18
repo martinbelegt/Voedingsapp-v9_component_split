@@ -32,9 +32,7 @@ export function DashboardTab(props) {
 
     totals,
 
-    quickSearch,
-    setQuickSearch,
-    quickSearchResults,
+    quickAddProps,
 
     timerProps,
 
@@ -87,10 +85,7 @@ export function DashboardTab(props) {
 
         <QuickAddSection
           {...dailyMealProps}
-          quickSearch={quickSearch}
-          setQuickSearch={setQuickSearch}
-          quickSearchResults={quickSearchResults}
-          quickAddProduct={quickAddProduct}
+          {...quickAddProps}
           categories={categories}
           cardStyle={cardStyle}
           inputStyle={inputStyle}
