@@ -88,6 +88,14 @@ export function DashboardTab(props) {
       </div>
 
       <div style={{ display: "grid", gap: 16 }}>
+        <CategoryFilterSection
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+          categoryFilterOptions={categoryFilterOptions}
+          cardStyle={cardStyle}
+          buttonStyle={buttonStyle}
+        />
+
         <MealRowsSection
           {...mealRowsProps}
           categories={categories}
@@ -95,14 +103,6 @@ export function DashboardTab(props) {
           buttonStyle={buttonStyle}
           inputStyle={inputStyle}
           labelStyle={labelStyle}
-        />
-
-        <CategoryFilterSection
-          categoryFilter={categoryFilter}
-          setCategoryFilter={setCategoryFilter}
-          categoryFilterOptions={categoryFilterOptions}
-          cardStyle={cardStyle}
-          buttonStyle={buttonStyle}
         />
       </div>
     </>

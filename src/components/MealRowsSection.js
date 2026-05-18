@@ -20,24 +20,6 @@ export function MealRowsSection(props) {
 
   return (
     <>
-      {rowsWithCalc.map((r, idx) => (
-        <MealRowCard
-          key={r.id}
-          index={idx}
-          row={r}
-          products={filteredProducts}
-          categories={categories}
-          onChange={updateRow}
-          onRemove={removeRow}
-          newRowRef={newRowRef}
-          isLastRow={idx === rowsWithCalc.length - 1}
-          labelStyle={labelStyle}
-          inputStyle={inputStyle}
-          buttonStyle={buttonStyle}
-          getCategoryColor={getCategoryColor}
-        />
-      ))}
-
       <div style={cardStyle}>
         <div
           style={{
@@ -65,6 +47,24 @@ export function MealRowsSection(props) {
           </button>
         </div>
       </div>
+
+      {rowsWithCalc.map((r, idx) => (
+        <MealRowCard
+          key={r.id}
+          index={idx}
+          row={r}
+          products={filteredProducts}
+          categories={categories}
+          onChange={updateRow}
+          onRemove={removeRow}
+          newRowRef={newRowRef}
+          isLastRow={idx === rowsWithCalc.length - 1}
+          labelStyle={labelStyle}
+          inputStyle={inputStyle}
+          buttonStyle={buttonStyle}
+          getCategoryColor={getCategoryColor}
+        />
+      ))}
     </>
   );
 }
