@@ -95,6 +95,7 @@ import {
 import {
   removeBaseProducts,
   removeProductsFromPack,
+  createPackFilterOptions,
 } from "./services/productPackService";
 
 const STORAGE_KEYS = {
@@ -903,16 +904,10 @@ export default function App() {
     return names;
   }, [products]);
 
-  const packFilterOptions = useMemo(() => {
-    return [
-      { value: "all", label: "Alles" },
-      { value: "__base__", label: "Basis / handmatig" },
-      ...activePackNames.map((name) => ({
-        value: name,
-        label: name,
-      })),
-    ];
-  }, [activePackNames]);
+  const packFilterOptions = useMemo(
+    () => createPackFilterOptions(activePackNames),
+    [activePackNames],
+  );
 
   const favoriteProducts = useMemo(() => {
     return [...products]
