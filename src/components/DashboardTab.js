@@ -16,10 +16,7 @@ export function DashboardTab(props) {
 
     savedMealProps,
 
-    favoriteProducts,
-    showFavorites,
-    setShowFavorites,
-    quickAddProduct,
+    favoritesProps,
 
     categoryFilter,
     setCategoryFilter,
@@ -83,10 +80,7 @@ export function DashboardTab(props) {
 
         <FavoritesSection
           categories={categories}
-          favoriteProducts={favoriteProducts}
-          showFavorites={showFavorites}
-          setShowFavorites={setShowFavorites}
-          quickAddProduct={quickAddProduct}
+          {...favoritesProps}
           cardStyle={cardStyle}
           buttonStyle={buttonStyle}
         />

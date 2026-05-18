@@ -1519,6 +1519,13 @@ Producten uit deze categorie gaan naar "Overig".`);
     deleteSavedMeal,
   };
 
+  const favoritesProps = {
+    favoriteProducts,
+    showFavorites,
+    setShowFavorites,
+    quickAddProduct,
+  };
+
   return (
     <div
       style={{
@@ -1597,10 +1604,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             categories={categories}
             products={products}
             savedMealProps={savedMealProps}
-            favoriteProducts={favoriteProducts}
-            showFavorites={showFavorites}
-            setShowFavorites={setShowFavorites}
-            quickAddProduct={quickAddProduct}
+            favoritesProps={favoritesProps}
             categoryFilter={categoryFilter}
             setCategoryFilter={setCategoryFilter}
             categoryFilterOptions={categoryFilterOptions}
