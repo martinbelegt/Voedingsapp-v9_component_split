@@ -1081,7 +1081,6 @@ export default function App() {
   }
 
   function addCurrentMealToSelectedDay() {
-    push;
     const snapshot = createMealSnapshot(dayMealName);
     if (!snapshot) {
       alert("Er is nog geen maaltijd ingevuld.");
@@ -1502,6 +1501,13 @@ Producten uit deze categorie gaan naar "Overig".`);
     clearTimers,
   };
 
+  const dailyMealProps = {
+    dayMealName,
+    setDayMealName,
+    addCurrentMealToSelectedDay,
+    addCurrentMealToSelectedDayAndClear,
+  };
+
   return (
     <div
       style={{
@@ -1609,12 +1615,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             setQuickSearch={setQuickSearch}
             quickSearchResults={quickSearchResults}
             selectedDate={selectedDate}
-            dayMealName={dayMealName}
-            setDayMealName={setDayMealName}
-            addCurrentMealToSelectedDay={addCurrentMealToSelectedDay}
-            addCurrentMealToSelectedDayAndClear={
-              addCurrentMealToSelectedDayAndClear
-            }
+            dailyMealProps={dailyMealProps}
             timerProps={timerProps}
             uiStyles={uiStyles}
           />

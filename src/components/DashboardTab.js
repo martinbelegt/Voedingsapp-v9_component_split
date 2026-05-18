@@ -9,10 +9,7 @@ import { MealTimersCard } from "./MealTimersCard";
 
 export function DashboardTab(props) {
   const {
-    dayMealName,
-    setDayMealName,
-    addCurrentMealToSelectedDay,
-    addCurrentMealToSelectedDayAndClear,
+    dailyMealProps,
 
     categories,
     products,
@@ -109,12 +106,7 @@ export function DashboardTab(props) {
         />
 
         <QuickAddSection
-          dayMealName={dayMealName}
-          setDayMealName={setDayMealName}
-          addCurrentMealToSelectedDay={addCurrentMealToSelectedDay}
-          addCurrentMealToSelectedDayAndClear={
-            addCurrentMealToSelectedDayAndClear
-          }
+          {...dailyMealProps}
           quickSearch={quickSearch}
           setQuickSearch={setQuickSearch}
           quickSearchResults={quickSearchResults}
