@@ -1533,6 +1533,16 @@ Producten uit deze categorie gaan naar "Overig".`);
     quickAddProduct,
   };
 
+  const mealRowsProps = {
+    rowsWithCalc,
+    filteredProducts,
+    updateRow,
+    removeRow,
+    addRow,
+    clearMeal,
+    newRowRef,
+  };
+
   return (
     <div
       style={{
@@ -1615,13 +1625,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             categoryFilter={categoryFilter}
             setCategoryFilter={setCategoryFilter}
             categoryFilterOptions={categoryFilterOptions}
-            rowsWithCalc={rowsWithCalc}
-            filteredProducts={filteredProducts}
-            updateRow={updateRow}
-            removeRow={removeRow}
-            addRow={addRow}
-            clearMeal={clearMeal}
-            newRowRef={newRowRef}
+            mealRowsProps={mealRowsProps}
             settings={settings}
             setSettings={setSettings}
             resetAppData={resetAppData}

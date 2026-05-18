@@ -22,13 +22,7 @@ export function DashboardTab(props) {
     setCategoryFilter,
     categoryFilterOptions,
 
-    rowsWithCalc,
-    filteredProducts,
-    updateRow,
-    removeRow,
-    addRow,
-    clearMeal,
-    newRowRef,
+    mealRowsProps,
 
     totals,
 
@@ -56,7 +50,7 @@ export function DashboardTab(props) {
           paddingBottom: 8,
         }}
       >
-        <ResultCard totals={totals} rowsWithCalc={rowsWithCalc} />
+        <ResultCard totals={totals} rowsWithCalc={mealRowsProps.rowsWithCalc} />
 
         <MealTimersCard
           {...timerProps}
@@ -95,14 +89,8 @@ export function DashboardTab(props) {
 
       <div style={{ display: "grid", gap: 16 }}>
         <MealRowsSection
-          rowsWithCalc={rowsWithCalc}
-          filteredProducts={filteredProducts}
+          {...mealRowsProps}
           categories={categories}
-          updateRow={updateRow}
-          removeRow={removeRow}
-          addRow={addRow}
-          clearMeal={clearMeal}
-          newRowRef={newRowRef}
           cardStyle={cardStyle}
           buttonStyle={buttonStyle}
           inputStyle={inputStyle}
