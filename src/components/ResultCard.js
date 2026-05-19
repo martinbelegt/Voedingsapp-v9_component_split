@@ -10,18 +10,18 @@ export function ResultCard({ totals, rowsWithCalc }) {
 
   const mealFlags = getMealFlags(totals);
 
-  const cardBox = {
+  const compactBox = {
     borderRadius: 10,
-    padding: 10,
+    padding: "8px 10px",
     border: "1px solid #e2e8f0",
     background: "white",
-    minHeight: 72,
+    minHeight: 56,
   };
 
   const labelStyleMini = {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: 800,
-    marginBottom: 6,
+    marginBottom: 5,
     letterSpacing: 0.3,
     textTransform: "uppercase",
   };
@@ -35,13 +35,13 @@ export function ResultCard({ totals, rowsWithCalc }) {
   function getMacroStyle(level) {
     switch (level) {
       case "high":
-        return { color: "#dc2626", fontWeight: 800 }; // rood
+        return { color: "#dc2626", fontWeight: 800 };
       case "medium":
-        return { color: "#f59e0b", fontWeight: 700 }; // oranje
+        return { color: "#f59e0b", fontWeight: 700 };
       case "low":
-        return { color: "#16a34a", fontWeight: 700 }; // groen
+        return { color: "#16a34a", fontWeight: 700 };
       default:
-        return { color: "#64748b" }; // grijs
+        return { color: "#64748b" };
     }
   }
 
@@ -51,7 +51,7 @@ export function ResultCard({ totals, rowsWithCalc }) {
         style={{
           border: "1px solid #94a3b8",
           borderRadius: 14,
-          padding: 12,
+          padding: 10,
           background: "#f1f5f9",
           boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
         }}
@@ -62,16 +62,10 @@ export function ResultCard({ totals, rowsWithCalc }) {
             justifyContent: "space-between",
             alignItems: "center",
             gap: 12,
-            marginBottom: 10,
+            marginBottom: 8,
           }}
         >
-          <div
-            style={{
-              fontWeight: 800,
-              fontSize: 16,
-              color: "#0f172a",
-            }}
-          >
+          <div style={{ fontWeight: 800, fontSize: 15, color: "#0f172a" }}>
             Maaltijd resultaat
           </div>
 
@@ -80,79 +74,72 @@ export function ResultCard({ totals, rowsWithCalc }) {
             style={{
               border: "1px solid #94a3b8",
               borderRadius: 10,
-              padding: "8px 12px",
+              padding: "6px 10px",
               background: "white",
               cursor: "pointer",
               fontWeight: 700,
+              fontSize: 13,
               color: "#0f172a",
             }}
           >
-            Vergroot / analyse
+            Analyse
           </button>
         </div>
 
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(420px, 1fr))",
-            gap: 12,
-            alignItems: "start",
+            gridTemplateColumns: "repeat(4, minmax(160px, 1fr))",
+            gap: 8,
+            alignItems: "stretch",
           }}
         >
-          {/* LINKER KOLOM */}
-          <div style={{ display: "grid", gap: 10 }}>
-            {/* Macro's */}
-            <div style={{ ...cardBox, borderTop: "3px solid #1d4ed8" }}>
-              <div style={{ ...labelStyleMini, color: "#1d4ed8" }}>
-                Macro&apos;s
-              </div>
-              <div style={valueStyleMini}>
-                <div style={getMacroStyle(totals.enzymeColorMap?.kh)}>
-                  <strong>KH:</strong> {totals.kh} g
-                </div>
-
-                <div style={getMacroStyle(totals.enzymeColorMap?.protein)}>
-                  <strong>Eiwit:</strong> {totals.protein} g
-                </div>
-              </div>
+          {/* Macro's en energie */}
+          <div style={{ ...compactBox, borderTop: "3px solid #1d4ed8" }}>
+            <div style={{ ...labelStyleMini, color: "#1d4ed8" }}>
+              Macro&apos;s / energie
             </div>
-
-            {/* Energie */}
-            <div style={{ ...cardBox, borderTop: "3px solid #b45309" }}>
-              <div style={{ ...labelStyleMini, color: "#b45309" }}>Energie</div>
-              <div style={valueStyleMini}>
-                <div>
-                  <strong>Vet:</strong> {totals.fat} g
-                </div>
-                <div>
-                  <strong>Kcal:</strong> {totals.kcal}
-                </div>
+            <div style={valueStyleMini}>
+              <div style={getMacroStyle(totals.enzymeColorMap?.kh)}>
+                <strong>KH:</strong> {totals.kh} g
               </div>
-            </div>
-
-            {/* Insuline / timing / GI */}
-            <div style={{ ...cardBox, borderTop: "3px solid #7c3aed" }}>
-              <div style={{ ...labelStyleMini, color: "#7c3aed" }}>
-                Insuline / timing / GI
+              <div style={getMacroStyle(totals.enzymeColorMap?.protein)}>
+                <strong>Eiwit:</strong> {totals.protein} g
               </div>
-              <div style={valueStyleMini}>
-                <div>
-                  <strong>Insuline:</strong> {totals.insulin} E
-                </div>
-                <div>
-                  <strong>Timing:</strong> {totals.personalTimingAdvice}
-                </div>
-                <div>
-                  <strong>GI:</strong> {totals.mealGiLabel}
-                </div>
+              <div>
+                <strong>Vet:</strong> {totals.fat} g ·{" "}
+                <strong>{totals.kcal}</strong> kcal
               </div>
             </div>
           </div>
 
-          {/* RECHTER KOLOM */}
+          {/* Insuline */}
+          <div style={{ ...compactBox, borderTop: "3px solid #7c3aed" }}>
+            <div style={{ ...labelStyleMini, color: "#7c3aed" }}>Insuline</div>
+            <div style={{ ...valueStyleMini, fontSize: 16, fontWeight: 800 }}>
+              {totals.insulin} E
+            </div>
+          </div>
+
+          {/* Timing / GI */}
+          <div style={{ ...compactBox, borderTop: "3px solid #0891b2" }}>
+            <div style={{ ...labelStyleMini, color: "#0891b2" }}>
+              Timing / GI
+            </div>
+            <div style={valueStyleMini}>
+              <div>
+                <strong>Timing:</strong> {totals.personalTimingAdvice}
+              </div>
+              <div>
+                <strong>GI:</strong> {totals.mealGiLabel}
+              </div>
+            </div>
+          </div>
+
+          {/* Creon compact */}
           <div
             style={{
-              ...cardBox,
+              ...compactBox,
               borderTop: "3px solid #166534",
               background: "#f0fdf4",
               border: "1px solid #bbf7d0",
@@ -160,7 +147,16 @@ export function ResultCard({ totals, rowsWithCalc }) {
           >
             <div style={{ ...labelStyleMini, color: "#166534" }}>Creon</div>
             <div style={valueStyleMini}>
-              <CreonResultCard totals={totals} />
+              <div>
+                <strong>Advies:</strong> {totals.best?.c25 || 0} x 25k +{" "}
+                {totals.best?.c10 || 0} x 10k
+              </div>
+              <div>
+                <strong>Dominant:</strong> {totals.dominantEnzymeLabel}
+              </div>
+              <div>
+                <strong>Load:</strong> {totals.enzymeLoad}
+              </div>
             </div>
           </div>
         </div>
@@ -229,7 +225,6 @@ export function ResultCard({ totals, rowsWithCalc }) {
                 alignItems: "start",
               }}
             >
-              {/* Linker blok */}
               <div
                 style={{
                   border: "1px solid #cbd5e1",
@@ -296,7 +291,6 @@ export function ResultCard({ totals, rowsWithCalc }) {
                 </div>
               </div>
 
-              {/* Rechter blok */}
               <div
                 style={{
                   border: "1px solid #bbf7d0",
