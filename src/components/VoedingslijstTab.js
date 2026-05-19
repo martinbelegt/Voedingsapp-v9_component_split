@@ -274,22 +274,29 @@ function VoedingslijstTab({
 
             {activePackNames.length > 0 && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {activePackNames.map((name) => (
-                  <span
-                    key={name}
-                    style={{
-                      padding: "3px 8px",
-                      borderRadius: 999,
-                      background: "#e0e7ff",
-                      border: "1px solid #c7d2fe",
-                      color: "#3730a3",
-                      fontSize: 12,
-                      fontWeight: 600,
-                    }}
-                  >
-                    {name}
-                  </span>
-                ))}
+                {activePackNames.map((name) => {
+                  const isActive = activePackFilter === name;
+
+                  return (
+                    <button
+                      key={name}
+                      onClick={() => setActivePackFilter(name)}
+                      style={{
+                        ...buttonStyle,
+                        padding: "4px 9px",
+                        borderRadius: 999,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        background: isActive ? "#3730a3" : "#e0e7ff",
+                        border: "1px solid #c7d2fe",
+                        color: isActive ? "white" : "#3730a3",
+                      }}
+                      title={`Toon alleen lijst: ${name}`}
+                    >
+                      {name}
+                    </button>
+                  );
+                })}
               </div>
             )}
 

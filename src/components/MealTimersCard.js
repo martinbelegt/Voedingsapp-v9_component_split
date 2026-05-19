@@ -42,55 +42,70 @@ export function MealTimersCard({
   const activeTimers = timers.filter((timer) => !isTimerExpired(timer, now));
   const expiredTimers = timers.filter((timer) => isTimerExpired(timer, now));
 
+  const compactInputStyle = {
+    ...inputStyle,
+    padding: "7px 9px",
+    fontSize: 13,
+    borderRadius: 10,
+  };
+
+  const compactButtonStyle = {
+    ...buttonStyle,
+    padding: "7px 10px",
+    fontSize: 13,
+    borderRadius: 10,
+  };
+
   return (
-    <div style={cardStyle}>
+    <div
+      style={{
+        ...cardStyle,
+        padding: 10,
+        borderRadius: 12,
+      }}
+    >
+      {/* Kopregel maaltijd-timers */}
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          gap: 12,
-          alignItems: "flex-start",
+          gap: 10,
+          alignItems: "center",
           flexWrap: "wrap",
         }}
       >
         <div>
-          <h2 style={{ margin: 0 }}>Maaltijd-timers</h2>
-          <div
-            style={{
-              marginTop: 4,
-              fontSize: 12,
-              color: "#64748b",
-              lineHeight: 1.45,
-            }}
-          >
-            Testmodel voor verzadiging, eetpauze, glucose opletten en
-            vertering/Creon. Gebruik dit als praktisch hulpmiddel, niet als
-            harde medische voorspelling.
+          <div style={{ fontWeight: 800, fontSize: 15, color: "#0f172a" }}>
+            Maaltijd-timers
+          </div>
+          <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>
+            Testmodel voor verzadiging, eetpauze, glucose en vertering.
           </div>
         </div>
 
         {timers.length > 0 && (
-          <button onClick={clearTimers} style={buttonStyle}>
-            Alle timers wissen
+          <button onClick={clearTimers} style={compactButtonStyle}>
+            Alles wissen
           </button>
         )}
       </div>
 
+      {/* Timer starten */}
       <div
         style={{
-          marginTop: 14,
+          marginTop: 10,
           display: "grid",
-          gap: 10,
-          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+          gap: 8,
+          gridTemplateColumns: "150px 95px minmax(180px, 1fr) auto",
           alignItems: "end",
         }}
       >
         <div>
-          <label style={labelStyle}>Type timer</label>
+          <label style={{ ...labelStyle, fontSize: 11 }}>Type</label>
           <select
             value={timerType}
             onChange={(e) => setTimerType(e.target.value)}
-            style={inputStyle}
+            style={compactInputStyle}
           >
             {TIMER_TYPES.map((type) => (
               <option key={type.value} value={type.value}>
@@ -101,11 +116,11 @@ export function MealTimersCard({
         </div>
 
         <div>
-          <label style={labelStyle}>Duur</label>
+          <label style={{ ...labelStyle, fontSize: 11 }}>Duur</label>
           <select
             value={durationHours}
             onChange={(e) => setDurationHours(Number(e.target.value))}
-            style={inputStyle}
+            style={compactInputStyle}
           >
             {TIMER_DURATION_OPTIONS.map((hours) => (
               <option key={hours} value={hours}>
@@ -116,33 +131,42 @@ export function MealTimersCard({
         </div>
 
         <div>
-          <label style={labelStyle}>Notitie</label>
+          <label style={{ ...labelStyle, fontSize: 11 }}>Notitie</label>
           <input
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="bijv. Griekse yoghurt test"
-            style={inputStyle}
+            style={compactInputStyle}
           />
         </div>
 
-        <button onClick={handleStartTimer} style={primaryButtonStyle}>
-          Timer starten
+        <button
+          onClick={handleStartTimer}
+          style={{
+            ...primaryButtonStyle,
+            padding: "8px 12px",
+            fontSize: 13,
+            borderRadius: 10,
+          }}
+        >
+          Start
         </button>
       </div>
 
-      <div style={{ marginTop: 14, display: "grid", gap: 8 }}>
+      {/* Actieve timers */}
+      <div style={{ marginTop: 10, display: "grid", gap: 6 }}>
         {activeTimers.length === 0 && (
           <div
             style={{
-              padding: 10,
-              borderRadius: 12,
+              padding: "7px 9px",
+              borderRadius: 10,
               background: "#f8fafc",
               border: "1px solid #e2e8f0",
-              fontSize: 13,
+              fontSize: 12,
               color: "#64748b",
             }}
           >
-            Nog geen actieve timers.
+            Geen actieve timers.
           </div>
         )}
 
@@ -157,26 +181,28 @@ export function MealTimersCard({
                 gap: 8,
                 gridTemplateColumns: "1fr auto",
                 alignItems: "center",
-                padding: 10,
-                borderRadius: 12,
+                padding: "7px 9px",
+                borderRadius: 10,
                 border: "1px solid #dbeafe",
                 background: "#eff6ff",
               }}
             >
               <div>
-                <div style={{ fontWeight: 800, color: "#1e3a8a" }}>
+                <div
+                  style={{ fontWeight: 800, color: "#1e3a8a", fontSize: 13 }}
+                >
                   {meta.label} · nog {formatRemainingTime(timer, now)}
                 </div>
-                <div style={{ fontSize: 12, color: "#475569", marginTop: 2 }}>
+                <div style={{ fontSize: 11, color: "#475569", marginTop: 1 }}>
                   Eindigt om {formatTimerEndTime(timer)}
                   {timer.note ? ` · ${timer.note}` : ""}
                 </div>
-                <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>
-                  {meta.description}
-                </div>
               </div>
 
-              <button onClick={() => deleteTimer(timer.id)} style={buttonStyle}>
+              <button
+                onClick={() => deleteTimer(timer.id)}
+                style={compactButtonStyle}
+              >
                 Stop
               </button>
             </div>
@@ -184,15 +210,9 @@ export function MealTimersCard({
         })}
 
         {expiredTimers.length > 0 && (
-          <div
-            style={{
-              paddingTop: 6,
-              fontSize: 12,
-              color: "#64748b",
-            }}
-          >
-            {expiredTimers.length} afgelopen timer(s). Je kunt ze wissen met
-            “Alle timers wissen”.
+          <div style={{ fontSize: 11, color: "#64748b" }}>
+            {expiredTimers.length} afgelopen timer(s). Gebruik “Alles wissen” om
+            op te ruimen.
           </div>
         )}
       </div>

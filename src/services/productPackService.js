@@ -15,3 +15,11 @@ export function createPackFilterOptions(activePackNames) {
     })),
   ];
 }
+export function normalizePackName(name) {
+  return String(name || "").trim();
+}
+export function getProductPackName(activePackFilter) {
+  if (activePackFilter === "all") return "";
+  if (activePackFilter === "__base__") return "";
+  return activePackFilter;
+}
