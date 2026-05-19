@@ -53,6 +53,7 @@ function VoedingslijstTab({
   sectionBadgeStyle,
   convertPer100ToPerPortion,
   convertPerPortionToPer100,
+  createNewPackList,
 }) {
   const productListGridTemplate =
     "54px 1.05fr 1.1fr 1.65fr 0.95fr 0.8fr 0.8fr 0.8fr 0.8fr 0.95fr 0.95fr 1.15fr 1.05fr";
@@ -299,6 +300,21 @@ function VoedingslijstTab({
                 })}
               </div>
             )}
+
+            <button
+              onClick={createNewPackList}
+              style={{
+                ...buttonStyle,
+                padding: "8px 12px",
+                fontSize: 13,
+                background: "#ecfdf5",
+                border: "1px solid #bbf7d0",
+                color: "#166534",
+                fontWeight: 700,
+              }}
+            >
+              Nieuwe lijst
+            </button>
 
             <button
               onClick={() => productImportFileRef.current?.click()}

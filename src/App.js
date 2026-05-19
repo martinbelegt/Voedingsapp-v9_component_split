@@ -1292,6 +1292,32 @@ Producten uit deze categorie gaan naar "Overig".`);
     );
     if (categoryFilter === categoryId) setCategoryFilter("all");
   }
+
+  function createNewPackList() {
+    const name = window.prompt("Naam van de nieuwe productlijst:");
+
+    const cleanName = String(name || "").trim();
+
+    if (!cleanName) return;
+
+    if (cleanName === "all" || cleanName === "__base__") {
+      alert("Deze naam is gereserveerd. Kies een andere naam.");
+      return;
+    }
+
+    const exists = activePackNames.some(
+      (packName) => packName.toLowerCase() === cleanName.toLowerCase(),
+    );
+
+    if (exists) {
+      alert("Er bestaat al een lijst met deze naam.");
+      setActivePackFilter(cleanName);
+      return;
+    }
+
+    setActivePackFilter(cleanName);
+  }
+
   function deleteCurrentPackList() {
     if (activePackFilter === "all") {
       alert("Kies eerst een specifieke lijst om te verwijderen.");
@@ -1678,6 +1704,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             packFilteredProducts={packFilteredProducts}
             deleteCurrentPackList={deleteCurrentPackList}
             exportCurrentPack={exportCurrentPack}
+            createNewPackList={createNewPackList}
             productImportFileRef={productImportFileRef}
             importBackupFromFile={importBackupFromFile}
             getCategoryColor={getCategoryColor}
