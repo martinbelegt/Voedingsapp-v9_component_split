@@ -1628,14 +1628,10 @@ Producten uit deze categorie gaan naar "Overig".`);
             products={products}
             savedMealProps={savedMealProps}
             favoritesProps={favoritesProps}
+            quickAddProps={quickAddProps}
             categoryFilterProps={categoryFilterProps}
             mealRowsProps={mealRowsProps}
-            settings={settings}
-            setSettings={setSettings}
-            resetAppData={resetAppData}
             totals={totals}
-            quickAddProps={quickAddProps}
-            selectedDate={selectedDate}
             dailyMealProps={dailyMealProps}
             timerProps={timerProps}
             uiStyles={uiStyles}
