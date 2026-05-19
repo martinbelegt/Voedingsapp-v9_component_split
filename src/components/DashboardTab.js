@@ -9,25 +9,18 @@ import { MealTimersCard } from "./MealTimersCard";
 
 export function DashboardTab(props) {
   const {
-    dailyMealProps,
-
     categories,
     products,
 
     savedMealProps,
-
     favoritesProps,
-
-    categoryFilterProps,
-
-    mealRowsProps,
-
-    totals,
-
     quickAddProps,
-
+    categoryFilterProps,
+    mealRowsProps,
+    dailyMealProps,
     timerProps,
 
+    totals,
     uiStyles,
   } = props;
 
@@ -36,6 +29,7 @@ export function DashboardTab(props) {
 
   return (
     <>
+      {/* Bovenste dashboardblok: totalen, timers en snelle acties */}
       <div
         style={{
           display: "grid",
@@ -48,8 +42,10 @@ export function DashboardTab(props) {
           paddingBottom: 8,
         }}
       >
+        {/* Maaltijdtotalen en berekende uitkomsten */}
         <ResultCard totals={totals} rowsWithCalc={mealRowsProps.rowsWithCalc} />
 
+        {/* Maaltijd-timers: verzadiging, eetpauze, glucose en vertering */}
         <MealTimersCard
           {...timerProps}
           cardStyle={cardStyle}
@@ -59,6 +55,7 @@ export function DashboardTab(props) {
           labelStyle={labelStyle}
         />
 
+        {/* Opgeslagen maaltijden */}
         <SavedMealsSection
           categories={categories}
           {...savedMealProps}
@@ -68,6 +65,7 @@ export function DashboardTab(props) {
           inputStyle={inputStyle}
         />
 
+        {/* Favoriete producten */}
         <FavoritesSection
           categories={categories}
           {...favoritesProps}
@@ -75,6 +73,7 @@ export function DashboardTab(props) {
           buttonStyle={buttonStyle}
         />
 
+        {/* Snel producten zoeken en maaltijd toevoegen aan dag */}
         <QuickAddSection
           {...dailyMealProps}
           {...quickAddProps}
@@ -85,13 +84,9 @@ export function DashboardTab(props) {
         />
       </div>
 
+      {/* Onderste dashboardblok: maaltijdregels en categoriefilter */}
       <div style={{ display: "grid", gap: 16 }}>
-        <CategoryFilterSection
-          {...categoryFilterProps}
-          cardStyle={cardStyle}
-          buttonStyle={buttonStyle}
-        />
-
+        {/* Huidige maaltijdregels */}
         <MealRowsSection
           {...mealRowsProps}
           categories={categories}
@@ -99,6 +94,13 @@ export function DashboardTab(props) {
           buttonStyle={buttonStyle}
           inputStyle={inputStyle}
           labelStyle={labelStyle}
+        />
+
+        {/* Categoriefilter voor de productlijst */}
+        <CategoryFilterSection
+          {...categoryFilterProps}
+          cardStyle={cardStyle}
+          buttonStyle={buttonStyle}
         />
       </div>
     </>
