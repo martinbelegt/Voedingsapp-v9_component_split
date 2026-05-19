@@ -84,8 +84,15 @@ export function DashboardTab(props) {
         />
       </div>
 
-      {/* Onderste dashboardblok: maaltijdregels en categoriefilter */}
+      {/* Onderste dashboardblok: categoriefilter en maaltijdregels */}
       <div style={{ display: "grid", gap: 16 }}>
+        {/* Categoriefilter voor de productlijst */}
+        <CategoryFilterSection
+          {...categoryFilterProps}
+          cardStyle={cardStyle}
+          buttonStyle={buttonStyle}
+        />
+
         {/* Huidige maaltijdregels */}
         <MealRowsSection
           {...mealRowsProps}
@@ -94,13 +101,6 @@ export function DashboardTab(props) {
           buttonStyle={buttonStyle}
           inputStyle={inputStyle}
           labelStyle={labelStyle}
-        />
-
-        {/* Categoriefilter voor de productlijst */}
-        <CategoryFilterSection
-          {...categoryFilterProps}
-          cardStyle={cardStyle}
-          buttonStyle={buttonStyle}
         />
       </div>
     </>
