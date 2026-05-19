@@ -1486,6 +1486,7 @@ Producten uit deze categorie gaan naar "Overig".`);
     };
   }
 
+  // UI-stijlen die door dashboardonderdelen worden hergebruikt
   const uiStyles = {
     cardStyle,
     buttonStyle,
@@ -1494,6 +1495,7 @@ Producten uit deze categorie gaan naar "Overig".`);
     labelStyle,
   };
 
+  // Maaltijd-timers: verzadiging, eetpauze, glucose en vertering
   const timerProps = {
     timers,
     startTimer,
@@ -1501,6 +1503,7 @@ Producten uit deze categorie gaan naar "Overig".`);
     clearTimers,
   };
 
+  // Daglogboek-acties vanuit het dashboard
   const dailyMealProps = {
     dayMealName,
     setDayMealName,
@@ -1508,6 +1511,7 @@ Producten uit deze categorie gaan naar "Overig".`);
     addCurrentMealToSelectedDayAndClear,
   };
 
+  // Opgeslagen standaardmaaltijden
   const savedMealProps = {
     savedMeals,
     showSavedMeals,
@@ -1519,6 +1523,7 @@ Producten uit deze categorie gaan naar "Overig".`);
     deleteSavedMeal,
   };
 
+  // Favorietenblok
   const favoritesProps = {
     favoriteProducts,
     showFavorites,
@@ -1526,6 +1531,7 @@ Producten uit deze categorie gaan naar "Overig".`);
     quickAddProduct,
   };
 
+  // Snel zoeken en snel toevoegen
   const quickAddProps = {
     quickSearch,
     setQuickSearch,
@@ -1533,6 +1539,7 @@ Producten uit deze categorie gaan naar "Overig".`);
     quickAddProduct,
   };
 
+  // Huidige maaltijdregels
   const mealRowsProps = {
     rowsWithCalc,
     filteredProducts,
@@ -1543,6 +1550,7 @@ Producten uit deze categorie gaan naar "Overig".`);
     newRowRef,
   };
 
+  // Categoriefilter voor productkeuze
   const categoryFilterProps = {
     categoryFilter,
     setCategoryFilter,
