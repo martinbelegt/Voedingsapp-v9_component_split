@@ -1,7 +1,6 @@
 import React from "react";
 
 export function MealRowCard({
-  index,
   row,
   products,
   categories,
@@ -9,7 +8,6 @@ export function MealRowCard({
   onRemove,
   newRowRef,
   isLastRow,
-  labelStyle,
   inputStyle,
   buttonStyle,
   getCategoryColor,
@@ -19,173 +17,133 @@ export function MealRowCard({
       ? getCategoryColor(categories, row.product.categoryId)
       : "white";
 
+  const compactInputStyle = {
+    ...inputStyle,
+    padding: "7px 9px",
+    fontSize: 13,
+    borderRadius: 10,
+  };
+
+  const metricStyle = {
+    background: "rgba(255,255,255,0.6)",
+    borderRadius: 10,
+    padding: "5px 7px",
+    fontSize: 12,
+    whiteSpace: "nowrap",
+  };
+
   return (
     <div
       ref={isLastRow ? newRowRef : null}
       style={{
         border: "1px solid #e5e7eb",
-        borderRadius: 16,
-        padding: 10,
-        marginBottom: 8,
+        borderRadius: 12,
+        padding: 8,
+        marginBottom: 6,
         background: backgroundColor,
       }}
     >
-      <div
-        style={{
-          fontSize: 12,
-          color: "#64748b",
-          fontWeight: 700,
-          marginBottom: 6,
-        }}
-      >
-        Rij {index + 1}
-      </div>
-
+      {/* Compacte maaltijdregel */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "2fr 1fr 1fr auto",
-          gap: 8,
+          gridTemplateColumns: "minmax(220px, 2fr) 110px 95px auto",
+          gap: 6,
+          alignItems: "center",
         }}
       >
-        <div>
-          <label style={labelStyle}>Product</label>
+        <select
+          value={row.productId}
+          onChange={(e) =>
+            onChange(row.id, {
+              productId: e.target.value,
+            })
+          }
+          style={compactInputStyle}
+        >
+          <option value="">Kies product</option>
 
-          <select
-            value={row.productId}
-            onChange={(e) =>
-              onChange(row.id, {
-                productId: e.target.value,
-              })
-            }
-            style={inputStyle}
-          >
-            <option value="">Kies product</option>
+          {products.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.favorite ? "★ " : ""}
+              {p.name}
+            </option>
+          ))}
+        </select>
 
-            {products.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.favorite ? "★ " : ""}
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <select
+          value={row.mode}
+          onChange={(e) =>
+            onChange(row.id, {
+              mode: e.target.value,
+            })
+          }
+          style={compactInputStyle}
+        >
+          <option value="portion">Porties</option>
+          <option value="gram">Gram</option>
+        </select>
 
-        <div>
-          <label style={labelStyle}>Methode</label>
+        <input
+          value={row.amount}
+          onChange={(e) =>
+            onChange(row.id, {
+              amount: e.target.value,
+            })
+          }
+          style={compactInputStyle}
+          placeholder={row.mode === "portion" ? "1" : "100"}
+        />
 
-          <select
-            value={row.mode}
-            onChange={(e) =>
-              onChange(row.id, {
-                mode: e.target.value,
-              })
-            }
-            style={inputStyle}
-          >
-            <option value="portion">Porties</option>
-            <option value="gram">Gram</option>
-          </select>
-        </div>
-
-        <div>
-          <label style={labelStyle}>Hoeveelheid</label>
-
-          <input
-            value={row.amount}
-            onChange={(e) =>
-              onChange(row.id, {
-                amount: e.target.value,
-              })
-            }
-            style={inputStyle}
-            placeholder={row.mode === "portion" ? "1" : "100"}
-          />
-        </div>
-
-        <div style={{ alignSelf: "end" }}>
-          <button onClick={() => onRemove(row.id)} style={buttonStyle}>
-            Wis
-          </button>
-        </div>
+        <button
+          onClick={() => onRemove(row.id)}
+          style={{
+            ...buttonStyle,
+            padding: "7px 10px",
+            fontSize: 13,
+            borderRadius: 10,
+          }}
+        >
+          Wis
+        </button>
       </div>
 
+      {/* Compacte berekende info */}
       <div
         style={{
           marginTop: 6,
-          fontSize: 12,
-          color: "#475569",
+          display: "flex",
+          gap: 6,
+          flexWrap: "wrap",
+          alignItems: "center",
+          color: "#334155",
         }}
       >
         {row.product ? (
-          <span>
-            {row.product.portion} = {row.product.portionGram} g • Berekend
-            totaal =<strong> {row.grams} g</strong>
-          </span>
+          <>
+            <span style={{ fontSize: 12, color: "#475569" }}>
+              {row.product.portion} = {row.product.portionGram} g · totaal{" "}
+              <strong>{row.grams} g</strong>
+            </span>
+
+            <span style={metricStyle}>
+              <strong>KH</strong> {row.kh}
+            </span>
+            <span style={metricStyle}>
+              <strong>Eiwit</strong> {row.protein}
+            </span>
+            <span style={metricStyle}>
+              <strong>Vet</strong> {row.fat}
+            </span>
+            <span style={metricStyle}>
+              <strong>Kcal</strong> {row.kcal}
+            </span>
+          </>
         ) : (
-          <span>Kies een product</span>
+          <span style={{ fontSize: 12, color: "#64748b" }}>
+            Kies een product
+          </span>
         )}
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: 6,
-          marginTop: 8,
-        }}
-      >
-        <div
-          style={{
-            background: "rgba(255,255,255,0.55)",
-            borderRadius: 12,
-            padding: 8,
-            textAlign: "center",
-          }}
-        >
-          <div style={{ fontSize: 12, color: "#64748b" }}>KH</div>
-
-          <div style={{ fontWeight: 700 }}>{row.kh}</div>
-        </div>
-
-        <div
-          style={{
-            background: "rgba(255,255,255,0.55)",
-            borderRadius: 12,
-            padding: 8,
-            textAlign: "center",
-          }}
-        >
-          <div style={{ fontSize: 12, color: "#64748b" }}>Eiwit</div>
-
-          <div style={{ fontWeight: 700 }}>{row.protein}</div>
-        </div>
-
-        <div
-          style={{
-            background: "rgba(255,255,255,0.55)",
-            borderRadius: 12,
-            padding: 8,
-            textAlign: "center",
-          }}
-        >
-          <div style={{ fontSize: 12, color: "#64748b" }}>Vet</div>
-
-          <div style={{ fontWeight: 700 }}>{row.fat}</div>
-        </div>
-
-        <div
-          style={{
-            background: "rgba(255,255,255,0.55)",
-            borderRadius: 12,
-            padding: 8,
-            textAlign: "center",
-          }}
-        >
-          <div style={{ fontSize: 12, color: "#64748b" }}>Kcal</div>
-
-          <div style={{ fontWeight: 700 }}>{row.kcal}</div>
-        </div>
       </div>
     </div>
   );
