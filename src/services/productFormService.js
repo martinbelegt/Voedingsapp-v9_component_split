@@ -22,6 +22,8 @@ export function createProductEditForm(product) {
     giValue: String(product.giValue ?? ""),
     timingTag: product.timingTag || "meal",
     giNotes: product.giNotes || "",
+    giSourceUrl: product.giSourceUrl || "",
+    giSourceNotes: product.giSourceNotes || "",
     personalTimingTag: product.personalTimingTag || product.timingTag || "meal",
     personalTimingNotes: product.personalTimingNotes || "",
     absorptionProfile: product.absorptionProfile || "steady",

@@ -12,6 +12,8 @@ export const defaultNewProduct = {
   giValue: "",
   timingTag: "meal",
   giNotes: "",
+  giSourceUrl: "",
+  giSourceNotes: "",
   personalTimingTag: "meal",
   personalTimingNotes: "",
   absorptionProfile: "steady",

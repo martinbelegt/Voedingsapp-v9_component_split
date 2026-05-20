@@ -1235,6 +1235,34 @@ function VoedingslijstTab({
                         style={inputStyle}
                       />
                     </div>
+                    <div style={{ display: "grid", gap: 4 }}>
+                      <label
+                        style={{
+                          ...labelStyle,
+                          display: "block",
+                          alignSelf: "start",
+                        }}
+                      >
+                        GI-bronnotitie
+                      </label>
+
+                      <textarea
+                        value={newProduct.giSourceNotes || ""}
+                        onChange={(e) =>
+                          setNewProduct({
+                            ...newProduct,
+                            giSourceNotes: e.target.value,
+                          })
+                        }
+                        style={{
+                          ...inputStyle,
+                          minHeight: 70,
+                          resize: "vertical",
+                          lineHeight: 1.35,
+                        }}
+                        placeholder="Bijv. gevonden via Sydney GI Database; vergelijkbaar product gebruikt"
+                      />
+                    </div>
                   </div>
                 </div>
 

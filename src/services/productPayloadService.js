@@ -28,6 +28,8 @@ export function createProductPayload({
     giValue,
     timingTag: newProduct.timingTag || "meal",
     giNotes: newProduct.giNotes || "",
+    giSourceUrl: newProduct.giSourceUrl || "",
+    giSourceNotes: newProduct.giSourceNotes || "",
     personalTimingTag:
       newProduct.personalTimingTag || newProduct.timingTag || "meal",
     personalTimingNotes: newProduct.personalTimingNotes || "",

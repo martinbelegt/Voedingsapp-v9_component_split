@@ -493,6 +493,8 @@ function normalizeProduct(p) {
     giValue: p.giValue ?? "",
     timingTag: p.timingTag || "meal",
     giNotes: p.giNotes || "",
+    giSourceUrl: p.giSourceUrl || "",
+    giSourceNotes: p.giSourceNotes || "",
     personalTimingTag: p.personalTimingTag || p.timingTag || "meal",
     personalTimingNotes: p.personalTimingNotes || "",
     absorptionProfile: p.absorptionProfile || "steady",
