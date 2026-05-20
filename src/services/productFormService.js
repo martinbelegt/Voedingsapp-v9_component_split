@@ -28,5 +28,9 @@ export function createProductEditForm(product) {
     favorite: !!product.favorite,
     packName: product.packName || "Martin",
     mealMoment: product.mealMoment || "neutral",
+    // Bron/herkomst van ingevoerde voedingsgegevens
+    sourceName: product.sourceName || "",
+    sourceUrl: product.sourceUrl || "",
+    sourceNotes: product.sourceNotes || "",
   };
 }

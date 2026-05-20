@@ -500,6 +500,9 @@ function normalizeProduct(p) {
     packId: p.packId ?? null,
     packName: p.packName ?? null,
     sourceType: p.sourceType ?? "manual",
+    sourceName: p.sourceName || "",
+    sourceUrl: p.sourceUrl || "",
+    sourceNotes: p.sourceNotes || "",
   };
 }
 

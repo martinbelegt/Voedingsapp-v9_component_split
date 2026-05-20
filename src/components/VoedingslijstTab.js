@@ -166,9 +166,10 @@ function VoedingslijstTab({
 
             <div style={{ display: "grid", gap: 8 }}>
               {categories.map((c) => {
-                const count = products.filter(
-                  (p) => p.categoryId === c.id,
-                ).length;
+                const count = products.filter((p) => {
+                  const productCategoryId = p.categoryId || "cat-overig";
+                  return productCategoryId === c.id;
+                }).length;
                 const isProtected = c.id === "cat-overig";
 
                 return (
@@ -938,6 +939,74 @@ function VoedingslijstTab({
                 <h3 style={{ marginTop: 0, marginBottom: 12 }}>
                   Voedingswaarden
                 </h3>
+
+                {/* Bron / herkomst van voedingsgegevens */}
+                <div style={{ ...cardStyle, padding: 14 }}>
+                  <h3 style={{ marginTop: 0, marginBottom: 12 }}>
+                    Bron / herkomst
+                  </h3>
+
+                  <div
+                    style={{ fontSize: 12, color: "#64748b", marginBottom: 10 }}
+                  >
+                    Leg vast waar je voedingswaarden of GI-inschatting vandaan
+                    komen. Handig voor controle, latere correcties en
+                    betrouwbare productlijsten.
+                  </div>
+
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1.4fr 1.4fr",
+                      gap: 10,
+                    }}
+                  >
+                    <div>
+                      <label style={labelStyle}>Bron</label>
+                      <input
+                        value={newProduct.sourceName || ""}
+                        onChange={(e) =>
+                          setNewProduct({
+                            ...newProduct,
+                            sourceName: e.target.value,
+                          })
+                        }
+                        style={inputStyle}
+                        placeholder="bijv. etiket, Open Food Facts, USDA"
+                      />
+                    </div>
+
+                    <div>
+                      <label style={labelStyle}>Bronlink</label>
+                      <input
+                        value={newProduct.sourceUrl || ""}
+                        onChange={(e) =>
+                          setNewProduct({
+                            ...newProduct,
+                            sourceUrl: e.target.value,
+                          })
+                        }
+                        style={inputStyle}
+                        placeholder="https://..."
+                      />
+                    </div>
+
+                    <div>
+                      <label style={labelStyle}>Bronnotitie</label>
+                      <input
+                        value={newProduct.sourceNotes || ""}
+                        onChange={(e) =>
+                          setNewProduct({
+                            ...newProduct,
+                            sourceNotes: e.target.value,
+                          })
+                        }
+                        style={inputStyle}
+                        placeholder="bijv. GI geschat op vergelijkbaar product"
+                      />
+                    </div>
+                  </div>
+                </div>
 
                 <div
                   style={{ fontSize: 12, color: "#64748b", marginBottom: 8 }}

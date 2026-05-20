@@ -37,6 +37,9 @@ export function createProductPayload({
     packName: getPackNameForNewProduct(activePackFilter),
     sourceType: "manual",
     mealMoment: newProduct.mealMoment || "neutral",
+    sourceName: newProduct.sourceName || "",
+    sourceUrl: newProduct.sourceUrl || "",
+    sourceNotes: newProduct.sourceNotes || "",
   });
 }
 export function findExistingProductMatch(products, newProduct) {

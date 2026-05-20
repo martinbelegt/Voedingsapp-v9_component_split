@@ -18,4 +18,8 @@ export const defaultNewProduct = {
   favorite: false,
   packName: "Martin",
   mealMoment: "neutral",
+  // Bron/herkomst van ingevoerde voedingsgegevens
+  sourceName: "",
+  sourceUrl: "",
+  sourceNotes: "",
 };
