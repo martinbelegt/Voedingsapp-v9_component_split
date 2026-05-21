@@ -108,6 +108,17 @@ const STORAGE_KEYS = {
   foodListsBackup: "dc_food_lists_backup_v1",
 };
 
+function getDayMealMomentLabel(value) {
+  if (value === "breakfast") return "Ontbijt";
+  if (value === "lunch") return "Lunch";
+  if (value === "dinner") return "Diner";
+  if (value === "snack") return "Snack";
+  if (value === "sport") return "Sport";
+  if (value === "dessert") return "Toetje";
+  if (value === "fruit") return "Fruit";
+  return "Algemeen";
+}
+
 function saveFoodListsBackup({ products, categories }) {
   try {
     localStorage.setItem(
@@ -1100,7 +1111,7 @@ export default function App() {
   }
 
   function addCurrentMealToSelectedDay() {
-    const snapshot = createMealSnapshot(dayMealName);
+    const snapshot = createMealSnapshot(getDayMealMomentLabel(dayMealMoment));
     if (!snapshot) {
       alert("Er is nog geen maaltijd ingevuld.");
       return;
@@ -1109,16 +1120,15 @@ export default function App() {
     addMealToDay({
       date: selectedDate,
       name: snapshot.name,
+      mealMoment: dayMealMoment,
       rows: snapshot.rows,
       totals: snapshot.totals,
       createdAt: snapshot.createdAt,
     });
-
-    setDayMealName("");
   }
 
   function addCurrentMealToSelectedDayAndClear() {
-    const snapshot = createMealSnapshot(dayMealName);
+    const snapshot = createMealSnapshot(getDayMealMomentLabel(dayMealMoment));
     if (!snapshot) {
       alert("Er is nog geen maaltijd ingevuld.");
       return;
@@ -1127,12 +1137,12 @@ export default function App() {
     addMealToDay({
       date: selectedDate,
       name: snapshot.name,
+      mealMoment: dayMealMoment,
       rows: snapshot.rows,
       totals: snapshot.totals,
       createdAt: snapshot.createdAt,
     });
 
-    setDayMealName("");
     clearMeal();
   }
 
@@ -1550,8 +1560,6 @@ Producten uit deze categorie gaan naar "Overig".`);
 
   // Daglogboek-acties vanuit het dashboard
   const dailyMealProps = {
-    dayMealName,
-    setDayMealName,
     dayMealMoment,
     setDayMealMoment,
     addCurrentMealToSelectedDay,

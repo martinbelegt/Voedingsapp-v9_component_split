@@ -3,8 +3,6 @@ import { getCategoryColor, getCategoryName } from "../services/productHelpers";
 
 export function QuickAddSection(props) {
   const {
-    dayMealName,
-    setDayMealName,
     dayMealMoment,
     setDayMealMoment,
     addCurrentMealToSelectedDay,
@@ -24,17 +22,11 @@ export function QuickAddSection(props) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 170px 1fr 1fr",
+          gridTemplateColumns: "170px 1fr 1fr",
           gap: 8,
           alignItems: "center",
         }}
       >
-        <input
-          value={dayMealName}
-          onChange={(e) => setDayMealName(e.target.value)}
-          style={inputStyle}
-          placeholder="Naam voor daglog, bv. Ontbijt / Lunch / Avondeten"
-        />
         <select
           value={dayMealMoment}
           onChange={(e) => setDayMealMoment(e.target.value)}

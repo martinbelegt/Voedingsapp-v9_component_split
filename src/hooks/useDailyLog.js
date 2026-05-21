@@ -56,6 +56,7 @@ export function useDailyLog(selectedDate) {
     const mealEntry = {
       id: createId("daily-meal"),
       name: input.name,
+      mealMoment: input.mealMoment || "neutral",
       createdAt: input.createdAt || new Date().toLocaleString("nl-NL"),
       rows: input.rows,
       totals: normalizeTotals(input.totals),

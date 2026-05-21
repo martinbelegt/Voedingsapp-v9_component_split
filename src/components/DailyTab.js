@@ -14,43 +14,102 @@ export function DailyTab({
   inputStyle,
   buttonStyle,
 }) {
+  const mealsForDay = selectedDay?.meals || [];
+
   return (
-    <div style={{ display: "grid", gap: 16, marginTop: 16 }}>
-      <div style={cardStyle}>
-        <h2 style={{ marginTop: 0 }}>Dag / Archief</h2>
+    <div style={{ display: "grid", gap: 14, marginTop: 16 }}>
+      {/* Dagkeuze */}
+      <div
+        style={{
+          ...cardStyle,
+          background: "#eff6ff",
+          border: "1px solid #bfdbfe",
+        }}
+      >
+        <h2 style={{ marginTop: 0, marginBottom: 10 }}>Dag / Archief</h2>
 
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "auto 1fr",
-            gap: 8,
+            gridTemplateColumns: "auto 220px 1fr",
+            gap: 10,
             alignItems: "center",
-            marginBottom: 12,
           }}
         >
-          <div>Datum</div>
+          <div style={{ fontWeight: 700, color: "#1e3a8a" }}>Datum</div>
+
           <input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
             style={inputStyle}
           />
-        </div>
 
-        <div style={{ fontSize: 13, color: "#475569" }}>
-          Opgeslagen dagen: {sortedDates.length}
+          <div style={{ fontSize: 13, color: "#475569" }}>
+            Opgeslagen dagen: {sortedDates.length}
+          </div>
         </div>
       </div>
 
-      <div style={cardStyle}>
-        <h2 style={{ marginTop: 0 }}>Dagtotaal</h2>
-        <div>KH: {dayTotals.kh} g</div>
-        <div>Eiwit: {dayTotals.protein} g</div>
-        <div>Vet: {dayTotals.fat} g</div>
-        <div>kcal: {dayTotals.kcal}</div>
+      {/* Compact dagtotaal */}
+      <div
+        style={{
+          ...cardStyle,
+          padding: 12,
+          background: "#f0fdf4",
+          border: "1px solid #bbf7d0",
+        }}
+      >
+        <div style={{ fontWeight: 800, color: "#166534", marginBottom: 8 }}>
+          Dagtotaal
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 8,
+            alignItems: "center",
+            fontSize: 13,
+            color: "#334155",
+          }}
+        >
+          <span>
+            <strong>KH</strong> {dayTotals.kh} g
+          </span>
+          <span>
+            <strong>Eiwit</strong> {dayTotals.protein} g
+          </span>
+          <span>
+            <strong>Vet</strong> {dayTotals.fat} g
+          </span>
+          <span>
+            <strong>Kcal</strong> {dayTotals.kcal}
+          </span>
+
+          {dayTotals.insulin != null && (
+            <span>
+              <strong>Insuline</strong> {dayTotals.insulin} E
+            </span>
+          )}
+
+          {dayTotals.creon25 != null && (
+            <span>
+              <strong>Creon</strong> {dayTotals.creon25}x25k +{" "}
+              {dayTotals.creon10 || 0}x10k
+            </span>
+          )}
+        </div>
       </div>
 
-      <div style={cardStyle}>
+      {/* Maaltijden/snacks van deze dag */}
+      <div
+        style={{
+          ...cardStyle,
+          background: "#f8fafc",
+          border: "1px solid #cbd5e1",
+        }}
+      >
         <div
           style={{
             display: "flex",
@@ -58,17 +117,22 @@ export function DailyTab({
             alignItems: "center",
             gap: 8,
             flexWrap: "wrap",
-            marginBottom: 12,
+            marginBottom: 10,
           }}
         >
-          <h2 style={{ margin: 0 }}>Maaltijden van deze dag</h2>
+          <div>
+            <h2 style={{ margin: 0 }}>Eetmomenten van deze dag</h2>
+            <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
+              {mealsForDay.length} item(s), nieuwste bovenaan
+            </div>
+          </div>
 
           <button
             onClick={() => {
               if (!selectedDay || !selectedDay.meals?.length) return;
 
               const ok = window.confirm(
-                `Alle maaltijden van ${selectedDate} verwijderen?`,
+                `Alle eetmomenten van ${selectedDate} verwijderen?`,
               );
 
               if (!ok) return;
@@ -88,21 +152,20 @@ export function DailyTab({
 
         {!selectedDay && (
           <div style={{ color: "#64748b" }}>
-            Geen maaltijden opgeslagen voor deze dag.
+            Geen eetmomenten opgeslagen voor deze dag.
           </div>
         )}
 
-        {selectedDay &&
-          selectedDay.meals.map((meal, index) => (
-            <DailyMealCard
-              key={meal.id}
-              meal={meal}
-              index={index}
-              products={products}
-              onDelete={deleteMealFromDay}
-              buttonStyle={buttonStyle}
-            />
-          ))}
+        {[...mealsForDay].reverse().map((meal, index) => (
+          <DailyMealCard
+            key={meal.id}
+            meal={meal}
+            index={index}
+            products={products}
+            onDelete={deleteMealFromDay}
+            buttonStyle={buttonStyle}
+          />
+        ))}
       </div>
     </div>
   );

@@ -41,7 +41,7 @@ export function DailyMealCard({
       >
         <div>
           <div style={{ fontWeight: 800, color: "#0f172a", fontSize: 14 }}>
-            {mealMomentLabel} · {meal.name || `Item ${index + 1}`}
+            {mealMomentLabel}
           </div>
           <div style={{ fontSize: 11, color: "#64748b" }}>{meal.createdAt}</div>
         </div>
