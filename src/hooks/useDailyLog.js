@@ -6,12 +6,17 @@ function round2(n) {
   return Math.round((n + Number.EPSILON) * 100) / 100;
 }
 
-function normalizeTotals(totals) {
+function normalizeTotals(totals = {}) {
   return {
-    kh: round2(totals.kh),
-    protein: round2(totals.protein),
-    fat: round2(totals.fat),
-    kcal: round2(totals.kcal),
+    kh: round2(Number(totals.kh) || 0),
+    protein: round2(Number(totals.protein) || 0),
+    fat: round2(Number(totals.fat) || 0),
+    kcal: round2(Number(totals.kcal) || 0),
+
+    insulin: round2(Number(totals.insulin) || 0),
+
+    creon25: Number(totals.creon25) || Number(totals.best?.c25) || 0,
+    creon10: Number(totals.creon10) || Number(totals.best?.c10) || 0,
   };
 }
 
@@ -28,19 +33,38 @@ export function useDailyLog(selectedDate) {
 
   const dayTotals = useMemo(() => {
     if (!selectedDay) {
-      return { kh: 0, protein: 0, fat: 0, kcal: 0 };
+      return {
+        kh: 0,
+        protein: 0,
+        fat: 0,
+        kcal: 0,
+        insulin: 0,
+        creon25: 0,
+        creon10: 0,
+      };
     }
 
     return normalizeTotals(
       selectedDay.meals.reduce(
         (acc, meal) => {
-          acc.kh += meal.totals.kh;
-          acc.protein += meal.totals.protein;
-          acc.fat += meal.totals.fat;
-          acc.kcal += meal.totals.kcal;
+          acc.kh += Number(meal.totals.kh) || 0;
+          acc.protein += Number(meal.totals.protein) || 0;
+          acc.fat += Number(meal.totals.fat) || 0;
+          acc.kcal += Number(meal.totals.kcal) || 0;
+          acc.insulin += Number(meal.totals.insulin) || 0;
+          acc.creon25 += Number(meal.totals.creon25) || 0;
+          acc.creon10 += Number(meal.totals.creon10) || 0;
           return acc;
         },
-        { kh: 0, protein: 0, fat: 0, kcal: 0 },
+        {
+          kh: 0,
+          protein: 0,
+          fat: 0,
+          kcal: 0,
+          insulin: 0,
+          creon25: 0,
+          creon10: 0,
+        },
       ),
     );
   }, [selectedDay]);

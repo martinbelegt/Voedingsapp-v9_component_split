@@ -51,54 +51,87 @@ export function DailyTab({
         </div>
       </div>
 
-      {/* Compact dagtotaal */}
+      {/* Dagtotaal duidelijk */}
       <div
         style={{
           ...cardStyle,
-          padding: 12,
-          background: "#f0fdf4",
-          border: "1px solid #bbf7d0",
+          padding: 14,
+          background: "#ecfdf5",
+          border: "1px solid #86efac",
+          boxShadow: "0 2px 6px rgba(22, 101, 52, 0.08)",
         }}
       >
-        <div style={{ fontWeight: 800, color: "#166534", marginBottom: 8 }}>
-          Dagtotaal
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 10,
+            flexWrap: "wrap",
+            marginBottom: 10,
+          }}
+        >
+          <div style={{ fontWeight: 900, color: "#14532d", fontSize: 17 }}>
+            Dagtotaal
+          </div>
+
+          <div style={{ fontSize: 12, color: "#166534", fontWeight: 700 }}>
+            {selectedDate}
+          </div>
         </div>
 
         <div
           style={{
-            display: "flex",
-            flexWrap: "wrap",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
             gap: 8,
-            alignItems: "center",
-            fontSize: 13,
-            color: "#334155",
           }}
         >
-          <span>
-            <strong>KH</strong> {dayTotals.kh} g
-          </span>
-          <span>
-            <strong>Eiwit</strong> {dayTotals.protein} g
-          </span>
-          <span>
-            <strong>Vet</strong> {dayTotals.fat} g
-          </span>
-          <span>
-            <strong>Kcal</strong> {dayTotals.kcal}
-          </span>
+          {[
+            ["KH", `${dayTotals.kh} g`],
+            ["Eiwit", `${dayTotals.protein} g`],
+            ["Vet", `${dayTotals.fat} g`],
+            ["Kcal", dayTotals.kcal],
+            ["Insuline", `${dayTotals.insulin || 0} E`],
+            [
+              "Creon",
+              `${dayTotals.creon25 || 0}x25k + ${dayTotals.creon10 || 0}x10k`,
+            ],
+          ].map(([label, value]) => (
+            <div
+              key={label}
+              style={{
+                background: "rgba(255,255,255,0.82)",
+                border: "1px solid #bbf7d0",
+                borderRadius: 12,
+                padding: "9px 10px",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 11,
+                  color: "#64748b",
+                  fontWeight: 900,
+                  textTransform: "uppercase",
+                  letterSpacing: 0.3,
+                  marginBottom: 3,
+                }}
+              >
+                {label}
+              </div>
 
-          {dayTotals.insulin != null && (
-            <span>
-              <strong>Insuline</strong> {dayTotals.insulin} E
-            </span>
-          )}
-
-          {dayTotals.creon25 != null && (
-            <span>
-              <strong>Creon</strong> {dayTotals.creon25}x25k +{" "}
-              {dayTotals.creon10 || 0}x10k
-            </span>
-          )}
+              <div
+                style={{
+                  fontSize: 18,
+                  fontWeight: 900,
+                  color: "#14532d",
+                  lineHeight: 1.1,
+                }}
+              >
+                {value}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
