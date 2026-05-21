@@ -32,6 +32,13 @@ export function DailyTab({
         ? "Dagtotaal vandaag"
         : "Dagtotaal archief";
 
+  const dayTotalHint =
+    dayMode === "Geplande dag"
+      ? "Je plant vooruit. Gebruik dit totaal om eerder op de dag bij te sturen op eiwit, kcal, KH, insuline en Creon."
+      : dayMode === "Vandaag"
+        ? "Gebruik dit totaal om gedurende de dag bij te sturen."
+        : "Terugblik op deze dag.";
+
   return (
     <div style={{ display: "grid", gap: 14, marginTop: 16 }}>
       {/* Dagkeuze */}
@@ -134,6 +141,17 @@ export function DailyTab({
           <div style={{ fontSize: 12, color: "#166534", fontWeight: 700 }}>
             {selectedDate}
           </div>
+        </div>
+
+        <div
+          style={{
+            fontSize: 12,
+            color: "#166534",
+            marginBottom: 10,
+            lineHeight: 1.4,
+          }}
+        >
+          {dayTotalHint}
         </div>
 
         <div
