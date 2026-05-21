@@ -105,7 +105,16 @@ export function DailyTab({
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            style={inputStyle}
+            onClick={(e) => {
+              if (e.currentTarget.showPicker) {
+                e.currentTarget.showPicker();
+              }
+            }}
+            style={{
+              ...inputStyle,
+              cursor: "pointer",
+              minHeight: 38,
+            }}
           />
 
           <div style={{ fontSize: 13, color: "#475569" }}>
@@ -145,10 +154,15 @@ export function DailyTab({
 
         <div
           style={{
-            fontSize: 12,
-            color: "#166534",
+            fontSize: 13,
+            color: "#14532d",
             marginBottom: 10,
-            lineHeight: 1.4,
+            lineHeight: 1.45,
+            fontWeight: 700,
+            background: "rgba(255,255,255,0.65)",
+            border: "1px solid #bbf7d0",
+            borderRadius: 10,
+            padding: "7px 9px",
           }}
         >
           {dayTotalHint}
