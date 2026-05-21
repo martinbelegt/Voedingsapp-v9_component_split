@@ -1383,6 +1383,63 @@ Producten uit deze categorie gaan naar "Overig".`);
     setActivePackFilter("all");
   }
 
+  function copyProductToCurrentPack(product) {
+    const defaultTarget =
+      activePackFilter !== "all" && activePackFilter !== "__base__"
+        ? activePackFilter
+        : "";
+
+    const targetPackName = window.prompt(
+      "Naar welke lijst wil je dit product kopiëren?",
+      defaultTarget,
+    );
+
+    if (!targetPackName || !targetPackName.trim()) return;
+
+    const cleanTargetPackName = targetPackName.trim();
+
+    if (cleanTargetPackName === "all" || cleanTargetPackName === "__base__") {
+      alert("Kies een persoonlijke lijstnaam, niet 'all' of '__base__'.");
+      return;
+    }
+
+    const alreadyExists = products.some(
+      (p) =>
+        p.packName === cleanTargetPackName &&
+        String(p.name).trim().toLowerCase() ===
+          String(product.name).trim().toLowerCase(),
+    );
+
+    if (alreadyExists) {
+      const ok = window.confirm(
+        `Er staat al een product met deze naam in lijst "${cleanTargetPackName}". Toch kopiëren?`,
+      );
+
+      if (!ok) return;
+    }
+
+    const copiedProduct = normalizeProduct({
+      ...product,
+      id: createId("prod"),
+      packId: null,
+      packName: cleanTargetPackName,
+      sourceType: "copied",
+      copiedFromProductId: product.id,
+      copiedFromPackName: product.packName || "Basis / handmatig",
+      favorite: false,
+      sourceNotes: [
+        product.sourceNotes,
+        `Gekopieerd uit lijst: ${product.packName || "Basis / handmatig"}`,
+      ]
+        .filter(Boolean)
+        .join("\n"),
+    });
+
+    addProductToStore(copiedProduct);
+
+    alert(`Product gekopieerd naar lijst "${cleanTargetPackName}".`);
+  }
+
   function exportBackup() {
     const snapshot = createFullBackupSnapshot({
       categories,
@@ -1725,6 +1782,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             addProduct={addProduct}
             resetNewProductForm={resetNewProductForm}
             toggleFavorite={toggleFavorite}
+            copyProductToCurrentPack={copyProductToCurrentPack}
             deleteProduct={deleteProduct}
             sortConfig={sortConfig}
             requestSort={requestSort}

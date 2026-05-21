@@ -15,6 +15,7 @@ function VoedingslijstTab({
   addProduct,
   resetNewProductForm,
   toggleFavorite,
+  copyProductToCurrentPack,
   deleteProduct,
   sortConfig,
   requestSort,
@@ -628,6 +629,11 @@ function VoedingslijstTab({
                 ? "rgba(255,255,255,0.68)"
                 : getCategoryColor(categories, p.categoryId);
 
+            const canCopyToCurrentPack =
+              activePackFilter === "all" ||
+              (activePackFilter !== "__base__" &&
+                p.packName !== activePackFilter);
+
             return (
               <div
                 key={p.id}
@@ -655,7 +661,16 @@ function VoedingslijstTab({
                 }}
                 title="Klik om productdetails te openen"
               >
-                <div style={bodyCellStyle} onClick={(e) => e.stopPropagation()}>
+                <div
+                  style={{
+                    ...bodyCellStyle,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 4,
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <button
                     onClick={() => toggleFavorite(p.id)}
                     style={{
@@ -673,6 +688,29 @@ function VoedingslijstTab({
                   >
                     {p.favorite ? "★" : "☆"}
                   </button>
+
+                  {canCopyToCurrentPack && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        copyProductToCurrentPack(p);
+                      }}
+                      style={{
+                        ...buttonStyle,
+                        padding: "4px 6px",
+                        fontSize: 13,
+                        minWidth: 26,
+                        fontWeight: 700,
+                        lineHeight: 1,
+                        background: "#eef2ff",
+                        border: "1px solid #c7d2fe",
+                        color: "#3730a3",
+                      }}
+                      title="Kopieer naar lijst"
+                    >
+                      ↪
+                    </button>
+                  )}
                 </div>
 
                 <div style={bodyCellStyle}>
