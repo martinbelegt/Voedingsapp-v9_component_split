@@ -920,11 +920,24 @@ export default function App() {
 
   const favoriteProducts = useMemo(() => {
     return [...products]
-      .filter((p) => p.favorite)
+      .filter((p) => {
+        if (!p.favorite) return false;
+
+        // Alle lijsten: toon alle favorieten
+        if (activePackFilter === "all") return true;
+
+        // Basis / handmatig: producten zonder packName
+        if (activePackFilter === "__base__") {
+          return !p.packName || String(p.packName).trim() === "";
+        }
+
+        // Specifieke lijst: alleen favorieten uit die lijst
+        return p.packName === activePackFilter;
+      })
       .sort((a, b) =>
         a.name.localeCompare(b.name, "nl", { sensitivity: "base" }),
       );
-  }, [products]);
+  }, [products, activePackFilter]);
 
   const packFilteredProducts = useMemo(() => {
     const q = productSearch.trim().toLowerCase();
