@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { getCategoryColor, getCategoryName } from "../services/productHelpers";
 
 export function QuickAddSection(props) {
@@ -16,6 +16,13 @@ export function QuickAddSection(props) {
     inputStyle,
     buttonStyle,
   } = props;
+
+  const [flashAction, setFlashAction] = useState(null);
+
+  function flash(name) {
+    setFlashAction(name);
+    setTimeout(() => setFlashAction(null), 650);
+  }
 
   return (
     <div style={cardStyle}>
@@ -43,11 +50,14 @@ export function QuickAddSection(props) {
         </select>
 
         <button
-          onClick={addCurrentMealToSelectedDay}
+          onClick={() => {
+            addCurrentMealToSelectedDay();
+            flash("add");
+          }}
           style={{
             ...buttonStyle,
-            background: "#dcfce7",
-            color: "#166534",
+            background: flashAction === "add" ? "#22c55e" : "#dcfce7",
+            color: flashAction === "add" ? "white" : "#166534",
             border: "1px solid #86efac",
             fontWeight: 700,
           }}
@@ -56,11 +66,14 @@ export function QuickAddSection(props) {
         </button>
 
         <button
-          onClick={addCurrentMealToSelectedDayAndClear}
+          onClick={() => {
+            addCurrentMealToSelectedDayAndClear();
+            flash("addClear");
+          }}
           style={{
             ...buttonStyle,
-            background: "#eff6ff",
-            color: "#1d4ed8",
+            background: flashAction === "addClear" ? "#2563eb" : "#eff6ff",
+            color: flashAction === "addClear" ? "white" : "#1d4ed8",
             border: "1px solid #bfdbfe",
             fontWeight: 700,
           }}
