@@ -25,6 +25,13 @@ export function DailyTab({
         ? "Vandaag"
         : "Archiefdag";
 
+  const dayTotalTitle =
+    dayMode === "Geplande dag"
+      ? "Gepland totaal"
+      : dayMode === "Vandaag"
+        ? "Dagtotaal vandaag"
+        : "Dagtotaal archief";
+
   return (
     <div style={{ display: "grid", gap: 14, marginTop: 16 }}>
       {/* Dagkeuze */}
@@ -121,7 +128,7 @@ export function DailyTab({
           }}
         >
           <div style={{ fontWeight: 900, color: "#14532d", fontSize: 17 }}>
-            Dagtotaal
+            {dayTotalTitle}
           </div>
 
           <div style={{ fontSize: 12, color: "#166534", fontWeight: 700 }}>
