@@ -16,6 +16,15 @@ export function DailyTab({
 }) {
   const mealsForDay = selectedDay?.meals || [];
 
+  const today = new Date().toISOString().slice(0, 10);
+
+  const dayMode =
+    selectedDate > today
+      ? "Geplande dag"
+      : selectedDate === today
+        ? "Vandaag"
+        : "Archiefdag";
+
   return (
     <div style={{ display: "grid", gap: 14, marginTop: 16 }}>
       {/* Dagkeuze */}
@@ -26,7 +35,47 @@ export function DailyTab({
           border: "1px solid #bfdbfe",
         }}
       >
-        <h2 style={{ marginTop: 0, marginBottom: 10 }}>Dag / Archief</h2>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 10,
+            flexWrap: "wrap",
+            marginBottom: 10,
+          }}
+        >
+          <h2 style={{ margin: 0 }}>Dag / Archief</h2>
+
+          <span
+            style={{
+              padding: "4px 9px",
+              borderRadius: 999,
+              background:
+                dayMode === "Geplande dag"
+                  ? "#ede9fe"
+                  : dayMode === "Vandaag"
+                    ? "#dcfce7"
+                    : "#e2e8f0",
+              border:
+                dayMode === "Geplande dag"
+                  ? "1px solid #c4b5fd"
+                  : dayMode === "Vandaag"
+                    ? "1px solid #86efac"
+                    : "1px solid #cbd5e1",
+              color:
+                dayMode === "Geplande dag"
+                  ? "#5b21b6"
+                  : dayMode === "Vandaag"
+                    ? "#166534"
+                    : "#475569",
+              fontSize: 12,
+              fontWeight: 800,
+            }}
+          >
+            {dayMode}
+          </span>
+        </div>
 
         <div
           style={{
