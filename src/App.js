@@ -774,7 +774,18 @@ export default function App() {
   const [categoryDraftName, setCategoryDraftName] = useState("");
   const [quickSearch, setQuickSearch] = useState("");
   const [giSearch, setGiSearch] = useState("");
-  const [activePackFilter, setActivePackFilter] = useState("all");
+  const [activePackFilter, setActivePackFilter] = useState(() => {
+    try {
+      return localStorage.getItem("dc_active_pack_filter_v1") || "all";
+    } catch {
+      return "all";
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem("dc_active_pack_filter_v1", activePackFilter);
+    } catch {}
+  }, [activePackFilter]);
 
   const [newProduct, setNewProduct] = useState(() =>
     createNewProductForm(categories),
