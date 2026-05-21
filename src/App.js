@@ -733,6 +733,7 @@ export default function App() {
 
   const [mealName, setMealName] = useState("");
   const [dayMealName, setDayMealName] = useState("");
+  const [dayMealMoment, setDayMealMoment] = useState("snack");
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().slice(0, 10),
   );
@@ -1551,6 +1552,8 @@ Producten uit deze categorie gaan naar "Overig".`);
   const dailyMealProps = {
     dayMealName,
     setDayMealName,
+    dayMealMoment,
+    setDayMealMoment,
     addCurrentMealToSelectedDay,
     addCurrentMealToSelectedDayAndClear,
   };

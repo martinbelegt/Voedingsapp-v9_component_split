@@ -5,6 +5,8 @@ export function QuickAddSection(props) {
   const {
     dayMealName,
     setDayMealName,
+    dayMealMoment,
+    setDayMealMoment,
     addCurrentMealToSelectedDay,
     addCurrentMealToSelectedDayAndClear,
     quickSearch,
@@ -22,7 +24,7 @@ export function QuickAddSection(props) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "2fr 1fr 1fr",
+          gridTemplateColumns: "1fr 170px 1fr 1fr",
           gap: 8,
           alignItems: "center",
         }}
@@ -33,6 +35,20 @@ export function QuickAddSection(props) {
           style={inputStyle}
           placeholder="Naam voor daglog, bv. Ontbijt / Lunch / Avondeten"
         />
+        <select
+          value={dayMealMoment}
+          onChange={(e) => setDayMealMoment(e.target.value)}
+          style={inputStyle}
+        >
+          <option value="breakfast">Ontbijt</option>
+          <option value="lunch">Lunch</option>
+          <option value="dinner">Diner</option>
+          <option value="snack">Snack</option>
+          <option value="sport">Sport</option>
+          <option value="dessert">Toetje</option>
+          <option value="fruit">Fruit</option>
+          <option value="neutral">Algemeen</option>
+        </select>
 
         <button
           onClick={addCurrentMealToSelectedDay}

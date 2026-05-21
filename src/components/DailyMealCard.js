@@ -7,61 +7,107 @@ export function DailyMealCard({
   onDelete,
   buttonStyle,
 }) {
+  const momentLabelMap = {
+    breakfast: "Ontbijt",
+    lunch: "Lunch",
+    dinner: "Diner",
+    snack: "Snack",
+    sport: "Sport",
+    dessert: "Toetje",
+    fruit: "Fruit",
+    neutral: "Algemeen",
+  };
+
+  const mealMomentLabel = momentLabelMap[meal.mealMoment] || "Maaltijd";
+
   return (
     <div
       style={{
         border: "1px solid #cbd5e1",
-        borderRadius: 10,
-        padding: 12,
-        marginBottom: 10,
+        borderRadius: 12,
+        padding: "8px 10px",
+        marginBottom: 8,
         background: "#f8fafc",
       }}
     >
+      {/* Kopregel maaltijd/snack */}
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          gap: 10,
-          alignItems: "start",
-          marginBottom: 8,
+          display: "grid",
+          gridTemplateColumns: "1fr auto",
+          gap: 8,
+          alignItems: "center",
         }}
       >
         <div>
-          <div style={{ fontWeight: 700 }}>
-            {index + 1}. {meal.name}
+          <div style={{ fontWeight: 800, color: "#0f172a", fontSize: 14 }}>
+            {mealMomentLabel} · {meal.name || `Item ${index + 1}`}
           </div>
-          <div style={{ fontSize: 12, color: "#64748b" }}>{meal.createdAt}</div>
+          <div style={{ fontSize: 11, color: "#64748b" }}>{meal.createdAt}</div>
         </div>
 
-        <button onClick={() => onDelete(meal.id)} style={buttonStyle}>
+        <button
+          onClick={() => onDelete(meal.id)}
+          style={{
+            ...buttonStyle,
+            padding: "6px 9px",
+            fontSize: 12,
+            borderRadius: 10,
+          }}
+        >
           Verwijder
         </button>
       </div>
 
-      <div style={{ marginBottom: 8, lineHeight: 1.6 }}>
-        <div>KH: {meal.totals.kh} g</div>
-        <div>Eiwit: {meal.totals.protein} g</div>
-        <div>Vet: {meal.totals.fat} g</div>
-        <div>kcal: {meal.totals.kcal}</div>
+      {/* Compacte totalen */}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 6,
+          marginTop: 7,
+          fontSize: 12,
+          color: "#334155",
+        }}
+      >
+        <span>
+          <strong>KH</strong> {meal.totals.kh} g
+        </span>
+        <span>
+          <strong>Eiwit</strong> {meal.totals.protein} g
+        </span>
+        <span>
+          <strong>Vet</strong> {meal.totals.fat} g
+        </span>
+        <span>
+          <strong>Kcal</strong> {meal.totals.kcal}
+        </span>
+        {meal.totals.insulin != null && (
+          <span>
+            <strong>Insuline</strong> {meal.totals.insulin} E
+          </span>
+        )}
+        {meal.totals.creon25 != null && (
+          <span>
+            <strong>Creon</strong> {meal.totals.creon25}x25k +{" "}
+            {meal.totals.creon10 || 0}x10k
+          </span>
+        )}
       </div>
 
-      <div style={{ fontSize: 13, color: "#334155" }}>
-        <strong>Regels:</strong>
-
-        <ul style={{ marginTop: 6 }}>
-          {meal.rows.map((row) => {
+      {/* Productregels compact */}
+      <div style={{ marginTop: 6, fontSize: 12, color: "#475569" }}>
+        {(meal.rows || [])
+          .map((row) => {
             const product = products.find((p) => p.id === row.productId);
-
             if (!product) return null;
 
-            return (
-              <li key={row.id}>
-                {product.name} — {row.amount}{" "}
-                {row.mode === "gram" ? "gram" : "portie(s)"}
-              </li>
-            );
-          })}
-        </ul>
+            return `${product.name} (${row.amount} ${
+              row.mode === "gram" ? "g" : "portie"
+            })`;
+          })
+          .filter(Boolean)
+          .join(" · ")}
       </div>
     </div>
   );
