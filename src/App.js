@@ -1455,7 +1455,19 @@ Producten uit deze categorie gaan naar "Overig".`);
 
   function exportCurrentPack() {
     const exportObject = createPackExportObject(products, activePackFilter);
-    const fileName = createPackExportFileName(activePackFilter);
+    const stamp = new Date().toISOString().slice(0, 10).replaceAll("-", "");
+
+    const safePackName =
+      activePackFilter === "all"
+        ? "alles"
+        : activePackFilter === "__base__"
+          ? "basis"
+          : String(activePackFilter)
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/gi, "_")
+              .replace(/^_+|_+$/g, "");
+
+    const fileName = `voedingslijst_${safePackName}_${stamp}.json`;
 
     downloadJsonFile(exportObject, fileName);
   }
