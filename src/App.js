@@ -758,6 +758,7 @@ export default function App() {
     sortedDates,
     addMealToDay,
     deleteMealFromDay,
+    updateMealTime,
     clearDailyLog,
   } = useDailyLog(selectedDate);
 
@@ -1913,6 +1914,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             clearDailyLog={clearDailyLog}
             products={products}
             deleteMealFromDay={deleteMealFromDay}
+            updateMealTime={updateMealTime}
             cardStyle={cardStyle}
             inputStyle={inputStyle}
             buttonStyle={buttonStyle}

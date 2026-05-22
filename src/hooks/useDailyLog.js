@@ -119,6 +119,26 @@ export function useDailyLog(selectedDate) {
     );
   }
 
+  function updateMealTime(mealId, nextEatenAt) {
+    setDailyLog((prev) =>
+      prev.map((day) =>
+        day.date === selectedDate
+          ? {
+              ...day,
+              meals: day.meals.map((meal) =>
+                meal.id === mealId
+                  ? {
+                      ...meal,
+                      eatenAt: nextEatenAt,
+                    }
+                  : meal,
+              ),
+            }
+          : day,
+      ),
+    );
+  }
+
   function clearDailyLog() {
     setDailyLog((prev) => prev.filter((day) => day.date !== selectedDate));
   }
@@ -131,6 +151,7 @@ export function useDailyLog(selectedDate) {
     sortedDates,
     addMealToDay,
     deleteMealFromDay,
+    updateMealTime,
     clearDailyLog,
   };
 }

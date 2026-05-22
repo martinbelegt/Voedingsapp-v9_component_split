@@ -5,6 +5,7 @@ export function DailyMealCard({
   index,
   products,
   onDelete,
+  onUpdateTime,
   buttonStyle,
 }) {
   const momentLabelMap = {
@@ -19,6 +20,22 @@ export function DailyMealCard({
   };
 
   const mealMomentLabel = momentLabelMap[meal.mealMoment] || "Maaltijd";
+  const eatenAtValue = meal.eatenAt || "";
+
+  function changeMealTime() {
+    const currentValue = eatenAtValue
+      ? eatenAtValue.slice(0, 16)
+      : new Date().toISOString().slice(0, 16);
+
+    const nextValue = window.prompt(
+      "Nieuwe datum/tijd voor dit eetmoment (YYYY-MM-DDTHH:mm)",
+      currentValue,
+    );
+
+    if (!nextValue) return;
+
+    onUpdateTime(meal.id, nextValue);
+  }
 
   return (
     <div
@@ -56,17 +73,34 @@ export function DailyMealCard({
           </div>
         </div>
 
-        <button
-          onClick={() => onDelete(meal.id)}
-          style={{
-            ...buttonStyle,
-            padding: "6px 9px",
-            fontSize: 12,
-            borderRadius: 10,
-          }}
-        >
-          Verwijder
-        </button>
+        <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
+          <button
+            onClick={() => changeMealTime()}
+            style={{
+              ...buttonStyle,
+              padding: "6px 9px",
+              fontSize: 12,
+              borderRadius: 10,
+              background: "#eef2ff",
+              border: "1px solid #c7d2fe",
+              color: "#3730a3",
+            }}
+          >
+            Tijd wijzigen
+          </button>
+
+          <button
+            onClick={() => onDelete(meal.id)}
+            style={{
+              ...buttonStyle,
+              padding: "6px 9px",
+              fontSize: 12,
+              borderRadius: 10,
+            }}
+          >
+            Verwijder
+          </button>
+        </div>
       </div>
 
       {/* Compacte totalen */}

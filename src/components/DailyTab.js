@@ -9,6 +9,7 @@ export function DailyTab({
   selectedDay,
   clearDailyLog,
   products,
+  updateMealTime,
   deleteMealFromDay,
   cardStyle,
   inputStyle,
