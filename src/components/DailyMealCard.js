@@ -43,7 +43,17 @@ export function DailyMealCard({
           <div style={{ fontWeight: 800, color: "#0f172a", fontSize: 14 }}>
             {mealMomentLabel}
           </div>
-          <div style={{ fontSize: 11, color: "#64748b" }}>{meal.createdAt}</div>
+          <div style={{ fontSize: 11, color: "#64748b" }}>
+            {meal.eatenAt
+              ? new Date(meal.eatenAt).toLocaleString("nl-NL", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : meal.createdAt}
+          </div>
         </div>
 
         <button

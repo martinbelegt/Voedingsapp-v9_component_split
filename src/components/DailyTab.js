@@ -277,16 +277,22 @@ export function DailyTab({
           </div>
         )}
 
-        {[...mealsForDay].reverse().map((meal, index) => (
-          <DailyMealCard
-            key={meal.id}
-            meal={meal}
-            index={index}
-            products={products}
-            onDelete={deleteMealFromDay}
-            buttonStyle={buttonStyle}
-          />
-        ))}
+        {[...mealsForDay]
+          .sort((a, b) => {
+            const aTime = new Date(a.eatenAt || a.createdAt || 0).getTime();
+            const bTime = new Date(b.eatenAt || b.createdAt || 0).getTime();
+            return bTime - aTime;
+          })
+          .map((meal, index) => (
+            <DailyMealCard
+              key={meal.id}
+              meal={meal}
+              index={index}
+              products={products}
+              onDelete={deleteMealFromDay}
+              buttonStyle={buttonStyle}
+            />
+          ))}
       </div>
     </div>
   );
