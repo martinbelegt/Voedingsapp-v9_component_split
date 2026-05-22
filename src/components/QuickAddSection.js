@@ -7,6 +7,8 @@ export function QuickAddSection(props) {
     setDayMealMoment,
     dayMealTime,
     setDayMealTime,
+    logCurrentMealToDay,
+    setLogCurrentMealToDay,
     addCurrentMealToSelectedDay,
     addCurrentMealToSelectedDayAndClear,
     quickSearch,
@@ -91,6 +93,25 @@ export function QuickAddSection(props) {
           Voeg toe en start nieuwe maaltijd
         </button>
       </div>
+
+      <label
+        style={{
+          marginTop: 8,
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          fontSize: 13,
+          color: "#334155",
+          fontWeight: 700,
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={logCurrentMealToDay}
+          onChange={(e) => setLogCurrentMealToDay(e.target.checked)}
+        />
+        Deze maaltijd direct naar Dag / Archief
+      </label>
 
       <div style={{ marginTop: 10 }}>
         <input

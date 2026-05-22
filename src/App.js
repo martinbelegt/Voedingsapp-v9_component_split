@@ -748,6 +748,7 @@ export default function App() {
   const [dayMealTime, setDayMealTime] = useState(() =>
     new Date().toTimeString().slice(0, 5),
   );
+  const [logCurrentMealToDay, setLogCurrentMealToDay] = useState(true);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().slice(0, 10),
   );
@@ -1126,6 +1127,10 @@ export default function App() {
   }
 
   function addCurrentMealToSelectedDay() {
+    if (!logCurrentMealToDay) {
+      alert("Deze maaltijd is niet opgeslagen in Dag / Archief.");
+      return;
+    }
     const snapshot = createMealSnapshot(getDayMealMomentLabel(dayMealMoment));
     if (!snapshot) {
       alert("Er is nog geen maaltijd ingevuld.");
@@ -1144,6 +1149,10 @@ export default function App() {
   }
 
   function addCurrentMealToSelectedDayAndClear() {
+    if (!logCurrentMealToDay) {
+      alert("Deze maaltijd is niet opgeslagen in Dag / Archief.");
+      return;
+    }
     const snapshot = createMealSnapshot(getDayMealMomentLabel(dayMealMoment));
     if (!snapshot) {
       alert("Er is nog geen maaltijd ingevuld.");
@@ -1649,6 +1658,8 @@ Producten uit deze categorie gaan naar "Overig".`);
     setDayMealMoment,
     dayMealTime,
     setDayMealTime,
+    logCurrentMealToDay,
+    setLogCurrentMealToDay,
     addCurrentMealToSelectedDay,
     addCurrentMealToSelectedDayAndClear,
   };
