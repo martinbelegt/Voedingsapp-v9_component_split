@@ -279,9 +279,10 @@ export function DailyTab({
 
         {[...mealsForDay]
           .sort((a, b) => {
-            const aTime = new Date(a.eatenAt || a.createdAt || 0).getTime();
-            const bTime = new Date(b.eatenAt || b.createdAt || 0).getTime();
-            return bTime - aTime;
+            const aTime = String(a.eatenAt || "");
+            const bTime = String(b.eatenAt || "");
+
+            return bTime.localeCompare(aTime);
           })
           .map((meal, index) => (
             <DailyMealCard
