@@ -81,7 +81,13 @@ export function useDailyLog(selectedDate) {
       id: createId("daily-meal"),
       name: input.name,
       mealMoment: input.mealMoment || "neutral",
+
+      // createdAt = wanneer je het in de app opslaat
       createdAt: input.createdAt || new Date().toLocaleString("nl-NL"),
+
+      // eatenAt = wanneer je het echt eet / plant
+      eatenAt: input.eatenAt || new Date().toISOString(),
+
       rows: input.rows,
       totals: normalizeTotals(input.totals),
     };

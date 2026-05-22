@@ -745,6 +745,9 @@ export default function App() {
   const [mealName, setMealName] = useState("");
   const [dayMealName, setDayMealName] = useState("");
   const [dayMealMoment, setDayMealMoment] = useState("snack");
+  const [dayMealTime, setDayMealTime] = useState(() =>
+    new Date().toTimeString().slice(0, 5),
+  );
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().slice(0, 10),
   );
@@ -1132,6 +1135,7 @@ export default function App() {
       date: selectedDate,
       name: snapshot.name,
       mealMoment: dayMealMoment,
+      eatenAt: `${selectedDate}T${dayMealTime || "12:00"}`,
       rows: snapshot.rows,
       totals: snapshot.totals,
       createdAt: snapshot.createdAt,
@@ -1642,6 +1646,8 @@ Producten uit deze categorie gaan naar "Overig".`);
   const dailyMealProps = {
     dayMealMoment,
     setDayMealMoment,
+    dayMealTime,
+    setDayMealTime,
     addCurrentMealToSelectedDay,
     addCurrentMealToSelectedDayAndClear,
   };
@@ -1778,6 +1784,8 @@ Producten uit deze categorie gaan naar "Overig".`);
             dailyMealProps={dailyMealProps}
             timerProps={timerProps}
             uiStyles={uiStyles}
+            dayMealTime={dayMealTime}
+            setDayMealTime={setDayMealTime}
           />
         )}
 

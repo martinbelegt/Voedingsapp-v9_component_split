@@ -11,7 +11,8 @@ export function DashboardTab(props) {
   const {
     categories,
     products,
-
+    dayMealTime,
+    setDayMealTime,
     savedMealProps,
     favoritesProps,
     quickAddProps,
@@ -81,6 +82,8 @@ export function DashboardTab(props) {
           cardStyle={cardStyle}
           inputStyle={inputStyle}
           buttonStyle={buttonStyle}
+          dayMealTime={dayMealTime}
+          setDayMealTime={setDayMealTime}
         />
       </div>
 
