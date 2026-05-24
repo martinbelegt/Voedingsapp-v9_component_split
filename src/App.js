@@ -4,7 +4,7 @@ import { DashboardTab } from "./components/DashboardTab";
 import { GiTimingTab } from "./components/GiTimingTab";
 import { SettingsTab } from "./components/SettingsTab";
 import { useDailyLog } from "./hooks/useDailyLog";
-import { DailyTab } from "./components/DailyTab";
+import { DailyTab } from "./components/daily/DailyTab";
 import { useSavedMeals } from "./hooks/useSavedMeals";
 import { useProducts } from "./hooks/useProducts";
 import { useCategories } from "./hooks/useCategories";
