@@ -760,6 +760,7 @@ export default function App() {
     addMealToDay,
     deleteMealFromDay,
     updateMealTime,
+    updateMealMedicalLog,
     clearDailyLog,
   } = useDailyLog(selectedDate);
 
@@ -1944,6 +1945,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             products={products}
             deleteMealFromDay={deleteMealFromDay}
             updateMealTime={updateMealTime}
+            updateMealMedicalLog={updateMealMedicalLog}
             cardStyle={cardStyle}
             inputStyle={inputStyle}
             buttonStyle={buttonStyle}

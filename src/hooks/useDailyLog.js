@@ -82,11 +82,24 @@ export function useDailyLog(selectedDate) {
       name: input.name,
       mealMoment: input.mealMoment || "neutral",
 
+      // Vrije context bij dit eetmoment
+      mealNote: input.mealNote || "",
+
       // createdAt = wanneer je het in de app opslaat
       createdAt: input.createdAt || new Date().toLocaleString("nl-NL"),
 
       // eatenAt = wanneer je het echt eet / plant
       eatenAt: input.eatenAt || new Date().toISOString(),
+
+      // Werkelijk toegediende insuline
+      actualInsulin: input.actualInsulin || "",
+      insulinType: input.insulinType || "Novorapid",
+      insulinTime: input.insulinTime || "",
+
+      // Werkelijk genomen Creon
+      actualCreon25: input.actualCreon25 || "",
+      actualCreon10: input.actualCreon10 || "",
+      creonTime: input.creonTime || "",
 
       rows: input.rows,
       totals: normalizeTotals(input.totals),
@@ -139,6 +152,26 @@ export function useDailyLog(selectedDate) {
     );
   }
 
+  function updateMealMedicalLog(mealId, updates) {
+    setDailyLog((prev) =>
+      prev.map((day) =>
+        day.date === selectedDate
+          ? {
+              ...day,
+              meals: day.meals.map((meal) =>
+                meal.id === mealId
+                  ? {
+                      ...meal,
+                      ...updates,
+                    }
+                  : meal,
+              ),
+            }
+          : day,
+      ),
+    );
+  }
+
   function clearDailyLog() {
     setDailyLog((prev) => prev.filter((day) => day.date !== selectedDate));
   }
@@ -152,6 +185,7 @@ export function useDailyLog(selectedDate) {
     addMealToDay,
     deleteMealFromDay,
     updateMealTime,
+    updateMealMedicalLog,
     clearDailyLog,
   };
 }

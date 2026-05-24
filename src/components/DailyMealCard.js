@@ -6,6 +6,7 @@ export function DailyMealCard({
   products,
   onDelete,
   onUpdateTime,
+  onUpdateMedicalLog,
   buttonStyle,
 }) {
   const momentLabelMap = {
@@ -35,6 +36,60 @@ export function DailyMealCard({
     if (!nextValue) return;
 
     onUpdateTime(meal.id, nextValue);
+  }
+
+  function changeMedicalLog() {
+    const mealNote = window.prompt(
+      "Contextnotitie bij dit eetmoment:",
+      meal.mealNote || "",
+    );
+    if (mealNote === null) return;
+
+    const actualInsulin = window.prompt(
+      "Werkelijk gespoten insuline (E):",
+      meal.actualInsulin || "",
+    );
+    if (actualInsulin === null) return;
+
+    const insulinType = window.prompt(
+      "Type insuline:",
+      meal.insulinType || "Novorapid",
+    );
+    if (insulinType === null) return;
+
+    const insulinTime = window.prompt(
+      "Tijd insuline (HH:mm):",
+      meal.insulinTime || "",
+    );
+    if (insulinTime === null) return;
+
+    const actualCreon25 = window.prompt(
+      "Werkelijk genomen Creon 25k:",
+      meal.actualCreon25 || "",
+    );
+    if (actualCreon25 === null) return;
+
+    const actualCreon10 = window.prompt(
+      "Werkelijk genomen Creon 10k:",
+      meal.actualCreon10 || "",
+    );
+    if (actualCreon10 === null) return;
+
+    const creonTime = window.prompt(
+      "Tijd Creon (HH:mm):",
+      meal.creonTime || "",
+    );
+    if (creonTime === null) return;
+
+    onUpdateMedicalLog(meal.id, {
+      mealNote,
+      actualInsulin,
+      insulinType,
+      insulinTime,
+      actualCreon25,
+      actualCreon10,
+      creonTime,
+    });
   }
 
   return (
@@ -87,6 +142,21 @@ export function DailyMealCard({
             }}
           >
             Tijd wijzigen
+          </button>
+
+          <button
+            onClick={() => changeMedicalLog()}
+            style={{
+              ...buttonStyle,
+              padding: "6px 9px",
+              fontSize: 12,
+              borderRadius: 10,
+              background: "#ecfdf5",
+              border: "1px solid #bbf7d0",
+              color: "#166534",
+            }}
+          >
+            Log wijzigen
           </button>
 
           <button
@@ -153,6 +223,47 @@ export function DailyMealCard({
           .filter(Boolean)
           .join(" · ")}
       </div>
+
+      {(meal.mealNote ||
+        meal.actualInsulin ||
+        meal.actualCreon25 ||
+        meal.actualCreon10) && (
+        <div
+          style={{
+            marginTop: 8,
+            padding: "7px 9px",
+            borderRadius: 10,
+            background: "#f0fdf4",
+            border: "1px solid #bbf7d0",
+            fontSize: 12,
+            color: "#14532d",
+            display: "grid",
+            gap: 4,
+          }}
+        >
+          {meal.mealNote && (
+            <div>
+              <strong>Notitie:</strong> {meal.mealNote}
+            </div>
+          )}
+
+          {meal.actualInsulin && (
+            <div>
+              <strong>Werkelijk insuline:</strong>{" "}
+              {meal.insulinType || "Insuline"} {meal.actualInsulin} E
+              {meal.insulinTime ? ` om ${meal.insulinTime}` : ""}
+            </div>
+          )}
+
+          {(meal.actualCreon25 || meal.actualCreon10) && (
+            <div>
+              <strong>Werkelijk Creon:</strong> {meal.actualCreon25 || 0}x25k +{" "}
+              {meal.actualCreon10 || 0}x10k
+              {meal.creonTime ? ` om ${meal.creonTime}` : ""}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
