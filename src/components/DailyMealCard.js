@@ -112,8 +112,27 @@ export function DailyMealCard({
         }}
       >
         <div>
-          <div style={{ fontWeight: 800, color: "#0f172a", fontSize: 14 }}>
+          <div
+            style={{
+              fontWeight: 900,
+              color: "#0f172a",
+              fontSize: 16,
+              lineHeight: 1.2,
+            }}
+          >
             {mealMomentLabel}
+
+            {meal.mealNote ? (
+              <span
+                style={{
+                  color: "#166534",
+                  fontWeight: 700,
+                }}
+              >
+                {" "}
+                – {meal.mealNote}
+              </span>
+            ) : null}
           </div>
           <div style={{ fontSize: 11, color: "#64748b" }}>
             {meal.eatenAt
@@ -241,12 +260,6 @@ export function DailyMealCard({
             gap: 4,
           }}
         >
-          {meal.mealNote && (
-            <div>
-              <strong>Notitie:</strong> {meal.mealNote}
-            </div>
-          )}
-
           {meal.actualInsulin && (
             <div>
               <strong>Werkelijk insuline:</strong>{" "}

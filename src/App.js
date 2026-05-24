@@ -1936,6 +1936,7 @@ Producten uit deze categorie gaan naar "Overig".`);
 
         {activeTab === "daily" && (
           <DailyTab
+            settings={settings}
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
             sortedDates={sortedDates}

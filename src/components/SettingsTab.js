@@ -103,6 +103,121 @@ export function SettingsTab({
 
             <div
               style={{
+                marginTop: 18,
+                paddingTop: 14,
+                borderTop: "1px solid #cbd5e1",
+              }}
+            >
+              <div
+                style={{
+                  fontWeight: 900,
+                  fontSize: 16,
+                  marginBottom: 12,
+                  color: "#0f172a",
+                }}
+              >
+                Persoonlijke doelen
+              </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                  gap: 12,
+                }}
+              >
+                <div>
+                  <label style={labelStyle}>Onderhoud kcal</label>
+
+                  <input
+                    value={settings.dailyTargets?.maintenanceKcal || ""}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        dailyTargets: {
+                          ...settings.dailyTargets,
+                          maintenanceKcal: e.target.value,
+                        },
+                      })
+                    }
+                    style={inputStyle}
+                  />
+
+                  <div style={helperStyle}>
+                    Geschatte kcal om op gewicht te blijven.
+                  </div>
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Dagdoel kcal</label>
+
+                  <input
+                    value={settings.dailyTargets?.targetKcal || ""}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        dailyTargets: {
+                          ...settings.dailyTargets,
+                          targetKcal: e.target.value,
+                        },
+                      })
+                    }
+                    style={inputStyle}
+                  />
+
+                  <div style={helperStyle}>
+                    Doel voor afvallen / onderhoud / opbouw.
+                  </div>
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Eiwitdoel per dag</label>
+
+                  <input
+                    value={settings.dailyTargets?.proteinGoal || ""}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        dailyTargets: {
+                          ...settings.dailyTargets,
+                          proteinGoal: e.target.value,
+                        },
+                      })
+                    }
+                    style={inputStyle}
+                  />
+
+                  <div style={helperStyle}>
+                    Persoonlijk eiwitdoel in gram per dag.
+                  </div>
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Min eiwit per maaltijd</label>
+
+                  <input
+                    value={settings.dailyTargets?.proteinMealGoal || ""}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        dailyTargets: {
+                          ...settings.dailyTargets,
+                          proteinMealGoal: e.target.value,
+                        },
+                      })
+                    }
+                    style={inputStyle}
+                  />
+
+                  <div style={helperStyle}>
+                    Richtwaarde voor eiwitsynthese per eetmoment.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
                 ...settingsCardBase,
                 background: "#fefce8",
                 border: "1px solid #fde68a",

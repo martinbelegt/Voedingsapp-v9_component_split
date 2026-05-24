@@ -5,9 +5,15 @@ import { loadSettings, saveSettings } from "../services/localStorageService";
 export function useSettings() {
   const [settings, setSettings] = useState(() => {
     const savedSettings = loadSettings();
+
     return {
       ...defaultSettings,
       ...(savedSettings || {}),
+
+      dailyTargets: {
+        ...defaultSettings.dailyTargets,
+        ...(savedSettings?.dailyTargets || {}),
+      },
     };
   });
 

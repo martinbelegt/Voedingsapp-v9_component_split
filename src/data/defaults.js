@@ -28,4 +28,11 @@ export const defaultSettings = {
   minProteinTriggerThreshold: "15",
   minEnzymeLoadValue: "10",
   enzymeTriggerPreset: "standaard",
+
+  dailyTargets: {
+    maintenanceKcal: 2250,
+    targetKcal: 2000,
+    proteinGoal: 140,
+    proteinMealGoal: 35,
+  },
 };
