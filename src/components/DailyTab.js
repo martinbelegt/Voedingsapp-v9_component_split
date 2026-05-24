@@ -9,8 +9,8 @@ export function DailyTab({
   selectedDay,
   clearDailyLog,
   products,
-  updateMealTime,
   deleteMealFromDay,
+  updateMealTime,
   cardStyle,
   inputStyle,
   buttonStyle,
@@ -292,6 +292,7 @@ export function DailyTab({
               index={index}
               products={products}
               onDelete={deleteMealFromDay}
+              onUpdateTime={updateMealTime}
               buttonStyle={buttonStyle}
             />
           ))}

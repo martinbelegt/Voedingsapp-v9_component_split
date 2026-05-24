@@ -1188,6 +1188,23 @@ export default function App() {
     scrollRefIntoView(newRowRef);
   }
 
+  function appendSavedMeal(mealId) {
+    const meal = getSavedMeal(mealId);
+    if (!meal) return;
+
+    const currentFilledRows = rows.filter((row) => row.productId);
+    const rowsToAppend = normalizeMealRows(meal.rows)
+      .filter((row) => row.productId)
+      .map((row) => ({
+        ...row,
+        id: createId("row"),
+      }));
+
+    setRows(ensureLastEmptyRow([...currentFilledRows, ...rowsToAppend]));
+
+    scrollRefIntoView(newRowRef);
+  }
+
   function addRow() {
     setRows((prev) => addEmptyMealRow(prev, makeRow));
   }
@@ -1673,6 +1690,7 @@ Producten uit deze categorie gaan naar "Overig".`);
     setMealName,
     saveCurrentMeal,
     loadSavedMeal,
+    appendSavedMeal,
     deleteSavedMeal,
   };
 

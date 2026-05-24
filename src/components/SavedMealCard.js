@@ -6,6 +6,7 @@ export function SavedMealCard({
   products,
   onLoad,
   onDelete,
+  onAppend,
   buttonStyle,
 }) {
   const [open, setOpen] = useState(false);
@@ -74,6 +75,10 @@ export function SavedMealCard({
               }}
             >
               Laden
+            </button>
+
+            <button onClick={() => onAppend(meal.id)} style={buttonStyle}>
+              Voeg toe
             </button>
 
             <button

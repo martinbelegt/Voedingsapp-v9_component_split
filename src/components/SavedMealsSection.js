@@ -12,6 +12,7 @@ export function SavedMealsSection(props) {
     setMealName,
     saveCurrentMeal,
     loadSavedMeal,
+    appendSavedMeal,
     deleteSavedMeal,
     products,
     cardStyle,
@@ -85,6 +86,7 @@ export function SavedMealsSection(props) {
                 index={index}
                 products={products}
                 onLoad={loadSavedMeal}
+                onAppend={appendSavedMeal}
                 onDelete={deleteSavedMeal}
                 buttonStyle={buttonStyle}
               />
