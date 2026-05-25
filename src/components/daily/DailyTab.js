@@ -18,8 +18,13 @@ export function DailyTab({
   cardStyle,
   inputStyle,
   buttonStyle,
+  addInsulinEventToDay,
+  updateInsulinEvent,
+  deleteInsulinEvent,
 }) {
   const mealsForDay = selectedDay?.meals || [];
+
+  const insulinEventsForDay = selectedDay?.insulinEvents || [];
 
   const dailyTargets = settings?.dailyTargets || {};
 
@@ -196,6 +201,43 @@ export function DailyTab({
           >
             Wis deze dag
           </button>
+          <button
+            onClick={() => {
+              const time = window.prompt(
+                "Tijd insuline (HH:mm)",
+                new Date().toTimeString().slice(0, 5),
+              );
+              if (!time) return;
+
+              const units = window.prompt("Aantal eenheden insuline:", "");
+              if (units === null) return;
+
+              const insulinType = window.prompt("Type insuline:", "Novorapid");
+              if (insulinType === null) return;
+
+              const note = window.prompt(
+                "Reden/notitie:",
+                "bijv. dageraadfenomeen / correctie / voor ontbijt",
+              );
+              if (note === null) return;
+
+              addInsulinEventToDay({
+                date: selectedDate,
+                eventTime: `${selectedDate}T${time}`,
+                units,
+                insulinType,
+                note,
+              });
+            }}
+            style={{
+              ...buttonStyle,
+              background: "#eef2ff",
+              border: "1px solid #c7d2fe",
+              color: "#3730a3",
+            }}
+          >
+            + Insuline
+          </button>
         </div>
 
         <DailyMealList
@@ -205,6 +247,9 @@ export function DailyTab({
           deleteMealFromDay={deleteMealFromDay}
           updateMealTime={updateMealTime}
           updateMealMedicalLog={updateMealMedicalLog}
+          insulinEventsForDay={insulinEventsForDay}
+          updateInsulinEvent={updateInsulinEvent}
+          deleteInsulinEvent={deleteInsulinEvent}
           buttonStyle={buttonStyle}
         />
       </div>

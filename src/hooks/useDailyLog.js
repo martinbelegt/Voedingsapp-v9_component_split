@@ -44,16 +44,18 @@ export function useDailyLog(selectedDate) {
       };
     }
 
-    return normalizeTotals(
+    const mealTotals = normalizeTotals(
       selectedDay.meals.reduce(
         (acc, meal) => {
           acc.kh += Number(meal.totals.kh) || 0;
           acc.protein += Number(meal.totals.protein) || 0;
           acc.fat += Number(meal.totals.fat) || 0;
           acc.kcal += Number(meal.totals.kcal) || 0;
-          acc.insulin += Number(meal.totals.insulin) || 0;
+
+          // Creon blijft voorlopig bij eetmomenten
           acc.creon25 += Number(meal.totals.creon25) || 0;
           acc.creon10 += Number(meal.totals.creon10) || 0;
+
           return acc;
         },
         {
@@ -67,7 +69,24 @@ export function useDailyLog(selectedDate) {
         },
       ),
     );
+
+    // Insuline komt nu uit losse insulin-events
+    const insulinTotal = (selectedDay?.insulinEvents || []).reduce(
+      (sum, event) => sum + (Number(event.units) || 0),
+      0,
+    );
+
+    return {
+      ...mealTotals,
+      insulin: round2(insulinTotal),
+    };
   }, [selectedDay]);
+
+  // Totaal werkelijk gespoten insuline
+  const insulinTotal = (selectedDay?.insulinEvents || []).reduce(
+    (sum, event) => sum + (Number(event.units) || 0),
+    0,
+  );
 
   const sortedDates = useMemo(() => {
     return [...dailyLog]
@@ -172,6 +191,74 @@ export function useDailyLog(selectedDate) {
     );
   }
 
+  function addInsulinEventToDay(input) {
+    const eventEntry = {
+      id: createId("insulin-event"),
+      type: "insulin",
+      eventTime: input.eventTime || new Date().toISOString(),
+      insulinType: input.insulinType || "Novorapid",
+      units: input.units || "",
+      note: input.note || "",
+      createdAt: new Date().toLocaleString("nl-NL"),
+    };
+
+    setDailyLog((prev) => {
+      const existingDay = prev.find((d) => d.date === input.date);
+
+      if (existingDay) {
+        return prev.map((d) =>
+          d.date === input.date
+            ? { ...d, insulinEvents: [...(d.insulinEvents || []), eventEntry] }
+            : d,
+        );
+      }
+
+      return [
+        ...prev,
+        { date: input.date, meals: [], insulinEvents: [eventEntry] },
+      ].sort((a, b) =>
+        String(b?.date || "").localeCompare(String(a?.date || "")),
+      );
+    });
+  }
+
+  // Insuline-event wijzigen
+  function updateInsulinEvent(mealId, updates) {
+    setDailyLog((prev) =>
+      prev.map((day) =>
+        day.date === selectedDate
+          ? {
+              ...day,
+              insulinEvents: (day.insulinEvents || []).map((event) =>
+                event.id === mealId
+                  ? {
+                      ...event,
+                      ...updates,
+                    }
+                  : event,
+              ),
+            }
+          : day,
+      ),
+    );
+  }
+
+  // Insuline-event verwijderen
+  function deleteInsulinEvent(eventId) {
+    setDailyLog((prev) =>
+      prev.map((day) =>
+        day.date === selectedDate
+          ? {
+              ...day,
+              insulinEvents: (day.insulinEvents || []).filter(
+                (event) => event.id !== eventId,
+              ),
+            }
+          : day,
+      ),
+    );
+  }
+
   function clearDailyLog() {
     setDailyLog((prev) => prev.filter((day) => day.date !== selectedDate));
   }
@@ -187,5 +274,8 @@ export function useDailyLog(selectedDate) {
     updateMealTime,
     updateMealMedicalLog,
     clearDailyLog,
+    addInsulinEventToDay,
+    updateInsulinEvent,
+    deleteInsulinEvent,
   };
 }

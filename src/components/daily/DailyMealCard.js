@@ -181,11 +181,7 @@ export function DailyMealCard({
         <span>
           <strong>Kcal</strong> {meal.totals.kcal}
         </span>
-        {meal.totals.insulin != null && (
-          <span>
-            <strong>Insuline</strong> {meal.totals.insulin} E
-          </span>
-        )}
+
         {meal.totals.creon25 != null && (
           <span>
             <strong>Creon</strong> {meal.totals.creon25}x25k +{" "}

@@ -762,6 +762,9 @@ export default function App() {
     updateMealTime,
     updateMealMedicalLog,
     clearDailyLog,
+    addInsulinEventToDay,
+    updateInsulinEvent,
+    deleteInsulinEvent,
   } = useDailyLog(selectedDate);
 
   const {
@@ -1950,6 +1953,9 @@ Producten uit deze categorie gaan naar "Overig".`);
             cardStyle={cardStyle}
             inputStyle={inputStyle}
             buttonStyle={buttonStyle}
+            addInsulinEventToDay={addInsulinEventToDay}
+            updateInsulinEvent={updateInsulinEvent}
+            deleteInsulinEvent={deleteInsulinEvent}
           />
         )}
       </div>
