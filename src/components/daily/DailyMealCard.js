@@ -202,61 +202,163 @@ export function DailyMealCard({
         {showDetails ? "Details sluiten" : "Details bekijken"}
       </button>
 
-      {/* Uitklapbare maaltijdanalyse */}
+      {/* Popup met maaltijdanalyse */}
       {showDetails && (
         <div
+          onClick={() => setShowDetails(false)}
           style={{
-            marginTop: 8,
-            padding: "9px 10px",
-            borderRadius: 12,
-            background: "white",
-            border: "1px solid #e2e8f0",
-            fontSize: 12,
-            color: "#334155",
-            display: "grid",
-            gap: 8,
+            position: "fixed",
+            inset: 0,
+            background: "rgba(15, 23, 42, 0.45)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 18,
+            zIndex: 9999,
           }}
         >
-          {/* Detailregels per product */}
-          {(meal.rows || [])
-            .filter((row) => row.productId)
-            .map((row) => {
-              const product = products.find((p) => p.id === row.productId);
-
-              return (
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "min(760px, 96vw)",
+              maxHeight: "88vh",
+              overflowY: "auto",
+              background: "white",
+              borderRadius: 18,
+              boxShadow: "0 20px 50px rgba(0,0,0,0.25)",
+              padding: 18,
+              border: "1px solid #cbd5e1",
+            }}
+          >
+            {/* Popup-kop */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 12,
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+            >
+              <div>
                 <div
-                  key={row.id}
-                  style={{
-                    borderBottom: "1px solid #e2e8f0",
-                    paddingBottom: 6,
-                  }}
+                  style={{ fontSize: 18, fontWeight: 900, color: "#0f172a" }}
                 >
-                  <div style={{ fontWeight: 800, color: "#0f172a" }}>
-                    {product?.name || "Onbekend product"}
-                  </div>
-
-                  <div style={{ marginTop: 3 }}>
-                    Hoeveelheid: {row.amount}{" "}
-                    {row.mode === "gram" ? "gram" : "portie(s)"} · Berekend:{" "}
-                    {row.grams || 0} g
-                  </div>
-
-                  <div style={{ marginTop: 3 }}>
-                    KH {row.kh || 0} g · Eiwit {row.protein || 0} g · Vet{" "}
-                    {row.fat || 0} g · Kcal {row.kcal || 0}
-                  </div>
-
-                  {product && (
-                    <div style={{ marginTop: 3, color: "#64748b" }}>
-                      GI: {product.giClass || "onbekend"}
-                      {product.giValue ? ` (${product.giValue})` : ""} · Timing:{" "}
-                      {product.timingTag || "onbekend"} · Absorptie:{" "}
-                      {product.absorptionProfile || "onbekend"}
-                    </div>
-                  )}
+                  {mealMomentLabel}
+                  {meal.mealNote ? (
+                    <span style={{ color: "#166534", fontWeight: 800 }}>
+                      {" "}
+                      – {meal.mealNote}
+                    </span>
+                  ) : null}
                 </div>
-              );
-            })}
+
+                <div style={{ fontSize: 12, color: "#64748b", marginTop: 3 }}>
+                  {meal.eatenAt
+                    ? new Date(meal.eatenAt).toLocaleString("nl-NL", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : meal.createdAt}
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowDetails(false)}
+                style={{
+                  ...buttonStyle,
+                  padding: "7px 10px",
+                  fontSize: 12,
+                  borderRadius: 10,
+                }}
+              >
+                Sluiten
+              </button>
+            </div>
+
+            {/* Popup-samenvatting */}
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 8,
+                padding: 10,
+                borderRadius: 12,
+                background: "#f8fafc",
+                border: "1px solid #e2e8f0",
+                fontSize: 13,
+                marginBottom: 12,
+              }}
+            >
+              <span>
+                <strong>KH</strong> {meal.totals.kh} g
+              </span>
+              <span>
+                <strong>Eiwit</strong> {meal.totals.protein} g
+              </span>
+              <span>
+                <strong>Vet</strong> {meal.totals.fat} g
+              </span>
+              <span>
+                <strong>Kcal</strong> {meal.totals.kcal}
+              </span>
+              {meal.totals.creon25 != null && (
+                <span>
+                  <strong>Creon</strong> {meal.totals.creon25}x25k +{" "}
+                  {meal.totals.creon10 || 0}x10k
+                </span>
+              )}
+            </div>
+
+            {/* Productdetails */}
+            <div style={{ display: "grid", gap: 8 }}>
+              {(meal.rows || [])
+                .filter((row) => row.productId)
+                .map((row) => {
+                  const product = products.find((p) => p.id === row.productId);
+
+                  return (
+                    <div
+                      key={row.id}
+                      style={{
+                        border: "1px solid #e2e8f0",
+                        borderRadius: 12,
+                        padding: 10,
+                        background: "#ffffff",
+                        fontSize: 13,
+                      }}
+                    >
+                      <div style={{ fontWeight: 900, color: "#0f172a" }}>
+                        {product?.name || "Onbekend product"}
+                      </div>
+
+                      <div style={{ marginTop: 4, color: "#334155" }}>
+                        Hoeveelheid: {row.amount}{" "}
+                        {row.mode === "gram" ? "gram" : "portie(s)"} · Berekend:{" "}
+                        {row.grams || 0} g
+                      </div>
+
+                      <div style={{ marginTop: 4, color: "#334155" }}>
+                        KH {row.kh || 0} g · Eiwit {row.protein || 0} g · Vet{" "}
+                        {row.fat || 0} g · Kcal {row.kcal || 0}
+                      </div>
+
+                      {product && (
+                        <div style={{ marginTop: 4, color: "#64748b" }}>
+                          GI: {product.giClass || "onbekend"}
+                          {product.giValue ? ` (${product.giValue})` : ""} ·
+                          Timing: {product.timingTag || "onbekend"} · Absorptie:{" "}
+                          {product.absorptionProfile || "onbekend"}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
         </div>
       )}
 
