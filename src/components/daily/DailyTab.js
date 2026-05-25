@@ -1,6 +1,7 @@
 import React from "react";
 import { DailyMealCard } from "./DailyMealCard";
 import { DailyTotalsCard } from "./DailyTotalsCard";
+import { DailyMealList } from "./DailyMealList";
 
 export function DailyTab({
   settings,
@@ -196,31 +197,15 @@ export function DailyTab({
           </button>
         </div>
 
-        {!selectedDay && (
-          <div style={{ color: "#64748b" }}>
-            Geen eetmomenten opgeslagen voor deze dag.
-          </div>
-        )}
-
-        {[...mealsForDay]
-          .sort((a, b) => {
-            const aTime = String(a.eatenAt || "");
-            const bTime = String(b.eatenAt || "");
-
-            return bTime.localeCompare(aTime);
-          })
-          .map((meal, index) => (
-            <DailyMealCard
-              key={meal.id}
-              meal={meal}
-              index={index}
-              products={products}
-              onDelete={deleteMealFromDay}
-              onUpdateTime={updateMealTime}
-              onUpdateMedicalLog={updateMealMedicalLog}
-              buttonStyle={buttonStyle}
-            />
-          ))}
+        <DailyMealList
+          mealsForDay={mealsForDay}
+          selectedDay={selectedDay}
+          products={products}
+          deleteMealFromDay={deleteMealFromDay}
+          updateMealTime={updateMealTime}
+          updateMealMedicalLog={updateMealMedicalLog}
+          buttonStyle={buttonStyle}
+        />
       </div>
     </div>
   );
