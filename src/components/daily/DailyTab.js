@@ -212,9 +212,6 @@ export function DailyTab({
               const units = window.prompt("Aantal eenheden insuline:", "");
               if (units === null) return;
 
-              const insulinType = window.prompt("Type insuline:", "Novorapid");
-              if (insulinType === null) return;
-
               const note = window.prompt(
                 "Reden/notitie:",
                 "bijv. dageraadfenomeen / correctie / voor ontbijt",
@@ -225,7 +222,7 @@ export function DailyTab({
                 date: selectedDate,
                 eventTime: `${selectedDate}T${time}`,
                 units,
-                insulinType,
+                insulinType: "Novorapid",
                 note,
               });
             }}

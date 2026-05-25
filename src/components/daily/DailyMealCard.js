@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { DailyMealMedicalLogBlock } from "./DailyMealMedicalLogBlock";
 import { DailyMealActions } from "./DailyMealActions";
 
@@ -11,6 +11,8 @@ export function DailyMealCard({
   onUpdateMedicalLog,
   buttonStyle,
 }) {
+  const [showDetails, setShowDetails] = useState(false);
+
   const momentLabelMap = {
     breakfast: "Ontbijt",
     lunch: "Lunch",
@@ -47,24 +49,6 @@ export function DailyMealCard({
     );
     if (mealNote === null) return;
 
-    const actualInsulin = window.prompt(
-      "Werkelijk gespoten insuline (E):",
-      meal.actualInsulin || "",
-    );
-    if (actualInsulin === null) return;
-
-    const insulinType = window.prompt(
-      "Type insuline:",
-      meal.insulinType || "Novorapid",
-    );
-    if (insulinType === null) return;
-
-    const insulinTime = window.prompt(
-      "Tijd insuline (HH:mm):",
-      meal.insulinTime || "",
-    );
-    if (insulinTime === null) return;
-
     const actualCreon25 = window.prompt(
       "Werkelijk genomen Creon 25k:",
       meal.actualCreon25 || "",
@@ -85,9 +69,6 @@ export function DailyMealCard({
 
     onUpdateMedicalLog(meal.id, {
       mealNote,
-      actualInsulin,
-      insulinType,
-      insulinTime,
       actualCreon25,
       actualCreon10,
       creonTime,
@@ -104,7 +85,7 @@ export function DailyMealCard({
         background: "#f8fafc",
       }}
     >
-      {/* Kopregel maaltijd/snack */}
+      {/* Kopregel eetmoment */}
       <div
         style={{
           display: "grid",
@@ -114,6 +95,7 @@ export function DailyMealCard({
         }}
       >
         <div>
+          {/* Titel + belangrijke contextnotitie */}
           <div
             style={{
               fontWeight: 900,
@@ -125,17 +107,14 @@ export function DailyMealCard({
             {mealMomentLabel}
 
             {meal.mealNote ? (
-              <span
-                style={{
-                  color: "#166534",
-                  fontWeight: 700,
-                }}
-              >
+              <span style={{ color: "#166534", fontWeight: 700 }}>
                 {" "}
                 – {meal.mealNote}
               </span>
             ) : null}
           </div>
+
+          {/* Eet/planningstijd */}
           <div style={{ fontSize: 11, color: "#64748b" }}>
             {meal.eatenAt
               ? new Date(meal.eatenAt).toLocaleString("nl-NL", {
@@ -149,6 +128,7 @@ export function DailyMealCard({
           </div>
         </div>
 
+        {/* Actieknoppen */}
         <DailyMealActions
           changeMealTime={changeMealTime}
           changeMedicalLog={changeMedicalLog}
@@ -205,6 +185,82 @@ export function DailyMealCard({
           .join(" · ")}
       </div>
 
+      {/* Detailknop */}
+      <button
+        onClick={() => setShowDetails((v) => !v)}
+        style={{
+          ...buttonStyle,
+          marginTop: 8,
+          padding: "6px 9px",
+          fontSize: 12,
+          borderRadius: 10,
+          background: "#fff",
+          border: "1px solid #cbd5e1",
+          color: "#334155",
+        }}
+      >
+        {showDetails ? "Details sluiten" : "Details bekijken"}
+      </button>
+
+      {/* Uitklapbare maaltijdanalyse */}
+      {showDetails && (
+        <div
+          style={{
+            marginTop: 8,
+            padding: "9px 10px",
+            borderRadius: 12,
+            background: "white",
+            border: "1px solid #e2e8f0",
+            fontSize: 12,
+            color: "#334155",
+            display: "grid",
+            gap: 8,
+          }}
+        >
+          {/* Detailregels per product */}
+          {(meal.rows || [])
+            .filter((row) => row.productId)
+            .map((row) => {
+              const product = products.find((p) => p.id === row.productId);
+
+              return (
+                <div
+                  key={row.id}
+                  style={{
+                    borderBottom: "1px solid #e2e8f0",
+                    paddingBottom: 6,
+                  }}
+                >
+                  <div style={{ fontWeight: 800, color: "#0f172a" }}>
+                    {product?.name || "Onbekend product"}
+                  </div>
+
+                  <div style={{ marginTop: 3 }}>
+                    Hoeveelheid: {row.amount}{" "}
+                    {row.mode === "gram" ? "gram" : "portie(s)"} · Berekend:{" "}
+                    {row.grams || 0} g
+                  </div>
+
+                  <div style={{ marginTop: 3 }}>
+                    KH {row.kh || 0} g · Eiwit {row.protein || 0} g · Vet{" "}
+                    {row.fat || 0} g · Kcal {row.kcal || 0}
+                  </div>
+
+                  {product && (
+                    <div style={{ marginTop: 3, color: "#64748b" }}>
+                      GI: {product.giClass || "onbekend"}
+                      {product.giValue ? ` (${product.giValue})` : ""} · Timing:{" "}
+                      {product.timingTag || "onbekend"} · Absorptie:{" "}
+                      {product.absorptionProfile || "onbekend"}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+        </div>
+      )}
+
+      {/* Werkelijke Creon/log bij dit eetmoment */}
       <DailyMealMedicalLogBlock meal={meal} />
     </div>
   );

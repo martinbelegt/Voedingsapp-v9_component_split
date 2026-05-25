@@ -86,6 +86,55 @@ export function SettingsTab({
                 Insuline
               </div>
 
+              {/* Insulineprofiel: langwerkend en kortwerkend */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                  gap: 12,
+                  marginBottom: 12,
+                }}
+              >
+                {/* Langwerkende / basale insuline */}
+                <div>
+                  <label style={labelStyle}>Langwerkende insuline</label>
+                  <input
+                    value={settings.basalInsulinName || ""}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        basalInsulinName: e.target.value,
+                      })
+                    }
+                    style={inputStyle}
+                    placeholder="bijv. Tresiba"
+                  />
+                  <div style={helperStyle}>
+                    Basale insuline. Deze telt niet mee in de KH-insulinecheck.
+                  </div>
+                </div>
+
+                {/* Kortwerkende / bolus-insuline */}
+                <div>
+                  <label style={labelStyle}>Kortwerkende insuline</label>
+                  <input
+                    value={settings.bolusInsulinName || ""}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        bolusInsulinName: e.target.value,
+                      })
+                    }
+                    style={inputStyle}
+                    placeholder="bijv. Novorapid"
+                  />
+                  <div style={helperStyle}>
+                    Maaltijd/correctie-insuline. Deze wordt gebruikt bij KH per
+                    1E.
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <label style={labelStyle}>Gram KH per 1E insuline</label>
                 <input

@@ -1,5 +1,9 @@
 export const defaultSettings = {
   settingsVersion: 2,
+
+  basalInsulinName: "Tresiba",
+  bolusInsulinName: "Novorapid",
+
   gramsKhPerUnit: "8",
 
   useCreon35000: true,
