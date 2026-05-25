@@ -10,7 +10,15 @@ export function DailyTotalsCard({
   proteinGoal,
   proteinMealGoal,
   dayTotals,
+  settings,
 }) {
+  const gramsKhPerUnit = Number(settings?.gramsKhPerUnit) || 0;
+  const calculatedInsulinFromKh =
+    gramsKhPerUnit > 0 ? dayTotals.kh / gramsKhPerUnit : 0;
+
+  const insulinDifference =
+    Number(dayTotals.insulin || 0) - calculatedInsulinFromKh;
+
   return (
     <div
       style={{
@@ -40,6 +48,7 @@ export function DailyTotalsCard({
         </div>
       </div>
 
+      {/* Hintblok met uitleg + persoonlijke doelen */}
       <div
         style={{
           fontSize: 13,
@@ -53,8 +62,10 @@ export function DailyTotalsCard({
           padding: "7px 9px",
         }}
       >
+        {/* Algemene daghint */}
         {dayTotalHint}
 
+        {/* Persoonlijke doelenregel */}
         <div
           style={{
             marginTop: 6,
@@ -66,6 +77,25 @@ export function DailyTotalsCard({
           Onderhoud {maintenanceKcal} kcal · Dagdoel {targetKcal} kcal ·
           Eiwitdoel {proteinGoal} g · Min maaltijd {proteinMealGoal} g
         </div>
+
+        {/* Controle KH ↔ insulineverhouding */}
+        {gramsKhPerUnit > 0 && (
+          <div
+            style={{
+              marginTop: 6,
+              paddingTop: 6,
+              borderTop: "1px solid #bbf7d0",
+              fontSize: 13,
+              fontWeight: 900,
+              color: "#14532d",
+            }}
+          >
+            Insulinecheck: KH {dayTotals.kh} g ÷ {gramsKhPerUnit} ={" "}
+            {calculatedInsulinFromKh.toFixed(2)} E · werkelijk{" "}
+            {Number(dayTotals.insulin || 0).toFixed(2)} E · verschil{" "}
+            {insulinDifference.toFixed(2)} E
+          </div>
+        )}
       </div>
 
       <div

@@ -148,6 +148,7 @@ export function DailyTab({
         proteinGoal={proteinGoal}
         proteinMealGoal={proteinMealGoal}
         dayTotals={dayTotals}
+        settings={settings}
       />
       {/* Maaltijden/snacks van deze dag */}
       <div
