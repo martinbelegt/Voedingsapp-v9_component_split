@@ -36,7 +36,7 @@ export function DailyMealActions({
           color: "#166534",
         }}
       >
-        Log wijzigen
+        Context wijzigen
       </button>
 
       <button

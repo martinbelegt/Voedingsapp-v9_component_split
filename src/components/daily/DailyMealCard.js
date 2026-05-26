@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DailyMealMedicalLogBlock } from "./DailyMealMedicalLogBlock";
 import { DailyMealActions } from "./DailyMealActions";
 
@@ -12,6 +12,23 @@ export function DailyMealCard({
   buttonStyle,
 }) {
   const [showDetails, setShowDetails] = useState(false);
+
+  // ESC sluit detailvenster
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === "Escape") {
+        setShowDetails(false);
+      }
+    }
+
+    if (showDetails) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showDetails]);
 
   const momentLabelMap = {
     breakfast: "Ontbijt",
@@ -47,31 +64,11 @@ export function DailyMealCard({
       "Contextnotitie bij dit eetmoment:",
       meal.mealNote || "",
     );
+
     if (mealNote === null) return;
-
-    const actualCreon25 = window.prompt(
-      "Werkelijk genomen Creon 25k:",
-      meal.actualCreon25 || "",
-    );
-    if (actualCreon25 === null) return;
-
-    const actualCreon10 = window.prompt(
-      "Werkelijk genomen Creon 10k:",
-      meal.actualCreon10 || "",
-    );
-    if (actualCreon10 === null) return;
-
-    const creonTime = window.prompt(
-      "Tijd Creon (HH:mm):",
-      meal.creonTime || "",
-    );
-    if (creonTime === null) return;
 
     onUpdateMedicalLog(meal.id, {
       mealNote,
-      actualCreon25,
-      actualCreon10,
-      creonTime,
     });
   }
 
@@ -95,7 +92,7 @@ export function DailyMealCard({
           borderRadius: 12,
           padding: "8px 10px",
           marginBottom: 8,
-          background: "#f8fafc",
+          background: "#f1f5f9",
           cursor: "pointer",
         }}
         title="Klik om maaltijdanalyse te openen"
@@ -155,6 +152,7 @@ export function DailyMealCard({
             marginTop: 7,
             fontSize: 12,
             color: "#334155",
+            fontWeight: 600,
           }}
         >
           <span>
@@ -254,7 +252,7 @@ export function DailyMealCard({
                   ) : null}
                 </div>
 
-                <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
+                <div style={{ fontSize: 12, color: "#334155", marginTop: 4 }}>
                   {mealTimeLabel}
                 </div>
               </div>
@@ -266,8 +264,8 @@ export function DailyMealCard({
                   padding: "7px 11px",
                   fontSize: 12,
                   borderRadius: 10,
-                  background: "white",
-                  border: "1px solid #cbd5e1",
+                  background: "#eff6ff",
+                  border: "1px solid #bfdbfe",
                 }}
               >
                 Sluiten
@@ -364,7 +362,8 @@ export function DailyMealCard({
                           border: "1px solid #e2e8f0",
                           borderRadius: 12,
                           padding: 10,
-                          background: "#f8fafc",
+                          background: "#ffffff",
+                          borderLeft: "5px solid #93c5fd",
                           fontSize: 13,
                         }}
                       >
@@ -384,11 +383,54 @@ export function DailyMealCard({
                         </div>
 
                         {product && (
-                          <div style={{ marginTop: 4, color: "#64748b" }}>
-                            GI: {product.giClass || "onbekend"}
-                            {product.giValue ? ` (${product.giValue})` : ""} ·
-                            Timing: {product.timingTag || "onbekend"} ·
-                            Absorptie: {product.absorptionProfile || "onbekend"}
+                          <div
+                            style={{
+                              marginTop: 6,
+                              display: "flex",
+                              flexWrap: "wrap",
+                              gap: 6,
+                            }}
+                          >
+                            <span
+                              style={{
+                                background: "#dcfce7",
+                                color: "#166534",
+                                padding: "3px 8px",
+                                borderRadius: 999,
+                                fontWeight: 700,
+                                fontSize: 11,
+                              }}
+                            >
+                              GI: {product.giClass || "onbekend"}
+                              {product.giValue ? ` (${product.giValue})` : ""}
+                            </span>
+
+                            <span
+                              style={{
+                                background: "#ede9fe",
+                                color: "#5b21b6",
+                                padding: "3px 8px",
+                                borderRadius: 999,
+                                fontWeight: 700,
+                                fontSize: 11,
+                              }}
+                            >
+                              Timing: {product.timingTag || "onbekend"}
+                            </span>
+
+                            <span
+                              style={{
+                                background: "#fef3c7",
+                                color: "#92400e",
+                                padding: "3px 8px",
+                                borderRadius: 999,
+                                fontWeight: 700,
+                                fontSize: 11,
+                              }}
+                            >
+                              Absorptie:{" "}
+                              {product.absorptionProfile || "onbekend"}
+                            </span>
                           </div>
                         )}
                       </div>
