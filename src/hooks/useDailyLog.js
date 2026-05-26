@@ -259,6 +259,74 @@ export function useDailyLog(selectedDate) {
     );
   }
 
+  // Glucosemoment toevoegen
+  function addGlucoseEventToDay(input) {
+    const eventEntry = {
+      id: createId("glucose-event"),
+      type: "glucose",
+      eventTime: input.eventTime || new Date().toISOString(),
+      glucoseValue: input.glucoseValue || "",
+      note: input.note || "",
+      createdAt: new Date().toLocaleString("nl-NL"),
+    };
+
+    setDailyLog((prev) => {
+      const existingDay = prev.find((d) => d.date === input.date);
+
+      if (existingDay) {
+        return prev.map((d) =>
+          d.date === input.date
+            ? { ...d, glucoseEvents: [...(d.glucoseEvents || []), eventEntry] }
+            : d,
+        );
+      }
+
+      return [
+        ...prev,
+        {
+          date: input.date,
+          meals: [],
+          insulinEvents: [],
+          glucoseEvents: [eventEntry],
+        },
+      ].sort((a, b) =>
+        String(b?.date || "").localeCompare(String(a?.date || "")),
+      );
+    });
+  }
+
+  // Glucosemoment wijzigen
+  function updateGlucoseEvent(eventId, updates) {
+    setDailyLog((prev) =>
+      prev.map((day) =>
+        day.date === selectedDate
+          ? {
+              ...day,
+              glucoseEvents: (day.glucoseEvents || []).map((event) =>
+                event.id === eventId ? { ...event, ...updates } : event,
+              ),
+            }
+          : day,
+      ),
+    );
+  }
+
+  // Glucosemoment verwijderen
+  function deleteGlucoseEvent(eventId) {
+    setDailyLog((prev) =>
+      prev.map((day) =>
+        day.date === selectedDate
+          ? {
+              ...day,
+              glucoseEvents: (day.glucoseEvents || []).filter(
+                (event) => event.id !== eventId,
+              ),
+            }
+          : day,
+      ),
+    );
+  }
+
   function clearDailyLog() {
     setDailyLog((prev) => prev.filter((day) => day.date !== selectedDate));
   }
@@ -277,5 +345,8 @@ export function useDailyLog(selectedDate) {
     addInsulinEventToDay,
     updateInsulinEvent,
     deleteInsulinEvent,
+    addGlucoseEventToDay,
+    updateGlucoseEvent,
+    deleteGlucoseEvent,
   };
 }

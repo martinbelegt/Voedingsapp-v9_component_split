@@ -765,6 +765,9 @@ export default function App() {
     addInsulinEventToDay,
     updateInsulinEvent,
     deleteInsulinEvent,
+    addGlucoseEventToDay,
+    updateGlucoseEvent,
+    deleteGlucoseEvent,
   } = useDailyLog(selectedDate);
 
   const {
@@ -1956,6 +1959,9 @@ Producten uit deze categorie gaan naar "Overig".`);
             addInsulinEventToDay={addInsulinEventToDay}
             updateInsulinEvent={updateInsulinEvent}
             deleteInsulinEvent={deleteInsulinEvent}
+            addGlucoseEventToDay={addGlucoseEventToDay}
+            updateGlucoseEvent={updateGlucoseEvent}
+            deleteGlucoseEvent={deleteGlucoseEvent}
           />
         )}
       </div>

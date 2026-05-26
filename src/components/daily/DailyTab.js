@@ -21,10 +21,15 @@ export function DailyTab({
   addInsulinEventToDay,
   updateInsulinEvent,
   deleteInsulinEvent,
+  addGlucoseEventToDay,
+  updateGlucoseEvent,
+  deleteGlucoseEvent,
 }) {
   const mealsForDay = selectedDay?.meals || [];
 
   const insulinEventsForDay = selectedDay?.insulinEvents || [];
+
+  const glucoseEventsForDay = selectedDay?.glucoseEvents || [];
 
   const dailyTargets = settings?.dailyTargets || {};
 
@@ -174,7 +179,7 @@ export function DailyTab({
           }}
         >
           <div>
-            <h2 style={{ margin: 0 }}>Eetmomenten van deze dag</h2>
+            <h2 style={{ margin: 0 }}>Tijdlijn van deze dag</h2>
             <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
               {mealsForDay.length} item(s), nieuwste bovenaan
             </div>
@@ -235,6 +240,39 @@ export function DailyTab({
           >
             + Insuline
           </button>
+          <button
+            onClick={() => {
+              const time = window.prompt(
+                "Tijd glucosemeting (HH:mm)",
+                new Date().toTimeString().slice(0, 5),
+              );
+              if (!time) return;
+
+              const glucoseValue = window.prompt("Glucosewaarde (mmol/L):", "");
+              if (glucoseValue === null) return;
+
+              const note = window.prompt(
+                "Notitie:",
+                "bijv. 1 uur na ontbijt / nuchter / voor sport",
+              );
+              if (note === null) return;
+
+              addGlucoseEventToDay({
+                date: selectedDate,
+                eventTime: `${selectedDate}T${time}`,
+                glucoseValue,
+                note,
+              });
+            }}
+            style={{
+              ...buttonStyle,
+              background: "#f0f9ff",
+              border: "1px solid #bae6fd",
+              color: "#0369a1",
+            }}
+          >
+            + Glucose
+          </button>
         </div>
 
         <DailyMealList
@@ -247,6 +285,9 @@ export function DailyTab({
           insulinEventsForDay={insulinEventsForDay}
           updateInsulinEvent={updateInsulinEvent}
           deleteInsulinEvent={deleteInsulinEvent}
+          glucoseEventsForDay={glucoseEventsForDay}
+          updateGlucoseEvent={updateGlucoseEvent}
+          deleteGlucoseEvent={deleteGlucoseEvent}
           buttonStyle={buttonStyle}
         />
       </div>
