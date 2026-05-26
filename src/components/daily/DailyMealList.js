@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { DailyMealCard } from "./DailyMealCard";
+import { DailyTimelineItem } from "./DailyTimelineItem";
 
 export function DailyMealList({
   mealsForDay = [],
@@ -16,6 +17,44 @@ export function DailyMealList({
   deleteGlucoseEvent,
   buttonStyle,
 }) {
+  const timelineItems = [
+    ...mealsForDay.map((meal) => ({
+      id: meal.id,
+      itemType: "meal",
+      time: meal.eatenAt || "",
+      meal,
+    })),
+    ...insulinEventsForDay.map((event) => ({
+      id: event.id,
+      itemType: "insulin",
+      time: event.eventTime || "",
+      event,
+    })),
+    ...glucoseEventsForDay.map((event) => ({
+      id: event.id,
+      itemType: "glucose",
+      time: event.eventTime || "",
+      event,
+    })),
+  ].sort((a, b) => String(b.time || "").localeCompare(String(a.time || "")));
+
+  const [expandedIds, setExpandedIds] = useState([]);
+
+  function toggleExpanded(id) {
+    setExpandedIds((prev) =>
+      prev.includes(id)
+        ? prev.filter((itemId) => itemId !== id)
+        : [...prev, id],
+    );
+  }
+
+  function expandAll() {
+    setExpandedIds(timelineItems.map((item) => item.id));
+  }
+
+  function collapseAll() {
+    setExpandedIds([]);
+  }
   if (!selectedDay) {
     return (
       <div style={{ color: "#64748b" }}>
@@ -24,26 +63,26 @@ export function DailyMealList({
     );
   }
 
-  const timelineItems = [
-    ...mealsForDay.map((meal) => ({
-      itemType: "meal",
-      time: meal.eatenAt || "",
-      meal,
-    })),
-    ...insulinEventsForDay.map((event) => ({
-      itemType: "insulin",
-      time: event.eventTime || "",
-      event,
-    })),
-    ...glucoseEventsForDay.map((event) => ({
-      itemType: "glucose",
-      time: event.eventTime || "",
-      event,
-    })),
-  ].sort((a, b) => String(b.time || "").localeCompare(String(a.time || "")));
-
   return (
     <>
+      {/* Tijdlijnbediening */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          gap: 8,
+          marginBottom: 8,
+        }}
+      >
+        <button onClick={expandAll} style={buttonStyle}>
+          Alles uitklappen
+        </button>
+
+        <button onClick={collapseAll} style={buttonStyle}>
+          Alles inklappen
+        </button>
+      </div>
+
       {/* Chronologische tijdlijn: eetmomenten + insuline-events */}
       {timelineItems.map((item, index) => {
         if (item.itemType === "meal") {
@@ -65,42 +104,21 @@ export function DailyMealList({
           const event = item.event;
 
           return (
-            <div
+            <DailyTimelineItem
               key={event.id}
-              style={{
-                marginBottom: 7,
-                marginLeft: 10,
-                marginRight: 10,
-                padding: "7px 10px",
-                borderRadius: 999,
-                background: "#e0e7ff",
-                border: "1px solid #a5b4fc",
-                color: "#312e81",
-                fontSize: 13,
-                fontWeight: 700,
-                boxShadow: "0 1px 3px rgba(49, 46, 129, 0.08)",
-              }}
-            >
-              {/* Compact insuline-event in de tijdlijn */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr auto",
-                  gap: 8,
-                  alignItems: "center",
-                }}
-              >
-                <div>
-                  <strong>💉 Insuline</strong> ·{" "}
-                  {new Date(event.eventTime).toLocaleString("nl-NL", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}{" "}
-                  · {event.insulinType} {event.units}E
-                  {event.note ? ` · ${event.note}` : ""}
-                </div>
-
-                <div style={{ display: "flex", gap: 6 }}>
+              expanded={expandedIds.includes(event.id)}
+              onToggle={() => toggleExpanded(event.id)}
+              icon="💉"
+              title={`${event.insulinType} ${event.units}E`}
+              subtitle={`${new Date(event.eventTime).toLocaleString("nl-NL", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}${event.note ? ` · ${event.note}` : ""}`}
+              accentColor="#312e81"
+              backgroundColor="#eef2ff"
+              borderColor="#c7d2fe"
+              actions={
+                <>
                   <button
                     onClick={() => {
                       const units = window.prompt(
@@ -154,60 +172,51 @@ export function DailyMealList({
                   >
                     Verwijder
                   </button>
+                </>
+              }
+              detailContent={
+                <div style={{ fontSize: 13, color: "#334155" }}>
+                  Werkelijk toegediende insuline.
+                  {event.note ? (
+                    <div style={{ marginTop: 6 }}>
+                      <strong>Context:</strong> {event.note}
+                    </div>
+                  ) : null}
                 </div>
-              </div>
-            </div>
+              }
+            />
           );
         }
         if (item.itemType === "glucose") {
           const event = item.event;
 
           return (
-            <div
+            <DailyTimelineItem
               key={event.id}
-              style={{
-                marginBottom: 7,
-                marginLeft: 10,
-                marginRight: 10,
-                padding: "7px 10px",
-                borderRadius: 999,
-                background: "#e0f2fe",
-                border: "1px solid #7dd3fc",
-                color: "#075985",
-                fontSize: 13,
-                fontWeight: 700,
-                boxShadow: "0 1px 3px rgba(7, 89, 133, 0.08)",
-              }}
-            >
-              {/* Compact glucose-event in de tijdlijn */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr auto",
-                  gap: 8,
-                  alignItems: "center",
-                }}
-              >
-                <div>
-                  <strong>📈 Glucose</strong> ·{" "}
-                  {new Date(event.eventTime).toLocaleString("nl-NL", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}{" "}
-                  · {event.glucoseValue} mmol/L
-                  {event.note ? ` · ${event.note}` : ""}
-                </div>
-
-                <div style={{ display: "flex", gap: 6 }}>
+              expanded={expandedIds.includes(event.id)}
+              onToggle={() => toggleExpanded(event.id)}
+              icon="📈"
+              title={`${event.glucoseValue} mmol/L`}
+              subtitle={`${new Date(event.eventTime).toLocaleString("nl-NL", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}${event.note ? ` · ${event.note}` : ""}`}
+              accentColor="#075985"
+              backgroundColor="#f0f9ff"
+              borderColor="#7dd3fc"
+              actions={
+                <>
                   <button
                     onClick={() => {
                       const glucoseValue = window.prompt(
                         "Glucosewaarde (mmol/L):",
                         event.glucoseValue || "",
                       );
+
                       if (glucoseValue === null) return;
 
                       const note = window.prompt("Notitie:", event.note || "");
+
                       if (note === null) return;
 
                       updateGlucoseEvent(event.id, {
@@ -233,6 +242,7 @@ export function DailyMealList({
                       const ok = window.confirm(
                         "Dit glucosemoment verwijderen?",
                       );
+
                       if (!ok) return;
 
                       deleteGlucoseEvent(event.id);
@@ -249,9 +259,19 @@ export function DailyMealList({
                   >
                     Verwijder
                   </button>
+                </>
+              }
+              detailContent={
+                <div style={{ fontSize: 13, color: "#334155" }}>
+                  Glucosemeting opgeslagen in metabole tijdlijn.
+                  {event.note ? (
+                    <div style={{ marginTop: 6 }}>
+                      <strong>Context:</strong> {event.note}
+                    </div>
+                  ) : null}
                 </div>
-              </div>
-            </div>
+              }
+            />
           );
         }
 

@@ -184,6 +184,33 @@ export function DailyMealDetailModal({
               .map((row) => {
                 const product = products.find((p) => p.id === row.productId);
 
+                const amount = Number(row.amount) || 0;
+                const grams =
+                  row.mode === "gram"
+                    ? amount
+                    : amount * (Number(product?.portionGram) || 0);
+
+                const kh = product
+                  ? Math.round(
+                      (((Number(product.kh100) || 0) * grams) / 100) * 100,
+                    ) / 100
+                  : 0;
+                const protein = product
+                  ? Math.round(
+                      (((Number(product.protein100) || 0) * grams) / 100) * 100,
+                    ) / 100
+                  : 0;
+                const fat = product
+                  ? Math.round(
+                      (((Number(product.fat100) || 0) * grams) / 100) * 100,
+                    ) / 100
+                  : 0;
+                const kcal = product
+                  ? Math.round(
+                      (((Number(product.kcal100) || 0) * grams) / 100) * 100,
+                    ) / 100
+                  : 0;
+
                 return (
                   <div
                     key={row.id}
@@ -203,12 +230,11 @@ export function DailyMealDetailModal({
                     <div style={{ marginTop: 4, color: "#334155" }}>
                       Hoeveelheid: {row.amount}{" "}
                       {row.mode === "gram" ? "gram" : "portie(s)"} · Berekend:{" "}
-                      {row.grams || 0} g
+                      {grams} g
                     </div>
 
                     <div style={{ marginTop: 4, color: "#334155" }}>
-                      KH {row.kh || 0} g · Eiwit {row.protein || 0} g · Vet{" "}
-                      {row.fat || 0} g · Kcal {row.kcal || 0}
+                      KH {kh} g · Eiwit {protein} g · Vet {fat} g · Kcal {kcal}
                     </div>
 
                     {product && (
