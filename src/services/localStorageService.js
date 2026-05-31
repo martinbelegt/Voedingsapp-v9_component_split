@@ -1,3 +1,4 @@
+import { supabase } from "./supabaseClient";
 import { starterProducts, krachtsportProducts } from "../data/starterProducts";
 import { starterCategories } from "../data/starterCategories";
 
@@ -109,4 +110,48 @@ export function saveDailyLog(dailyLog) {
   localStorage.setItem(STORAGE_KEYS.dailyLog, JSON.stringify(dailyLog));
 }
 
+export async function loadDailyLogFromCloud() {
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("daily_logs")
+    .select("*")
+    .eq("date", "main")
+    .maybeSingle();
+
+  if (error) {
+    console.error("loadDailyLogFromCloud error:", error);
+    return null;
+  }
+
+  return data?.data || null;
+}
+
+export async function saveDailyLogToCloud(dailyLog) {
+  if (!supabase) return false;
+
+  const { data, error } = await supabase
+    .from("daily_logs")
+    .upsert(
+      {
+        date: "main",
+        data: dailyLog,
+        updated_at: new Date().toISOString(),
+      },
+      {
+        onConflict: "date",
+      },
+    )
+    .select();
+
+  console.log("saveDailyLogToCloud data:", data);
+  console.log("saveDailyLogToCloud error:", error);
+
+  if (error) {
+    console.error("saveDailyLogToCloud error:", error);
+    return false;
+  }
+
+  return true;
+}
 export { STORAGE_KEYS };

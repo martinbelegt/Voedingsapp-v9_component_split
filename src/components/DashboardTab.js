@@ -30,7 +30,7 @@ export function DashboardTab(props) {
 
   return (
     <>
-      {/* Bovenste dashboardblok: totalen, timers en snelle acties */}
+      {/* Bovenste dashboardblok: totalen, timers, filter en snelle acties */}
       <div
         style={{
           display: "grid",
@@ -54,6 +54,13 @@ export function DashboardTab(props) {
           primaryButtonStyle={primaryButtonStyle}
           inputStyle={inputStyle}
           labelStyle={labelStyle}
+        />
+
+        {/* Categoriefilter voor de productlijst */}
+        <CategoryFilterSection
+          {...categoryFilterProps}
+          cardStyle={cardStyle}
+          buttonStyle={buttonStyle}
         />
 
         {/* Opgeslagen maaltijden */}
@@ -87,18 +94,12 @@ export function DashboardTab(props) {
         />
       </div>
 
-      {/* Onderste dashboardblok: categoriefilter en maaltijdregels */}
+      {/* Onderste dashboardblok: maaltijdregels */}
       <div style={{ display: "grid", gap: 16 }}>
-        {/* Categoriefilter voor de productlijst */}
-        <CategoryFilterSection
-          {...categoryFilterProps}
-          cardStyle={cardStyle}
-          buttonStyle={buttonStyle}
-        />
-
         {/* Huidige maaltijdregels */}
         <MealRowsSection
           {...mealRowsProps}
+          {...quickAddProps}
           categories={categories}
           cardStyle={cardStyle}
           buttonStyle={buttonStyle}

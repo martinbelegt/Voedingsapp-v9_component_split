@@ -1,7 +1,7 @@
-import React from "react";
-import { DailyMealCard } from "./DailyMealCard";
+import React, { useEffect, useState } from "react";
 import { DailyTotalsCard } from "./DailyTotalsCard";
 import { DailyMealList } from "./DailyMealList";
+import { DailyEventAddModal } from "./DailyEventAddModal";
 
 export function DailyTab({
   settings,
@@ -24,21 +24,38 @@ export function DailyTab({
   addGlucoseEventToDay,
   updateGlucoseEvent,
   deleteGlucoseEvent,
+  addGlucoseBoostEventToDay,
+  updateGlucoseBoostEvent,
+  deleteGlucoseBoostEvent,
+  addMovementEventToDay,
+  updateMovementEvent,
+  deleteMovementEvent,
+  addBowelEventToDay,
+  updateBowelEvent,
+  deleteBowelEvent,
+  activeTimers = [],
 }) {
+  const [addEventType, setAddEventType] = useState(null);
+
   const mealsForDay = selectedDay?.meals || [];
-
   const insulinEventsForDay = selectedDay?.insulinEvents || [];
-
   const glucoseEventsForDay = selectedDay?.glucoseEvents || [];
+  const glucoseBoostEventsForDay = selectedDay?.glucoseBoostEvents || [];
+  const movementEventsForDay = selectedDay?.movementEvents || [];
+  const bowelEventsForDay = selectedDay?.bowelEvents || [];
+
+  const totalTimelineItems =
+    mealsForDay.length +
+    insulinEventsForDay.length +
+    glucoseEventsForDay.length +
+    glucoseBoostEventsForDay.length +
+    movementEventsForDay.length +
+    bowelEventsForDay.length;
 
   const dailyTargets = settings?.dailyTargets || {};
-
   const maintenanceKcal = Number(dailyTargets.maintenanceKcal) || 0;
-
   const targetKcal = Number(dailyTargets.targetKcal) || 0;
-
   const proteinGoal = Number(dailyTargets.proteinGoal) || 0;
-
   const proteinMealGoal = Number(dailyTargets.proteinMealGoal) || 0;
 
   const today = new Date().toISOString().slice(0, 10);
@@ -63,6 +80,60 @@ export function DailyTab({
       : dayMode === "Vandaag"
         ? "Gebruik dit totaal om gedurende de dag bij te sturen."
         : "Terugblik op deze dag.";
+
+  function saveAddedEvent({ eventType, eventTime, value1, value2, value3 }) {
+    const date = eventTime.slice(0, 10);
+
+    if (eventType === "insulin") {
+      addInsulinEventToDay({
+        date,
+        eventTime,
+        units: value1,
+        insulinType: "Novorapid",
+        note: value2,
+      });
+    }
+
+    if (eventType === "glucose") {
+      addGlucoseEventToDay({
+        date,
+        eventTime,
+        glucoseValue: value1,
+        note: value2,
+      });
+    }
+
+    if (eventType === "glucoseBoost") {
+      addGlucoseBoostEventToDay({
+        date,
+        eventTime,
+        kh: value1,
+        source: value2,
+        note: value3,
+      });
+    }
+
+    if (eventType === "movement") {
+      addMovementEventToDay({
+        date,
+        eventTime,
+        activityType: value1,
+        intensityType: value2,
+        durationMinutes: value3,
+        note: "",
+      });
+    }
+
+    if (eventType === "bowel") {
+      addBowelEventToDay({
+        date,
+        eventTime,
+        bristolScore: value1,
+        urgency: value2,
+        note: value3,
+      });
+    }
+  }
 
   return (
     <div style={{ display: "grid", gap: 14, marginTop: 16 }}>
@@ -148,6 +219,7 @@ export function DailyTab({
         </div>
       </div>
 
+      {/* Dagtotaal */}
       <DailyTotalsCard
         cardStyle={cardStyle}
         dayTotalTitle={dayTotalTitle}
@@ -160,7 +232,8 @@ export function DailyTab({
         dayTotals={dayTotals}
         settings={settings}
       />
-      {/* Maaltijden/snacks van deze dag */}
+
+      {/* Tijdlijn van deze dag */}
       <div
         style={{
           ...cardStyle,
@@ -168,113 +241,134 @@ export function DailyTab({
           border: "1px solid #cbd5e1",
         }}
       >
+        {/* Tijdlijnkop + eventknoppen */}
         <div
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 8,
-            flexWrap: "wrap",
+            display: "grid",
+            gap: 12,
             marginBottom: 10,
           }}
         >
-          <div>
-            <h2 style={{ margin: 0 }}>Tijdlijn van deze dag</h2>
-            <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
-              {mealsForDay.length} item(s), nieuwste bovenaan
+          {/* Titel */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 8,
+              flexWrap: "wrap",
+            }}
+          >
+            <div>
+              <h2 style={{ margin: 0 }}>Tijdlijn van deze dag</h2>
+
+              <div
+                style={{
+                  fontSize: 12,
+                  color: "#64748b",
+                  marginTop: 2,
+                }}
+              >
+                {totalTimelineItems} item(s), nieuwste bovenaan
+              </div>
             </div>
+
+            {/* Dag wissen */}
+            <button
+              onClick={() => {
+                if (!selectedDay) return;
+
+                const ok = window.confirm(
+                  `Alle tijdlijnmomenten van ${selectedDate} verwijderen?`,
+                );
+
+                if (!ok) return;
+
+                clearDailyLog();
+              }}
+              style={{
+                ...buttonStyle,
+                background: "#fee2e2",
+                border: "1px solid #fecaca",
+                color: "#991b1b",
+              }}
+            >
+              Wis deze dag
+            </button>
           </div>
 
-          <button
-            onClick={() => {
-              if (!selectedDay || !selectedDay.meals?.length) return;
-
-              const ok = window.confirm(
-                `Alle eetmomenten van ${selectedDate} verwijderen?`,
-              );
-
-              if (!ok) return;
-
-              clearDailyLog();
-            }}
+          {/* Event knoppen */}
+          <div
             style={{
-              ...buttonStyle,
-              background: "#fee2e2",
-              border: "1px solid #fecaca",
-              color: "#991b1b",
+              display: "flex",
+              gap: 8,
+              flexWrap: "wrap",
+              alignItems: "center",
             }}
           >
-            Wis deze dag
-          </button>
-          <button
-            onClick={() => {
-              const time = window.prompt(
-                "Tijd insuline (HH:mm)",
-                new Date().toTimeString().slice(0, 5),
-              );
-              if (!time) return;
+            <button
+              onClick={() => setAddEventType("insulin")}
+              style={{
+                ...buttonStyle,
+                background: "#eef2ff",
+                border: "1px solid #c7d2fe",
+                color: "#3730a3",
+              }}
+            >
+              + Insuline
+            </button>
 
-              const units = window.prompt("Aantal eenheden insuline:", "");
-              if (units === null) return;
+            <button
+              onClick={() => setAddEventType("glucose")}
+              style={{
+                ...buttonStyle,
+                background: "#f0f9ff",
+                border: "1px solid #bae6fd",
+                color: "#0369a1",
+              }}
+            >
+              + Glucose
+            </button>
 
-              const note = window.prompt(
-                "Reden/notitie:",
-                "bijv. dageraadfenomeen / correctie / voor ontbijt",
-              );
-              if (note === null) return;
+            <button
+              onClick={() => setAddEventType("glucoseBoost")}
+              style={{
+                ...buttonStyle,
+                background: "#fff7ed",
+                border: "1px solid #fdba74",
+                color: "#c2410c",
+              }}
+            >
+              ⚡ Glucoseboost
+            </button>
 
-              addInsulinEventToDay({
-                date: selectedDate,
-                eventTime: `${selectedDate}T${time}`,
-                units,
-                insulinType: "Novorapid",
-                note,
-              });
-            }}
-            style={{
-              ...buttonStyle,
-              background: "#eef2ff",
-              border: "1px solid #c7d2fe",
-              color: "#3730a3",
-            }}
-          >
-            + Insuline
-          </button>
-          <button
-            onClick={() => {
-              const time = window.prompt(
-                "Tijd glucosemeting (HH:mm)",
-                new Date().toTimeString().slice(0, 5),
-              );
-              if (!time) return;
+            <button
+              onClick={() => setAddEventType("movement")}
+              style={{
+                ...buttonStyle,
+                background: "#ecfeff",
+                border: "1px solid #67e8f9",
+                color: "#0e7490",
+              }}
+            >
+              + Beweging/sport
+            </button>
 
-              const glucoseValue = window.prompt("Glucosewaarde (mmol/L):", "");
-              if (glucoseValue === null) return;
-
-              const note = window.prompt(
-                "Notitie:",
-                "bijv. 1 uur na ontbijt / nuchter / voor sport",
-              );
-              if (note === null) return;
-
-              addGlucoseEventToDay({
-                date: selectedDate,
-                eventTime: `${selectedDate}T${time}`,
-                glucoseValue,
-                note,
-              });
-            }}
-            style={{
-              ...buttonStyle,
-              background: "#f0f9ff",
-              border: "1px solid #bae6fd",
-              color: "#0369a1",
-            }}
-          >
-            + Glucose
-          </button>
+            <button
+              onClick={() => setAddEventType("bowel")}
+              style={{
+                ...buttonStyle,
+                background: "#fef3c7",
+                border: "1px solid #fcd34d",
+                color: "#92400e",
+              }}
+            >
+              + Stoelgang
+            </button>
+          </div>
         </div>
 
+        {/* Chronologische lijst */}
         <DailyMealList
           mealsForDay={mealsForDay}
           selectedDay={selectedDay}
@@ -288,9 +382,29 @@ export function DailyTab({
           glucoseEventsForDay={glucoseEventsForDay}
           updateGlucoseEvent={updateGlucoseEvent}
           deleteGlucoseEvent={deleteGlucoseEvent}
+          glucoseBoostEventsForDay={glucoseBoostEventsForDay}
+          updateGlucoseBoostEvent={updateGlucoseBoostEvent}
+          deleteGlucoseBoostEvent={deleteGlucoseBoostEvent}
+          movementEventsForDay={movementEventsForDay}
+          updateMovementEvent={updateMovementEvent}
+          deleteMovementEvent={deleteMovementEvent}
+          bowelEventsForDay={bowelEventsForDay}
+          updateBowelEvent={updateBowelEvent}
+          deleteBowelEvent={deleteBowelEvent}
           buttonStyle={buttonStyle}
         />
       </div>
+
+      {/* Uniform event toevoegen */}
+      {addEventType && (
+        <DailyEventAddModal
+          eventType={addEventType}
+          selectedDate={selectedDate}
+          buttonStyle={buttonStyle}
+          onClose={() => setAddEventType(null)}
+          onSave={saveAddedEvent}
+        />
+      )}
     </div>
   );
 }

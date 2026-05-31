@@ -1056,8 +1056,7 @@ function VoedingslijstTab({
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "0.9fr 1fr 1fr 1fr 1fr",
-                    gap: 10,
+                    gap: 14,
                   }}
                 >
                   <div>
@@ -1141,76 +1140,130 @@ function VoedingslijstTab({
                     </select>
                   </div>
 
-                  <div>
-                    <label style={labelStyle}>
-                      {newProduct.inputMode === "per100"
-                        ? "KH / 100 g"
-                        : "KH / portie"}
-                    </label>
-                    <input
-                      value={newProduct.khInput}
-                      onChange={(e) =>
-                        setNewProduct({
-                          ...newProduct,
-                          khInput: e.target.value,
-                        })
-                      }
-                      style={inputStyle}
-                    />
+                  {/* Macro's */}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(4, 1fr)",
+                      gap: 10,
+                    }}
+                  >
+                    <div>
+                      <label style={labelStyle}>
+                        {newProduct.inputMode === "per100"
+                          ? "KH / 100 g"
+                          : "KH / portie"}
+                      </label>
+                      <input
+                        value={newProduct.khInput}
+                        onChange={(e) =>
+                          setNewProduct({
+                            ...newProduct,
+                            khInput: e.target.value,
+                          })
+                        }
+                        style={inputStyle}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={labelStyle}>
+                        {newProduct.inputMode === "per100"
+                          ? "Eiwit / 100 g"
+                          : "Eiwit / portie"}
+                      </label>
+                      <input
+                        value={newProduct.proteinInput}
+                        onChange={(e) =>
+                          setNewProduct({
+                            ...newProduct,
+                            proteinInput: e.target.value,
+                          })
+                        }
+                        style={inputStyle}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={labelStyle}>
+                        {newProduct.inputMode === "per100"
+                          ? "Vet / 100 g"
+                          : "Vet / portie"}
+                      </label>
+                      <input
+                        value={newProduct.fatInput}
+                        onChange={(e) =>
+                          setNewProduct({
+                            ...newProduct,
+                            fatInput: e.target.value,
+                          })
+                        }
+                        style={inputStyle}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={labelStyle}>
+                        {newProduct.inputMode === "per100"
+                          ? "Kcal / 100 g"
+                          : "Kcal / portie"}
+                      </label>
+                      <input
+                        value={newProduct.kcalInput}
+                        onChange={(e) =>
+                          setNewProduct({
+                            ...newProduct,
+                            kcalInput: e.target.value,
+                          })
+                        }
+                        style={inputStyle}
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <label style={labelStyle}>
-                      {newProduct.inputMode === "per100"
-                        ? "Eiwit / 100 g"
-                        : "Eiwit / portie"}
-                    </label>
-                    <input
-                      value={newProduct.proteinInput}
-                      onChange={(e) =>
-                        setNewProduct({
-                          ...newProduct,
-                          proteinInput: e.target.value,
-                        })
-                      }
-                      style={inputStyle}
-                    />
-                  </div>
+                  {/* Vezels en zout */}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: 10,
+                    }}
+                  >
+                    <div>
+                      <label style={labelStyle}>
+                        {newProduct.inputMode === "per100"
+                          ? "Vezels / 100 g"
+                          : "Vezels / portie"}
+                      </label>
+                      <input
+                        value={newProduct.fiberInput || ""}
+                        onChange={(e) =>
+                          setNewProduct({
+                            ...newProduct,
+                            fiberInput: e.target.value,
+                          })
+                        }
+                        style={inputStyle}
+                      />
+                    </div>
 
-                  <div>
-                    <label style={labelStyle}>
-                      {newProduct.inputMode === "per100"
-                        ? "Vet / 100 g"
-                        : "Vet / portie"}
-                    </label>
-                    <input
-                      value={newProduct.fatInput}
-                      onChange={(e) =>
-                        setNewProduct({
-                          ...newProduct,
-                          fatInput: e.target.value,
-                        })
-                      }
-                      style={inputStyle}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={labelStyle}>
-                      {newProduct.inputMode === "per100"
-                        ? "Kcal / 100 g"
-                        : "Kcal / portie"}
-                    </label>
-                    <input
-                      value={newProduct.kcalInput}
-                      onChange={(e) =>
-                        setNewProduct({
-                          ...newProduct,
-                          kcalInput: e.target.value,
-                        })
-                      }
-                      style={inputStyle}
-                    />
+                    <div>
+                      <label style={labelStyle}>
+                        {newProduct.inputMode === "per100"
+                          ? "Zout / 100 g"
+                          : "Zout / portie"}
+                      </label>
+                      <input
+                        value={newProduct.saltInput || ""}
+                        onChange={(e) =>
+                          setNewProduct({
+                            ...newProduct,
+                            saltInput: e.target.value,
+                          })
+                        }
+                        style={inputStyle}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

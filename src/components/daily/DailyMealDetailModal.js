@@ -116,6 +116,7 @@ export function DailyMealDetailModal({
             ["Eiwit", `${meal.totals.protein} g`],
             ["Vet", `${meal.totals.fat} g`],
             ["Kcal", meal.totals.kcal],
+            ["Insuline indicatie", `${meal.totals.insulin || 0} E`],
             [
               "Creon",
               `${meal.totals.creon25 || 0}x25k + ${

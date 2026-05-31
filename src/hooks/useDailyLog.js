@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { createId } from "../services/idService";
-import { loadDailyLog, saveDailyLog } from "../services/localStorageService";
+import {
+  loadDailyLog,
+  saveDailyLog,
+  loadDailyLogFromCloud,
+  saveDailyLogToCloud,
+} from "../services/localStorageService";
 
 function round2(n) {
   return Math.round((n + Number.EPSILON) * 100) / 100;
@@ -22,10 +27,61 @@ function normalizeTotals(totals = {}) {
 
 export function useDailyLog(selectedDate) {
   const [dailyLog, setDailyLog] = useState(() => loadDailyLog());
+  const [cloudLoaded, setCloudLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCloud() {
+      const cloudDailyLog = await loadDailyLogFromCloud();
+
+      console.log("CLOUD RAW:", cloudDailyLog);
+      console.log(
+        "CLOUD DATES:",
+        cloudDailyLog?.map((day) => ({
+          date: day.date,
+          meals: day.meals?.length || 0,
+          insulin: day.insulinEvents?.length || 0,
+          glucose: day.glucoseEvents?.length || 0,
+          movement: day.movementEvents?.length || 0,
+        })),
+      );
+      console.log("SELECTED DATE:", selectedDate);
+      console.log(
+        "CLOUD SELECTED DAY:",
+        cloudDailyLog?.find((day) => day.date === selectedDate),
+      );
+
+      if (cancelled) return;
+
+      if (cloudDailyLog) {
+        setDailyLog(cloudDailyLog);
+      }
+
+      setCloudLoaded(true);
+    }
+
+    loadCloud();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     saveDailyLog(dailyLog);
-  }, [dailyLog]);
+
+    if (!cloudLoaded) return;
+    if (!dailyLog || dailyLog.length === 0) return;
+
+    const timeoutId = setTimeout(() => {
+      saveDailyLogToCloud(dailyLog).then((ok) => {
+        console.log("cloud save result:", ok);
+      });
+    }, 1500);
+
+    return () => clearTimeout(timeoutId);
+  }, [dailyLog, cloudLoaded]);
 
   const selectedDay = useMemo(() => {
     return dailyLog.find((d) => d?.date === selectedDate) || null;
@@ -152,23 +208,75 @@ export function useDailyLog(selectedDate) {
   }
 
   function updateMealTime(mealId, nextEatenAt) {
-    setDailyLog((prev) =>
-      prev.map((day) =>
-        day.date === selectedDate
-          ? {
-              ...day,
-              meals: day.meals.map((meal) =>
-                meal.id === mealId
-                  ? {
-                      ...meal,
-                      eatenAt: nextEatenAt,
-                    }
-                  : meal,
-              ),
-            }
-          : day,
-      ),
-    );
+    const nextDate = String(nextEatenAt || "").slice(0, 10);
+
+    setDailyLog((prev) => {
+      let mealToMove = null;
+
+      // 1. Haal maaltijd uit de oude dag
+      const withoutMeal = prev
+        .map((day) => {
+          const foundMeal = (day.meals || []).find(
+            (meal) => meal.id === mealId,
+          );
+
+          if (!foundMeal) {
+            return day;
+          }
+
+          mealToMove = {
+            ...foundMeal,
+            eatenAt: nextEatenAt,
+          };
+
+          return {
+            ...day,
+            meals: (day.meals || []).filter((meal) => meal.id !== mealId),
+          };
+        })
+        .filter(
+          (day) =>
+            (day.meals || []).length > 0 ||
+            (day.insulinEvents || []).length > 0 ||
+            (day.glucoseEvents || []).length > 0 ||
+            (day.glucoseBoostEvents || []).length > 0 ||
+            (day.movementEvents || []).length > 0,
+        );
+
+      if (!mealToMove || !nextDate) {
+        return prev;
+      }
+
+      // 2. Zet maaltijd in de nieuwe dag
+      const existingTargetDay = withoutMeal.find(
+        (day) => day.date === nextDate,
+      );
+
+      if (existingTargetDay) {
+        return withoutMeal
+          .map((day) =>
+            day.date === nextDate
+              ? {
+                  ...day,
+                  meals: [...(day.meals || []), mealToMove],
+                }
+              : day,
+          )
+          .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+      }
+
+      return [
+        ...withoutMeal,
+        {
+          date: nextDate,
+          meals: [mealToMove],
+          insulinEvents: [],
+          glucoseEvents: [],
+          glucoseBoostEvents: [],
+          movementEvents: [],
+        },
+      ].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+    });
   }
 
   function updateMealMedicalLog(mealId, updates) {
@@ -327,6 +435,300 @@ export function useDailyLog(selectedDate) {
     );
   }
 
+  // Glucoseboost toevoegen
+  function addGlucoseBoostEventToDay(input) {
+    const eventEntry = {
+      id: createId("glucose-boost"),
+      type: "glucoseBoost",
+      eventTime: input.eventTime || new Date().toISOString(),
+      kh: input.kh || "",
+      source: input.source || "",
+      note: input.note || "",
+      createdAt: new Date().toLocaleString("nl-NL"),
+    };
+
+    setDailyLog((prev) => {
+      const existingDay = prev.find((d) => d.date === input.date);
+
+      if (existingDay) {
+        return prev.map((d) =>
+          d.date === input.date
+            ? {
+                ...d,
+                glucoseBoostEvents: [
+                  ...(d.glucoseBoostEvents || []),
+                  eventEntry,
+                ],
+              }
+            : d,
+        );
+      }
+
+      return [
+        ...prev,
+        {
+          date: input.date,
+          meals: [],
+          insulinEvents: [],
+          glucoseEvents: [],
+          glucoseBoostEvents: [eventEntry],
+        },
+      ].sort((a, b) =>
+        String(b?.date || "").localeCompare(String(a?.date || "")),
+      );
+    });
+  }
+
+  // Glucoseboost wijzigen
+  function updateGlucoseBoostEvent(eventId, updates) {
+    setDailyLog((prev) =>
+      prev.map((day) =>
+        day.date === selectedDate
+          ? {
+              ...day,
+              glucoseBoostEvents: (day.glucoseBoostEvents || []).map((event) =>
+                event.id === eventId ? { ...event, ...updates } : event,
+              ),
+            }
+          : day,
+      ),
+    );
+  }
+
+  // Glucoseboost verwijderen
+  function deleteGlucoseBoostEvent(eventId) {
+    setDailyLog((prev) =>
+      prev.map((day) =>
+        day.date === selectedDate
+          ? {
+              ...day,
+              glucoseBoostEvents: (day.glucoseBoostEvents || []).filter(
+                (event) => event.id !== eventId,
+              ),
+            }
+          : day,
+      ),
+    );
+  }
+
+  // Beweging/sport toevoegen
+  function addMovementEventToDay(input) {
+    const eventEntry = {
+      id: createId("movement-event"),
+      type: "movement",
+      eventTime: input.eventTime || new Date().toISOString(),
+      activityType: input.activityType || "Krachttraining",
+      intensityType: input.intensityType || "Gemengd",
+      durationMinutes: input.durationMinutes || "",
+      note: input.note || "",
+      createdAt: new Date().toLocaleString("nl-NL"),
+    };
+
+    function addBowelEventToDay(input) {
+      const eventEntry = {
+        id: createId("bowel-event"),
+        type: "bowel",
+        eventTime: input.eventTime || new Date().toISOString(),
+        bristolScore: input.bristolScore || 4,
+        urgency: input.urgency || "",
+        note: input.note || "",
+        createdAt: new Date().toLocaleString("nl-NL"),
+      };
+
+      setDailyLog((prev) => {
+        const existingDay = prev.find((d) => d.date === input.date);
+
+        if (existingDay) {
+          return prev.map((d) =>
+            d.date === input.date
+              ? {
+                  ...d,
+                  bowelEvents: [...(d.bowelEvents || []), eventEntry],
+                }
+              : d,
+          );
+        }
+
+        return [
+          ...prev,
+          {
+            date: input.date,
+            meals: [],
+            insulinEvents: [],
+            glucoseEvents: [],
+            glucoseBoostEvents: [],
+            movementEvents: [],
+            bowelEvents: [eventEntry],
+          },
+        ];
+      });
+    }
+
+    function updateBowelEvent(eventId, updates) {
+      setDailyLog((prev) =>
+        prev.map((day) =>
+          day.date === selectedDate
+            ? {
+                ...day,
+                bowelEvents: (day.bowelEvents || []).map((event) =>
+                  event.id === eventId ? { ...event, ...updates } : event,
+                ),
+              }
+            : day,
+        ),
+      );
+    }
+
+    function deleteBowelEvent(eventId) {
+      setDailyLog((prev) =>
+        prev.map((day) =>
+          day.date === selectedDate
+            ? {
+                ...day,
+                bowelEvents: (day.bowelEvents || []).filter(
+                  (event) => event.id !== eventId,
+                ),
+              }
+            : day,
+        ),
+      );
+    }
+
+    setDailyLog((prev) => {
+      const existingDay = prev.find((d) => d.date === input.date);
+
+      if (existingDay) {
+        return prev.map((d) =>
+          d.date === input.date
+            ? {
+                ...d,
+                movementEvents: [...(d.movementEvents || []), eventEntry],
+              }
+            : d,
+        );
+      }
+
+      return [
+        ...prev,
+        {
+          date: input.date,
+          meals: [],
+          insulinEvents: [],
+          glucoseEvents: [],
+          glucoseBoostEvents: [],
+          movementEvents: [eventEntry],
+          addBowelEventToDay,
+          updateBowelEvent,
+          deleteBowelEvent,
+        },
+      ].sort((a, b) =>
+        String(b?.date || "").localeCompare(String(a?.date || "")),
+      );
+    });
+  }
+
+  function updateMovementEvent(eventId, updates) {
+    setDailyLog((prev) =>
+      prev.map((day) =>
+        day.date === selectedDate
+          ? {
+              ...day,
+              movementEvents: (day.movementEvents || []).map((event) =>
+                event.id === eventId ? { ...event, ...updates } : event,
+              ),
+            }
+          : day,
+      ),
+    );
+  }
+
+  function deleteMovementEvent(eventId) {
+    setDailyLog((prev) =>
+      prev.map((day) =>
+        day.date === selectedDate
+          ? {
+              ...day,
+              movementEvents: (day.movementEvents || []).filter(
+                (event) => event.id !== eventId,
+              ),
+            }
+          : day,
+      ),
+    );
+  }
+
+  function addBowelEventToDay(input) {
+    const eventEntry = {
+      id: createId("bowel-event"),
+      type: "bowel",
+      eventTime: input.eventTime || new Date().toISOString(),
+      bristolScore: input.bristolScore || "4",
+      urgency: input.urgency || "",
+      note: input.note || "",
+      createdAt: new Date().toLocaleString("nl-NL"),
+    };
+
+    setDailyLog((prev) => {
+      const existingDay = prev.find((d) => d.date === input.date);
+
+      if (existingDay) {
+        return prev.map((d) =>
+          d.date === input.date
+            ? {
+                ...d,
+                bowelEvents: [...(d.bowelEvents || []), eventEntry],
+              }
+            : d,
+        );
+      }
+
+      return [
+        ...prev,
+        {
+          date: input.date,
+          meals: [],
+          insulinEvents: [],
+          glucoseEvents: [],
+          glucoseBoostEvents: [],
+          movementEvents: [],
+          bowelEvents: [eventEntry],
+        },
+      ].sort((a, b) =>
+        String(b?.date || "").localeCompare(String(a?.date || "")),
+      );
+    });
+  }
+
+  function updateBowelEvent(eventId, updates) {
+    setDailyLog((prev) =>
+      prev.map((day) =>
+        day.date === selectedDate
+          ? {
+              ...day,
+              bowelEvents: (day.bowelEvents || []).map((event) =>
+                event.id === eventId ? { ...event, ...updates } : event,
+              ),
+            }
+          : day,
+      ),
+    );
+  }
+
+  function deleteBowelEvent(eventId) {
+    setDailyLog((prev) =>
+      prev.map((day) =>
+        day.date === selectedDate
+          ? {
+              ...day,
+              bowelEvents: (day.bowelEvents || []).filter(
+                (event) => event.id !== eventId,
+              ),
+            }
+          : day,
+      ),
+    );
+  }
+
   function clearDailyLog() {
     setDailyLog((prev) => prev.filter((day) => day.date !== selectedDate));
   }
@@ -348,5 +750,14 @@ export function useDailyLog(selectedDate) {
     addGlucoseEventToDay,
     updateGlucoseEvent,
     deleteGlucoseEvent,
+    addGlucoseBoostEventToDay,
+    updateGlucoseBoostEvent,
+    deleteGlucoseBoostEvent,
+    addMovementEventToDay,
+    updateMovementEvent,
+    deleteMovementEvent,
+    addBowelEventToDay,
+    updateBowelEvent,
+    deleteBowelEvent,
   };
 }

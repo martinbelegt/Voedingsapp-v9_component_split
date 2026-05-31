@@ -61,8 +61,7 @@ export function MealTimersCard({
     <div
       style={{
         ...cardStyle,
-        padding: 10,
-        borderRadius: 12,
+        marginBottom: 0,
       }}
     >
       {/* Kopregel maaltijd-timers */}
@@ -77,8 +76,6 @@ export function MealTimersCard({
           alignItems: "center",
           background: "#f8fafc",
           fontWeight: 800,
-          borderRadius: 10,
-          padding: "8px 10px",
         }}
       >
         <span>

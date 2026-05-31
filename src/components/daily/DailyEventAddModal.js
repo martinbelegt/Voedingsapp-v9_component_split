@@ -1,0 +1,238 @@
+import React, { useState } from "react";
+
+export function DailyEventAddModal({
+  eventType,
+  selectedDate,
+  buttonStyle,
+  onClose,
+  onSave,
+}) {
+  const [eventTime, setEventTime] = useState(
+    `${selectedDate}T${new Date().toTimeString().slice(0, 5)}`,
+  );
+
+  const [value1, setValue1] = useState("");
+  const [value2, setValue2] = useState("");
+  const [value3, setValue3] = useState("");
+
+  const config = {
+    insulin: {
+      title: "Insuline toevoegen",
+      label1: "Aantal eenheden",
+      placeholder1: "bijv. 4",
+      label2: "Notitie",
+      placeholder2: "bijv. dageraad / correctie / voor maaltijd",
+    },
+    glucose: {
+      title: "Glucosemeting toevoegen",
+      label1: "Glucosewaarde mmol/L",
+      placeholder1: "bijv. 7.8",
+      label2: "Notitie",
+      placeholder2: "bijv. nuchter / 1 uur na ontbijt",
+    },
+    glucoseBoost: {
+      title: "Glucoseboost toevoegen",
+      label1: "Snelle KH gram",
+      placeholder1: "bijv. 15",
+      label2: "Bron",
+      placeholder2: "bijv. druivensuiker",
+      label3: "Notitie",
+      placeholder3: "bijv. hypo-correctie",
+    },
+    movement: {
+      title: "Beweging/sport toevoegen",
+      label1: "Type",
+      placeholder1: "bijv. krachttraining",
+      label2: "Belasting",
+      placeholder2: "aeroob / anaeroob / gemengd",
+      label3: "Duur minuten",
+      placeholder3: "bijv. 60",
+    },
+    bowel: {
+      title: "Stoelgang toevoegen",
+      label1: "Bristol score",
+      placeholder1: "1 t/m 7",
+      label2: "Urgentie",
+      placeholder2: "laag / middel / hoog",
+      label3: "Notitie",
+      placeholder3: "",
+    },
+  }[eventType];
+
+  if (!config) return null;
+
+  function save() {
+    onSave({
+      eventType,
+      eventTime,
+      value1,
+      value2,
+      value3,
+    });
+    onClose();
+  }
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(15, 23, 42, 0.45)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 18,
+        zIndex: 9999,
+      }}
+    >
+      {/* Event toevoegen modal */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: "min(460px, 94vw)",
+          background: "white",
+          borderRadius: 18,
+          padding: 18,
+          border: "1px solid #cbd5e1",
+          boxShadow: "0 20px 50px rgba(0,0,0,0.25)",
+        }}
+      >
+        {/* Kop */}
+        <div
+          style={{
+            fontWeight: 900,
+            fontSize: 18,
+            color: "#0f172a",
+            marginBottom: 12,
+          }}
+        >
+          {config.title}
+        </div>
+
+        {/* Datum/tijd */}
+        <label style={{ fontSize: 13, fontWeight: 800 }}>Datum en tijd</label>
+        <input
+          type="datetime-local"
+          value={eventTime}
+          onChange={(e) => setEventTime(e.target.value)}
+          onClick={(e) => e.currentTarget.showPicker?.()}
+          style={{
+            width: "100%",
+            boxSizing: "border-box",
+            padding: "10px 11px",
+            borderRadius: 10,
+            border: "1px solid #cbd5e1",
+            fontSize: 14,
+            marginTop: 4,
+            marginBottom: 12,
+            cursor: "pointer",
+            minHeight: 44,
+          }}
+        />
+
+        {/* Veld 1 */}
+        <label style={{ fontSize: 13, fontWeight: 800 }}>{config.label1}</label>
+
+        {eventType === "bowel" ? (
+          <select
+            value={value1 || "4"}
+            onChange={(e) => setValue1(e.target.value)}
+            style={{
+              width: "100%",
+              boxSizing: "border-box",
+              padding: "10px 11px",
+              borderRadius: 10,
+              border: "1px solid #cbd5e1",
+              marginTop: 4,
+              marginBottom: 12,
+              minHeight: 44,
+              cursor: "pointer",
+            }}
+          >
+            <option value="1">1 - keutels / zeer hard</option>
+            <option value="2">2 - klonterig / hard</option>
+            <option value="3">3 - worstvormig met scheurtjes</option>
+            <option value="4">4 - glad / ideaal</option>
+            <option value="5">5 - zacht</option>
+            <option value="6">6 - brijig</option>
+            <option value="7">7 - waterdun</option>
+          </select>
+        ) : (
+          <input
+            value={value1}
+            onChange={(e) => setValue1(e.target.value)}
+            placeholder={config.placeholder1}
+            style={{
+              width: "100%",
+              boxSizing: "border-box",
+              padding: "10px 11px",
+              borderRadius: 10,
+              border: "1px solid #cbd5e1",
+              marginTop: 4,
+              marginBottom: 12,
+            }}
+          />
+        )}
+        {/* Veld 2 */}
+        <label style={{ fontSize: 13, fontWeight: 800 }}>{config.label2}</label>
+        <input
+          value={value2}
+          onChange={(e) => setValue2(e.target.value)}
+          placeholder={config.placeholder2}
+          style={{
+            width: "100%",
+            boxSizing: "border-box",
+            padding: "10px 11px",
+            borderRadius: 10,
+            border: "1px solid #cbd5e1",
+            marginTop: 4,
+            marginBottom: 12,
+          }}
+        />
+
+        {/* Optioneel veld 3 */}
+        {config.label3 && (
+          <>
+            <label style={{ fontSize: 13, fontWeight: 800 }}>
+              {config.label3}
+            </label>
+            <input
+              value={value3}
+              onChange={(e) => setValue3(e.target.value)}
+              placeholder={config.placeholder3}
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                padding: "10px 11px",
+                borderRadius: 10,
+                border: "1px solid #cbd5e1",
+                marginTop: 4,
+                marginBottom: 14,
+              }}
+            />
+          </>
+        )}
+
+        {/* Acties */}
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+          <button onClick={onClose} style={buttonStyle}>
+            Annuleren
+          </button>
+          <button
+            onClick={save}
+            style={{
+              ...buttonStyle,
+              background: "#eff6ff",
+              border: "1px solid #bfdbfe",
+              color: "#1d4ed8",
+              fontWeight: 800,
+            }}
+          >
+            Opslaan
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

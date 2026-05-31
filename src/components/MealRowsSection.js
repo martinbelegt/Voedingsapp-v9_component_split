@@ -1,6 +1,6 @@
 import React from "react";
 import { MealRowCard } from "./MealRowCard";
-import { getCategoryColor } from "../services/productHelpers";
+import { getCategoryColor, getCategoryName } from "../services/productHelpers";
 
 export function MealRowsSection(props) {
   const {
@@ -16,10 +16,16 @@ export function MealRowsSection(props) {
     buttonStyle,
     inputStyle,
     labelStyle,
+
+    quickSearch,
+    setQuickSearch,
+    quickSearchResults,
+    quickAddProduct,
   } = props;
 
   return (
     <>
+      {/* Knoppen voor huidige maaltijd */}
       <div style={cardStyle}>
         <div
           style={{
@@ -48,6 +54,46 @@ export function MealRowsSection(props) {
         </div>
       </div>
 
+      {/* Snel product toevoegen */}
+      <div style={cardStyle}>
+        <input
+          value={quickSearch}
+          onChange={(e) => setQuickSearch(e.target.value)}
+          placeholder="Snel product toevoegen..."
+          style={inputStyle}
+        />
+
+        {quickSearch && (
+          <div style={{ marginTop: 6, display: "grid", gap: 4 }}>
+            {quickSearchResults.length === 0 && (
+              <div style={{ fontSize: 12, color: "#64748b" }}>
+                Geen resultaten
+              </div>
+            )}
+
+            {quickSearchResults.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => {
+                  quickAddProduct(p.id);
+                  setQuickSearch("");
+                }}
+                style={{
+                  ...buttonStyle,
+                  textAlign: "left",
+                  padding: "6px 8px",
+                  fontSize: 13,
+                  background: getCategoryColor(categories, p.categoryId),
+                }}
+              >
+                {getCategoryName(categories, p.categoryId)} | {p.name}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Productregels van de huidige maaltijd */}
       {rowsWithCalc.map((r, idx) => (
         <MealRowCard
           key={r.id}

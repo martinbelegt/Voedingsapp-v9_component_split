@@ -744,7 +744,10 @@ export default function App() {
 
   const [mealName, setMealName] = useState("");
   const [dayMealName, setDayMealName] = useState("");
-  const [dayMealMoment, setDayMealMoment] = useState("snack");
+  const [dayMealDate, setDayMealDate] = useState(() =>
+    new Date().toISOString().slice(0, 10),
+  );
+  const [dayMealMoment, setDayMealMoment] = useState("breakfast");
   const [dayMealTime, setDayMealTime] = useState(() =>
     new Date().toTimeString().slice(0, 5),
   );
@@ -768,6 +771,15 @@ export default function App() {
     addGlucoseEventToDay,
     updateGlucoseEvent,
     deleteGlucoseEvent,
+    addGlucoseBoostEventToDay,
+    updateGlucoseBoostEvent,
+    deleteGlucoseBoostEvent,
+    addMovementEventToDay,
+    updateMovementEvent,
+    deleteMovementEvent,
+    addBowelEventToDay,
+    updateBowelEvent,
+    deleteBowelEvent,
   } = useDailyLog(selectedDate);
 
   const {
@@ -1138,6 +1150,7 @@ export default function App() {
       alert("Deze maaltijd is niet opgeslagen in Dag / Archief.");
       return;
     }
+
     const snapshot = createMealSnapshot(getDayMealMomentLabel(dayMealMoment));
     if (!snapshot) {
       alert("Er is nog geen maaltijd ingevuld.");
@@ -1145,10 +1158,10 @@ export default function App() {
     }
 
     addMealToDay({
-      date: selectedDate,
+      date: dayMealDate,
       name: snapshot.name,
       mealMoment: dayMealMoment,
-      eatenAt: `${selectedDate}T${dayMealTime || "12:00"}`,
+      eatenAt: `${dayMealDate}T${dayMealTime || "12:00"}`,
       rows: snapshot.rows,
       totals: snapshot.totals,
       createdAt: snapshot.createdAt,
@@ -1160,6 +1173,7 @@ export default function App() {
       alert("Deze maaltijd is niet opgeslagen in Dag / Archief.");
       return;
     }
+
     const snapshot = createMealSnapshot(getDayMealMomentLabel(dayMealMoment));
     if (!snapshot) {
       alert("Er is nog geen maaltijd ingevuld.");
@@ -1167,9 +1181,10 @@ export default function App() {
     }
 
     addMealToDay({
-      date: selectedDate,
+      date: dayMealDate,
       name: snapshot.name,
       mealMoment: dayMealMoment,
+      eatenAt: `${dayMealDate}T${dayMealTime || "12:00"}`,
       rows: snapshot.rows,
       totals: snapshot.totals,
       createdAt: snapshot.createdAt,
@@ -1177,7 +1192,6 @@ export default function App() {
 
     clearMeal();
   }
-
   function saveCurrentMeal() {
     const cleanedRows = rows.filter((r) => r.productId && r.amount !== "");
     if (!mealName.trim() || cleanedRows.length === 0) return;
@@ -1680,12 +1694,16 @@ Producten uit deze categorie gaan naar "Overig".`);
   const dailyMealProps = {
     dayMealMoment,
     setDayMealMoment,
+    dayMealDate,
+    setDayMealDate,
     dayMealTime,
     setDayMealTime,
     logCurrentMealToDay,
     setLogCurrentMealToDay,
     addCurrentMealToSelectedDay,
     addCurrentMealToSelectedDayAndClear,
+
+    dayMealTime,
   };
 
   // Opgeslagen standaardmaaltijden
@@ -1756,7 +1774,6 @@ Producten uit deze categorie gaan naar "Overig".`);
             testlogboek en backup/herstel via Instellingen.
           </p>
         </div>
-
         <div
           style={{
             display: "flex",
@@ -1770,6 +1787,13 @@ Producten uit deze categorie gaan naar "Overig".`);
             style={getTabButtonStyle("dashboard", "#2563eb")}
           >
             Dashboard
+          </button>
+
+          <button
+            onClick={() => setActiveTab("daily")}
+            style={getTabButtonStyle("daily", "#0891b2")}
+          >
+            Dag / Archief
           </button>
 
           <button
@@ -1787,27 +1811,12 @@ Producten uit deze categorie gaan naar "Overig".`);
           </button>
 
           <button
-            onClick={() => setActiveTab("testlog")}
-            style={getTabButtonStyle("testlog", "#ea580c")}
-          >
-            Testlogboek
-          </button>
-
-          <button
-            onClick={() => setActiveTab("daily")}
-            style={getTabButtonStyle("daily", "#0891b2")}
-          >
-            Dag / Archief
-          </button>
-
-          <button
             onClick={() => setActiveTab("settings")}
             style={getTabButtonStyle("settings", "#475569")}
           >
             Instellingen
           </button>
         </div>
-
         {activeTab === "dashboard" && (
           <DashboardTab
             categories={categories}
@@ -1825,7 +1834,6 @@ Producten uit deze categorie gaan naar "Overig".`);
             setDayMealTime={setDayMealTime}
           />
         )}
-
         {activeTab === "voedingslijst" && (
           <VoedingslijstTab
             categories={categories}
@@ -1881,7 +1889,6 @@ Producten uit deze categorie gaan naar "Overig".`);
             convertPerPortionToPer100={convertPerPortionToPer100}
           />
         )}
-
         {activeTab === "settings" && (
           <SettingsTab
             settings={settings}
@@ -1900,7 +1907,6 @@ Producten uit deze categorie gaan naar "Overig".`);
             enzymeTriggerPresets={enzymeTriggerPresets}
           />
         )}
-
         {activeTab === "gi" && (
           <GiTimingTab
             categories={categories}
@@ -1923,7 +1929,6 @@ Producten uit deze categorie gaan naar "Overig".`);
             round2={round2}
           />
         )}
-
         {activeTab === "testlog" && (
           <TestLogSection
             testLog={testLog}
@@ -1962,6 +1967,16 @@ Producten uit deze categorie gaan naar "Overig".`);
             addGlucoseEventToDay={addGlucoseEventToDay}
             updateGlucoseEvent={updateGlucoseEvent}
             deleteGlucoseEvent={deleteGlucoseEvent}
+            addGlucoseBoostEventToDay={addGlucoseBoostEventToDay}
+            updateGlucoseBoostEvent={updateGlucoseBoostEvent}
+            deleteGlucoseBoostEvent={deleteGlucoseBoostEvent}
+            addMovementEventToDay={addMovementEventToDay}
+            updateMovementEvent={updateMovementEvent}
+            deleteMovementEvent={deleteMovementEvent}
+            addBowelEventToDay={addBowelEventToDay}
+            updateBowelEvent={updateBowelEvent}
+            deleteBowelEvent={deleteBowelEvent}
+            activeTimers={timerProps.timers}
           />
         )}
       </div>

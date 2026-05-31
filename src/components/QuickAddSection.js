@@ -11,14 +11,11 @@ export function QuickAddSection(props) {
     setLogCurrentMealToDay,
     addCurrentMealToSelectedDay,
     addCurrentMealToSelectedDayAndClear,
-    quickSearch,
-    setQuickSearch,
-    quickSearchResults,
-    quickAddProduct,
-    categories,
     cardStyle,
     inputStyle,
     buttonStyle,
+    dayMealDate,
+    setDayMealDate,
   } = props;
 
   const [flashAction, setFlashAction] = useState(null);
@@ -33,7 +30,7 @@ export function QuickAddSection(props) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "150px 110px 1fr 1fr",
+          gridTemplateColumns: "150px 140px 110px 1fr 1fr",
           gap: 8,
           alignItems: "center",
         }}
@@ -46,12 +43,35 @@ export function QuickAddSection(props) {
           <option value="breakfast">Ontbijt</option>
           <option value="lunch">Lunch</option>
           <option value="dinner">Diner</option>
+          <option value="eveningMeal">Avondeten</option>
+          <option value="nightMeal">Nocturnal Protection 21:30</option>
+          <option value="preWorkout">Pre krachttraining</option>
+          <option value="postWorkout">Post krachttraining</option>
+          <option value="recovery">Herstelmoment</option>
+          <option value="lateMeal">Late maaltijd/snack</option>
+          <option value="pppMeal">PPP / vertraagde maaltijd</option>
           <option value="snack">Snack</option>
           <option value="sport">Sport</option>
           <option value="dessert">Toetje</option>
           <option value="fruit">Fruit</option>
           <option value="neutral">Algemeen</option>
         </select>
+
+        {/* Datum voor Dag / Archief */}
+        <input
+          type="date"
+          value={dayMealDate}
+          onChange={(e) => setDayMealDate(e.target.value)}
+          onClick={(e) => {
+            if (e.currentTarget.showPicker) {
+              e.currentTarget.showPicker();
+            }
+          }}
+          style={{
+            ...inputStyle,
+            cursor: "pointer",
+          }}
+        />
 
         <input
           type="time"
@@ -92,63 +112,6 @@ export function QuickAddSection(props) {
         >
           Voeg toe en start nieuwe maaltijd
         </button>
-      </div>
-
-      <label
-        style={{
-          marginTop: 8,
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          fontSize: 13,
-          color: "#334155",
-          fontWeight: 700,
-        }}
-      >
-        <input
-          type="checkbox"
-          checked={logCurrentMealToDay}
-          onChange={(e) => setLogCurrentMealToDay(e.target.checked)}
-        />
-        Deze maaltijd direct naar Dag / Archief
-      </label>
-
-      <div style={{ marginTop: 10 }}>
-        <input
-          value={quickSearch}
-          onChange={(e) => setQuickSearch(e.target.value)}
-          placeholder="Snel product toevoegen..."
-          style={inputStyle}
-        />
-
-        {quickSearch && (
-          <div style={{ marginTop: 6, display: "grid", gap: 4 }}>
-            {quickSearchResults.length === 0 && (
-              <div style={{ fontSize: 12, color: "#64748b" }}>
-                Geen resultaten
-              </div>
-            )}
-
-            {quickSearchResults.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => {
-                  quickAddProduct(p.id);
-                  setQuickSearch("");
-                }}
-                style={{
-                  ...buttonStyle,
-                  textAlign: "left",
-                  padding: "6px 8px",
-                  fontSize: 13,
-                  background: getCategoryColor(categories, p.categoryId),
-                }}
-              >
-                {getCategoryName(categories, p.categoryId)} | {p.name}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
