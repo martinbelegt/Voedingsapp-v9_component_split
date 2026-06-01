@@ -99,6 +99,8 @@ import {
   createPackFilterOptions,
 } from "./services/productPackService";
 
+import { saveAppDataToCloud } from "./services/localStorageService";
+
 const STORAGE_KEYS = {
   settings: "dc_settings_v2",
   products: "dc_products_v2",
@@ -790,6 +792,24 @@ export default function App() {
     getSavedMeal,
     overwriteSavedMeal,
   } = useSavedMeals();
+
+  useEffect(() => {
+    async function pushLocalAppDataToCloud() {
+      console.log("Pushing app data to cloud...");
+
+      await saveAppDataToCloud("products", products);
+
+      await saveAppDataToCloud("categories", categories);
+
+      await saveAppDataToCloud("settings", settings);
+
+      await saveAppDataToCloud("savedMeals", savedMeals);
+
+      console.log("App data push complete");
+    }
+
+    pushLocalAppDataToCloud();
+  }, [products, categories, settings, savedMeals]);
 
   const [showSavedMeals, setShowSavedMeals] = useState(true);
   const [showFavorites, setShowFavorites] = useState(true);

@@ -154,4 +154,44 @@ export async function saveDailyLogToCloud(dailyLog) {
 
   return true;
 }
+
+export async function loadAppDataFromCloud(key) {
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("app_data")
+    .select("*")
+    .eq("key", key)
+    .maybeSingle();
+
+  if (error) {
+    console.error("loadAppDataFromCloud error:", key, error);
+    return null;
+  }
+
+  return data?.data || null;
+}
+
+export async function saveAppDataToCloud(key, value) {
+  if (!supabase) return false;
+
+  const { error } = await supabase.from("app_data").upsert(
+    {
+      key,
+      data: value,
+      updated_at: new Date().toISOString(),
+    },
+    {
+      onConflict: "key",
+    },
+  );
+
+  if (error) {
+    console.error("saveAppDataToCloud error:", key, error);
+    return false;
+  }
+
+  return true;
+}
+
 export { STORAGE_KEYS };
