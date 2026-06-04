@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { DailyTotalsCard } from "./DailyTotalsCard";
 import { DailyMealList } from "./DailyMealList";
 import { DailyEventAddModal } from "./DailyEventAddModal";
 
@@ -81,6 +80,22 @@ export function DailyTab({
         ? "Gebruik dit totaal om gedurende de dag bij te sturen."
         : "Terugblik op deze dag.";
 
+  const totalsChip = (bg, color) => ({
+    background: bg,
+
+    color,
+
+    padding: window.innerWidth < 900 ? "3px 8px" : "4px 9px",
+
+    borderRadius: 999,
+
+    fontSize: window.innerWidth < 900 ? 11 : 13,
+
+    fontWeight: 800,
+
+    whiteSpace: "nowrap",
+  });
+
   function saveAddedEvent({ eventType, eventTime, value1, value2, value3 }) {
     const date = eventTime.slice(0, 10);
 
@@ -143,59 +158,42 @@ export function DailyTab({
           ...cardStyle,
           background: "#eff6ff",
           border: "1px solid #bfdbfe",
+          padding: window.innerWidth < 900 ? "6px 8px" : 16,
         }}
       >
         <div
           style={{
-            display: "flex",
-            justifyContent: "space-between",
+            display: "grid",
+            gridTemplateColumns:
+              window.innerWidth < 900 ? "auto 1fr" : "auto 220px 1fr",
+            gap: window.innerWidth < 900 ? 6 : 10,
             alignItems: "center",
-            gap: 10,
-            flexWrap: "wrap",
-            marginBottom: 10,
           }}
         >
-          <h2 style={{ margin: 0 }}>Dag / Archief</h2>
-
-          <span
+          <div
             style={{
-              padding: "4px 9px",
-              borderRadius: 999,
-              background:
-                dayMode === "Geplande dag"
-                  ? "#ede9fe"
-                  : dayMode === "Vandaag"
-                    ? "#dcfce7"
-                    : "#e2e8f0",
-              border:
-                dayMode === "Geplande dag"
-                  ? "1px solid #c4b5fd"
-                  : dayMode === "Vandaag"
-                    ? "1px solid #86efac"
-                    : "1px solid #cbd5e1",
-              color:
-                dayMode === "Geplande dag"
-                  ? "#5b21b6"
-                  : dayMode === "Vandaag"
-                    ? "#166534"
-                    : "#475569",
-              fontSize: 12,
-              fontWeight: 800,
+              fontWeight: 700,
+              color: "#1e3a8a",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
             }}
           >
-            {dayMode}
-          </span>
-        </div>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "auto 220px 1fr",
-            gap: 10,
-            alignItems: "center",
-          }}
-        >
-          <div style={{ fontWeight: 700, color: "#1e3a8a" }}>Datum</div>
+            Datum
+            <span
+              style={{
+                padding: "2px 8px",
+                borderRadius: 999,
+                background: "#dcfce7",
+                border: "1px solid #86efac",
+                color: "#166534",
+                fontSize: 11,
+                fontWeight: 700,
+              }}
+            >
+              {dayMode}
+            </span>
+          </div>
 
           <input
             type="date"
@@ -208,30 +206,60 @@ export function DailyTab({
             }}
             style={{
               ...inputStyle,
+              minWidth: 0,
               cursor: "pointer",
               minHeight: 38,
             }}
           />
 
-          <div style={{ fontSize: 13, color: "#475569" }}>
-            Opgeslagen dagen: {sortedDates.length}
-          </div>
+          <div />
         </div>
       </div>
 
-      {/* Dagtotaal */}
-      <DailyTotalsCard
-        cardStyle={cardStyle}
-        dayTotalTitle={dayTotalTitle}
-        selectedDate={selectedDate}
-        dayTotalHint={dayTotalHint}
-        maintenanceKcal={maintenanceKcal}
-        targetKcal={targetKcal}
-        proteinGoal={proteinGoal}
-        proteinMealGoal={proteinMealGoal}
-        dayTotals={dayTotals}
-        settings={settings}
-      />
+      <div
+        style={{
+          display: "flex",
+          gap: 6,
+          flexWrap: "wrap",
+          alignItems: "center",
+          marginBottom: 10,
+        }}
+      >
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 800,
+            color: "#64748b",
+            marginRight: 2,
+          }}
+        >
+          Dagtotaal
+        </span>
+
+        <span style={totalsChip("#dbeafe", "#1d4ed8")}>
+          KH {dayTotals?.kh || 0}g
+        </span>
+
+        <span style={totalsChip("#ede9fe", "#6d28d9")}>
+          Eiwit {dayTotals?.protein || 0}g
+        </span>
+
+        <span style={totalsChip("#ffedd5", "#c2410c")}>
+          Vet {dayTotals?.fat || 0}g
+        </span>
+
+        <span style={totalsChip("#dcfce7", "#166534")}>
+          {dayTotals?.kcal || 0} kcal
+        </span>
+
+        <span style={totalsChip("#eff6ff", "#2563eb")}>
+          💉 {dayTotals?.insulin || 0}E
+        </span>
+
+        <span style={totalsChip("#fef3c7", "#a16207")}>
+          Creon {dayTotals?.creon25 || 0}x25k + {dayTotals?.creon10 || 0}x10k
+        </span>
+      </div>
 
       {/* Tijdlijn van deze dag */}
       <div
@@ -260,11 +288,20 @@ export function DailyTab({
             }}
           >
             <div>
-              <h2 style={{ margin: 0 }}>Tijdlijn van deze dag</h2>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: window.innerWidth < 900 ? 18 : 30,
+                  fontWeight: 700,
+                  color: "#0f766e",
+                }}
+              >
+                Vandaag ({totalTimelineItems} items)
+              </h2>
 
               <div
                 style={{
-                  fontSize: 12,
+                  fontSize: 11,
                   color: "#64748b",
                   marginTop: 2,
                 }}

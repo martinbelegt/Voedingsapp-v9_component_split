@@ -126,6 +126,13 @@ export function DailyMealCard({
           mealTimeLabel={mealTimeLabel}
           buttonStyle={buttonStyle}
           onClose={() => setShowDetails(false)}
+          onDelete={() => {
+            const ok = window.confirm("Deze maaltijd verwijderen?");
+            if (!ok) return;
+
+            onDelete(meal.id);
+            setShowDetails(false);
+          }}
         />
       )}
 

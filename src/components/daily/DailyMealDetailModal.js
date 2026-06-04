@@ -7,6 +7,7 @@ export function DailyMealDetailModal({
   mealTimeLabel,
   buttonStyle,
   onClose,
+  onDelete,
 }) {
   // ESC sluit detailvenster
   useEffect(() => {
@@ -84,22 +85,49 @@ export function DailyMealDetailModal({
             </div>
           </div>
 
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onClose();
-            }}
+          <div
             style={{
-              ...buttonStyle,
-              padding: "7px 11px",
-              fontSize: 12,
-              borderRadius: 10,
-              background: "#eff6ff",
-              border: "1px solid #bfdbfe",
+              display: "flex",
+              gap: 8,
             }}
           >
-            Sluiten
-          </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+
+                onDelete();
+              }}
+              style={{
+                ...buttonStyle,
+                padding: "7px 11px",
+                fontSize: 12,
+                borderRadius: 10,
+                background: "#fee2e2",
+                border: "1px solid #fecaca",
+                color: "#991b1b",
+                fontWeight: 800,
+              }}
+            >
+              Verwijder
+            </button>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
+              style={{
+                ...buttonStyle,
+                padding: "7px 11px",
+                fontSize: 12,
+                borderRadius: 10,
+                background: "#eff6ff",
+                border: "1px solid #bfdbfe",
+              }}
+            >
+              Sluiten
+            </button>
+          </div>
         </div>
 
         {/* Samenvatting macro's */}

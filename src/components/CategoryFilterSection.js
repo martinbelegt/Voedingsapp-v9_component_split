@@ -11,8 +11,18 @@ export function CategoryFilterSection(props) {
 
   const [showCategoryFilter, setShowCategoryFilter] = useState(false);
 
+  const isMobile =
+    window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
+
   return (
-    <div style={cardStyle}>
+    <div
+      style={{
+        ...cardStyle,
+        padding: isMobile ? 4 : cardStyle?.padding,
+        marginBottom: isMobile ? 4 : cardStyle?.marginBottom,
+        border: isMobile ? "1px solid #e5e7eb" : cardStyle?.border,
+      }}
+    >
       <button
         onClick={() => setShowCategoryFilter((v) => !v)}
         style={{
@@ -22,6 +32,10 @@ export function CategoryFilterSection(props) {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          padding: isMobile ? "2px 8px" : undefined,
+          fontSize: isMobile ? 12 : undefined,
+          lineHeight: isMobile ? 1.1 : undefined,
+          borderRadius: isMobile ? 0 : buttonStyle?.borderRadius,
         }}
       >
         <span>Categorie filter</span>
@@ -31,10 +45,10 @@ export function CategoryFilterSection(props) {
       {showCategoryFilter && (
         <div
           style={{
-            marginTop: 10,
+            marginTop: isMobile ? 5 : 10,
             display: "flex",
             flexWrap: "wrap",
-            gap: 8,
+            gap: isMobile ? 4 : 8,
           }}
         >
           {categoryFilterOptions.map((c) => {
@@ -47,9 +61,22 @@ export function CategoryFilterSection(props) {
                 onClick={() => setCategoryFilter(c.id)}
                 style={{
                   ...buttonStyle,
-                  background: isActive ? "#0f172a" : bg,
-                  color: isActive ? "white" : "#0f172a",
-                  border: isActive ? "1px solid #0f172a" : "1px solid #dbe3ee",
+
+                  background: isActive ? "#dcfce7" : bg,
+
+                  color: isActive ? "#166534" : "#0f172a",
+
+                  border: isActive ? "1px solid #86efac" : "1px solid #dbe3ee",
+
+                  padding: isMobile ? "2px 7px" : undefined,
+
+                  fontSize: isMobile ? 11 : undefined,
+
+                  fontWeight: isMobile ? 600 : undefined,
+
+                  lineHeight: isMobile ? 1.1 : undefined,
+
+                  borderRadius: isMobile ? 2 : buttonStyle?.borderRadius,
                 }}
               >
                 {c.name}

@@ -16,12 +16,34 @@ export function MealRowsSection(props) {
     buttonStyle,
     inputStyle,
     labelStyle,
+    totals,
+    dayTotals,
 
     quickSearch,
     setQuickSearch,
     quickSearchResults,
     quickAddProduct,
   } = props;
+
+  const isMobile =
+    window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
+
+  const totalsChip = (bg, color) => ({
+    background: bg,
+    color,
+    padding: isMobile ? "3px 8px" : "4px 9px",
+    borderRadius: 999,
+    fontSize: isMobile ? 11 : 13,
+    fontWeight: 800,
+    whiteSpace: "nowrap",
+  });
+
+  const previewTotals = {
+    kh: (dayTotals?.kh || 0) + (totals?.kh || 0),
+    protein: (dayTotals?.protein || 0) + (totals?.protein || 0),
+    fat: (dayTotals?.fat || 0) + (totals?.fat || 0),
+    kcal: (dayTotals?.kcal || 0) + (totals?.kcal || 0),
+  };
 
   return (
     <>
@@ -54,7 +76,7 @@ export function MealRowsSection(props) {
         </div>
       </div>
 
-      {/* Snel product toevoegen */}
+      {/* Snel product toevoegen + dagtotaal */}
       <div style={cardStyle}>
         <input
           value={quickSearch}
@@ -62,6 +84,43 @@ export function MealRowsSection(props) {
           placeholder="Snel product toevoegen..."
           style={inputStyle}
         />
+
+        <div
+          style={{
+            display: "flex",
+            gap: 6,
+            flexWrap: "wrap",
+            alignItems: "center",
+            marginTop: 8,
+          }}
+        >
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 800,
+              color: "#64748b",
+              marginRight: 2,
+            }}
+          >
+            Dagtotaal
+          </span>
+
+          <span style={totalsChip("#dbeafe", "#1d4ed8")}>
+            KH {previewTotals.kh}g
+          </span>
+
+          <span style={totalsChip("#ede9fe", "#6d28d9")}>
+            Eiwit {previewTotals.protein}g
+          </span>
+
+          <span style={totalsChip("#ffedd5", "#c2410c")}>
+            Vet {previewTotals.fat}g
+          </span>
+
+          <span style={totalsChip("#dcfce7", "#166534")}>
+            {previewTotals.kcal} kcal
+          </span>
+        </div>
 
         {quickSearch && (
           <div style={{ marginTop: 6, display: "grid", gap: 4 }}>

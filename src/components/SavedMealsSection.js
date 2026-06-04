@@ -14,14 +14,33 @@ export function SavedMealsSection(props) {
     loadSavedMeal,
     appendSavedMeal,
     deleteSavedMeal,
+    overwriteSavedMeal,
     products,
     cardStyle,
     buttonStyle,
     inputStyle,
   } = props;
 
+  function editSavedMeal(id) {
+    const meal = savedMeals.find((m) => m.id === id);
+    if (!meal) return;
+
+    const newName = window.prompt("Nieuwe naam:", meal.name);
+    if (newName === null) return;
+
+    overwriteSavedMeal(id, meal.rows, newName);
+  }
+
   return (
-    <div style={{ ...cardStyle, marginBottom: 16 }}>
+    <div
+      style={{
+        ...cardStyle,
+        marginBottom: window.innerWidth < 900 ? 4 : 16,
+        padding: window.innerWidth < 900 ? 4 : cardStyle?.padding,
+        border:
+          window.innerWidth < 900 ? "1px solid #e5e7eb" : cardStyle?.border,
+      }}
+    >
       <button
         onClick={() => setShowSavedMeals((v) => !v)}
         style={{
@@ -35,6 +54,11 @@ export function SavedMealsSection(props) {
           border: "1px solid #d8b4fe",
           color: "#4c1d95",
           fontWeight: 700,
+          fontWeight: 700,
+          padding: window.innerWidth < 900 ? "2px 8px" : undefined,
+          fontSize: window.innerWidth < 900 ? 12 : undefined,
+          lineHeight: window.innerWidth < 900 ? 1.1 : undefined,
+          borderRadius: window.innerWidth < 900 ? 2 : buttonStyle?.borderRadius,
         }}
       >
         <span>Standaardmaaltijden ({savedMeals.length})</span>
@@ -42,13 +66,13 @@ export function SavedMealsSection(props) {
       </button>
 
       {showSavedMeals && (
-        <div style={{ marginTop: 12 }}>
+        <div style={{ marginTop: window.innerWidth < 900 ? 5 : 12 }}>
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "2fr auto",
-              gap: 8,
-              marginBottom: 12,
+              gridTemplateColumns: window.innerWidth < 900 ? "1fr" : "2fr auto",
+              gap: window.innerWidth < 900 ? 5 : 8,
+              marginBottom: window.innerWidth < 900 ? 6 : 12,
             }}
           >
             <input
@@ -88,6 +112,7 @@ export function SavedMealsSection(props) {
                 onLoad={loadSavedMeal}
                 onAppend={appendSavedMeal}
                 onDelete={deleteSavedMeal}
+                onEdit={editSavedMeal}
                 buttonStyle={buttonStyle}
               />
             ))}

@@ -5,7 +5,6 @@ import { FavoritesSection } from "./FavoritesSection";
 import { QuickAddSection } from "./QuickAddSection";
 import { MealRowsSection } from "./MealRowsSection";
 import { CategoryFilterSection } from "./CategoryFilterSection";
-import { MealTimersCard } from "./MealTimersCard";
 
 export function DashboardTab(props) {
   const {
@@ -19,51 +18,49 @@ export function DashboardTab(props) {
     categoryFilterProps,
     mealRowsProps,
     dailyMealProps,
-    timerProps,
-
     totals,
     uiStyles,
   } = props;
 
-  const { cardStyle, buttonStyle, primaryButtonStyle, inputStyle, labelStyle } =
-    uiStyles;
+  const { cardStyle, buttonStyle, inputStyle, labelStyle } = uiStyles;
+
+  const isMobile =
+    window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
+
+  const dashboardGap = isMobile ? 8 : 16;
+
+  const totalsChip = (bg, color) => ({
+    background: bg,
+    color,
+    padding: isMobile ? "3px 8px" : "4px 9px",
+    borderRadius: 999,
+    fontSize: isMobile ? 11 : 13,
+    fontWeight: 800,
+    whiteSpace: "nowrap",
+  });
 
   return (
     <>
-      {/* Bovenste dashboardblok: totalen, timers, filter en snelle acties */}
       <div
         style={{
           display: "grid",
-          gap: 16,
-          marginBottom: 16,
+          gap: dashboardGap,
+          marginBottom: isMobile ? 8 : 16,
           position: "sticky",
           top: 0,
           zIndex: 10,
           background: "#f8fafc",
-          paddingBottom: 8,
+          paddingBottom: isMobile ? 4 : 8,
         }}
       >
-        {/* Maaltijdtotalen en berekende uitkomsten */}
         <ResultCard totals={totals} rowsWithCalc={mealRowsProps.rowsWithCalc} />
 
-        {/* Maaltijd-timers: verzadiging, eetpauze, glucose en vertering */}
-        <MealTimersCard
-          {...timerProps}
-          cardStyle={cardStyle}
-          buttonStyle={buttonStyle}
-          primaryButtonStyle={primaryButtonStyle}
-          inputStyle={inputStyle}
-          labelStyle={labelStyle}
-        />
-
-        {/* Categoriefilter voor de productlijst */}
         <CategoryFilterSection
           {...categoryFilterProps}
           cardStyle={cardStyle}
           buttonStyle={buttonStyle}
         />
 
-        {/* Opgeslagen maaltijden */}
         <SavedMealsSection
           categories={categories}
           {...savedMealProps}
@@ -73,7 +70,6 @@ export function DashboardTab(props) {
           inputStyle={inputStyle}
         />
 
-        {/* Favoriete producten */}
         <FavoritesSection
           categories={categories}
           {...favoritesProps}
@@ -81,7 +77,6 @@ export function DashboardTab(props) {
           buttonStyle={buttonStyle}
         />
 
-        {/* Snel producten zoeken en maaltijd toevoegen aan dag */}
         <QuickAddSection
           {...dailyMealProps}
           {...quickAddProps}
@@ -94,9 +89,7 @@ export function DashboardTab(props) {
         />
       </div>
 
-      {/* Onderste dashboardblok: maaltijdregels */}
-      <div style={{ display: "grid", gap: 16 }}>
-        {/* Huidige maaltijdregels */}
+      <div style={{ display: "grid", gap: dashboardGap }}>
         <MealRowsSection
           {...mealRowsProps}
           {...quickAddProps}
@@ -105,6 +98,8 @@ export function DashboardTab(props) {
           buttonStyle={buttonStyle}
           inputStyle={inputStyle}
           labelStyle={labelStyle}
+          totals={totals}
+          dayTotals={props.dayTotals}
         />
       </div>
     </>

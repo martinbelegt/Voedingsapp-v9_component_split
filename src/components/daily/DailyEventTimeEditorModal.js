@@ -8,6 +8,9 @@ export function DailyEventTimeEditorModal({
 }) {
   const [draftValue, setDraftValue] = useState(initialValue || "");
 
+  const isMobile =
+    window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
+
   return (
     <div
       onClick={onClose}
@@ -70,15 +73,24 @@ export function DailyEventTimeEditorModal({
           }}
           style={{
             width: "100%",
+
             boxSizing: "border-box",
-            padding: "10px 11px",
+
+            padding: isMobile ? "12px 11px" : "10px 11px",
+
             borderRadius: 10,
+
             border: "1px solid #cbd5e1",
-            fontSize: 14,
+
+            fontSize: isMobile ? 16 : 14,
+
             marginBottom: 14,
 
             cursor: "pointer",
-            minHeight: 44,
+
+            minHeight: 46,
+
+            WebkitAppearance: "none",
           }}
         />
 

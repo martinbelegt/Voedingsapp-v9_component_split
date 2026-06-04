@@ -100,7 +100,20 @@ import {
 } from "./services/productPackService";
 
 import { saveAppDataToCloud } from "./services/localStorageService";
+import { MobileHeader } from "./components/mobile/MobileHeader";
 
+// ======================================================
+// ZOEKANKER: LOCAL STORAGE / BACKUP KEYS
+//
+// Supabase = waarheid
+// localStorage = cache / backup / fallback
+//
+// Zoek hierop bij:
+//
+// CLOUD
+// BACKUP
+// STORAGE
+// ======================================================
 const STORAGE_KEYS = {
   settings: "dc_settings_v2",
   products: "dc_products_v2",
@@ -651,7 +664,17 @@ function initCategoriesAndProducts() {
     products: applyGiToProducts(starterProducts),
   };
 }
-
+// ======================================================
+// ZOEKANKER: APP RESET / NOODRESET
+//
+// Reset wist:
+//
+// instellingen
+// saved meals
+// daglog
+//
+// Voedingslijsten blijven behouden.
+// ======================================================
 export default function App() {
   function resetAppData() {
     const confirmReset = window.confirm(
@@ -675,8 +698,20 @@ export default function App() {
       alert("Fout bij resetten van de app.");
     }
   }
-
-  const [activeTab, setActiveTab] = useState("dashboard");
+  // ======================================================
+  // ZOEKANKER: HOME TAB / MOBIELE WERKPLEK
+  //
+  // Tijdlijn = primaire werkplek.
+  //
+  // Zoek:
+  //
+  // mobiel
+  // tabs
+  // home screen
+  // ======================================================
+  const [activeTab, setActiveTab] = useState("daily");
+  const isMobile =
+    window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
   const [editingProductId, setEditingProductId] = useState(null);
   const [sortConfig, setSortConfig] = useState({
     key: "category",
@@ -757,7 +792,21 @@ export default function App() {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().slice(0, 10),
   );
-
+  // ======================================================
+  // ZOEKANKER: DAGLIJN / METABOLE TIJDLIJN
+  //
+  // maaltijden
+  // glucose
+  // insuline
+  // sport
+  // bowel
+  //
+  // Zoek:
+  //
+  // timeline
+  // daglijn
+  // sport
+  // ======================================================
   const {
     selectedDay,
     dayTotals,
@@ -783,7 +832,18 @@ export default function App() {
     updateBowelEvent,
     deleteBowelEvent,
   } = useDailyLog(selectedDate);
-
+  // ======================================================
+  // ZOEKANKER: SAVED MEALS / STANDAARDMAALTIJDEN
+  //
+  // Laden = vervangen
+  // Voeg toe = append
+  // Wijzig = momenteel naam wijzigen
+  //
+  // Zoek:
+  //
+  // saved meals
+  // standaardmaaltijden
+  // ======================================================
   const {
     savedMeals,
     setSavedMeals,
@@ -792,7 +852,17 @@ export default function App() {
     getSavedMeal,
     overwriteSavedMeal,
   } = useSavedMeals();
-
+  // ======================================================
+  // ZOEKANKER: CLOUD IS LEIDEND
+  //
+  // Supabase = waarheid
+  //
+  // localStorage:
+  //
+  // cache
+  // backup
+  // fallback
+  // ======================================================
   useEffect(() => {
     async function pushLocalAppDataToCloud() {
       console.log("Pushing app data to cloud...");
@@ -811,8 +881,8 @@ export default function App() {
     pushLocalAppDataToCloud();
   }, [products, categories, settings, savedMeals]);
 
-  const [showSavedMeals, setShowSavedMeals] = useState(true);
-  const [showFavorites, setShowFavorites] = useState(true);
+  const [showSavedMeals, setShowSavedMeals] = useState(() => !isMobile);
+  const [showFavorites, setShowFavorites] = useState(() => !isMobile);
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [productSearch, setProductSearch] = useState("");
   const [categoryDraftName, setCategoryDraftName] = useState("");
@@ -1167,7 +1237,7 @@ export default function App() {
 
   function addCurrentMealToSelectedDay() {
     if (!logCurrentMealToDay) {
-      alert("Deze maaltijd is niet opgeslagen in Dag / Archief.");
+      alert("Deze maaltijd is niet opgeslagen in Tijdlijn.");
       return;
     }
 
@@ -1190,7 +1260,7 @@ export default function App() {
 
   function addCurrentMealToSelectedDayAndClear() {
     if (!logCurrentMealToDay) {
-      alert("Deze maaltijd is niet opgeslagen in Dag / Archief.");
+      alert("Deze maaltijd is niet opgeslagen in Tijdlijn.");
       return;
     }
 
@@ -1254,6 +1324,19 @@ export default function App() {
     setRows((prev) => removeMealRowById(prev, id, makeRow, ensureLastEmptyRow));
   }
 
+  // ======================================================
+  // ZOEKANKER: PRODUCT MANAGEMENT
+  //
+  // toevoegen
+  // wijzigen
+  // verwijderen
+  // favorieten
+  //
+  // Zoek:
+  //
+  // productbeheer
+  // voedingslijst
+  // ======================================================
   function addProduct() {
     if (!newProduct.name.trim()) return;
 
@@ -1511,7 +1594,13 @@ Producten uit deze categorie gaan naar "Overig".`);
 
     alert(`Product gekopieerd naar lijst "${cleanTargetPackName}".`);
   }
-
+  // ======================================================
+  // ZOEKANKER: BACKUP / IMPORT / HERSTEL
+  //
+  // volledige backup
+  // noodbackup
+  // import productlijsten
+  // ======================================================
   function exportBackup() {
     const snapshot = createFullBackupSnapshot({
       categories,
@@ -1682,8 +1771,9 @@ Producten uit deze categorie gaan naar "Overig".`);
 
     return {
       ...(isActive ? primaryButtonStyle : buttonStyle),
-      padding: "10px 16px",
-      fontSize: 14,
+      padding: window.innerWidth < 700 ? "8px 10px" : "10px 16px",
+
+      fontSize: window.innerWidth < 700 ? 12 : 14,
       fontWeight: 800,
       borderRadius: 999,
       background: isActive ? color : "#ffffff",
@@ -1701,7 +1791,17 @@ Producten uit deze categorie gaan naar "Overig".`);
     inputStyle,
     labelStyle,
   };
-
+  // ======================================================
+  // ZOEKANKER: DASHBOARD PROPS BLOKKEN
+  //
+  // Dashboard krijgt veel data via props-blokken.
+  //
+  // Zoek hierop als:
+  //
+  // props ontbreken
+  // dashboard stuk is
+  // component koppelingen wijzigen
+  // ======================================================
   // Maaltijd-timers: verzadiging, eetpauze, glucose en vertering
   const timerProps = {
     timers,
@@ -1725,7 +1825,11 @@ Producten uit deze categorie gaan naar "Overig".`);
 
     dayMealTime,
   };
-
+  // ======================================================
+  // ZOEKANKER: SAVED MEALS UI CONNECTIE
+  //
+  // Dashboard ↔ saved meals props
+  // ======================================================
   // Opgeslagen standaardmaaltijden
   const savedMealProps = {
     savedMeals,
@@ -1737,6 +1841,7 @@ Producten uit deze categorie gaan naar "Overig".`);
     loadSavedMeal,
     appendSavedMeal,
     deleteSavedMeal,
+    overwriteSavedMeal,
   };
 
   // Favorietenblok
@@ -1773,6 +1878,13 @@ Producten uit deze categorie gaan naar "Overig".`);
     categoryFilterOptions,
   };
 
+  // ======================================================
+  // ZOEKANKER: TAB NAVIGATIE / HOOFDLAYOUT
+  //
+  // Header
+  // tabs
+  // routing
+  // ======================================================
   return (
     <div
       style={{
@@ -1782,61 +1894,132 @@ Producten uit deze categorie gaan naar "Overig".`);
         fontFamily: "Arial, sans-serif",
       }}
     >
-      <div style={{ maxWidth: 1240, margin: "0 auto" }}>
-        <div style={{ ...cardStyle, marginBottom: 16 }}>
-          <h1 style={{ margin: 0, fontSize: 28 }}>
-            Diabetes + Creon web-app prototype
-          </h1>
-          <p style={{ marginTop: 8, color: "#475569" }}>
-            Nu met standaardmaaltijden, categorieën met ids, porties of gram,
-            favorieten, opslag in je browser, sticky kopregel, categoriebeheer,
-            snelle productzoeker, uitgebreider Creon-model, GI / Timing-tabblad,
-            testlogboek en backup/herstel via Instellingen.
-          </p>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            gap: 8,
-            marginBottom: 16,
-            flexWrap: "wrap",
-          }}
-        >
-          <button
-            onClick={() => setActiveTab("dashboard")}
-            style={getTabButtonStyle("dashboard", "#2563eb")}
-          >
-            Dashboard
-          </button>
+      <div
+        style={{
+          maxWidth: 1240,
+          width: "100%",
+          margin: "0 auto",
+          overflowX: "hidden",
+        }}
+      >
+        {isMobile ? (
+          <MobileHeader />
+        ) : (
+          <div style={{ ...cardStyle, marginBottom: 16 }}>
+            <h1 style={{ margin: 0, fontSize: 28 }}>
+              Diabetes + Creon web-app prototype
+            </h1>
 
-          <button
-            onClick={() => setActiveTab("daily")}
-            style={getTabButtonStyle("daily", "#0891b2")}
-          >
-            Dag / Archief
-          </button>
+            <p style={{ marginTop: 8, color: "#475569" }}>
+              Nu met standaardmaaltijden, categorieën met ids, porties of gram,
+              favorieten, opslag in je browser, sticky kopregel,
+              categoriebeheer, snelle productzoeker, uitgebreider Creon-model,
+              GI / Timing-tabblad, testlogboek en backup/herstel via
+              Instellingen.
+            </p>
+          </div>
+        )}
 
-          <button
-            onClick={() => setActiveTab("voedingslijst")}
-            style={getTabButtonStyle("voedingslijst", "#16a34a")}
+        {isMobile ? (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr 1fr auto",
+              gap: 4,
+              marginBottom: 10,
+              alignItems: "center",
+            }}
           >
-            Voedingslijst
-          </button>
+            <button
+              onClick={() => setActiveTab("daily")}
+              style={getTabButtonStyle("daily", "#0891b2")}
+            >
+              Tijdlijn
+            </button>
 
-          <button
-            onClick={() => setActiveTab("gi")}
-            style={getTabButtonStyle("gi", "#9333ea")}
-          >
-            GI / Timing
-          </button>
+            <button
+              onClick={() => setActiveTab("dashboard")}
+              style={getTabButtonStyle("dashboard", "#2563eb")}
+            >
+              Dashboard
+            </button>
 
-          <button
-            onClick={() => setActiveTab("settings")}
-            style={getTabButtonStyle("settings", "#475569")}
+            <button
+              onClick={() => setActiveTab("voedingslijst")}
+              style={getTabButtonStyle("voedingslijst", "#16a34a")}
+            >
+              Voeding
+            </button>
+
+            <select
+              value={
+                activeTab === "gi" || activeTab === "settings" ? activeTab : ""
+              }
+              onChange={(e) => {
+                if (e.target.value) {
+                  setActiveTab(e.target.value);
+                }
+              }}
+              style={{
+                padding: "6px",
+                borderRadius: 4,
+                border: "1px solid #cbd5e1",
+                background: "white",
+                fontSize: 12,
+                fontWeight: 700,
+                color: "#0f172a",
+              }}
+            >
+              <option value="">Meer</option>
+              <option value="gi">GI / Timing</option>
+              <option value="settings">Instellingen</option>
+            </select>
+          </div>
+        ) : (
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              marginBottom: 16,
+              flexWrap: "wrap",
+            }}
           >
-            Instellingen
-          </button>
-        </div>
+            <button
+              onClick={() => setActiveTab("daily")}
+              style={getTabButtonStyle("daily", "#0891b2")}
+            >
+              Tijdlijn
+            </button>
+
+            <button
+              onClick={() => setActiveTab("dashboard")}
+              style={getTabButtonStyle("dashboard", "#2563eb")}
+            >
+              Dashboard
+            </button>
+
+            <button
+              onClick={() => setActiveTab("voedingslijst")}
+              style={getTabButtonStyle("voedingslijst", "#16a34a")}
+            >
+              Voedingslijst
+            </button>
+
+            <button
+              onClick={() => setActiveTab("gi")}
+              style={getTabButtonStyle("gi", "#9333ea")}
+            >
+              GI / Timing
+            </button>
+
+            <button
+              onClick={() => setActiveTab("settings")}
+              style={getTabButtonStyle("settings", "#475569")}
+            >
+              Instellingen
+            </button>
+          </div>
+        )}
         {activeTab === "dashboard" && (
           <DashboardTab
             categories={categories}
@@ -1852,6 +2035,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             uiStyles={uiStyles}
             dayMealTime={dayMealTime}
             setDayMealTime={setDayMealTime}
+            dayTotals={dayTotals}
           />
         )}
         {activeTab === "voedingslijst" && (

@@ -12,8 +12,17 @@ export function FavoritesSection(props) {
     buttonStyle,
   } = props;
 
+  const isMobile =
+    window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
+
   return (
-    <div style={{ ...cardStyle, marginBottom: 16 }}>
+    <div
+      style={{
+        ...cardStyle,
+        marginBottom: isMobile ? 8 : 16,
+        padding: isMobile ? 0 : cardStyle?.padding,
+      }}
+    >
       <button
         onClick={() => setShowFavorites((v) => !v)}
         style={{
@@ -27,6 +36,12 @@ export function FavoritesSection(props) {
           border: "1px solid #fed7aa",
           color: "#9a3412",
           fontWeight: 700,
+          padding: isMobile ? "3px 8px" : undefined,
+          fontSize: isMobile ? 13 : undefined,
+          padding: isMobile ? "2px 8px" : undefined,
+          fontSize: isMobile ? 12 : undefined,
+          borderRadius: isMobile ? 2 : buttonStyle?.borderRadius,
+          lineHeight: isMobile ? 1.15 : undefined,
         }}
       >
         <span>Favorieten ({favoriteProducts.length})</span>
@@ -38,8 +53,8 @@ export function FavoritesSection(props) {
           style={{
             display: "flex",
             flexWrap: "wrap",
-            gap: 10,
-            marginTop: 12,
+            gap: isMobile ? 4 : 10,
+            marginTop: isMobile ? 5 : 12,
           }}
         >
           {favoriteProducts.map((p) => (
@@ -52,8 +67,11 @@ export function FavoritesSection(props) {
                 border: "1px solid rgba(148,163,184,0.35)",
                 color: "#0f172a",
                 boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                padding: "10px 12px",
-                fontWeight: 700,
+                padding: isMobile ? "2px 6px" : "10px 12px",
+                fontSize: isMobile ? 10 : undefined,
+                fontWeight: isMobile ? 600 : 700,
+                borderRadius: isMobile ? 2 : buttonStyle?.borderRadius,
+                lineHeight: isMobile ? 1.05 : undefined,
               }}
               title={`${getCategoryName(categories, p.categoryId)} | ${p.name}`}
             >

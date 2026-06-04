@@ -13,60 +13,75 @@ export function DailyTimelineItem({
   expanded,
   onToggle,
   compact = false,
+  indentLevel = 0,
 }) {
+  const isMobile =
+    window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
+
   return (
     <div
       style={{
-        marginBottom: 6,
-        borderRadius: 8,
+        marginBottom: isMobile ? 4 : 6,
+
+        marginLeft: isMobile && indentLevel > 0 ? indentLevel * 14 : 0,
+
+        borderRadius: isMobile ? 2 : 4,
+
         border: `1px solid ${borderColor}`,
-        borderLeft: `6px solid ${accentColor}`,
+
+        borderLeft: `5px solid ${accentColor}`,
+
         background: backgroundColor,
+
         overflow: "hidden",
+
         boxShadow: "none",
       }}
     >
       <div
         onClick={onToggle}
         style={{
-          padding: compact ? "6px 9px" : "8px 10px",
+          padding: isMobile ? "5px 7px" : compact ? "6px 9px" : "8px 10px",
           cursor: "pointer",
           display: "grid",
-          gridTemplateColumns: "1fr auto",
-          gap: 8,
+          gridTemplateColumns: isMobile ? "1fr auto" : "1fr auto",
+          gap: isMobile ? 5 : 8,
           alignItems: "center",
         }}
       >
-        <div>
+        <div style={{ minWidth: 0 }}>
           <div
             style={{
-              fontWeight: 850,
+              fontWeight: 700,
               color: accentColor,
-              fontSize: compact ? 13 : 14,
-              lineHeight: 1.2,
+              fontSize: isMobile ? 12 : compact ? 13 : 14,
+              lineHeight: isMobile ? 1.12 : 1.2,
             }}
           >
             {timeLabel ? (
               <span
                 style={{
                   display: "inline-block",
-                  minWidth: 46,
+                  minWidth: isMobile ? 39 : 46,
                   color: "#0f172a",
-                  fontWeight: 900,
+                  fontWeight: 700,
                 }}
               >
                 {timeLabel}
               </span>
             ) : null}
-            {icon} {title}
+
+            <span style={{ marginRight: 3 }}>{icon}</span>
+            {title}
           </div>
 
           {!compact && subtitle ? (
             <div
               style={{
-                marginTop: 2,
-                fontSize: 12,
-                color: "#475569",
+                marginTop: isMobile ? 1 : 2,
+                fontSize: isMobile ? 10.5 : 12,
+                color: "#64748b",
+                lineHeight: 1.15,
               }}
             >
               {subtitle}
@@ -80,7 +95,7 @@ export function DailyTimelineItem({
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 5,
+              gap: isMobile ? 3 : 5,
             }}
           >
             {actions}
@@ -91,10 +106,11 @@ export function DailyTimelineItem({
               style={{
                 border: "none",
                 background: "transparent",
-                fontSize: 14,
+                fontSize: isMobile ? 12 : 14,
                 cursor: "pointer",
                 color: "#64748b",
-                fontWeight: 900,
+                fontWeight: 800,
+                padding: isMobile ? 2 : undefined,
               }}
             >
               {expanded ? "▲" : "▼"}
@@ -107,8 +123,9 @@ export function DailyTimelineItem({
         <div
           style={{
             borderTop: "1px solid rgba(15,23,42,0.08)",
-            padding: "8px 10px",
+            padding: isMobile ? "4px 6px" : "5px 7px",
             background: "rgba(255,255,255,0.72)",
+            fontSize: isMobile ? 11 : undefined,
           }}
         >
           {detailContent}

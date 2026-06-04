@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { getCategoryColor, getCategoryName } from "../services/productHelpers";
 
 export function QuickAddSection(props) {
   const {
@@ -7,8 +6,6 @@ export function QuickAddSection(props) {
     setDayMealMoment,
     dayMealTime,
     setDayMealTime,
-    logCurrentMealToDay,
-    setLogCurrentMealToDay,
     addCurrentMealToSelectedDay,
     addCurrentMealToSelectedDayAndClear,
     cardStyle,
@@ -20,25 +17,38 @@ export function QuickAddSection(props) {
 
   const [flashAction, setFlashAction] = useState(null);
 
+  const isMobile =
+    window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
+
   function flash(name) {
     setFlashAction(name);
     setTimeout(() => setFlashAction(null), 650);
   }
 
   return (
-    <div style={cardStyle}>
+    <div
+      style={{
+        ...cardStyle,
+        padding: isMobile ? 8 : cardStyle?.padding,
+      }}
+    >
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "150px 140px 110px 1fr 1fr",
-          gap: 8,
+          gridTemplateColumns: isMobile
+            ? "1fr 1fr"
+            : "150px 140px 110px 1fr 1fr",
+          gap: isMobile ? 6 : 8,
           alignItems: "center",
         }}
       >
         <select
           value={dayMealMoment}
           onChange={(e) => setDayMealMoment(e.target.value)}
-          style={inputStyle}
+          style={{
+            ...inputStyle,
+            gridColumn: isMobile ? "1 / -1" : "auto",
+          }}
         >
           <option value="breakfast">Ontbijt</option>
           <option value="lunch">Lunch</option>
@@ -57,7 +67,6 @@ export function QuickAddSection(props) {
           <option value="neutral">Algemeen</option>
         </select>
 
-        {/* Datum voor Dag / Archief */}
         <input
           type="date"
           value={dayMealDate}
@@ -92,9 +101,11 @@ export function QuickAddSection(props) {
             color: flashAction === "add" ? "white" : "#166534",
             border: "1px solid #86efac",
             fontWeight: 700,
+            fontSize: isMobile ? 12 : undefined,
+            padding: isMobile ? "7px 8px" : undefined,
           }}
         >
-          Voeg toe aan dag
+          Voeg toe
         </button>
 
         <button
@@ -108,9 +119,11 @@ export function QuickAddSection(props) {
             color: flashAction === "addClear" ? "white" : "#1d4ed8",
             border: "1px solid #bfdbfe",
             fontWeight: 700,
+            fontSize: isMobile ? 12 : undefined,
+            padding: isMobile ? "7px 8px" : undefined,
           }}
         >
-          Voeg toe en start nieuwe maaltijd
+          + nieuwe maaltijd
         </button>
       </div>
     </div>

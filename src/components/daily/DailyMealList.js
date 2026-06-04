@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { DailyMealCard } from "./DailyMealCard";
 import { DailyTimelineItem } from "./DailyTimelineItem";
 import { DailyEventTimeEditorModal } from "./DailyEventTimeEditorModal";
+import { DailyEventEditModal } from "../DailyEventEditModal";
+import { DailyTimerModal } from "../DailyTimerModal";
 
 export function DailyMealList({
   mealsForDay = [],
@@ -27,47 +29,14 @@ export function DailyMealList({
   updateBowelEvent,
   deleteBowelEvent,
 }) {
-  const EVENT_COLORS = {
-    meal: {
-      bg: "#ecfdf5",
-      border: "#22c55e",
-      text: "#14532d",
-    },
-
-    insulin: {
-      bg: "#eef2ff",
-      border: "#6366f1",
-      text: "#312e81",
-    },
-
-    glucose: {
-      bg: "#eff6ff",
-      border: "#3b82f6",
-      text: "#1e3a8a",
-    },
-
-    glucoseBoost: {
-      bg: "#fff7ed",
-      border: "#f97316",
-      text: "#9a3412",
-    },
-
-    movement: {
-      bg: "#f5f3ff",
-      border: "#8b5cf6",
-      text: "#4c1d95",
-    },
-
-    bowel: {
-      bg: "#fef3c7",
-      border: "#d97706",
-      text: "#78350f",
-    },
-  };
-
   const [expandedIds, setExpandedIds] = useState([]);
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [editingType, setEditingType] = useState(null);
+  const [showTimerModal, setShowTimerModal] = useState(false);
+  const [timerEvent, setTimerEvent] = useState(null);
   const [compactTimeline, setCompactTimeline] = useState(false);
   const [timelineFilter, setTimelineFilter] = useState("all");
+
   const [visibleTypes, setVisibleTypes] = useState({
     meal: true,
     insulinAdvice: true,
@@ -78,14 +47,14 @@ export function DailyMealList({
     bowel: true,
   });
 
+  const [timeEditorEvent, setTimeEditorEvent] = useState(null);
+
   function toggleVisibleType(type) {
     setVisibleTypes((prev) => ({
       ...prev,
       [type]: !prev[type],
     }));
   }
-
-  const [timeEditorEvent, setTimeEditorEvent] = useState(null);
 
   const timelineItems = [
     ...mealsForDay.map((meal) => ({
@@ -94,6 +63,7 @@ export function DailyMealList({
       time: meal.eatenAt || "",
       meal,
     })),
+
     ...mealsForDay
       .filter(
         (meal) =>
@@ -107,30 +77,35 @@ export function DailyMealList({
         time: meal.eatenAt || "",
         meal,
       })),
+
     ...insulinEventsForDay.map((event) => ({
       id: event.id,
       itemType: "insulin",
       time: event.eventTime || "",
       event,
     })),
+
     ...glucoseEventsForDay.map((event) => ({
       id: event.id,
       itemType: "glucose",
       time: event.eventTime || "",
       event,
     })),
+
     ...glucoseBoostEventsForDay.map((event) => ({
       id: event.id,
       itemType: "glucoseBoost",
       time: event.eventTime || "",
       event,
     })),
+
     ...movementEventsForDay.map((event) => ({
       id: event.id,
       itemType: "movement",
       time: event.eventTime || "",
       event,
     })),
+
     ...bowelEventsForDay.map((event) => ({
       id: event.id,
       itemType: "bowel",
@@ -140,9 +115,7 @@ export function DailyMealList({
   ].sort((a, b) => String(b.time || "").localeCompare(String(a.time || "")));
 
   function getFilteredTimelineItems() {
-    if (timelineFilter === "all") {
-      return timelineItems;
-    }
+    if (timelineFilter === "all") return timelineItems;
 
     if (timelineFilter === "movementOnly") {
       return timelineItems.filter((item) => item.itemType === "movement");
@@ -162,9 +135,7 @@ export function DailyMealList({
 
         return sportItems.some((sportItem) => {
           const sportTime = new Date(sportItem.time).getTime();
-
           const windowStart = sportTime - 2 * 60 * 60 * 1000;
-
           const windowEnd = sportTime + 3 * 60 * 60 * 1000;
 
           return itemTime >= windowStart && itemTime <= windowEnd;
@@ -224,35 +195,10 @@ export function DailyMealList({
     const hours = closestDiff / 1000 / 60 / 60;
 
     if (hours < 0 && hours >= -2) return "PRE";
-
     if (hours >= 0 && hours <= 1) return "TIJDENS";
-
     if (hours > 1 && hours <= 3) return "POST";
 
     return null;
-  }
-
-  function getEventStyle(type) {
-    const c = EVENT_COLORS[type] || {
-      bg: "#ffffff",
-      border: "#cbd5e1",
-      text: "#334155",
-    };
-
-    return {
-      background: c.bg,
-      color: c.text,
-
-      borderLeft: `6px solid ${c.border}`,
-
-      borderRadius: 8,
-
-      padding: "8px 10px",
-
-      boxShadow: "none",
-
-      marginBottom: 6,
-    };
   }
 
   function toggleExpanded(id) {
@@ -271,14 +217,6 @@ export function DailyMealList({
     setExpandedIds([]);
   }
 
-  function openTimeEditor(type, event) {
-    setTimeEditorEvent({
-      type,
-      id: event.id,
-      eventTime: event.eventTime,
-    });
-  }
-
   function saveEventTime(nextValue) {
     if (!timeEditorEvent) return;
 
@@ -294,19 +232,38 @@ export function DailyMealList({
     setTimeEditorEvent(null);
   }
 
-  function timeButton(type, event) {
+  function timerButton(event) {
     return (
       <button
-        onClick={() => openTimeEditor(type, event)}
+        onClick={() => {
+          setTimerEvent(event);
+          setShowTimerModal(true);
+        }}
         style={{
           ...buttonStyle,
           fontSize: 12,
           padding: "4px 7px",
           borderRadius: 999,
-          background: "white",
+          background: "#fff7ed",
+          border: "1px solid #fdba74",
+          color: "#c2410c",
         }}
       >
-        Tijd
+        ⏱ Timer
+      </button>
+    );
+  }
+
+  function editButton(event, type) {
+    return (
+      <button
+        onClick={() => {
+          setEditingEvent(event);
+          setEditingType(type);
+        }}
+        style={buttonStyle}
+      >
+        Wijzig
       </button>
     );
   }
@@ -347,9 +304,14 @@ export function DailyMealList({
           onClick={() => setTimelineFilter("all")}
           style={{
             ...buttonStyle,
-            background: timelineFilter === "all" ? "#0f172a" : "#f8fafc",
-            color: timelineFilter === "all" ? "white" : "#0f172a",
-            border: "1px solid #cbd5e1",
+            background: timelineFilter === "all" ? "#bbf7d0" : "#f8fafc",
+            color: timelineFilter === "all" ? "#14532d" : "#166534",
+            border:
+              timelineFilter === "all"
+                ? "1px solid #22c55e"
+                : "1px solid #cbd5e1",
+            fontSize: window.innerWidth < 900 ? 11 : 12,
+            padding: window.innerWidth < 900 ? "2px 7px" : undefined,
           }}
         >
           Alles
@@ -383,9 +345,14 @@ export function DailyMealList({
           onClick={() => setTimelineFilter("metabolic")}
           style={{
             ...buttonStyle,
-            background: timelineFilter === "metabolic" ? "#0f172a" : "#ecfeff",
-            color: timelineFilter === "metabolic" ? "white" : "#0f172a",
-            border: "1px solid #7dd3fc",
+            background: timelineFilter === "metabolic" ? "#bbf7d0" : "#ecfeff",
+            color: timelineFilter === "metabolic" ? "#14532d" : "#166534",
+            border:
+              timelineFilter === "metabolic"
+                ? "1px solid #22c55e"
+                : "1px solid #86efac",
+            fontSize: window.innerWidth < 900 ? 11 : 12,
+            padding: window.innerWidth < 900 ? "2px 7px" : undefined,
           }}
         >
           Insuline + glucose
@@ -481,10 +448,13 @@ export function DailyMealList({
             onClick={() => toggleVisibleType(type)}
             style={{
               ...buttonStyle,
-              fontSize: 12,
-              background: visibleTypes[type] ? "#0f172a" : "#f8fafc",
-              color: visibleTypes[type] ? "white" : "#64748b",
-              border: "1px solid #cbd5e1",
+              fontSize: window.innerWidth < 900 ? 11 : 12,
+              padding: window.innerWidth < 900 ? "2px 7px" : undefined,
+              background: visibleTypes[type] ? "#bbf7d0" : "#f8fafc",
+              color: visibleTypes[type] ? "#14532d" : "#166534",
+              border: visibleTypes[type]
+                ? "1px solid #22c55e"
+                : "1px solid #cbd5e1",
             }}
           >
             {visibleTypes[type] ? "☑" : "☐"} {label}
@@ -516,6 +486,7 @@ export function DailyMealList({
           return (
             <DailyTimelineItem
               key={item.id}
+              indentLevel={1}
               compact={compactTimeline}
               icon="💡"
               title={`Insuline advies · ${meal.totals?.insulin || "?"} E`}
@@ -543,6 +514,7 @@ export function DailyMealList({
           return (
             <DailyTimelineItem
               key={event.id}
+              indentLevel={1}
               expanded={expandedIds.includes(event.id)}
               onToggle={() => toggleExpanded(event.id)}
               icon="💉"
@@ -558,65 +530,13 @@ export function DailyMealList({
               borderColor="#c7d2fe"
               actions={
                 <>
-                  {timeButton("insulin", event)}
-
-                  <button
-                    onClick={() => {
-                      const units = window.prompt(
-                        "Aantal eenheden:",
-                        event.units || "",
-                      );
-                      if (units === null) return;
-
-                      const note = window.prompt("Notitie:", event.note || "");
-                      if (note === null) return;
-
-                      updateInsulinEvent(event.id, { units, note });
-                    }}
-                    style={{
-                      ...buttonStyle,
-                      fontSize: 12,
-                      padding: "4px 7px",
-                      borderRadius: 999,
-                      background: "white",
-                      border: "1px solid #c7d2fe",
-                      color: "#3730a3",
-                    }}
-                  >
-                    Wijzig
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      const ok = window.confirm(
-                        "Dit insuline-event verwijderen?",
-                      );
-                      if (!ok) return;
-
-                      deleteInsulinEvent(event.id);
-                    }}
-                    style={{
-                      ...buttonStyle,
-                      fontSize: 12,
-                      padding: "4px 7px",
-                      borderRadius: 999,
-                      background: "#fee2e2",
-                      border: "1px solid #fecaca",
-                      color: "#991b1b",
-                    }}
-                  >
-                    Verwijder
-                  </button>
+                  {timerButton(event)}
+                  {editButton(event, "insulin")}
                 </>
               }
               detailContent={
                 <div style={{ fontSize: 13, color: "#334155" }}>
                   Werkelijk toegediende insuline.
-                  {event.note ? (
-                    <div style={{ marginTop: 6 }}>
-                      <strong>Context:</strong> {event.note}
-                    </div>
-                  ) : null}
                 </div>
               }
             />
@@ -629,6 +549,7 @@ export function DailyMealList({
           return (
             <DailyTimelineItem
               key={event.id}
+              indentLevel={1}
               expanded={expandedIds.includes(event.id)}
               onToggle={() => toggleExpanded(event.id)}
               icon="📈"
@@ -637,73 +558,20 @@ export function DailyMealList({
                 hour: "2-digit",
                 minute: "2-digit",
               })}
-              subtitsubtitle={`${getSportPhaseLabel(item) ? `[${getSportPhaseLabel(item)}] ` : ""}${event.note || ""}`}
-              le={event.note || ""}
+              subtitle={`${getSportPhaseLabel(item) ? `[${getSportPhaseLabel(item)}] ` : ""}${event.note || ""}`}
               compact={compactTimeline}
               accentColor="#075985"
               backgroundColor="#f0f9ff"
               borderColor="#7dd3fc"
               actions={
                 <>
-                  {timeButton("glucose", event)}
-
-                  <button
-                    onClick={() => {
-                      const glucoseValue = window.prompt(
-                        "Glucosewaarde (mmol/L):",
-                        event.glucoseValue || "",
-                      );
-                      if (glucoseValue === null) return;
-
-                      const note = window.prompt("Notitie:", event.note || "");
-                      if (note === null) return;
-
-                      updateGlucoseEvent(event.id, { glucoseValue, note });
-                    }}
-                    style={{
-                      ...buttonStyle,
-                      fontSize: 12,
-                      padding: "4px 7px",
-                      borderRadius: 999,
-                      background: "white",
-                      border: "1px solid #bae6fd",
-                      color: "#0369a1",
-                    }}
-                  >
-                    Wijzig
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      const ok = window.confirm(
-                        "Dit glucosemoment verwijderen?",
-                      );
-                      if (!ok) return;
-
-                      deleteGlucoseEvent(event.id);
-                    }}
-                    style={{
-                      ...buttonStyle,
-                      fontSize: 12,
-                      padding: "4px 7px",
-                      borderRadius: 999,
-                      background: "#fee2e2",
-                      border: "1px solid #fecaca",
-                      color: "#991b1b",
-                    }}
-                  >
-                    Verwijder
-                  </button>
+                  {timerButton(event)}
+                  {editButton(event, "glucose")}
                 </>
               }
               detailContent={
                 <div style={{ fontSize: 13, color: "#334155" }}>
                   Glucosemeting opgeslagen in metabole tijdlijn.
-                  {event.note ? (
-                    <div style={{ marginTop: 6 }}>
-                      <strong>Context:</strong> {event.note}
-                    </div>
-                  ) : null}
                 </div>
               }
             />
@@ -716,6 +584,7 @@ export function DailyMealList({
           return (
             <DailyTimelineItem
               key={event.id}
+              indentLevel={1}
               expanded={expandedIds.includes(event.id)}
               onToggle={() => toggleExpanded(event.id)}
               compact={compactTimeline}
@@ -725,84 +594,19 @@ export function DailyMealList({
                 hour: "2-digit",
                 minute: "2-digit",
               })}
-              subtitle={`${
-                getSportPhaseLabel(item) ? `[${getSportPhaseLabel(item)}] ` : ""
-              }${event.source || "Glucoseboost"}${
-                event.note ? ` · ${event.note}` : ""
-              }`}
+              subtitle={`${getSportPhaseLabel(item) ? `[${getSportPhaseLabel(item)}] ` : ""}${event.source || "Glucoseboost"}${event.note ? ` · ${event.note}` : ""}`}
               accentColor="#c2410c"
               backgroundColor="#fff7ed"
               borderColor="#fdba74"
               actions={
                 <>
-                  {timeButton("glucoseBoost", event)}
-
-                  <button
-                    onClick={() => {
-                      const kh = window.prompt(
-                        "Snelle KH (gram):",
-                        event.kh || "",
-                      );
-                      if (kh === null) return;
-
-                      const source = window.prompt("Bron:", event.source || "");
-                      if (source === null) return;
-
-                      const note = window.prompt("Notitie:", event.note || "");
-                      if (note === null) return;
-
-                      updateGlucoseBoostEvent(event.id, { kh, source, note });
-                    }}
-                    style={{
-                      ...buttonStyle,
-                      fontSize: 12,
-                      padding: "4px 7px",
-                      borderRadius: 999,
-                      background: "white",
-                      border: "1px solid #fdba74",
-                      color: "#c2410c",
-                    }}
-                  >
-                    Wijzig
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      const ok = window.confirm(
-                        "Deze glucoseboost verwijderen?",
-                      );
-                      if (!ok) return;
-
-                      deleteGlucoseBoostEvent(event.id);
-                    }}
-                    style={{
-                      ...buttonStyle,
-                      fontSize: 12,
-                      padding: "4px 7px",
-                      borderRadius: 999,
-                      background: "#fee2e2",
-                      border: "1px solid #fecaca",
-                      color: "#991b1b",
-                    }}
-                  >
-                    Verwijder
-                  </button>
+                  {timerButton(event)}
+                  {editButton(event, "glucoseBoost")}
                 </>
               }
               detailContent={
                 <div style={{ fontSize: 13, color: "#334155" }}>
                   Hypo-correctie / snelle glucoseboost.
-                  <div style={{ marginTop: 6 }}>
-                    <strong>Bron:</strong> {event.source || "Onbekend"}
-                  </div>
-                  <div style={{ marginTop: 6 }}>
-                    <strong>Snelle KH:</strong> {event.kh || 0} g
-                  </div>
-                  {event.note ? (
-                    <div style={{ marginTop: 6 }}>
-                      <strong>Context:</strong> {event.note}
-                    </div>
-                  ) : null}
                 </div>
               }
             />
@@ -826,104 +630,19 @@ export function DailyMealList({
                 hour: "2-digit",
                 minute: "2-digit",
               })}
-              subtitle={`${
-                getSportPhaseLabel(item) ? `[${getSportPhaseLabel(item)}] ` : ""
-              }${event.intensityType || "Belasting onbekend"}${
-                event.note ? ` · ${event.note}` : ""
-              }`}
+              subtitle={`${getSportPhaseLabel(item) ? `[${getSportPhaseLabel(item)}] ` : ""}${event.intensityType || "Belasting onbekend"}${event.note ? ` · ${event.note}` : ""}`}
               accentColor="#4c1d95"
               backgroundColor="#f5f3ff"
               borderColor="#c4b5fd"
               actions={
                 <>
-                  {timeButton("movement", event)}
-
-                  <button
-                    onClick={() => {
-                      const activityType = window.prompt(
-                        "Type beweging/sport:",
-                        event.activityType || "",
-                      );
-                      if (activityType === null) return;
-
-                      const intensityType = window.prompt(
-                        "Belasting:",
-                        event.intensityType || "",
-                      );
-                      if (intensityType === null) return;
-
-                      const durationMinutes = window.prompt(
-                        "Duur in minuten:",
-                        event.durationMinutes || "",
-                      );
-                      if (durationMinutes === null) return;
-
-                      const note = window.prompt("Notitie:", event.note || "");
-                      if (note === null) return;
-
-                      updateMovementEvent(event.id, {
-                        activityType,
-                        intensityType,
-                        durationMinutes,
-                        note,
-                      });
-                    }}
-                    style={{
-                      ...buttonStyle,
-                      fontSize: 12,
-                      padding: "4px 7px",
-                      borderRadius: 999,
-                      background: "white",
-                      border: "1px solid #67e8f9",
-                      color: "#0e7490",
-                    }}
-                  >
-                    Wijzig
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      const ok = window.confirm(
-                        "Dit bewegingsmoment verwijderen?",
-                      );
-                      if (!ok) return;
-
-                      deleteMovementEvent(event.id);
-                    }}
-                    style={{
-                      ...buttonStyle,
-                      fontSize: 12,
-                      padding: "4px 7px",
-                      borderRadius: 999,
-                      background: "#fee2e2",
-                      border: "1px solid #fecaca",
-                      color: "#991b1b",
-                    }}
-                  >
-                    Verwijder
-                  </button>
+                  {timerButton(event)}
+                  {editButton(event, "movement")}
                 </>
               }
               detailContent={
                 <div style={{ fontSize: 13, color: "#334155" }}>
                   Beweging/sportmoment in metabole tijdlijn.
-                  <div style={{ marginTop: 6 }}>
-                    <strong>Type:</strong> {event.activityType || "Onbekend"}
-                  </div>
-                  <div style={{ marginTop: 6 }}>
-                    <strong>Belasting:</strong>{" "}
-                    {event.intensityType || "Onbekend"}
-                  </div>
-                  {event.durationMinutes ? (
-                    <div style={{ marginTop: 6 }}>
-                      <strong>Duur:</strong> {event.durationMinutes} minuten
-                    </div>
-                  ) : null}
-                  {event.note ? (
-                    <div style={{ marginTop: 6 }}>
-                      <strong>Context:</strong> {event.note}
-                    </div>
-                  ) : null}
                 </div>
               }
             />
@@ -936,6 +655,7 @@ export function DailyMealList({
           return (
             <DailyTimelineItem
               key={event.id}
+              indentLevel={1}
               expanded={expandedIds.includes(event.id)}
               onToggle={() => toggleExpanded(event.id)}
               compact={compactTimeline}
@@ -945,91 +665,19 @@ export function DailyMealList({
                 hour: "2-digit",
                 minute: "2-digit",
               })}
-              subtitle={`${
-                getSportPhaseLabel(item) ? `[${getSportPhaseLabel(item)}] ` : ""
-              }${event.source || "Glucoseboost"}${
-                event.note ? ` · ${event.note}` : ""
-              }`}
+              subtitle={`${getSportPhaseLabel(item) ? `[${getSportPhaseLabel(item)}] ` : ""}${event.urgency || ""}${event.note ? ` · ${event.note}` : ""}`}
               accentColor="#92400e"
               backgroundColor="#fffbeb"
               borderColor="#fcd34d"
               actions={
                 <>
-                  {timeButton("bowel", event)}
-
-                  <button
-                    onClick={() => {
-                      const bristolScore = window.prompt(
-                        "Bristol score:",
-                        event.bristolScore || "4",
-                      );
-                      if (bristolScore === null) return;
-
-                      const urgency = window.prompt(
-                        "Urgentie:",
-                        event.urgency || "",
-                      );
-                      if (urgency === null) return;
-
-                      const note = window.prompt("Notitie:", event.note || "");
-                      if (note === null) return;
-
-                      updateBowelEvent(event.id, {
-                        bristolScore,
-                        urgency,
-                        note,
-                      });
-                    }}
-                    style={{
-                      ...buttonStyle,
-                      fontSize: 12,
-                      padding: "4px 7px",
-                      borderRadius: 999,
-                      background: "white",
-                      border: "1px solid #fcd34d",
-                      color: "#92400e",
-                    }}
-                  >
-                    Wijzig
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      const ok = window.confirm("Stoelgangmoment verwijderen?");
-                      if (!ok) return;
-
-                      deleteBowelEvent(event.id);
-                    }}
-                    style={{
-                      ...buttonStyle,
-                      fontSize: 12,
-                      padding: "4px 7px",
-                      borderRadius: 999,
-                      background: "#fee2e2",
-                      border: "1px solid #fecaca",
-                      color: "#991b1b",
-                    }}
-                  >
-                    Verwijder
-                  </button>
+                  {timerButton(event)}
+                  {editButton(event, "bowel")}
                 </>
               }
               detailContent={
                 <div style={{ fontSize: 13, color: "#334155" }}>
                   Stoelgangmoment in metabole tijdlijn.
-                  <div style={{ marginTop: 6 }}>
-                    <strong>Bristol:</strong> {event.bristolScore}
-                  </div>
-                  {event.urgency ? (
-                    <div style={{ marginTop: 6 }}>
-                      <strong>Urgentie:</strong> {event.urgency}
-                    </div>
-                  ) : null}
-                  {event.note ? (
-                    <div style={{ marginTop: 6 }}>
-                      <strong>Context:</strong> {event.note}
-                    </div>
-                  ) : null}
                 </div>
               }
             />
@@ -1039,7 +687,6 @@ export function DailyMealList({
         return null;
       })}
 
-      {/* Uniforme datum/tijd editor voor tijdlijn-events */}
       {timeEditorEvent && (
         <DailyEventTimeEditorModal
           initialValue={
@@ -1050,6 +697,52 @@ export function DailyMealList({
           buttonStyle={buttonStyle}
           onSave={saveEventTime}
           onClose={() => setTimeEditorEvent(null)}
+        />
+      )}
+
+      {editingEvent && (
+        <DailyEventEditModal
+          event={editingEvent}
+          eventType={editingType}
+          buttonStyle={buttonStyle}
+          onClose={() => {
+            setEditingEvent(null);
+            setEditingType(null);
+          }}
+          onSave={(id, updates) => {
+            if (editingType === "insulin") updateInsulinEvent(id, updates);
+            if (editingType === "glucose") updateGlucoseEvent(id, updates);
+            if (editingType === "glucoseBoost")
+              updateGlucoseBoostEvent(id, updates);
+            if (editingType === "movement") updateMovementEvent(id, updates);
+            if (editingType === "bowel") updateBowelEvent(id, updates);
+
+            setEditingEvent(null);
+            setEditingType(null);
+          }}
+          onDelete={(id) => {
+            if (editingType === "insulin") deleteInsulinEvent(id);
+            if (editingType === "glucose") deleteGlucoseEvent(id);
+            if (editingType === "glucoseBoost") deleteGlucoseBoostEvent(id);
+            if (editingType === "movement") deleteMovementEvent(id);
+            if (editingType === "bowel") deleteBowelEvent(id);
+
+            setEditingEvent(null);
+            setEditingType(null);
+          }}
+        />
+      )}
+
+      {showTimerModal && (
+        <DailyTimerModal
+          buttonStyle={buttonStyle}
+          onClose={() => {
+            setShowTimerModal(false);
+            setTimerEvent(null);
+          }}
+          onSave={(timer) => {
+            alert(`Timer ingesteld: ${timer.minutes} min · ${timer.label}`);
+          }}
         />
       )}
     </>

@@ -7,16 +7,20 @@ export function SavedMealCard({
   onLoad,
   onDelete,
   onAppend,
+  onEdit,
   buttonStyle,
 }) {
   const [open, setOpen] = useState(false);
+
+  const isMobile =
+    window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
 
   return (
     <div
       style={{
         border: "1px solid #cbd5e1",
-        borderRadius: 10,
-        padding: 10,
+        borderRadius: isMobile ? 2 : 10,
+        padding: isMobile ? "3px 6px" : 10,
         background: "#f8fafc",
       }}
     >
@@ -26,34 +30,54 @@ export function SavedMealCard({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          gap: 10,
+          gap: isMobile ? 4 : 10,
           cursor: "pointer",
         }}
       >
-        <div>
-          <div style={{ fontWeight: 700 }}>
+        <div style={{ minWidth: 0 }}>
+          <div
+            style={{
+              fontWeight: isMobile ? 600 : 700,
+              fontSize: isMobile ? 11 : undefined,
+              lineHeight: isMobile ? 1.05 : undefined,
+              whiteSpace: "normal",
+            }}
+          >
             {index + 1}. {meal.name}
           </div>
+
           {meal.createdAt && (
-            <div style={{ fontSize: 12, color: "#64748b" }}>
+            <div
+              style={{
+                fontSize: isMobile ? 10 : 12,
+                color: "#64748b",
+              }}
+            >
               {meal.createdAt}
             </div>
           )}
         </div>
 
-        <div style={{ fontSize: 14 }}>{open ? "▲" : "▼"}</div>
+        <div style={{ fontSize: isMobile ? 11 : 14 }}>{open ? "▲" : "▼"}</div>
       </div>
 
       {open && (
-        <div style={{ marginTop: 10 }}>
-          <div style={{ display: "grid", gap: 4, marginBottom: 10 }}>
+        <div style={{ marginTop: isMobile ? 5 : 10 }}>
+          <div
+            style={{
+              display: "grid",
+              gap: isMobile ? 2 : 4,
+              marginBottom: isMobile ? 5 : 10,
+            }}
+          >
             {meal.rows?.map((r, i) => {
               const product = products.find((p) => p.id === r.productId);
+
               return (
                 <div
                   key={i}
                   style={{
-                    fontSize: 13,
+                    fontSize: isMobile ? 11 : 13,
                     color: "#334155",
                   }}
                 >
@@ -63,7 +87,13 @@ export function SavedMealCard({
             })}
           </div>
 
-          <div style={{ display: "flex", gap: 8 }}>
+          <div
+            style={{
+              display: "flex",
+              gap: isMobile ? 4 : 8,
+              flexWrap: "wrap",
+            }}
+          >
             <button
               onClick={() => onLoad(meal.id)}
               style={{
@@ -72,13 +102,37 @@ export function SavedMealCard({
                 color: "#166534",
                 border: "1px solid #86efac",
                 fontWeight: 700,
+                padding: isMobile ? "3px 6px" : undefined,
+                fontSize: isMobile ? 11 : undefined,
               }}
             >
               Laden
             </button>
 
-            <button onClick={() => onAppend(meal.id)} style={buttonStyle}>
+            <button
+              onClick={() => onAppend(meal.id)}
+              style={{
+                ...buttonStyle,
+                padding: isMobile ? "3px 6px" : undefined,
+                fontSize: isMobile ? 11 : undefined,
+              }}
+            >
               Voeg toe
+            </button>
+
+            <button
+              onClick={() => onEdit(meal.id)}
+              style={{
+                ...buttonStyle,
+                background: "#eef2ff",
+                border: "1px solid #c7d2fe",
+                color: "#3730a3",
+                fontWeight: 700,
+                padding: isMobile ? "3px 6px" : undefined,
+                fontSize: isMobile ? 11 : undefined,
+              }}
+            >
+              Wijzig
             </button>
 
             <button
@@ -87,6 +141,8 @@ export function SavedMealCard({
                 ...buttonStyle,
                 background: "#fee2e2",
                 border: "1px solid #fecaca",
+                padding: isMobile ? "3px 6px" : undefined,
+                fontSize: isMobile ? 11 : undefined,
               }}
             >
               Wis

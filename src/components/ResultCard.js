@@ -6,6 +6,10 @@ import {
 } from "../services/mealAnalysisService";
 
 export function ResultCard({ totals, rowsWithCalc }) {
+  const isMobile =
+    window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
+
+  const [open, setOpen] = useState(!isMobile);
   const [showResultDetail, setShowResultDetail] = useState(false);
 
   const mealFlags = getMealFlags(totals);
@@ -45,122 +49,154 @@ export function ResultCard({ totals, rowsWithCalc }) {
     }
   }
 
+  const mobileCompactResult = isMobile ? (
+    <button
+      onClick={() => setShowResultDetail(true)}
+      style={{
+        width: "100%",
+        border: "1px solid #94a3b8",
+        borderRadius: 2,
+        padding: "3px 8px",
+        background: "#f1f5f9",
+        cursor: "pointer",
+        fontWeight: 700,
+        fontSize: 12,
+        color: "#0f172a",
+        textAlign: "left",
+      }}
+    >
+      Analyse
+    </button>
+  ) : null;
+
   return (
     <>
-      <div
-        style={{
-          border: "1px solid #94a3b8",
-          borderRadius: 14,
-          padding: 10,
-          background: "#f1f5f9",
-          boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
-        }}
-      >
+      {isMobile ? (
+        mobileCompactResult
+      ) : (
         <div
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 12,
-            marginBottom: 8,
+            border: "1px solid #94a3b8",
+            borderRadius: 14,
+            padding: 10,
+            background: "#f1f5f9",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
           }}
         >
-          <div style={{ fontWeight: 800, fontSize: 15, color: "#0f172a" }}>
-            Maaltijd resultaat
-          </div>
-
-          <button
-            onClick={() => setShowResultDetail(true)}
-            style={{
-              border: "1px solid #94a3b8",
-              borderRadius: 10,
-              padding: "6px 10px",
-              background: "white",
-              cursor: "pointer",
-              fontWeight: 700,
-              fontSize: 13,
-              color: "#0f172a",
-            }}
-          >
-            Analyse
-          </button>
-        </div>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, minmax(160px, 1fr))",
-            gap: 8,
-            alignItems: "stretch",
-          }}
-        >
-          {/* Macro's en energie */}
-          <div style={{ ...compactBox, borderTop: "3px solid #1d4ed8" }}>
-            <div style={{ ...labelStyleMini, color: "#1d4ed8" }}>
-              Macro&apos;s / energie
-            </div>
-            <div style={valueStyleMini}>
-              <div style={getMacroStyle(totals.enzymeColorMap?.kh)}>
-                <strong>KH:</strong> {totals.kh} g
-              </div>
-              <div style={getMacroStyle(totals.enzymeColorMap?.protein)}>
-                <strong>Eiwit:</strong> {totals.protein} g
-              </div>
-              <div>
-                <strong>Vet:</strong> {totals.fat} g ·{" "}
-                <strong>{totals.kcal}</strong> kcal
-              </div>
-            </div>
-          </div>
-
-          {/* Insuline */}
-          <div style={{ ...compactBox, borderTop: "3px solid #7c3aed" }}>
-            <div style={{ ...labelStyleMini, color: "#7c3aed" }}>Insuline</div>
-            <div style={{ ...valueStyleMini, fontSize: 16, fontWeight: 800 }}>
-              {totals.insulin} E
-            </div>
-          </div>
-
-          {/* Timing / GI */}
-          <div style={{ ...compactBox, borderTop: "3px solid #0891b2" }}>
-            <div style={{ ...labelStyleMini, color: "#0891b2" }}>
-              Timing / GI
-            </div>
-            <div style={valueStyleMini}>
-              <div>
-                <strong>Timing:</strong> {totals.personalTimingAdvice}
-              </div>
-              <div>
-                <strong>GI:</strong> {totals.mealGiLabel}
-              </div>
-            </div>
-          </div>
-
-          {/* Creon compact */}
           <div
             style={{
-              ...compactBox,
-              borderTop: "3px solid #166534",
-              background: "#f0fdf4",
-              border: "1px solid #bbf7d0",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 12,
+              marginBottom: open ? 8 : 0,
             }}
           >
-            <div style={{ ...labelStyleMini, color: "#166534" }}>Creon</div>
-            <div style={valueStyleMini}>
-              <div>
-                <strong>Advies:</strong> {totals.best?.c25 || 0} x 25k +{" "}
-                {totals.best?.c10 || 0} x 10k
+            <div
+              style={{
+                fontWeight: 800,
+                fontSize: 15,
+                color: "#0f172a",
+              }}
+            >
+              Maaltijd resultaat
+            </div>
+
+            <button
+              onClick={() => setShowResultDetail(true)}
+              style={{
+                border: "1px solid #94a3b8",
+                borderRadius: 10,
+                padding: "6px 10px",
+                background: "white",
+                cursor: "pointer",
+                fontWeight: 700,
+                fontSize: 13,
+                color: "#0f172a",
+              }}
+            >
+              Analyse
+            </button>
+          </div>
+
+          {open && (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(4, minmax(160px, 1fr))",
+                gap: 8,
+                alignItems: "stretch",
+              }}
+            >
+              <div style={{ ...compactBox, borderTop: "3px solid #1d4ed8" }}>
+                <div style={{ ...labelStyleMini, color: "#1d4ed8" }}>
+                  Macro&apos;s / energie
+                </div>
+                <div style={valueStyleMini}>
+                  <div style={getMacroStyle(totals.enzymeColorMap?.kh)}>
+                    <strong>KH:</strong> {totals.kh} g
+                  </div>
+                  <div style={getMacroStyle(totals.enzymeColorMap?.protein)}>
+                    <strong>Eiwit:</strong> {totals.protein} g
+                  </div>
+                  <div>
+                    <strong>Vet:</strong> {totals.fat} g ·{" "}
+                    <strong>{totals.kcal}</strong> kcal
+                  </div>
+                </div>
               </div>
-              <div>
-                <strong>Dominant:</strong> {totals.dominantEnzymeLabel}
+
+              <div style={{ ...compactBox, borderTop: "3px solid #7c3aed" }}>
+                <div style={{ ...labelStyleMini, color: "#7c3aed" }}>
+                  Insuline
+                </div>
+                <div
+                  style={{ ...valueStyleMini, fontSize: 16, fontWeight: 800 }}
+                >
+                  {totals.insulin} E
+                </div>
               </div>
-              <div>
-                <strong>Load:</strong> {totals.enzymeLoad}
+
+              <div style={{ ...compactBox, borderTop: "3px solid #0891b2" }}>
+                <div style={{ ...labelStyleMini, color: "#0891b2" }}>
+                  Timing / GI
+                </div>
+                <div style={valueStyleMini}>
+                  <div>
+                    <strong>Timing:</strong> {totals.personalTimingAdvice}
+                  </div>
+                  <div>
+                    <strong>GI:</strong> {totals.mealGiLabel}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  ...compactBox,
+                  borderTop: "3px solid #166534",
+                  background: "#f0fdf4",
+                  border: "1px solid #bbf7d0",
+                }}
+              >
+                <div style={{ ...labelStyleMini, color: "#166534" }}>Creon</div>
+                <div style={valueStyleMini}>
+                  <div>
+                    <strong>Advies:</strong> {totals.best?.c25 || 0} x 25k +{" "}
+                    {totals.best?.c10 || 0} x 10k
+                  </div>
+                  <div>
+                    <strong>Dominant:</strong> {totals.dominantEnzymeLabel}
+                  </div>
+                  <div>
+                    <strong>Load:</strong> {totals.enzymeLoad}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
-      </div>
+      )}
 
       {showResultDetail && (
         <div
@@ -172,7 +208,7 @@ export function ResultCard({ totals, rowsWithCalc }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: 20,
+            padding: isMobile ? 10 : 20,
             zIndex: 9999,
           }}
         >
@@ -183,9 +219,9 @@ export function ResultCard({ totals, rowsWithCalc }) {
               maxHeight: "90vh",
               overflowY: "auto",
               background: "#ffffff",
-              borderRadius: 18,
+              borderRadius: isMobile ? 10 : 18,
               boxShadow: "0 20px 50px rgba(0,0,0,0.25)",
-              padding: 20,
+              padding: isMobile ? 10 : 20,
               border: "1px solid #cbd5e1",
             }}
           >
@@ -195,10 +231,16 @@ export function ResultCard({ totals, rowsWithCalc }) {
                 justifyContent: "space-between",
                 alignItems: "center",
                 gap: 12,
-                marginBottom: 16,
+                marginBottom: isMobile ? 8 : 16,
               }}
             >
-              <div style={{ fontSize: 20, fontWeight: 800, color: "#0f172a" }}>
+              <div
+                style={{
+                  fontSize: isMobile ? 16 : 20,
+                  fontWeight: 800,
+                  color: "#0f172a",
+                }}
+              >
                 Uitgebreide maaltijdanalyse
               </div>
 
@@ -206,11 +248,12 @@ export function ResultCard({ totals, rowsWithCalc }) {
                 onClick={() => setShowResultDetail(false)}
                 style={{
                   border: "1px solid #94a3b8",
-                  borderRadius: 10,
-                  padding: "8px 12px",
+                  borderRadius: 8,
+                  padding: isMobile ? "5px 8px" : "8px 12px",
                   background: "#f8fafc",
                   cursor: "pointer",
                   fontWeight: 700,
+                  fontSize: isMobile ? 12 : undefined,
                 }}
               >
                 Sluiten
@@ -220,24 +263,39 @@ export function ResultCard({ totals, rowsWithCalc }) {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-                gap: 16,
+                gridTemplateColumns: isMobile
+                  ? "1fr"
+                  : "repeat(auto-fit, minmax(320px, 1fr))",
+                gap: isMobile ? 8 : 16,
                 alignItems: "start",
               }}
             >
               <div
                 style={{
                   border: "1px solid #cbd5e1",
-                  borderRadius: 14,
-                  padding: 14,
+                  padding: isMobile ? 8 : 14,
+                  borderRadius: isMobile ? 6 : 14,
                   background: "#f8fafc",
                 }}
               >
-                <div style={{ fontWeight: 800, marginBottom: 10 }}>
+                <div
+                  style={{
+                    fontWeight: 800,
+                    marginBottom: isMobile ? 6 : 10,
+                    fontSize: isMobile ? 14 : undefined,
+                  }}
+                >
                   Samenvatting
                 </div>
 
-                <div style={{ display: "grid", gap: 6, fontSize: 14 }}>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr",
+                    gap: isMobile ? 3 : 6,
+                    fontSize: isMobile ? 12 : 14,
+                  }}
+                >
                   <div>
                     <strong>KH:</strong> {totals.kh} g
                   </div>
@@ -260,60 +318,65 @@ export function ResultCard({ totals, rowsWithCalc }) {
                     <strong>GI:</strong> {totals.mealGiLabel}
                   </div>
                 </div>
-
-                <div
-                  style={{ fontWeight: 800, marginTop: 16, marginBottom: 10 }}
-                >
-                  Producten in deze maaltijd
-                </div>
-
-                <div style={{ display: "grid", gap: 8 }}>
-                  {(rowsWithCalc || [])
-                    .filter((r) => r.product)
-                    .map((r, idx) => (
-                      <div
-                        key={r.id || idx}
-                        style={{
-                          border: "1px solid #e2e8f0",
-                          borderRadius: 10,
-                          padding: 10,
-                          background: "white",
-                          fontSize: 13,
-                        }}
-                      >
-                        <div style={{ fontWeight: 700 }}>{r.product.name}</div>
-                        <div style={{ color: "#475569", marginTop: 4 }}>
-                          {r.grams} g • KH {r.kh} • Eiwit {r.protein} • Vet{" "}
-                          {r.fat}
-                        </div>
-                      </div>
-                    ))}
-                </div>
               </div>
 
               <div
                 style={{
                   border: "1px solid #bbf7d0",
-                  borderRadius: 14,
-                  padding: 14,
+                  borderRadius: isMobile ? 6 : 14,
+                  padding: isMobile ? 8 : 14,
                   background: "#f0fdf4",
                 }}
               >
-                <div style={{ fontWeight: 800, marginBottom: 10 }}>
+                <div
+                  style={{
+                    fontWeight: 800,
+                    marginBottom: isMobile ? 6 : 10,
+                    fontSize: isMobile ? 14 : undefined,
+                  }}
+                >
                   Creon-analyse
                 </div>
 
-                <CreonResultCard totals={totals} />
+                {isMobile ? (
+                  <div
+                    style={{
+                      display: "grid",
+                      gap: 3,
+                      fontSize: 12,
+                      color: "#14532d",
+                    }}
+                  >
+                    <div>
+                      <strong>Advies:</strong> {totals.best?.c25 || 0} x 25k +{" "}
+                      {totals.best?.c10 || 0} x 10k
+                    </div>
+
+                    <div>
+                      <strong>Vetbelasting:</strong> {totals.fat} g
+                    </div>
+
+                    <div>
+                      <strong>Dominant:</strong> {totals.dominantEnzymeLabel}
+                    </div>
+
+                    <div>
+                      <strong>Load:</strong> {totals.enzymeLoad}
+                    </div>
+                  </div>
+                ) : (
+                  <CreonResultCard totals={totals} />
+                )}
 
                 <div
                   style={{
-                    marginTop: 16,
+                    marginTop: isMobile ? 8 : 16,
                     borderTop: "1px solid #d1fae5",
-                    paddingTop: 12,
-                    fontSize: 14,
+                    paddingTop: isMobile ? 8 : 12,
+                    fontSize: isMobile ? 12 : 14,
                     color: "#14532d",
                     display: "grid",
-                    gap: 6,
+                    gap: isMobile ? 4 : 6,
                   }}
                 >
                   <div style={{ fontWeight: 800 }}>Korte interpretatie</div>
@@ -334,6 +397,48 @@ export function ResultCard({ totals, rowsWithCalc }) {
                       maaltijd: <strong>{mealFlags.delayedItemsText}</strong>
                     </div>
                   )}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  border: "1px solid #e2e8f0",
+                  borderRadius: isMobile ? 6 : 14,
+                  padding: isMobile ? 8 : 14,
+                  background: "#ffffff",
+                }}
+              >
+                <div
+                  style={{
+                    fontWeight: 800,
+                    marginBottom: isMobile ? 6 : 10,
+                    fontSize: isMobile ? 14 : undefined,
+                  }}
+                >
+                  Producten in deze maaltijd
+                </div>
+
+                <div style={{ display: "grid", gap: isMobile ? 4 : 8 }}>
+                  {(rowsWithCalc || [])
+                    .filter((r) => r.product)
+                    .map((r, idx) => (
+                      <div
+                        key={r.id || idx}
+                        style={{
+                          border: "1px solid #e2e8f0",
+                          borderRadius: isMobile ? 4 : 10,
+                          padding: isMobile ? 6 : 10,
+                          background: "white",
+                          fontSize: isMobile ? 11 : 13,
+                        }}
+                      >
+                        <div style={{ fontWeight: 700 }}>{r.product.name}</div>
+                        <div style={{ color: "#475569", marginTop: 4 }}>
+                          {r.grams} g • KH {r.kh} • Eiwit {r.protein} • Vet{" "}
+                          {r.fat}
+                        </div>
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>

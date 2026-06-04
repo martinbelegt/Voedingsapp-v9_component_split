@@ -15,6 +15,26 @@ export function DailyEventAddModal({
   const [value2, setValue2] = useState("");
   const [value3, setValue3] = useState("");
 
+  const isMobile =
+    window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
+
+  const mobileInputStyle = {
+    width: "100%",
+    boxSizing: "border-box",
+
+    padding: isMobile ? "12px 11px" : "10px 11px",
+
+    borderRadius: 10,
+
+    border: "1px solid #cbd5e1",
+
+    fontSize: isMobile ? 16 : 14,
+
+    minHeight: isMobile ? 46 : 44,
+
+    WebkitAppearance: "none",
+  };
+
   const config = {
     insulin: {
       title: "Insuline toevoegen",
@@ -90,10 +110,17 @@ export function DailyEventAddModal({
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: "min(460px, 94vw)",
+          width: "min(460px,95vw)",
+
+          maxHeight: isMobile ? "85vh" : "90vh",
+
+          overflowY: "auto",
+
           background: "white",
-          borderRadius: 18,
-          padding: 18,
+
+          borderRadius: isMobile ? 10 : 18,
+
+          padding: isMobile ? 12 : 18,
           border: "1px solid #cbd5e1",
           boxShadow: "0 20px 50px rgba(0,0,0,0.25)",
         }}
@@ -118,16 +145,13 @@ export function DailyEventAddModal({
           onChange={(e) => setEventTime(e.target.value)}
           onClick={(e) => e.currentTarget.showPicker?.()}
           style={{
-            width: "100%",
-            boxSizing: "border-box",
-            padding: "10px 11px",
-            borderRadius: 10,
-            border: "1px solid #cbd5e1",
-            fontSize: 14,
+            ...mobileInputStyle,
+
             marginTop: 4,
+
             marginBottom: 12,
+
             cursor: "pointer",
-            minHeight: 44,
           }}
         />
 
@@ -139,11 +163,7 @@ export function DailyEventAddModal({
             value={value1 || "4"}
             onChange={(e) => setValue1(e.target.value)}
             style={{
-              width: "100%",
-              boxSizing: "border-box",
-              padding: "10px 11px",
-              borderRadius: 10,
-              border: "1px solid #cbd5e1",
+              ...mobileInputStyle,
               marginTop: 4,
               marginBottom: 12,
               minHeight: 44,
@@ -164,11 +184,7 @@ export function DailyEventAddModal({
             onChange={(e) => setValue1(e.target.value)}
             placeholder={config.placeholder1}
             style={{
-              width: "100%",
-              boxSizing: "border-box",
-              padding: "10px 11px",
-              borderRadius: 10,
-              border: "1px solid #cbd5e1",
+              ...mobileInputStyle,
               marginTop: 4,
               marginBottom: 12,
             }}
@@ -181,11 +197,7 @@ export function DailyEventAddModal({
           onChange={(e) => setValue2(e.target.value)}
           placeholder={config.placeholder2}
           style={{
-            width: "100%",
-            boxSizing: "border-box",
-            padding: "10px 11px",
-            borderRadius: 10,
-            border: "1px solid #cbd5e1",
+            ...mobileInputStyle,
             marginTop: 4,
             marginBottom: 12,
           }}
@@ -202,11 +214,7 @@ export function DailyEventAddModal({
               onChange={(e) => setValue3(e.target.value)}
               placeholder={config.placeholder3}
               style={{
-                width: "100%",
-                boxSizing: "border-box",
-                padding: "10px 11px",
-                borderRadius: 10,
-                border: "1px solid #cbd5e1",
+                ...mobileInputStyle,
                 marginTop: 4,
                 marginBottom: 14,
               }}

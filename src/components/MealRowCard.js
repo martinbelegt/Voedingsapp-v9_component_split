@@ -12,6 +12,9 @@ export function MealRowCard({
   buttonStyle,
   getCategoryColor,
 }) {
+  const isMobile =
+    window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
+
   const backgroundColor =
     row.product && getCategoryColor
       ? getCategoryColor(categories, row.product.categoryId)
@@ -19,16 +22,18 @@ export function MealRowCard({
 
   const compactInputStyle = {
     ...inputStyle,
-    padding: "7px 9px",
-    fontSize: 13,
-    borderRadius: 10,
+    padding: isMobile ? "6px 7px" : "7px 9px",
+    fontSize: isMobile ? 12 : 13,
+    borderRadius: isMobile ? 6 : 10,
+    minHeight: isMobile ? 34 : undefined,
+    minWidth: 0,
   };
 
   const metricStyle = {
     background: "rgba(255,255,255,0.6)",
-    borderRadius: 10,
-    padding: "5px 7px",
-    fontSize: 12,
+    borderRadius: isMobile ? 6 : 10,
+    padding: isMobile ? "3px 6px" : "5px 7px",
+    fontSize: isMobile ? 11 : 12,
     whiteSpace: "nowrap",
   };
 
@@ -37,32 +42,32 @@ export function MealRowCard({
       ref={isLastRow ? newRowRef : null}
       style={{
         border: "1px solid #e5e7eb",
-        borderRadius: 12,
-        padding: 8,
-        marginBottom: 6,
+        borderRadius: isMobile ? 6 : 12,
+        padding: isMobile ? 6 : 8,
+        marginBottom: isMobile ? 5 : 6,
         background: backgroundColor,
+        overflow: "hidden",
       }}
     >
-      {/* Compacte maaltijdregel */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "minmax(220px, 2fr) 110px 95px auto",
-          gap: 6,
+          gridTemplateColumns: isMobile
+            ? "1fr 70px 48px"
+            : "minmax(220px, 2fr) 110px 95px auto",
+          gap: isMobile ? 5 : 6,
           alignItems: "center",
         }}
       >
         <select
           value={row.productId}
-          onChange={(e) =>
-            onChange(row.id, {
-              productId: e.target.value,
-            })
-          }
-          style={compactInputStyle}
+          onChange={(e) => onChange(row.id, { productId: e.target.value })}
+          style={{
+            ...compactInputStyle,
+            gridColumn: isMobile ? "1 / -1" : "auto",
+          }}
         >
           <option value="">Kies product</option>
-
           {products.map((p) => (
             <option key={p.id} value={p.id}>
               {p.favorite ? "★ " : ""}
@@ -73,11 +78,7 @@ export function MealRowCard({
 
         <select
           value={row.mode}
-          onChange={(e) =>
-            onChange(row.id, {
-              mode: e.target.value,
-            })
-          }
+          onChange={(e) => onChange(row.id, { mode: e.target.value })}
           style={compactInputStyle}
         >
           <option value="portion">Porties</option>
@@ -86,12 +87,36 @@ export function MealRowCard({
 
         <input
           value={row.amount}
-          onChange={(e) =>
-            onChange(row.id, {
-              amount: e.target.value,
-            })
-          }
-          style={compactInputStyle}
+          onChange={(e) => onChange(row.id, { amount: e.target.value })}
+          style={{
+            ...compactInputStyle,
+
+            width: isMobile ? 42 : undefined,
+            minWidth: isMobile ? 42 : undefined,
+            maxWidth: isMobile ? 42 : undefined,
+
+            minHeight: 0,
+
+            height: isMobile ? 29 : undefined,
+
+            padding: 0,
+
+            margin: 0,
+
+            textAlign: "center",
+
+            lineHeight: "30px",
+
+            boxSizing: "border-box",
+
+            background: "#f1f1f1",
+
+            border: "1px solid #cbd5e1",
+
+            borderRadius: isMobile ? 6 : 10,
+
+            color: "#0f172a",
+          }}
           placeholder={row.mode === "portion" ? "1" : "100"}
         />
 
@@ -99,29 +124,39 @@ export function MealRowCard({
           onClick={() => onRemove(row.id)}
           style={{
             ...buttonStyle,
-            padding: "7px 10px",
-            fontSize: 13,
-            borderRadius: 10,
+            padding: isMobile ? "6px 7px" : "7px 10px",
+            fontSize: isMobile ? 11 : 13,
+            borderRadius: isMobile ? 6 : 10,
+            display: "inline-block",
+            minWidth: 0,
           }}
         >
           Wis
         </button>
       </div>
 
-      {/* Compacte berekende info */}
       <div
         style={{
-          marginTop: 6,
+          marginTop: isMobile ? 5 : 6,
           display: "flex",
-          gap: 6,
+          gap: isMobile ? 4 : 6,
           flexWrap: "wrap",
           alignItems: "center",
           color: "#334155",
+          fontSize: isMobile ? 11 : 12,
+          lineHeight: 1.2,
         }}
       >
         {row.product ? (
           <>
-            <span style={{ fontSize: 12, color: "#475569" }}>
+            <span
+              style={{
+                fontSize: isMobile ? 11 : 12,
+                color: "#475569",
+                flexBasis: "100%",
+                lineHeight: 1.2,
+              }}
+            >
               {row.product.portion} = {row.product.portionGram} g · totaal{" "}
               <strong>{row.grams} g</strong>
             </span>
@@ -140,7 +175,7 @@ export function MealRowCard({
             </span>
           </>
         ) : (
-          <span style={{ fontSize: 12, color: "#64748b" }}>
+          <span style={{ fontSize: isMobile ? 11 : 12, color: "#64748b" }}>
             Kies een product
           </span>
         )}
