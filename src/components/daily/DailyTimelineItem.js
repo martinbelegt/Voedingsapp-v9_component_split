@@ -22,7 +22,7 @@ export function DailyTimelineItem({
     ? indentLevel * 14
     : compact
       ? indentLevel * 14
-      : indentLevel * 24;
+      : indentLevel * 32;
 
   return (
     <div

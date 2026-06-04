@@ -56,6 +56,13 @@ export function DailyMealList({
     }));
   }
 
+  function formatTime(value) {
+    return new Date(value).toLocaleString("nl-NL", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
   const timelineItems = [
     ...mealsForDay.map((meal) => ({
       id: meal.id,
@@ -201,6 +208,11 @@ export function DailyMealList({
     return null;
   }
 
+  function phasePrefix(item) {
+    const phaseLabel = getSportPhaseLabel(item);
+    return phaseLabel ? `🟣 ${phaseLabel} · ` : "";
+  }
+
   function toggleExpanded(id) {
     setExpandedIds((prev) =>
       prev.includes(id)
@@ -278,7 +290,6 @@ export function DailyMealList({
 
   return (
     <>
-      {/* Tijdlijnbediening */}
       <div
         style={{
           display: "flex",
@@ -399,12 +410,14 @@ export function DailyMealList({
         style={{
           ...buttonStyle,
           background:
-            expandedIds.length >= visibleTimelineItems.length
+            visibleTimelineItems.length > 0 &&
+            visibleTimelineItems.every((item) => expandedIds.includes(item.id))
               ? "#eef2ff"
               : "#f8fafc",
         }}
       >
-        {expandedIds.length >= visibleTimelineItems.length
+        {visibleTimelineItems.length > 0 &&
+        visibleTimelineItems.every((item) => expandedIds.includes(item.id))
           ? "Alles inklappen"
           : "Alles uitklappen"}
       </button>
@@ -462,7 +475,6 @@ export function DailyMealList({
         ))}
       </div>
 
-      {/* Chronologische metabole tijdlijn */}
       {visibleTimelineItems.map((item, index) => {
         if (item.itemType === "meal") {
           return (
@@ -490,10 +502,7 @@ export function DailyMealList({
               compact={compactTimeline}
               icon="💡"
               title={`Insuline advies · ${meal.totals?.insulin || "?"} E`}
-              timeLabel={new Date(meal.eatenAt).toLocaleString("nl-NL", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+              timeLabel={formatTime(meal.eatenAt)}
               subtitle={meal.name || meal.mealMoment || ""}
               accentColor="#ca8a04"
               backgroundColor="#fefce8"
@@ -519,11 +528,8 @@ export function DailyMealList({
               onToggle={() => toggleExpanded(event.id)}
               icon="💉"
               title={`Toegediende insuline · ${event.units}E`}
-              timeLabel={new Date(event.eventTime).toLocaleString("nl-NL", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-              subtitle={`${getSportPhaseLabel(item) ? `[${getSportPhaseLabel(item)}] ` : ""}${event.note || ""}`}
+              timeLabel={formatTime(event.eventTime)}
+              subtitle={`${phasePrefix(item)}${event.note || ""}`}
               compact={compactTimeline}
               accentColor="#312e81"
               backgroundColor="#eef2ff"
@@ -554,11 +560,8 @@ export function DailyMealList({
               onToggle={() => toggleExpanded(event.id)}
               icon="📈"
               title={`Glucosewaarde · ${event.glucoseValue} mmol/L`}
-              timeLabel={new Date(event.eventTime).toLocaleString("nl-NL", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-              subtitle={`${getSportPhaseLabel(item) ? `[${getSportPhaseLabel(item)}] ` : ""}${event.note || ""}`}
+              timeLabel={formatTime(event.eventTime)}
+              subtitle={`${phasePrefix(item)}${event.note || ""}`}
               compact={compactTimeline}
               accentColor="#075985"
               backgroundColor="#f0f9ff"
@@ -590,11 +593,10 @@ export function DailyMealList({
               compact={compactTimeline}
               icon="⚡"
               title={`${event.kh}g snelle KH`}
-              timeLabel={new Date(event.eventTime).toLocaleString("nl-NL", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-              subtitle={`${getSportPhaseLabel(item) ? `[${getSportPhaseLabel(item)}] ` : ""}${event.source || "Glucoseboost"}${event.note ? ` · ${event.note}` : ""}`}
+              timeLabel={formatTime(event.eventTime)}
+              subtitle={`${phasePrefix(item)}${event.source || "Glucoseboost"}${
+                event.note ? ` · ${event.note}` : ""
+              }`}
               accentColor="#c2410c"
               backgroundColor="#fff7ed"
               borderColor="#fdba74"
@@ -623,14 +625,13 @@ export function DailyMealList({
               onToggle={() => toggleExpanded(event.id)}
               compact={compactTimeline}
               icon="🏋️"
-              title={`TRAINING ANKER · ${event.activityType || "Beweging"}${
+              title={`${event.activityType || "Beweging"}${
                 event.durationMinutes ? ` · ${event.durationMinutes} min` : ""
               }`}
-              timeLabel={new Date(event.eventTime).toLocaleString("nl-NL", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-              subtitle={`${getSportPhaseLabel(item) ? `[${getSportPhaseLabel(item)}] ` : ""}${event.intensityType || "Belasting onbekend"}${event.note ? ` · ${event.note}` : ""}`}
+              timeLabel={formatTime(event.eventTime)}
+              subtitle={`${phasePrefix(item)}${
+                event.intensityType || "Belasting onbekend"
+              }${event.note ? ` · ${event.note}` : ""}`}
               accentColor="#4c1d95"
               backgroundColor="#f5f3ff"
               borderColor="#c4b5fd"
@@ -661,11 +662,10 @@ export function DailyMealList({
               compact={compactTimeline}
               icon="🚽"
               title={`Bristol ${event.bristolScore}`}
-              timeLabel={new Date(event.eventTime).toLocaleString("nl-NL", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-              subtitle={`${getSportPhaseLabel(item) ? `[${getSportPhaseLabel(item)}] ` : ""}${event.urgency || ""}${event.note ? ` · ${event.note}` : ""}`}
+              timeLabel={formatTime(event.eventTime)}
+              subtitle={`${phasePrefix(item)}${event.urgency || ""}${
+                event.note ? ` · ${event.note}` : ""
+              }`}
               accentColor="#92400e"
               backgroundColor="#fffbeb"
               borderColor="#fcd34d"
