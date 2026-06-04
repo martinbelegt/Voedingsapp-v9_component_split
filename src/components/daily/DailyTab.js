@@ -150,6 +150,15 @@ export function DailyTab({
     }
   }
 
+  const advisedInsulin = (selectedDay?.meals || []).reduce(
+    (sum, meal) => sum + (Number(meal?.totals?.insulin) || 0),
+    0,
+  );
+
+  const actualInsulin = Number(dayTotals?.insulin || 0);
+
+  const insulinDiff = Math.round((actualInsulin - advisedInsulin) * 100) / 100;
+
   return (
     <div style={{ display: "grid", gap: 14, marginTop: 16 }}>
       {/* Dagkeuze */}
@@ -241,7 +250,7 @@ export function DailyTab({
         </span>
 
         <span style={totalsChip("#ede9fe", "#6d28d9")}>
-          Eiwit {dayTotals?.protein || 0}g
+          Eiwit {dayTotals?.protein || 0}g van {proteinGoal}g
         </span>
 
         <span style={totalsChip("#ffedd5", "#c2410c")}>
@@ -249,15 +258,17 @@ export function DailyTab({
         </span>
 
         <span style={totalsChip("#dcfce7", "#166534")}>
-          {dayTotals?.kcal || 0} kcal
+          {dayTotals?.kcal || 0} van {targetKcal} kcal
         </span>
 
         <span style={totalsChip("#eff6ff", "#2563eb")}>
-          💉 {dayTotals?.insulin || 0}E
+          💉 {actualInsulin}E / advies {advisedInsulin}E /{" "}
+          {insulinDiff >= 0 ? "+" : ""}
+          {insulinDiff}E
         </span>
 
         <span style={totalsChip("#fef3c7", "#a16207")}>
-          Creon {dayTotals?.creon25 || 0}x25k + {dayTotals?.creon10 || 0}x10k
+          💊 Creon {dayTotals?.creon25 || 0}x25k + {dayTotals?.creon10 || 0}x10k
         </span>
       </div>
 

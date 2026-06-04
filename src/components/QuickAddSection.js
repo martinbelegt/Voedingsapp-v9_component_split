@@ -55,15 +55,13 @@ export function QuickAddSection(props) {
           <option value="dinner">Diner</option>
           <option value="eveningMeal">Avondeten</option>
           <option value="nightMeal">Nocturnal Protection 21:30</option>
-          <option value="preWorkout">Pre krachttraining</option>
-          <option value="postWorkout">Post krachttraining</option>
-          <option value="recovery">Herstelmoment</option>
           <option value="lateMeal">Late maaltijd/snack</option>
           <option value="pppMeal">PPP / vertraagde maaltijd</option>
           <option value="snack">Snack</option>
-          <option value="sport">Sport</option>
           <option value="dessert">Toetje</option>
           <option value="fruit">Fruit</option>
+          <option value="sport">Sportvoeding</option>
+          <option value="recovery">Herstelmoment</option>
           <option value="neutral">Algemeen</option>
         </select>
 

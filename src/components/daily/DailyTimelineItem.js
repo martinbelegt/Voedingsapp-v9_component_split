@@ -18,23 +18,22 @@ export function DailyTimelineItem({
   const isMobile =
     window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
 
+  const indentPx = isMobile
+    ? indentLevel * 14
+    : compact
+      ? indentLevel * 14
+      : indentLevel * 24;
+
   return (
     <div
       style={{
         marginBottom: isMobile ? 4 : 6,
-
-        marginLeft: isMobile && indentLevel > 0 ? indentLevel * 14 : 0,
-
+        marginLeft: indentLevel > 0 ? indentPx : 0,
         borderRadius: isMobile ? 2 : 4,
-
         border: `1px solid ${borderColor}`,
-
         borderLeft: `5px solid ${accentColor}`,
-
         background: backgroundColor,
-
         overflow: "hidden",
-
         boxShadow: "none",
       }}
     >
@@ -44,7 +43,7 @@ export function DailyTimelineItem({
           padding: isMobile ? "5px 7px" : compact ? "6px 9px" : "8px 10px",
           cursor: "pointer",
           display: "grid",
-          gridTemplateColumns: isMobile ? "1fr auto" : "1fr auto",
+          gridTemplateColumns: "1fr auto",
           gap: isMobile ? 5 : 8,
           alignItems: "center",
         }}

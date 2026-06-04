@@ -18,6 +18,7 @@ export function MealRowsSection(props) {
     labelStyle,
     totals,
     dayTotals,
+    settings,
 
     quickSearch,
     setQuickSearch,
@@ -38,12 +39,18 @@ export function MealRowsSection(props) {
     whiteSpace: "nowrap",
   });
 
+  const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
+
   const previewTotals = {
-    kh: (dayTotals?.kh || 0) + (totals?.kh || 0),
-    protein: (dayTotals?.protein || 0) + (totals?.protein || 0),
-    fat: (dayTotals?.fat || 0) + (totals?.fat || 0),
-    kcal: (dayTotals?.kcal || 0) + (totals?.kcal || 0),
+    kh: round2((dayTotals?.kh || 0) + (totals?.kh || 0)),
+    protein: round2((dayTotals?.protein || 0) + (totals?.protein || 0)),
+    fat: round2((dayTotals?.fat || 0) + (totals?.fat || 0)),
+    kcal: round2((dayTotals?.kcal || 0) + (totals?.kcal || 0)),
   };
+
+  const dailyTargets = settings?.dailyTargets || {};
+  const proteinGoal = Number(dailyTargets.proteinGoal) || 0;
+  const targetKcal = Number(dailyTargets.targetKcal) || 0;
 
   return (
     <>
@@ -110,7 +117,7 @@ export function MealRowsSection(props) {
           </span>
 
           <span style={totalsChip("#ede9fe", "#6d28d9")}>
-            Eiwit {previewTotals.protein}g
+            Eiwit {previewTotals.protein}g van {proteinGoal}g
           </span>
 
           <span style={totalsChip("#ffedd5", "#c2410c")}>
@@ -118,7 +125,7 @@ export function MealRowsSection(props) {
           </span>
 
           <span style={totalsChip("#dcfce7", "#166534")}>
-            {previewTotals.kcal} kcal
+            {previewTotals.kcal} van {targetKcal} kcal
           </span>
         </div>
 

@@ -2036,6 +2036,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             dayMealTime={dayMealTime}
             setDayMealTime={setDayMealTime}
             dayTotals={dayTotals}
+            settings={settings}
           />
         )}
         {activeTab === "voedingslijst" && (

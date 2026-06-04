@@ -100,6 +100,7 @@ export function DashboardTab(props) {
           labelStyle={labelStyle}
           totals={totals}
           dayTotals={props.dayTotals}
+          settings={props.settings}
         />
       </div>
     </>
