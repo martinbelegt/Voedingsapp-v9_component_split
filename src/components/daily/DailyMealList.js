@@ -387,8 +387,8 @@ export function DailyMealList({
       <button
         onClick={() => {
           const allExpanded =
-            expandedIds.length >= visibleTimelineItems.length &&
-            visibleTimelineItems.length > 0;
+            visibleTimelineItems.length > 0 &&
+            visibleTimelineItems.every((item) => expandedIds.includes(item.id));
 
           if (allExpanded) {
             collapseAll();
@@ -735,6 +735,7 @@ export function DailyMealList({
 
       {showTimerModal && (
         <DailyTimerModal
+          event={timerEvent}
           buttonStyle={buttonStyle}
           onClose={() => {
             setShowTimerModal(false);

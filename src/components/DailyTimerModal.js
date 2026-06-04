@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export function DailyTimerModal({ buttonStyle, onClose, onSave }) {
+export function DailyTimerModal({ event, buttonStyle, onClose, onSave }) {
   const [minutes, setMinutes] = useState(60);
   const [label, setLabel] = useState("Bijspuiten / controleren");
 
