@@ -222,7 +222,18 @@ export function DailyMealList({
 
   function phasePrefix(item) {
     const phaseLabel = getSportPhaseLabel(item);
-    return phaseLabel ? `🟣 ${phaseLabel} · ` : "";
+
+    if (!phaseLabel) return "";
+
+    if (phaseLabel === "PRE") {
+      return "🔵 PRE · ";
+    }
+
+    if (phaseLabel === "TIJDENS") {
+      return "🟣 TIJDENS · ";
+    }
+
+    return "🟢 POST · ";
   }
 
   function toggleExpanded(id) {
@@ -538,7 +549,7 @@ export function DailyMealList({
               indentLevel={1}
               expanded={expandedIds.includes(event.id)}
               onToggle={() => toggleExpanded(event.id)}
-              icon="💉"
+              icon="🟣💉"
               title={`Toegediende insuline · ${event.units}E`}
               timeLabel={formatTime(event.eventTime)}
               subtitle={`${phasePrefix(item)}${event.note || ""}`}
@@ -570,7 +581,7 @@ export function DailyMealList({
               indentLevel={1}
               expanded={expandedIds.includes(event.id)}
               onToggle={() => toggleExpanded(event.id)}
-              icon="📈"
+              icon="🟣📈"
               title={`Glucosewaarde · ${event.glucoseValue} mmol/L`}
               timeLabel={formatTime(event.eventTime)}
               subtitle={`${phasePrefix(item)}${event.note || ""}`}
@@ -636,7 +647,11 @@ export function DailyMealList({
               expanded={expandedIds.includes(event.id)}
               onToggle={() => toggleExpanded(event.id)}
               compact={compactTimeline}
-              icon="🏋️"
+              icon={
+                event.activityType?.toLowerCase().includes("kracht")
+                  ? "🟠🏋️"
+                  : "🟠🚶"
+              }
               title={`${event.activityType || "Beweging"}${
                 event.durationMinutes ? ` · ${event.durationMinutes} min` : ""
               }`}
@@ -705,7 +720,7 @@ export function DailyMealList({
               expanded={expandedIds.includes(event.id)}
               onToggle={() => toggleExpanded(event.id)}
               compact={compactTimeline}
-              icon="📝"
+              icon="⚫📝"
               title={event.note || "Notitie"}
               timeLabel={formatTime(event.eventTime)}
               subtitle={`${phasePrefix(item)}${event.context || ""}`}
