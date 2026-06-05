@@ -831,6 +831,9 @@ export default function App() {
     addBowelEventToDay,
     updateBowelEvent,
     deleteBowelEvent,
+    addNoteEventToDay,
+    updateNoteEvent,
+    deleteNoteEvent,
   } = useDailyLog(selectedDate);
   // ======================================================
   // ZOEKANKER: SAVED MEALS / STANDAARDMAALTIJDEN
@@ -2182,6 +2185,9 @@ Producten uit deze categorie gaan naar "Overig".`);
             updateBowelEvent={updateBowelEvent}
             deleteBowelEvent={deleteBowelEvent}
             activeTimers={timerProps.timers}
+            addNoteEventToDay={addNoteEventToDay}
+            updateNoteEvent={updateNoteEvent}
+            deleteNoteEvent={deleteNoteEvent}
           />
         )}
       </div>

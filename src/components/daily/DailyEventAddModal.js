@@ -77,6 +77,13 @@ export function DailyEventAddModal({
       label3: "Notitie",
       placeholder3: "",
     },
+    note: {
+      title: "Notitie toevoegen",
+      label1: "Notitie",
+      placeholder1: "bijv. 2 HMB pillen voor training",
+      label2: "Context",
+      placeholder2: "optioneel",
+    },
   }[eventType];
 
   if (!config) return null;

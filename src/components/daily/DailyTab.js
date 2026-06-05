@@ -33,6 +33,10 @@ export function DailyTab({
   updateBowelEvent,
   deleteBowelEvent,
   activeTimers = [],
+  addNoteEventToDay,
+  updateNoteEvent,
+  deleteNoteEvent,
+  noteEventsForDay = selectedDay?.noteEvents || [],
 }) {
   const [addEventType, setAddEventType] = useState(null);
 
@@ -49,6 +53,7 @@ export function DailyTab({
     glucoseEventsForDay.length +
     glucoseBoostEventsForDay.length +
     movementEventsForDay.length +
+    noteEventsForDay.length +
     bowelEventsForDay.length;
 
   const dailyTargets = settings?.dailyTargets || {};
@@ -146,6 +151,14 @@ export function DailyTab({
         bristolScore: value1,
         urgency: value2,
         note: value3,
+      });
+    }
+    if (eventType === "note") {
+      addNoteEventToDay({
+        date,
+        eventTime,
+        note: value1,
+        context: value2,
       });
     }
   }
@@ -413,6 +426,18 @@ export function DailyTab({
             >
               + Stoelgang
             </button>
+
+            <button
+              onClick={() => setAddEventType("note")}
+              style={{
+                ...buttonStyle,
+                background: "#f8fafc",
+                border: "1px solid #cbd5e1",
+                color: "#334155",
+              }}
+            >
+              + Notitie
+            </button>
           </div>
         </div>
 
@@ -440,6 +465,9 @@ export function DailyTab({
           updateBowelEvent={updateBowelEvent}
           deleteBowelEvent={deleteBowelEvent}
           buttonStyle={buttonStyle}
+          noteEventsForDay={noteEventsForDay}
+          updateNoteEvent={updateNoteEvent}
+          deleteNoteEvent={deleteNoteEvent}
         />
       </div>
 

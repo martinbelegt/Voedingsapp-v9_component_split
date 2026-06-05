@@ -729,6 +729,73 @@ export function useDailyLog(selectedDate) {
     );
   }
 
+  function addNoteEventToDay(input) {
+    const eventEntry = {
+      id: createId("note-event"),
+      type: "note",
+      eventTime: input.eventTime || new Date().toISOString(),
+      note: input.note || "",
+      context: input.context || "",
+      createdAt: new Date().toLocaleString("nl-NL"),
+    };
+
+    setDailyLog((prev) => {
+      const existingDay = prev.find((d) => d.date === input.date);
+
+      if (existingDay) {
+        return prev.map((d) =>
+          d.date === input.date
+            ? { ...d, noteEvents: [...(d.noteEvents || []), eventEntry] }
+            : d,
+        );
+      }
+
+      return [
+        ...prev,
+        {
+          date: input.date,
+          meals: [],
+          insulinEvents: [],
+          glucoseEvents: [],
+          glucoseBoostEvents: [],
+          movementEvents: [],
+          bowelEvents: [],
+          noteEvents: [eventEntry],
+        },
+      ].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+    });
+  }
+
+  function updateNoteEvent(eventId, updates) {
+    setDailyLog((prev) =>
+      prev.map((day) =>
+        day.date === selectedDate
+          ? {
+              ...day,
+              noteEvents: (day.noteEvents || []).map((event) =>
+                event.id === eventId ? { ...event, ...updates } : event,
+              ),
+            }
+          : day,
+      ),
+    );
+  }
+
+  function deleteNoteEvent(eventId) {
+    setDailyLog((prev) =>
+      prev.map((day) =>
+        day.date === selectedDate
+          ? {
+              ...day,
+              noteEvents: (day.noteEvents || []).filter(
+                (event) => event.id !== eventId,
+              ),
+            }
+          : day,
+      ),
+    );
+  }
+
   function clearDailyLog() {
     setDailyLog((prev) => prev.filter((day) => day.date !== selectedDate));
   }
@@ -759,5 +826,8 @@ export function useDailyLog(selectedDate) {
     addBowelEventToDay,
     updateBowelEvent,
     deleteBowelEvent,
+    addNoteEventToDay,
+    updateNoteEvent,
+    deleteNoteEvent,
   };
 }

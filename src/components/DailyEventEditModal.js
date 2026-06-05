@@ -16,9 +16,13 @@ export function DailyEventEditModal({
       ? event?.units || ""
       : eventType === "glucose"
         ? event?.glucoseValue || ""
-        : "",
+        : eventType === "note"
+          ? event?.note || ""
+          : "",
   );
-  const [note, setNote] = useState(event?.note || "");
+  const [note, setNote] = useState(
+    eventType === "note" ? event?.context || "" : event?.note || "",
+  );
 
   const isGlucose = eventType === "glucose";
   const isInsulin = eventType === "insulin";
@@ -74,7 +78,9 @@ export function DailyEventEditModal({
             ? "Aantal eenheden"
             : isGlucose
               ? "Glucosewaarde"
-              : "Waarde"}
+              : eventType === "note"
+                ? "Notitie"
+                : "Waarde"}
         </label>
         <input
           value={value1}
@@ -91,7 +97,9 @@ export function DailyEventEditModal({
           }}
         />
 
-        <label style={{ fontSize: 13, fontWeight: 800 }}>Notitie</label>
+        <label style={{ fontSize: 13, fontWeight: 800 }}>
+          {eventType === "note" ? "Context" : "Notitie"}
+        </label>
         <input
           value={note}
           onChange={(e) => setNote(e.target.value)}
@@ -139,7 +147,8 @@ export function DailyEventEditModal({
                   eventTime,
                   ...(isInsulin ? { units: value1 } : {}),
                   ...(isGlucose ? { glucoseValue: value1 } : {}),
-                  note,
+                  ...(eventType === "note" ? { note: value1 } : {}),
+                  ...(eventType === "note" ? { context: note } : { note }),
                 });
                 onClose();
               }}

@@ -25,9 +25,14 @@ export function DailyMealList({
   movementEventsForDay = [],
   updateMovementEvent,
   deleteMovementEvent,
+
   bowelEventsForDay = [],
   updateBowelEvent,
   deleteBowelEvent,
+
+  noteEventsForDay = [],
+  updateNoteEvent,
+  deleteNoteEvent,
 }) {
   const [expandedIds, setExpandedIds] = useState([]);
   const [editingEvent, setEditingEvent] = useState(null);
@@ -45,6 +50,7 @@ export function DailyMealList({
     glucoseBoost: true,
     movement: true,
     bowel: true,
+    note: true,
   });
 
   const [timeEditorEvent, setTimeEditorEvent] = useState(null);
@@ -116,6 +122,12 @@ export function DailyMealList({
     ...bowelEventsForDay.map((event) => ({
       id: event.id,
       itemType: "bowel",
+      time: event.eventTime || "",
+      event,
+    })),
+    ...noteEventsForDay.map((event) => ({
+      id: event.id,
+      itemType: "note",
       time: event.eventTime || "",
       event,
     })),
@@ -683,7 +695,42 @@ export function DailyMealList({
             />
           );
         }
+        if (item.itemType === "note") {
+          const event = item.event;
 
+          return (
+            <DailyTimelineItem
+              key={event.id}
+              indentLevel={1}
+              expanded={expandedIds.includes(event.id)}
+              onToggle={() => toggleExpanded(event.id)}
+              compact={compactTimeline}
+              icon="📝"
+              title={event.note || "Notitie"}
+              timeLabel={formatTime(event.eventTime)}
+              subtitle={`${phasePrefix(item)}${event.context || ""}`}
+              accentColor="#475569"
+              backgroundColor="#f8fafc"
+              borderColor="#cbd5e1"
+              actions={
+                <>
+                  {timerButton(event)}
+                  {editButton(event, "note")}
+                </>
+              }
+              detailContent={
+                <div style={{ fontSize: 13, color: "#334155" }}>
+                  {event.note}
+                  {event.context ? (
+                    <div style={{ marginTop: 6 }}>
+                      <strong>Context:</strong> {event.context}
+                    </div>
+                  ) : null}
+                </div>
+              }
+            />
+          );
+        }
         return null;
       })}
 
@@ -716,6 +763,7 @@ export function DailyMealList({
               updateGlucoseBoostEvent(id, updates);
             if (editingType === "movement") updateMovementEvent(id, updates);
             if (editingType === "bowel") updateBowelEvent(id, updates);
+            if (editingType === "note") updateNoteEvent(id, updates);
 
             setEditingEvent(null);
             setEditingType(null);
@@ -726,6 +774,7 @@ export function DailyMealList({
             if (editingType === "glucoseBoost") deleteGlucoseBoostEvent(id);
             if (editingType === "movement") deleteMovementEvent(id);
             if (editingType === "bowel") deleteBowelEvent(id);
+            if (editingType === "note") deleteNoteEvent(id);
 
             setEditingEvent(null);
             setEditingType(null);
