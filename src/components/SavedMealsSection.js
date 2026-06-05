@@ -10,6 +10,8 @@ export function SavedMealsSection(props) {
     setShowSavedMeals,
     mealName,
     setMealName,
+    mealServings,
+    setMealServings,
     saveCurrentMeal,
     loadSavedMeal,
     appendSavedMeal,
@@ -75,12 +77,29 @@ export function SavedMealsSection(props) {
               marginBottom: window.innerWidth < 900 ? 6 : 12,
             }}
           >
-            <input
-              value={mealName}
-              onChange={(e) => setMealName(e.target.value)}
-              style={inputStyle}
-              placeholder="Naam van maaltijd, bv. Ontbijt standaard"
-            />
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "2fr 90px",
+                gap: 6,
+              }}
+            >
+              <input
+                value={mealName}
+                onChange={(e) => setMealName(e.target.value)}
+                style={inputStyle}
+                placeholder="Naam van maaltijd"
+              />
+
+              <input
+                type="number"
+                min="1"
+                value={mealServings}
+                onChange={(e) => setMealServings(Number(e.target.value) || 1)}
+                style={inputStyle}
+                placeholder="Porties"
+              />
+            </div>
 
             <button
               onClick={saveCurrentMeal}

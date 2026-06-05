@@ -44,6 +44,7 @@ export function SavedMealCard({
             }}
           >
             {index + 1}. {meal.name}
+            {meal.servings ? ` (${meal.servings} porties)` : ""}
           </div>
 
           {meal.createdAt && (
@@ -95,7 +96,18 @@ export function SavedMealCard({
             }}
           >
             <button
-              onClick={() => onLoad(meal.id)}
+              onClick={() => {
+                const servings = Number(meal.servings) || 1;
+
+                const requested = window.prompt(
+                  `Deze maaltijd is opgeslagen als ${servings} portie(s).\nHoeveel porties wil je laden?`,
+                  "1",
+                );
+
+                if (requested === null) return;
+
+                onLoad(meal.id, Number(requested) || 1);
+              }}
               style={{
                 ...buttonStyle,
                 background: "#dcfce7",

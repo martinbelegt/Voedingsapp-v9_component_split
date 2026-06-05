@@ -48,11 +48,15 @@ export function useSavedMeals() {
     }
   }, [savedMeals, cloudLoaded]);
 
-  function addSavedMeal(name, rows) {
+  function addSavedMeal(name, rows, options = {}) {
     const newMeal = {
       id: createId("saved-meal"),
+
       name,
+
       rows,
+
+      servings: options.servings || 1,
     };
 
     setSavedMeals((prev) => [...prev, newMeal]);

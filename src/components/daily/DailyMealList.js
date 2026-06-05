@@ -546,7 +546,7 @@ export function DailyMealList({
           return (
             <DailyTimelineItem
               key={event.id}
-              indentLevel={1}
+              indentLevel={2}
               expanded={expandedIds.includes(event.id)}
               onToggle={() => toggleExpanded(event.id)}
               icon="🟣💉"
@@ -578,7 +578,7 @@ export function DailyMealList({
           return (
             <DailyTimelineItem
               key={event.id}
-              indentLevel={1}
+              indentLevel={2}
               expanded={expandedIds.includes(event.id)}
               onToggle={() => toggleExpanded(event.id)}
               icon="🟣📈"
@@ -610,7 +610,7 @@ export function DailyMealList({
           return (
             <DailyTimelineItem
               key={event.id}
-              indentLevel={1}
+              indentLevel={2}
               expanded={expandedIds.includes(event.id)}
               onToggle={() => toggleExpanded(event.id)}
               compact={compactTimeline}

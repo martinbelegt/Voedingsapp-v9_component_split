@@ -781,6 +781,7 @@ export default function App() {
   const { timers, startTimer, deleteTimer, clearTimers } = useMealTimers();
 
   const [mealName, setMealName] = useState("");
+  const [mealServings, setMealServings] = useState(1);
   const [dayMealName, setDayMealName] = useState("");
   const [dayMealDate, setDayMealDate] = useState(() =>
     new Date().toISOString().slice(0, 10),
@@ -1277,15 +1278,33 @@ export default function App() {
     const cleanedRows = rows.filter((r) => r.productId && r.amount !== "");
     if (!mealName.trim() || cleanedRows.length === 0) return;
 
-    addSavedMeal(mealName.trim(), cleanedRows);
+    addSavedMeal(mealName.trim(), cleanedRows, {
+      servings: Number(mealServings) || 1,
+    });
+
     setMealName("");
+    setMealServings(1);
   }
 
-  function loadSavedMeal(mealId) {
+  function loadSavedMeal(mealId, requestedServings = 1) {
     const meal = getSavedMeal(mealId);
+
     if (!meal) return;
 
-    setRows(ensureLastEmptyRow(normalizeMealRows(meal.rows)));
+    const storedServings = Number(meal.servings) || 1;
+
+    const factor = requestedServings / storedServings;
+
+    const scaledRows = meal.rows.map((row) => ({
+      ...row,
+
+      amount:
+        Number(row.amount) > 0
+          ? String(round2(Number(row.amount) * factor))
+          : row.amount,
+    }));
+
+    setRows(ensureLastEmptyRow(normalizeMealRows(scaledRows)));
 
     scrollRefIntoView(newRowRef);
   }
@@ -1828,6 +1847,10 @@ Producten uit deze categorie gaan naar "Overig".`);
     setShowSavedMeals,
     mealName,
     setMealName,
+
+    mealServings,
+    setMealServings,
+
     saveCurrentMeal,
     loadSavedMeal,
     appendSavedMeal,
