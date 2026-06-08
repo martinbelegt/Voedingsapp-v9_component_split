@@ -311,6 +311,22 @@ export function DailyMealList({
     );
   }
 
+  function toggleButtonStyle(active) {
+    return {
+      ...buttonStyle,
+
+      background: active ? "#dbeafe" : "#f8fafc",
+
+      border: active ? "1px solid #93c5fd" : "1px solid #cbd5e1",
+
+      color: active ? "#1d4ed8" : "#334155",
+
+      boxShadow: "none",
+
+      outline: "none",
+    };
+  }
+
   return (
     <>
       <div
@@ -324,12 +340,7 @@ export function DailyMealList({
       >
         <button
           onClick={() => setCompactTimeline((v) => !v)}
-          style={{
-            ...buttonStyle,
-            background: compactTimeline ? "#3730a3" : "#eef2ff",
-            color: compactTimeline ? "white" : "#3730a3",
-            border: "1px solid #c7d2fe",
-          }}
+          style={toggleButtonStyle(compactTimeline)}
         >
           {compactTimeline ? "Normale tijdlijn" : "Compacte tijdlijn"}
         </button>
@@ -337,13 +348,7 @@ export function DailyMealList({
         <button
           onClick={() => setTimelineFilter("all")}
           style={{
-            ...buttonStyle,
-            background: timelineFilter === "all" ? "#bbf7d0" : "#f8fafc",
-            color: timelineFilter === "all" ? "#14532d" : "#166534",
-            border:
-              timelineFilter === "all"
-                ? "1px solid #22c55e"
-                : "1px solid #cbd5e1",
+            ...toggleButtonStyle(timelineFilter === "all"),
             fontSize: window.innerWidth < 900 ? 11 : 12,
             padding: window.innerWidth < 900 ? "2px 7px" : undefined,
           }}
@@ -353,24 +358,14 @@ export function DailyMealList({
 
         <button
           onClick={() => setTimelineFilter("insulin")}
-          style={{
-            ...buttonStyle,
-            background: timelineFilter === "insulin" ? "#312e81" : "#eef2ff",
-            color: timelineFilter === "insulin" ? "white" : "#312e81",
-            border: "1px solid #c7d2fe",
-          }}
+          style={toggleButtonStyle(timelineFilter === "insulin")}
         >
           Alleen insuline
         </button>
 
         <button
           onClick={() => setTimelineFilter("glucose")}
-          style={{
-            ...buttonStyle,
-            background: timelineFilter === "glucose" ? "#0369a1" : "#f0f9ff",
-            color: timelineFilter === "glucose" ? "white" : "#0369a1",
-            border: "1px solid #7dd3fc",
-          }}
+          style={toggleButtonStyle(timelineFilter === "glucose")}
         >
           Alleen glucose
         </button>
@@ -378,14 +373,10 @@ export function DailyMealList({
         <button
           onClick={() => setTimelineFilter("metabolic")}
           style={{
-            ...buttonStyle,
-            background: timelineFilter === "metabolic" ? "#bbf7d0" : "#ecfeff",
-            color: timelineFilter === "metabolic" ? "#14532d" : "#166534",
-            border:
-              timelineFilter === "metabolic"
-                ? "1px solid #22c55e"
-                : "1px solid #86efac",
+            ...toggleButtonStyle(timelineFilter === "metabolic"),
+
             fontSize: window.innerWidth < 900 ? 11 : 12,
+
             padding: window.innerWidth < 900 ? "2px 7px" : undefined,
           }}
         >
@@ -393,28 +384,16 @@ export function DailyMealList({
         </button>
 
         <button
-          onClick={() => setTimelineFilter("movementOnly")}
-          style={{
-            ...buttonStyle,
-            background:
-              timelineFilter === "movementOnly" ? "#4c1d95" : "#f5f3ff",
-            color: timelineFilter === "movementOnly" ? "white" : "#4c1d95",
-            border: "1px solid #c4b5fd",
-          }}
+          onClick={() =>
+            setTimelineFilter((prev) =>
+              prev === "sportFocus" ? "all" : "sportFocus",
+            )
+          }
+          style={toggleButtonStyle(timelineFilter === "sportFocus")}
         >
-          Alleen sport
-        </button>
-
-        <button
-          onClick={() => setTimelineFilter("sportFocus")}
-          style={{
-            ...buttonStyle,
-            background: timelineFilter === "sportFocus" ? "#4c1d95" : "#f5f3ff",
-            color: timelineFilter === "sportFocus" ? "white" : "#4c1d95",
-            border: "1px solid #c4b5fd",
-          }}
-        >
-          Sport focus
+          {timelineFilter === "sportFocus"
+            ? "Sport focus uit"
+            : "Sport focus aan"}
         </button>
       </div>
 
@@ -430,37 +409,16 @@ export function DailyMealList({
             expandAll();
           }
         }}
-        style={{
-          ...buttonStyle,
-          background:
-            visibleTimelineItems.length > 0 &&
-            visibleTimelineItems.every((item) => expandedIds.includes(item.id))
-              ? "#eef2ff"
-              : "#f8fafc",
-        }}
+        style={toggleButtonStyle(
+          visibleTimelineItems.length > 0 &&
+            visibleTimelineItems.every((item) => expandedIds.includes(item.id)),
+        )}
       >
         {visibleTimelineItems.length > 0 &&
         visibleTimelineItems.every((item) => expandedIds.includes(item.id))
           ? "Alles inklappen"
           : "Alles uitklappen"}
       </button>
-
-      {timelineFilter === "sportFocus" && (
-        <div
-          style={{
-            marginBottom: 8,
-            padding: "8px 10px",
-            borderRadius: 8,
-            background: "#f5f3ff",
-            border: "1px solid #c4b5fd",
-            color: "#4c1d95",
-            fontSize: 13,
-            fontWeight: 700,
-          }}
-        >
-          🏋️ Sport focus actief · toont alles van 2 uur vóór tot 3 uur ná sport.
-        </div>
-      )}
 
       <div
         style={{

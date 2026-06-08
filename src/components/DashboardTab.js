@@ -53,7 +53,11 @@ export function DashboardTab(props) {
           paddingBottom: isMobile ? 4 : 8,
         }}
       >
-        <ResultCard totals={totals} rowsWithCalc={mealRowsProps.rowsWithCalc} />
+        <ResultCard
+          totals={totals}
+          rowsWithCalc={mealRowsProps.rowsWithCalc}
+          buttonStyle={buttonStyle}
+        />
 
         <CategoryFilterSection
           {...categoryFilterProps}

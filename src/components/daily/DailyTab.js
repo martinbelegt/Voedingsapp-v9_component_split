@@ -46,6 +46,7 @@ export function DailyTab({
   const glucoseBoostEventsForDay = selectedDay?.glucoseBoostEvents || [];
   const movementEventsForDay = selectedDay?.movementEvents || [];
   const bowelEventsForDay = selectedDay?.bowelEvents || [];
+  const [showTimelineAnalysis, setShowTimelineAnalysis] = useState(false);
 
   const totalTimelineItems =
     mealsForDay.length +
@@ -284,6 +285,78 @@ export function DailyTab({
           💊 Creon {dayTotals?.creon25 || 0}x25k + {dayTotals?.creon10 || 0}x10k
         </span>
       </div>
+
+      <button
+        onClick={() => setShowTimelineAnalysis((v) => !v)}
+        style={{
+          ...buttonStyle,
+
+          width: "100%",
+
+          marginBottom: 10,
+
+          background: showTimelineAnalysis ? "#dbeafe" : "#f8fafc",
+
+          border: "1px solid #93c5fd",
+
+          color: "#1d4ed8",
+
+          fontWeight: 800,
+
+          textAlign: "center",
+        }}
+      >
+        {showTimelineAnalysis ? "📈 Daganalyse verbergen" : "📈 Daganalyse"}
+      </button>
+
+      {showTimelineAnalysis && (
+        <div
+          style={{
+            ...cardStyle,
+            marginBottom: 10,
+            background: "#eff6ff",
+            border: "1px solid #bfdbfe",
+            color: "#1e3a8a",
+            fontSize: 13,
+            lineHeight: 1.45,
+          }}
+        >
+          <div style={{ fontWeight: 900, marginBottom: 6 }}>📈 Daganalyse</div>
+
+          <div>
+            <strong>Timing:</strong>{" "}
+            {dayTotals?.personalTimingAdvice ||
+              dayTotals?.timingAdvice ||
+              "Nog geen advies"}
+          </div>
+
+          <div>
+            <strong>Insuline:</strong> {actualInsulin}E werkelijk /{" "}
+            {advisedInsulin}E advies
+          </div>
+
+          <div>
+            <strong>Eiwit:</strong> {dayTotals?.protein || 0} g van{" "}
+            {proteinGoal} g
+          </div>
+
+          <div>
+            <strong>Glucose events:</strong> {glucoseEventsForDay.length}
+          </div>
+
+          <div>
+            <strong>Sport events:</strong> {movementEventsForDay.length}
+          </div>
+
+          <div>
+            <strong>Notities:</strong> {noteEventsForDay.length}
+          </div>
+
+          <div>
+            <strong>Darm events:</strong> {bowelEventsForDay.length}
+          </div>
+        </div>
+      )}
 
       {/* Tijdlijn van deze dag */}
       <div

@@ -5,7 +5,7 @@ import {
   getMealFlags,
 } from "../services/mealAnalysisService";
 
-export function ResultCard({ totals, rowsWithCalc }) {
+export function ResultCard({ totals, rowsWithCalc, buttonStyle = {} }) {
   const isMobile =
     window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
 
@@ -53,19 +53,24 @@ export function ResultCard({ totals, rowsWithCalc }) {
     <button
       onClick={() => setShowResultDetail(true)}
       style={{
+        ...buttonStyle,
+
         width: "100%",
-        border: "1px solid #94a3b8",
-        borderRadius: 2,
-        padding: "3px 8px",
-        background: "#f1f5f9",
-        cursor: "pointer",
-        fontWeight: 700,
-        fontSize: 12,
-        color: "#0f172a",
-        textAlign: "left",
+
+        marginBottom: 10,
+
+        background: showResultDetail ? "#dbeafe" : "#f8fafc",
+
+        border: "1px solid #93c5fd",
+
+        color: "#1d4ed8",
+
+        fontWeight: 800,
+
+        textAlign: "center",
       }}
     >
-      Analyse
+      🍽 Maaltijdanalyse
     </button>
   ) : null;
 
@@ -99,23 +104,21 @@ export function ResultCard({ totals, rowsWithCalc }) {
                 color: "#0f172a",
               }}
             >
-              Maaltijd resultaat
+              Maaltijdresultaat
             </div>
 
             <button
               onClick={() => setShowResultDetail(true)}
               style={{
-                border: "1px solid #94a3b8",
-                borderRadius: 10,
-                padding: "6px 10px",
-                background: "white",
-                cursor: "pointer",
-                fontWeight: 700,
-                fontSize: 13,
-                color: "#0f172a",
+                ...buttonStyle,
+                background: "#f8fafc",
+                border: "1px solid #93c5fd",
+                color: "#1d4ed8",
+                fontWeight: 800,
+                textAlign: "center",
               }}
             >
-              Analyse
+              🍽 Maaltijdanalyse
             </button>
           </div>
 
@@ -241,7 +244,7 @@ export function ResultCard({ totals, rowsWithCalc }) {
                   color: "#0f172a",
                 }}
               >
-                Uitgebreide maaltijdanalyse
+                🍽 Maaltijdanalyse
               </div>
 
               <button
