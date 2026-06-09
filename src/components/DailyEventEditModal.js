@@ -11,6 +11,13 @@ export function DailyEventEditModal({
   const [eventTime, setEventTime] = useState(
     event?.eventTime?.slice(0, 16) || "",
   );
+  const [alarmAt, setAlarmAt] = useState(
+    event?.alarmAt
+      ? event.alarmAt.slice(0, 16)
+      : event?.eventTime
+        ? event.eventTime.slice(0, 16)
+        : new Date().toISOString().slice(0, 16),
+  );
   const [value1, setValue1] = useState(
     eventType === "insulin"
       ? event?.units || ""
@@ -23,7 +30,9 @@ export function DailyEventEditModal({
   const [note, setNote] = useState(
     eventType === "note" ? event?.context || "" : event?.note || "",
   );
-
+  const [alarmEnabled, setAlarmEnabled] = useState(
+    Boolean(event?.alarmEnabled),
+  );
   const isGlucose = eventType === "glucose";
   const isInsulin = eventType === "insulin";
 
@@ -114,6 +123,55 @@ export function DailyEventEditModal({
             border: "1px solid #cbd5e1",
           }}
         />
+        {eventType === "note" && (
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 14,
+              fontSize: 13,
+              fontWeight: 800,
+              color: "#334155",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={alarmEnabled}
+              onChange={(e) => setAlarmEnabled(e.target.checked)}
+            />
+            🔔 Alarm actief op tijdstip van deze notitie
+          </label>
+        )}
+
+        {eventType === "note" && alarmEnabled && (
+          <div style={{ marginBottom: 14 }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: 4,
+                fontSize: 13,
+                fontWeight: 800,
+                color: "#334155",
+              }}
+            >
+              Alarmtijd
+            </label>
+
+            <input
+              type="datetime-local"
+              value={alarmAt}
+              onChange={(e) => setAlarmAt(e.target.value)}
+              style={{
+                width: "100%",
+                padding: 8,
+                border: "1px solid #cbd5e1",
+                borderRadius: 8,
+                fontSize: 16,
+              }}
+            />
+          </div>
+        )}
 
         <div
           style={{ display: "flex", gap: 8, justifyContent: "space-between" }}
@@ -149,6 +207,12 @@ export function DailyEventEditModal({
                   ...(isGlucose ? { glucoseValue: value1 } : {}),
                   ...(eventType === "note" ? { note: value1 } : {}),
                   ...(eventType === "note" ? { context: note } : { note }),
+                  ...(eventType === "note"
+                    ? {
+                        alarmEnabled,
+                        alarmAt: alarmEnabled ? alarmAt : null,
+                      }
+                    : {}),
                 });
                 onClose();
               }}
