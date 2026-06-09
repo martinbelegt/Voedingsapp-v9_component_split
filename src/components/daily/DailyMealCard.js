@@ -87,7 +87,7 @@ export function DailyMealCard({
     <>
       {/* Eetmoment als uniforme tijdlijnkaart */}
       <DailyTimelineItem
-        icon="🍽️"
+        icon={meal.mealMoment === "sport" ? "🟢🥤" : "🟢🍽️"}
         timeLabel={
           meal.eatenAt
             ? new Date(meal.eatenAt).toLocaleString("nl-NL", {
@@ -125,6 +125,7 @@ export function DailyMealCard({
           mealTimeLabel={mealTimeLabel}
           buttonStyle={buttonStyle}
           onClose={() => setShowDetails(false)}
+          onChangeTime={() => setShowTimeEditor(true)}
           onDelete={() => {
             const ok = window.confirm("Deze maaltijd verwijderen?");
             if (!ok) return;

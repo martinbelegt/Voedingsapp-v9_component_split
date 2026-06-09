@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { ResultCard } from "./ResultCard";
 import { MealRowCard } from "./MealRowCard";
 import { getCategoryColor, getCategoryName } from "../services/productHelpers";
 
@@ -38,6 +39,8 @@ export function MealRowsSection(props) {
     fontWeight: 800,
     whiteSpace: "nowrap",
   });
+
+  const [showMealAnalysis, setShowMealAnalysis] = useState(false);
 
   const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
 
@@ -82,6 +85,35 @@ export function MealRowsSection(props) {
           </button>
         </div>
       </div>
+
+      <button
+        onClick={() => setShowMealAnalysis((v) => !v)}
+        style={{
+          ...buttonStyle,
+          width: "100%",
+          marginTop: 8,
+          marginBottom: 10,
+          background: showMealAnalysis ? "#dbeafe" : "#f8fafc",
+          border: "1px solid #93c5fd",
+          color: "#1d4ed8",
+          fontWeight: 800,
+          textAlign: "center",
+        }}
+      >
+        {showMealAnalysis
+          ? "🍽 Maaltijdanalyse verbergen"
+          : "🍽 Maaltijdanalyse"}
+      </button>
+
+      {showMealAnalysis && (
+        <ResultCard
+          totals={totals}
+          rowsWithCalc={rowsWithCalc}
+          buttonStyle={buttonStyle}
+          forceDetailOpen={true}
+          onForceClose={() => setShowMealAnalysis(false)}
+        />
+      )}
 
       {/* Snel product toevoegen + dagtotaal */}
       <div style={cardStyle}>

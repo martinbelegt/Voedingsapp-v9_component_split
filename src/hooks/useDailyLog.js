@@ -736,6 +736,10 @@ export function useDailyLog(selectedDate) {
       eventTime: input.eventTime || new Date().toISOString(),
       note: input.note || "",
       context: input.context || "",
+
+      alarmEnabled: input.alarmEnabled || false,
+      alarmAt: input.alarmAt || null,
+
       createdAt: new Date().toLocaleString("nl-NL"),
     };
 
@@ -764,6 +768,7 @@ export function useDailyLog(selectedDate) {
         },
       ].sort((a, b) => String(b.date).localeCompare(String(a.date)));
     });
+    return eventEntry;
   }
 
   function updateNoteEvent(eventId, updates) {

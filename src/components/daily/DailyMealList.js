@@ -74,6 +74,9 @@ export function DailyMealList({
       id: meal.id,
       itemType: "meal",
       time: meal.eatenAt || "",
+      sortTime: meal.eatenAt
+        ? new Date(new Date(meal.eatenAt).getTime() + 100).toISOString()
+        : "",
       meal,
     })),
 
@@ -88,6 +91,9 @@ export function DailyMealList({
         id: `advice-${meal.id}`,
         itemType: "insulinAdvice",
         time: meal.eatenAt || "",
+        sortTime: meal.eatenAt
+          ? new Date(new Date(meal.eatenAt).getTime() + 90).toISOString()
+          : "",
         meal,
       })),
 
@@ -131,7 +137,12 @@ export function DailyMealList({
       time: event.eventTime || "",
       event,
     })),
-  ].sort((a, b) => String(b.time || "").localeCompare(String(a.time || "")));
+  ].sort((a, b) => {
+    const timeA = new Date(a.sortTime || a.time || 0).getTime();
+    const timeB = new Date(b.sortTime || b.time || 0).getTime();
+
+    return timeB - timeA;
+  });
 
   function getFilteredTimelineItems() {
     if (timelineFilter === "all") return timelineItems;
@@ -479,21 +490,21 @@ export function DailyMealList({
           return (
             <DailyTimelineItem
               key={item.id}
-              indentLevel={1}
-              compact={compactTimeline}
+              indentLevel={0}
+              compact={true}
               icon="💡"
-              title={`Insuline advies · ${meal.totals?.insulin || "?"} E`}
+              title={`💡 Advies NovoRapid ${
+                meal.totals?.insulin != null
+                  ? Math.round(Number(meal.totals.insulin) * 100) / 100
+                  : "?"
+              }E`}
               timeLabel={formatTime(meal.eatenAt)}
-              subtitle={meal.name || meal.mealMoment || ""}
-              accentColor="#ca8a04"
-              backgroundColor="#fefce8"
-              borderColor="#fde047"
+              subtitle={null}
+              accentColor="#166534"
+              backgroundColor="#eff6ff"
+              borderColor="#93c5fd"
               expanded={false}
-              detailContent={
-                <div style={{ fontSize: 13 }}>
-                  Berekend advies gebaseerd op maaltijd.
-                </div>
-              }
+              detailContent={null}
             />
           );
         }
@@ -507,14 +518,14 @@ export function DailyMealList({
               indentLevel={2}
               expanded={expandedIds.includes(event.id)}
               onToggle={() => toggleExpanded(event.id)}
-              icon="🟣💉"
-              title={`Toegediende insuline · ${event.units}E`}
+              icon="💉"
+              title={`💉 ${event.insulinType || "Insuline"} ${event.units}E`}
               timeLabel={formatTime(event.eventTime)}
-              subtitle={`${phasePrefix(item)}${event.note || ""}`}
-              compact={compactTimeline}
-              accentColor="#312e81"
-              backgroundColor="#eef2ff"
-              borderColor="#c7d2fe"
+              subtitle={null}
+              compact={true}
+              accentColor="#1d4ed8"
+              backgroundColor="#eff6ff"
+              borderColor="#93c5fd"
               actions={
                 <>
                   {timerButton(event)}
@@ -536,14 +547,14 @@ export function DailyMealList({
           return (
             <DailyTimelineItem
               key={event.id}
-              indentLevel={2}
-              expanded={expandedIds.includes(event.id)}
-              onToggle={() => toggleExpanded(event.id)}
-              icon="🟣📈"
-              title={`Glucosewaarde · ${event.glucoseValue} mmol/L`}
+              indentLevel={3}
+              expanded={false}
+              onToggle={() => {}}
+              icon="📈"
+              title={`${event.glucoseValue} mmol/L`}
               timeLabel={formatTime(event.eventTime)}
-              subtitle={`${phasePrefix(item)}${event.note || ""}`}
-              compact={compactTimeline}
+              subtitle={null}
+              compact={true}
               accentColor="#075985"
               backgroundColor="#f0f9ff"
               borderColor="#7dd3fc"
@@ -553,11 +564,7 @@ export function DailyMealList({
                   {editButton(event, "glucose")}
                 </>
               }
-              detailContent={
-                <div style={{ fontSize: 13, color: "#334155" }}>
-                  Glucosemeting opgeslagen in metabole tijdlijn.
-                </div>
-              }
+              detailContent={null}
             />
           );
         }
@@ -571,9 +578,9 @@ export function DailyMealList({
               indentLevel={2}
               expanded={expandedIds.includes(event.id)}
               onToggle={() => toggleExpanded(event.id)}
-              compact={compactTimeline}
+              compact={true}
               icon="⚡"
-              title={`${event.kh}g snelle KH`}
+              title={`⚡ +${event.carbs || "?"}g snelle KH`}
               timeLabel={formatTime(event.eventTime)}
               subtitle={`${phasePrefix(item)}${event.source || "Glucoseboost"}${
                 event.note ? ` · ${event.note}` : ""
@@ -678,10 +685,14 @@ export function DailyMealList({
               expanded={expandedIds.includes(event.id)}
               onToggle={() => toggleExpanded(event.id)}
               compact={compactTimeline}
-              icon="⚫📝"
+              icon={event.alarmEnabled ? "🔔📝" : "📝"}
               title={event.note || "Notitie"}
               timeLabel={formatTime(event.eventTime)}
-              subtitle={`${phasePrefix(item)}${event.context || ""}`}
+              subtitle={
+                event.alarmEnabled
+                  ? `🔔 Alarm actief${event.context ? ` · ${event.context}` : ""}`
+                  : `${phasePrefix(item)}${event.context || ""}`
+              }
               accentColor="#475569"
               backgroundColor="#f8fafc"
               borderColor="#cbd5e1"

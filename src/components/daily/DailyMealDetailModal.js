@@ -7,6 +7,7 @@ export function DailyMealDetailModal({
   mealTimeLabel,
   buttonStyle,
   onClose,
+  onChangeTime,
   onDelete,
 }) {
   // ESC sluit detailvenster
@@ -91,6 +92,25 @@ export function DailyMealDetailModal({
               gap: 8,
             }}
           >
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onChangeTime();
+              }}
+              style={{
+                ...buttonStyle,
+                padding: "7px 11px",
+                fontSize: 12,
+                borderRadius: 10,
+                background: "#eff6ff",
+                border: "1px solid #bfdbfe",
+                color: "#1d4ed8",
+                fontWeight: 800,
+              }}
+            >
+              Tijd wijzigen
+            </button>
+
             <button
               onClick={(e) => {
                 e.stopPropagation();

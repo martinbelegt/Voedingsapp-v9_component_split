@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { DailyMealList } from "./DailyMealList";
 import { DailyEventAddModal } from "./DailyEventAddModal";
+import { requestNotificationPermission } from "../../services/notificationService";
+import { scheduleLocalAlarm } from "../../services/alarmService";
 
 export function DailyTab({
   settings,
@@ -155,11 +157,21 @@ export function DailyTab({
       });
     }
     if (eventType === "note") {
-      addNoteEventToDay({
+      const noteEvent = addNoteEventToDay({
         date,
         eventTime,
         note: value1,
         context: value2,
+
+        alarmEnabled: true,
+        alarmAt: eventTime,
+      });
+
+      scheduleLocalAlarm({
+        id: noteEvent.id,
+        alarmAt: noteEvent.alarmAt,
+        title: "VoedingsApp reminder",
+        body: noteEvent.note || "Geplande notitie",
       });
     }
   }
@@ -172,6 +184,22 @@ export function DailyTab({
   const actualInsulin = Number(dayTotals?.insulin || 0);
 
   const insulinDiff = Math.round((actualInsulin - advisedInsulin) * 100) / 100;
+  const proteinRemaining = Math.max(
+    0,
+    Math.round((proteinGoal - (dayTotals?.protein || 0)) * 100) / 100,
+  );
+
+  const kcalRemaining = Math.max(
+    0,
+    Math.round((targetKcal - (dayTotals?.kcal || 0)) * 100) / 100,
+  );
+
+  const insulinDiffLabel =
+    insulinDiff === 0
+      ? "gelijk aan advies"
+      : insulinDiff > 0
+        ? `${insulinDiff}E boven advies`
+        : `${Math.abs(insulinDiff)}E onder advies`;
 
   return (
     <div style={{ display: "grid", gap: 14, marginTop: 16 }}>
@@ -276,11 +304,11 @@ export function DailyTab({
         </span>
 
         <span style={totalsChip("#eff6ff", "#2563eb")}>
-          💉 {actualInsulin}E / advies {advisedInsulin}E /{" "}
+          💉 {(Number(actualInsulin) || 0).toFixed(1)}E / advies{" "}
+          {(Number(advisedInsulin) || 0).toFixed(1)}E /{" "}
           {insulinDiff >= 0 ? "+" : ""}
-          {insulinDiff}E
+          {(Number(insulinDiff) || 0).toFixed(1)}E
         </span>
-
         <span style={totalsChip("#fef3c7", "#a16207")}>
           💊 Creon {dayTotals?.creon25 || 0}x25k + {dayTotals?.creon10 || 0}x10k
         </span>
@@ -309,6 +337,21 @@ export function DailyTab({
         {showTimelineAnalysis ? "📈 Daganalyse verbergen" : "📈 Daganalyse"}
       </button>
 
+      <button
+        onClick={requestNotificationPermission}
+        style={{
+          ...buttonStyle,
+          width: "100%",
+          marginBottom: 10,
+          background: "#f8fafc",
+          border: "1px solid #cbd5e1",
+          color: "#334155",
+          textAlign: "center",
+        }}
+      >
+        🔔 Test notificatie
+      </button>
+
       {showTimelineAnalysis && (
         <div
           style={{
@@ -332,28 +375,36 @@ export function DailyTab({
 
           <div>
             <strong>Insuline:</strong> {actualInsulin}E werkelijk /{" "}
-            {advisedInsulin}E advies
+            {advisedInsulin}E advies · {insulinDiffLabel}
           </div>
 
           <div>
-            <strong>Eiwit:</strong> {dayTotals?.protein || 0} g van{" "}
-            {proteinGoal} g
+            <strong>Eiwit:</strong> {dayTotals?.protein || 0}g van {proteinGoal}
+            g · nog {proteinRemaining}g te gaan
           </div>
 
           <div>
-            <strong>Glucose events:</strong> {glucoseEventsForDay.length}
+            <strong>Kcal:</strong> {dayTotals?.kcal || 0} van {targetKcal} kcal
+            · nog {kcalRemaining} kcal ruimte
           </div>
 
           <div>
-            <strong>Sport events:</strong> {movementEventsForDay.length}
+            <strong>Glucose:</strong> {glucoseEventsForDay.length}{" "}
+            registratie(s) vandaag
           </div>
 
           <div>
-            <strong>Notities:</strong> {noteEventsForDay.length}
+            <strong>Sport:</strong> {movementEventsForDay.length}{" "}
+            bewegingsmoment(en)
           </div>
 
           <div>
-            <strong>Darm events:</strong> {bowelEventsForDay.length}
+            <strong>Context:</strong> {noteEventsForDay.length} notitie(s)
+            toegevoegd
+          </div>
+
+          <div>
+            <strong>Darmen:</strong> {bowelEventsForDay.length} registratie(s)
           </div>
         </div>
       )}

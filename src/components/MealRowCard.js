@@ -95,6 +95,8 @@ export function MealRowCard({
             minWidth: isMobile ? 42 : undefined,
             maxWidth: isMobile ? 42 : undefined,
 
+            fontSize: 16,
+
             minHeight: 0,
 
             height: isMobile ? 29 : undefined,

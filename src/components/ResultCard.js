@@ -5,7 +5,13 @@ import {
   getMealFlags,
 } from "../services/mealAnalysisService";
 
-export function ResultCard({ totals, rowsWithCalc, buttonStyle = {} }) {
+export function ResultCard({
+  totals,
+  rowsWithCalc,
+  buttonStyle = {},
+  forceDetailOpen = false,
+  onForceClose,
+}) {
   const isMobile =
     window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
 
@@ -49,30 +55,7 @@ export function ResultCard({ totals, rowsWithCalc, buttonStyle = {} }) {
     }
   }
 
-  const mobileCompactResult = isMobile ? (
-    <button
-      onClick={() => setShowResultDetail(true)}
-      style={{
-        ...buttonStyle,
-
-        width: "100%",
-
-        marginBottom: 10,
-
-        background: showResultDetail ? "#dbeafe" : "#f8fafc",
-
-        border: "1px solid #93c5fd",
-
-        color: "#1d4ed8",
-
-        fontWeight: 800,
-
-        textAlign: "center",
-      }}
-    >
-      🍽 Maaltijdanalyse
-    </button>
-  ) : null;
+  const mobileCompactResult = null;
 
   return (
     <>
@@ -106,20 +89,6 @@ export function ResultCard({ totals, rowsWithCalc, buttonStyle = {} }) {
             >
               Maaltijdresultaat
             </div>
-
-            <button
-              onClick={() => setShowResultDetail(true)}
-              style={{
-                ...buttonStyle,
-                background: "#f8fafc",
-                border: "1px solid #93c5fd",
-                color: "#1d4ed8",
-                fontWeight: 800,
-                textAlign: "center",
-              }}
-            >
-              🍽 Maaltijdanalyse
-            </button>
           </div>
 
           {open && (
@@ -201,9 +170,15 @@ export function ResultCard({ totals, rowsWithCalc, buttonStyle = {} }) {
         </div>
       )}
 
-      {showResultDetail && (
+      {(showResultDetail || forceDetailOpen) && (
         <div
-          onClick={() => setShowResultDetail(false)}
+          onClick={() => {
+            if (onForceClose) {
+              onForceClose();
+            } else {
+              setShowResultDetail(false);
+            }
+          }}
           style={{
             position: "fixed",
             inset: 0,
@@ -248,7 +223,13 @@ export function ResultCard({ totals, rowsWithCalc, buttonStyle = {} }) {
               </div>
 
               <button
-                onClick={() => setShowResultDetail(false)}
+                onClick={() => {
+                  if (onForceClose) {
+                    onForceClose();
+                  } else {
+                    setShowResultDetail(false);
+                  }
+                }}
                 style={{
                   border: "1px solid #94a3b8",
                   borderRadius: 8,
