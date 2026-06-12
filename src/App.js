@@ -830,6 +830,9 @@ export default function App() {
     addMovementEventToDay,
     updateMovementEvent,
     deleteMovementEvent,
+    addSupplementEventToDay,
+    updateSupplementEvent,
+    deleteSupplementEvent,
     addBowelEventToDay,
     updateBowelEvent,
     deleteBowelEvent,
@@ -2192,6 +2195,9 @@ Producten uit deze categorie gaan naar "Overig".`);
             addMovementEventToDay={addMovementEventToDay}
             updateMovementEvent={updateMovementEvent}
             deleteMovementEvent={deleteMovementEvent}
+            addSupplementEventToDay={addSupplementEventToDay}
+            updateSupplementEvent={updateSupplementEvent}
+            deleteSupplementEvent={deleteSupplementEvent}
             addBowelEventToDay={addBowelEventToDay}
             updateBowelEvent={updateBowelEvent}
             deleteBowelEvent={deleteBowelEvent}

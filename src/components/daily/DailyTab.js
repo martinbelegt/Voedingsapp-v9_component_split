@@ -2,7 +2,13 @@ import React, { useEffect, useState } from "react";
 import { DailyMealList } from "./DailyMealList";
 import { DailyEventAddModal } from "./DailyEventAddModal";
 import { requestNotificationPermission } from "../../services/notificationService";
-import { scheduleLocalAlarm } from "../../services/alarmService";
+
+import {
+  scheduleLocalAlarm,
+  clearLocalAlarm,
+  snoozeLocalAlarm,
+  enableAlarmSound,
+} from "../../services/alarmService";
 
 export function DailyTab({
   settings,
@@ -31,6 +37,9 @@ export function DailyTab({
   addMovementEventToDay,
   updateMovementEvent,
   deleteMovementEvent,
+  addSupplementEventToDay,
+  updateSupplementEvent,
+  deleteSupplementEvent,
   addBowelEventToDay,
   updateBowelEvent,
   deleteBowelEvent,
@@ -41,6 +50,7 @@ export function DailyTab({
   noteEventsForDay = selectedDay?.noteEvents || [],
 }) {
   const [addEventType, setAddEventType] = useState(null);
+  const [activeAlarm, setActiveAlarm] = useState(null);
 
   const mealsForDay = selectedDay?.meals || [];
   const insulinEventsForDay = selectedDay?.insulinEvents || [];
@@ -104,7 +114,14 @@ export function DailyTab({
     whiteSpace: "nowrap",
   });
 
-  function saveAddedEvent({ eventType, eventTime, value1, value2, value3 }) {
+  function saveAddedEvent({
+    eventType,
+    eventTime,
+    value1,
+    value2,
+    value3,
+    bowelColor,
+  }) {
     const date = eventTime.slice(0, 10);
 
     if (eventType === "insulin") {
@@ -146,12 +163,22 @@ export function DailyTab({
         note: "",
       });
     }
+    if (eventType === "supplement") {
+      addSupplementEventToDay({
+        date,
+        eventTime,
+        name: value1,
+        dosage: value2,
+        note: value3,
+      });
+    }
 
     if (eventType === "bowel") {
       addBowelEventToDay({
         date,
         eventTime,
         bristolScore: value1,
+        bowelColor,
         urgency: value2,
         note: value3,
       });
@@ -200,6 +227,18 @@ export function DailyTab({
       : insulinDiff > 0
         ? `${insulinDiff}E boven advies`
         : `${Math.abs(insulinDiff)}E onder advies`;
+
+  useEffect(() => {
+    function handleAlarm(event) {
+      setActiveAlarm(event.detail);
+    }
+
+    window.addEventListener("voedingsapp-alarm", handleAlarm);
+
+    return () => {
+      window.removeEventListener("voedingsapp-alarm", handleAlarm);
+    };
+  }, []);
 
   return (
     <div style={{ display: "grid", gap: 14, marginTop: 16 }}>
@@ -350,6 +389,21 @@ export function DailyTab({
         }}
       >
         🔔 Test notificatie
+      </button>
+      <button
+        onClick={enableAlarmSound}
+        style={{
+          ...buttonStyle,
+          width: "100%",
+          marginBottom: 10,
+          background: "#fff7ed",
+          border: "1px solid #fdba74",
+          color: "#c2410c",
+          textAlign: "center",
+          fontWeight: 700,
+        }}
+      >
+        🔊 Alarmgeluid activeren
       </button>
 
       {showTimelineAnalysis && (
@@ -562,6 +616,17 @@ export function DailyTab({
             >
               + Notitie
             </button>
+            <button
+              onClick={() => setAddEventType("supplement")}
+              style={{
+                ...buttonStyle,
+                background: "#ede9fe",
+                border: "1px solid #c4b5fd",
+                color: "#5b21b6",
+              }}
+            >
+              + Supplement
+            </button>
           </div>
         </div>
 
@@ -585,6 +650,10 @@ export function DailyTab({
           movementEventsForDay={movementEventsForDay}
           updateMovementEvent={updateMovementEvent}
           deleteMovementEvent={deleteMovementEvent}
+          supplementEventsForDay={selectedDay?.supplementEvents || []}
+          addSupplementEventToDay={addSupplementEventToDay}
+          updateSupplementEvent={updateSupplementEvent}
+          deleteSupplementEvent={deleteSupplementEvent}
           bowelEventsForDay={bowelEventsForDay}
           updateBowelEvent={updateBowelEvent}
           deleteBowelEvent={deleteBowelEvent}
@@ -604,6 +673,91 @@ export function DailyTab({
           onClose={() => setAddEventType(null)}
           onSave={saveAddedEvent}
         />
+      )}
+      {activeAlarm && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(15, 23, 42, 0.72)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 20,
+          }}
+        >
+          <div
+            style={{
+              background: "#fff7ed",
+              border: "3px solid #fb923c",
+              borderRadius: 22,
+              padding: 24,
+              maxWidth: 420,
+              width: "100%",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
+              textAlign: "center",
+            }}
+          >
+            <div style={{ fontSize: 46, marginBottom: 10 }}>🔔</div>
+
+            <h2 style={{ margin: 0, color: "#9a3412", fontSize: 26 }}>
+              {activeAlarm.title}
+            </h2>
+
+            <p style={{ fontSize: 17, color: "#431407", marginTop: 12 }}>
+              {activeAlarm.body}
+            </p>
+
+            <div
+              style={{
+                display: "grid",
+                gap: 10,
+                marginTop: 22,
+              }}
+            >
+              <button
+                onClick={() => {
+                  clearLocalAlarm(activeAlarm.id);
+                  setActiveAlarm(null);
+                }}
+                style={{
+                  ...buttonStyle,
+                  background: "#16a34a",
+                  border: "1px solid #15803d",
+                  color: "white",
+                  fontSize: 18,
+                  padding: "12px 16px",
+                }}
+              >
+                ✅ Gedaan
+              </button>
+
+              <button
+                onClick={() => {
+                  snoozeLocalAlarm({
+                    id: activeAlarm.id,
+                    title: activeAlarm.title,
+                    body: activeAlarm.body,
+                    minutes: 5,
+                  });
+
+                  setActiveAlarm(null);
+                }}
+                style={{
+                  ...buttonStyle,
+                  background: "#fff",
+                  border: "1px solid #fdba74",
+                  color: "#9a3412",
+                  fontSize: 16,
+                  padding: "10px 14px",
+                }}
+              >
+                ⏱ Herinner over 5 minuten
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

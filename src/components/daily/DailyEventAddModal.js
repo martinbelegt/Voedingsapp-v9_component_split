@@ -1,5 +1,57 @@
 import React, { useState } from "react";
 
+const BOWEL_COLOR_OPTIONS = [
+  {
+    value: "",
+    label: "Kleur niet ingevuld",
+    info: "",
+  },
+  {
+    value: "dark_brown",
+    label: "🟤 Donkerbruin - meestal normaal",
+    info: "",
+  },
+  {
+    value: "brown",
+    label: "🟫 Bruin - normale kleur",
+    info: "",
+  },
+  {
+    value: "light_brown",
+    label: "🟨 Lichtbruin - meestal normaal, let op veranderingen",
+    info: "",
+  },
+  {
+    value: "yellow",
+    label: "🟡 Geel - kan wijzen op vetmalabsorptie of snelle passage",
+    info: "",
+  },
+  {
+    value: "green",
+    label: "🟢 Groen - voeding, supplementen of snelle passage",
+    info: "",
+  },
+  {
+    value: "grey",
+    label: "⚪ Grijs - kan wijzen op galproblemen",
+    info: "",
+  },
+  {
+    value: "black",
+    label: "⚫ Zwart - kan bloedverlies betekenen",
+    info: "",
+  },
+  {
+    value: "red",
+    label: "🔴 Rood - kan bloedverlies betekenen",
+    info: "",
+  },
+];
+
+function getBowelColorInfo(value) {
+  return BOWEL_COLOR_OPTIONS.find((opt) => opt.value === value)?.info || "";
+}
+
 export function DailyEventAddModal({
   eventType,
   selectedDate,
@@ -11,9 +63,10 @@ export function DailyEventAddModal({
     `${selectedDate}T${new Date().toTimeString().slice(0, 5)}`,
   );
 
-  const [value1, setValue1] = useState("");
+  const [value1, setValue1] = useState(eventType === "bowel" ? "4" : "");
   const [value2, setValue2] = useState("");
   const [value3, setValue3] = useState("");
+  const [bowelColor, setBowelColor] = useState("brown");
 
   const isMobile =
     window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
@@ -21,17 +74,11 @@ export function DailyEventAddModal({
   const mobileInputStyle = {
     width: "100%",
     boxSizing: "border-box",
-
     padding: isMobile ? "12px 11px" : "10px 11px",
-
     borderRadius: 10,
-
     border: "1px solid #cbd5e1",
-
     fontSize: isMobile ? 16 : 14,
-
     minHeight: isMobile ? 46 : 44,
-
     WebkitAppearance: "none",
   };
 
@@ -72,10 +119,6 @@ export function DailyEventAddModal({
       title: "Stoelgang toevoegen",
       label1: "Bristol score",
       placeholder1: "1 t/m 7",
-      label2: "Urgentie",
-      placeholder2: "laag / middel / hoog",
-      label3: "Notitie",
-      placeholder3: "",
     },
     note: {
       title: "Notitie toevoegen",
@@ -83,6 +126,15 @@ export function DailyEventAddModal({
       placeholder1: "bijv. 2 HMB pillen voor training",
       label2: "Context",
       placeholder2: "optioneel",
+    },
+    supplement: {
+      title: "Supplement toevoegen",
+      label1: "Naam supplement",
+      placeholder1: "bijv. HMB",
+      label2: "Dosering",
+      placeholder2: "bijv. 2 capsules",
+      label3: "Notitie",
+      placeholder3: "optioneel",
     },
   }[eventType];
 
@@ -95,6 +147,7 @@ export function DailyEventAddModal({
       value1,
       value2,
       value3,
+      bowelColor,
     });
     onClose();
   }
@@ -113,26 +166,19 @@ export function DailyEventAddModal({
         zIndex: 9999,
       }}
     >
-      {/* Event toevoegen modal */}
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
           width: "min(460px,95vw)",
-
           maxHeight: isMobile ? "85vh" : "90vh",
-
           overflowY: "auto",
-
           background: "white",
-
           borderRadius: isMobile ? 10 : 18,
-
           padding: isMobile ? 12 : 18,
           border: "1px solid #cbd5e1",
           boxShadow: "0 20px 50px rgba(0,0,0,0.25)",
         }}
       >
-        {/* Kop */}
         <div
           style={{
             fontWeight: 900,
@@ -144,7 +190,6 @@ export function DailyEventAddModal({
           {config.title}
         </div>
 
-        {/* Datum/tijd */}
         <label style={{ fontSize: 13, fontWeight: 800 }}>Datum en tijd</label>
         <input
           type="datetime-local"
@@ -153,21 +198,17 @@ export function DailyEventAddModal({
           onClick={(e) => e.currentTarget.showPicker?.()}
           style={{
             ...mobileInputStyle,
-
             marginTop: 4,
-
             marginBottom: 12,
-
             cursor: "pointer",
           }}
         />
 
-        {/* Veld 1 */}
         <label style={{ fontSize: 13, fontWeight: 800 }}>{config.label1}</label>
 
         {eventType === "bowel" ? (
           <select
-            value={value1 || "4"}
+            value={value1}
             onChange={(e) => setValue1(e.target.value)}
             style={{
               ...mobileInputStyle,
@@ -197,43 +238,75 @@ export function DailyEventAddModal({
             }}
           />
         )}
-        {/* Veld 2 */}
-        <label style={{ fontSize: 13, fontWeight: 800 }}>{config.label2}</label>
-        <input
-          value={value2}
-          onChange={(e) => setValue2(e.target.value)}
-          placeholder={config.placeholder2}
-          style={{
-            ...mobileInputStyle,
-            marginTop: 4,
-            marginBottom: 12,
-          }}
-        />
 
-        {/* Optioneel veld 3 */}
-        {config.label3 && (
+        {eventType === "bowel" && (
           <>
             <label style={{ fontSize: 13, fontWeight: 800 }}>
-              {config.label3}
+              Kleur ontlasting
             </label>
-            <input
-              value={value3}
-              onChange={(e) => setValue3(e.target.value)}
-              placeholder={config.placeholder3}
+
+            <select
+              value={bowelColor}
+              onChange={(e) => setBowelColor(e.target.value)}
               style={{
                 ...mobileInputStyle,
                 marginTop: 4,
-                marginBottom: 14,
+                marginBottom: 8,
+                cursor: "pointer",
               }}
-            />
+            >
+              {BOWEL_COLOR_OPTIONS.map((opt) => (
+                <option key={opt.value || "empty"} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </>
         )}
 
-        {/* Acties */}
+        {eventType !== "bowel" && (
+          <>
+            <label style={{ fontSize: 13, fontWeight: 800 }}>
+              {config.label2}
+            </label>
+
+            <input
+              value={value2}
+              onChange={(e) => setValue2(e.target.value)}
+              placeholder={config.placeholder2}
+              style={{
+                ...mobileInputStyle,
+                marginTop: 4,
+                marginBottom: 12,
+              }}
+            />
+
+            {config.label3 && (
+              <>
+                <label style={{ fontSize: 13, fontWeight: 800 }}>
+                  {config.label3}
+                </label>
+
+                <input
+                  value={value3}
+                  onChange={(e) => setValue3(e.target.value)}
+                  placeholder={config.placeholder3}
+                  style={{
+                    ...mobileInputStyle,
+                    marginTop: 4,
+                    marginBottom: 14,
+                  }}
+                />
+              </>
+            )}
+          </>
+        )}
+
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
           <button onClick={onClose} style={buttonStyle}>
             Annuleren
           </button>
+
           <button
             onClick={save}
             style={{

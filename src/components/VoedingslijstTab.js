@@ -82,6 +82,8 @@ function VoedingslijstTab({
 
   const [hoveredProductId, setHoveredProductId] = useState(null);
 
+  const isMobile = window.innerWidth < 768;
+
   useEffect(() => {
     try {
       localStorage.setItem(
@@ -124,7 +126,15 @@ function VoedingslijstTab({
   );
 
   return (
-    <div style={{ display: "grid", gap: 16, marginTop: 16 }}>
+    <div
+      style={{
+        display: "grid",
+        gap: isMobile ? 10 : 16,
+        marginTop: isMobile ? 8 : 16,
+        maxWidth: "100%",
+        overflowX: "hidden",
+      }}
+    >
       <div style={cardStyle}>
         <button
           onClick={() => setShowCategoryManager((v) => !v)}
@@ -378,7 +388,7 @@ function VoedingslijstTab({
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "auto 1fr auto",
+              gridTemplateColumns: isMobile ? "1fr" : "auto 1fr auto",
               gap: 8,
               alignItems: "center",
             }}
@@ -425,406 +435,540 @@ function VoedingslijstTab({
 
         <div
           style={{
-            maxHeight: "65vh",
-            overflowY: "auto",
-            border: "1px solid #e5e7eb",
-            borderRadius: 12,
-            background: "white",
-            padding: 6,
+            marginBottom: 10,
+            padding: "8px 10px",
+            borderRadius: 10,
+            background: "#f8fafc",
+            border: "1px solid #e2e8f0",
+            fontSize: 13,
+            color: "#334155",
           }}
         >
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: productListGridTemplate,
-              gap: 5,
-              padding: "10px 6px",
-              marginBottom: 8,
-              fontSize: 11,
-              fontWeight: 700,
-              color: "#475569",
-              borderBottom: "2px solid #94a3b8",
-              background: "#f8fafc",
-              position: "sticky",
-              top: 0,
-              zIndex: 5,
-              alignItems: "center",
-              justifyItems: "stretch",
-              textAlign: "left",
-            }}
-          >
-            <div
-              style={clickableHeaderCellStyle}
-              onClick={() => requestSort("favorite")}
-              title="Sorteer op favoriet"
-            >
-              <SortableHeader
-                label="Fav"
-                sortKey="favorite"
-                sortConfig={sortConfig}
-                textAlign="left"
-              />
-            </div>
+          Totaal producten: <strong>{products.length}</strong>
+          {" • "}
+          Getoond: <strong>{packFilteredProducts.length}</strong>
+          {" • "}
+          Filter: <strong>{activePackFilter}</strong>
+        </div>
 
-            <div
-              style={clickableHeaderCellStyle}
-              onClick={() => requestSort("category")}
-              title="Sorteer op categorie"
-            >
-              <SortableHeader
-                label="Categorie"
-                sortKey="category"
-                sortConfig={sortConfig}
-              />
-            </div>
+        {isMobile && (
+          <div style={{ display: "grid", gap: 8 }}>
+            {packFilteredProducts.map((p) => {
+              const bg = getCategoryColor(categories, p.categoryId);
 
-            <div
-              style={clickableHeaderCellStyle}
-              onClick={() => requestSort("mealMoment")}
-              title="Sorteer op moment"
-            >
-              <SortableHeader
-                label="Moment"
-                sortKey="mealMoment"
-                sortConfig={sortConfig}
-              />
-            </div>
-
-            <div
-              style={clickableHeaderCellStyle}
-              onClick={() => requestSort("name")}
-              title="Sorteer op naam"
-            >
-              <SortableHeader
-                label="Naam"
-                sortKey="name"
-                sortConfig={sortConfig}
-              />
-            </div>
-
-            <div
-              style={clickableHeaderCellStyle}
-              onClick={() => requestSort("portion")}
-              title="Sorteer op portie"
-            >
-              <SortableHeader
-                label="Portie"
-                sortKey="portion"
-                sortConfig={sortConfig}
-                textAlign="left"
-              />
-            </div>
-
-            <div
-              style={clickableHeaderCellStyle}
-              onClick={() => requestSort("portionGram")}
-              title="Sorteer op gram"
-            >
-              <SortableHeader
-                label="Gram"
-                sortKey="portionGram"
-                sortConfig={sortConfig}
-                textAlign="left"
-              />
-            </div>
-
-            <div
-              style={clickableHeaderCellStyle}
-              onClick={() => requestSort("kh100")}
-              title="Sorteer op koolhydraten"
-            >
-              <SortableHeader
-                label="KH"
-                sortKey="kh100"
-                sortConfig={sortConfig}
-                textAlign="left"
-              />
-            </div>
-
-            <div
-              style={clickableHeaderCellStyle}
-              onClick={() => requestSort("protein100")}
-              title="Sorteer op eiwit"
-            >
-              <SortableHeader
-                label="Eiwit"
-                sortKey="protein100"
-                sortConfig={sortConfig}
-                textAlign="left"
-              />
-            </div>
-
-            <div
-              style={clickableHeaderCellStyle}
-              onClick={() => requestSort("fat100")}
-              title="Sorteer op vet"
-            >
-              <SortableHeader
-                label="Vet"
-                sortKey="fat100"
-                sortConfig={sortConfig}
-                textAlign="left"
-              />
-            </div>
-
-            <div
-              style={clickableHeaderCellStyle}
-              onClick={() => requestSort("kcal100")}
-              title="Sorteer op kcal"
-            >
-              <SortableHeader
-                label="Kcal"
-                sortKey="kcal100"
-                sortConfig={sortConfig}
-                textAlign="left"
-              />
-            </div>
-
-            <div
-              style={clickableHeaderCellStyle}
-              onClick={() => requestSort("giClass")}
-              title="Sorteer op GI"
-            >
-              <SortableHeader
-                label="GI"
-                sortKey="giClass"
-                sortConfig={sortConfig}
-                textAlign="left"
-              />
-            </div>
-
-            <div
-              style={clickableHeaderCellStyle}
-              onClick={() => requestSort("timing")}
-              title="Sorteer op timing"
-            >
-              <SortableHeader
-                label="Timing"
-                sortKey="timing"
-                sortConfig={sortConfig}
-                textAlign="left"
-              />
-            </div>
-
-            <div
-              style={{
-                ...clickableHeaderCellStyle,
-                borderRight: "none",
-              }}
-              onClick={() => requestSort("absorptionProfile")}
-              title="Sorteer op absorptie"
-            >
-              <SortableHeader
-                label="Absorptie"
-                sortKey="absorptionProfile"
-                sortConfig={sortConfig}
-                textAlign="left"
-              />
-            </div>
-          </div>
-
-          {packFilteredProducts.map((p) => {
-            const rowBg =
-              hoveredProductId === p.id
-                ? "rgba(255,255,255,0.68)"
-                : getCategoryColor(categories, p.categoryId);
-
-            const canCopyToCurrentPack =
-              activePackFilter === "all" ||
-              (activePackFilter !== "__base__" &&
-                p.packName !== activePackFilter);
-
-            return (
-              <div
-                key={p.id}
-                onMouseEnter={() => setHoveredProductId(p.id)}
-                onMouseLeave={() => setHoveredProductId(null)}
-                onClick={() => openEditProductModal(p)}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: productListGridTemplate,
-                  gap: 5,
-                  padding: 6,
-                  border: "1px solid #e5e7eb",
-                  borderRadius: 10,
-                  marginBottom: 5,
-                  fontSize: 12,
-                  alignItems: "stretch",
-                  justifyItems: "stretch",
-                  background: rowBg,
-                  transition: "background 120ms ease, box-shadow 120ms ease",
-                  boxShadow:
-                    hoveredProductId === p.id
-                      ? "0 1px 4px rgba(0,0,0,0.08)"
-                      : "none",
-                  cursor: "pointer",
-                }}
-                title="Klik om productdetails te openen"
-              >
+              return (
                 <div
+                  key={p.id}
+                  onClick={() => openEditProductModal(p)}
                   style={{
-                    ...bodyCellStyle,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: 4,
+                    background: bg,
+                    border: "1px solid #e5e7eb",
+                    borderRadius: 12,
+                    padding: 10,
+                    display: "grid",
+                    gap: 6,
+                    cursor: "pointer",
+                    maxWidth: "100%",
+                    boxSizing: "border-box",
                   }}
-                  onClick={(e) => e.stopPropagation()}
                 >
-                  <button
-                    onClick={() => toggleFavorite(p.id)}
+                  <div
                     style={{
-                      ...buttonStyle,
-                      padding: "4px 8px",
-                      fontSize: 16,
-                      fontWeight: 700,
-                      lineHeight: 1,
-                      background: "white",
-                      border: "1px solid #cbd5e1",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      gap: 8,
+                      alignItems: "flex-start",
                     }}
-                    title={
-                      p.favorite ? "Favoriet verwijderen" : "Favoriet maken"
-                    }
                   >
-                    {p.favorite ? "★" : "☆"}
-                  </button>
+                    <div
+                      style={{
+                        fontWeight: 900,
+                        fontSize: 15,
+                        color: "#0f172a",
+                      }}
+                    >
+                      {p.name}
+                    </div>
 
-                  {canCopyToCurrentPack && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        copyProductToCurrentPack(p);
+                        toggleFavorite(p.id);
                       }}
                       style={{
                         ...buttonStyle,
-                        padding: "4px 6px",
-                        fontSize: 13,
-                        minWidth: 26,
-                        fontWeight: 700,
+                        padding: "3px 7px",
+                        fontSize: 16,
                         lineHeight: 1,
-                        background: "#eef2ff",
-                        border: "1px solid #c7d2fe",
-                        color: "#3730a3",
+                        background: "white",
+                        border: "1px solid #cbd5e1",
                       }}
-                      title="Kopieer naar lijst"
                     >
-                      ↪
+                      {p.favorite ? "★" : "☆"}
                     </button>
-                  )}
-                </div>
+                  </div>
 
-                <div style={bodyCellStyle}>
+                  <div
+                    style={{ fontSize: 12, color: "#334155", fontWeight: 700 }}
+                  >
+                    {getCategoryName(categories, p.categoryId)} ·{" "}
+                    {getMealMomentLabel(p.mealMoment)}
+                  </div>
+
                   <div
                     style={{
-                      fontSize: 11,
-                      fontWeight: 600,
-                      padding: "2px 6px",
-                      borderRadius: 6,
-                      background: "rgba(255,255,255,0.5)",
-                      display: "inline-block",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 6,
+                      fontSize: 12,
+                      color: "#0f172a",
                     }}
                   >
-                    {getCategoryName(categories, p.categoryId)}
+                    <span>KH {p.kh100}/100g</span>
+                    <span>Eiwit {p.protein100}/100g</span>
+                    <span>Vet {p.fat100}/100g</span>
+                    <span>{p.kcal100} kcal</span>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 6,
+                      fontSize: 11,
+                      color: "#334155",
+                    }}
+                  >
+                    <span>{p.portion || "portie"}</span>
+                    <span>{p.portionGram}g</span>
+                    <span>
+                      GI {getGiClassMeta(p.giClass, giClassOptions).label}
+                    </span>
+                    <span>
+                      {getTimingLabel(
+                        p.personalTimingTag || p.timingTag,
+                        timingOptions,
+                      )}
+                    </span>
+                    <span>
+                      {
+                        getAbsorptionMeta(
+                          p.absorptionProfile,
+                          absorptionProfileOptions,
+                        ).label
+                      }
+                    </span>
                   </div>
                 </div>
+              );
+            })}
+          </div>
+        )}
 
-                <div style={bodyCellStyle}>
-                  {getMealMomentLabel(p.mealMoment)}
-                </div>
-
-                <div
-                  style={{
-                    ...bodyCellStyle,
-                    fontWeight: 700,
-                    fontSize: 13,
-                  }}
-                >
-                  {p.name}
-                </div>
-
-                <div style={bodyCellStyle}>{p.portion}</div>
-                <div style={bodyCellStyle}>{p.portionGram} g</div>
-                <div style={bodyCellStyle}>KH/100g {p.kh100}</div>
-                <div style={bodyCellStyle}>E/100g {p.protein100}</div>
-                <div style={bodyCellStyle}>V/100g {p.fat100}</div>
-                <div style={bodyCellStyle}>Kcal/100g {p.kcal100}</div>
-
-                <div
-                  style={bodyCellStyle}
-                  title={
-                    p.giValue !== "" && p.giValue != null
-                      ? `GI ${p.giValue}`
-                      : "GI onbekend"
-                  }
-                >
-                  <span
-                    style={{
-                      display: "inline-block",
-                      padding: "2px 6px",
-                      borderRadius: 999,
-                      background: getGiClassMeta(p.giClass, giClassOptions)
-                        .color,
-                    }}
-                  >
-                    {getGiClassMeta(p.giClass, giClassOptions).label}
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    minHeight: 40,
-                    width: "100%",
-                    boxSizing: "border-box",
-                    paddingLeft: 6,
-                    lineHeight: 1.2,
-                    paddingTop: 8,
-                    borderRight: "2px solid rgba(148,163,184,0.5)",
-                    paddingRight: 8,
-                    overflow: "hidden",
-                  }}
-                >
-                  {getTimingLabel(
-                    p.personalTimingTag || p.timingTag,
-                    timingOptions,
-                  )}
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    minHeight: 40,
-                    width: "100%",
-                    boxSizing: "border-box",
-                    paddingLeft: 6,
-                    overflow: "hidden",
-                  }}
-                >
-                  <span
-                    style={{
-                      display: "inline-block",
-                      padding: "2px 6px",
-                      borderRadius: 999,
-                      background: getAbsorptionMeta(
-                        p.absorptionProfile,
-                        absorptionProfileOptions,
-                      ).color,
-                    }}
-                  >
-                    {
-                      getAbsorptionMeta(
-                        p.absorptionProfile,
-                        absorptionProfileOptions,
-                      ).label
-                    }
-                  </span>
-                </div>
+        {!isMobile && (
+          <div
+            style={{
+              maxHeight: "65vh",
+              overflowY: "auto",
+              border: "1px solid #e5e7eb",
+              borderRadius: 12,
+              background: "white",
+              padding: 6,
+            }}
+          >
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: productListGridTemplate,
+                gap: 5,
+                padding: "10px 6px",
+                marginBottom: 8,
+                fontSize: 11,
+                fontWeight: 700,
+                color: "#475569",
+                borderBottom: "2px solid #94a3b8",
+                background: "#f8fafc",
+                position: "sticky",
+                top: 0,
+                zIndex: 5,
+                alignItems: "center",
+                justifyItems: "stretch",
+                textAlign: "left",
+              }}
+            >
+              <div
+                style={clickableHeaderCellStyle}
+                onClick={() => requestSort("favorite")}
+                title="Sorteer op favoriet"
+              >
+                <SortableHeader
+                  label="Fav"
+                  sortKey="favorite"
+                  sortConfig={sortConfig}
+                  textAlign="left"
+                />
               </div>
-            );
-          })}
-        </div>
+
+              <div
+                style={clickableHeaderCellStyle}
+                onClick={() => requestSort("category")}
+                title="Sorteer op categorie"
+              >
+                <SortableHeader
+                  label="Categorie"
+                  sortKey="category"
+                  sortConfig={sortConfig}
+                />
+              </div>
+
+              <div
+                style={clickableHeaderCellStyle}
+                onClick={() => requestSort("mealMoment")}
+                title="Sorteer op moment"
+              >
+                <SortableHeader
+                  label="Moment"
+                  sortKey="mealMoment"
+                  sortConfig={sortConfig}
+                />
+              </div>
+
+              <div
+                style={clickableHeaderCellStyle}
+                onClick={() => requestSort("name")}
+                title="Sorteer op naam"
+              >
+                <SortableHeader
+                  label="Naam"
+                  sortKey="name"
+                  sortConfig={sortConfig}
+                />
+              </div>
+
+              <div
+                style={clickableHeaderCellStyle}
+                onClick={() => requestSort("portion")}
+                title="Sorteer op portie"
+              >
+                <SortableHeader
+                  label="Portie"
+                  sortKey="portion"
+                  sortConfig={sortConfig}
+                  textAlign="left"
+                />
+              </div>
+
+              <div
+                style={clickableHeaderCellStyle}
+                onClick={() => requestSort("portionGram")}
+                title="Sorteer op gram"
+              >
+                <SortableHeader
+                  label="Gram"
+                  sortKey="portionGram"
+                  sortConfig={sortConfig}
+                  textAlign="left"
+                />
+              </div>
+
+              <div
+                style={clickableHeaderCellStyle}
+                onClick={() => requestSort("kh100")}
+                title="Sorteer op koolhydraten"
+              >
+                <SortableHeader
+                  label="KH"
+                  sortKey="kh100"
+                  sortConfig={sortConfig}
+                  textAlign="left"
+                />
+              </div>
+
+              <div
+                style={clickableHeaderCellStyle}
+                onClick={() => requestSort("protein100")}
+                title="Sorteer op eiwit"
+              >
+                <SortableHeader
+                  label="Eiwit"
+                  sortKey="protein100"
+                  sortConfig={sortConfig}
+                  textAlign="left"
+                />
+              </div>
+
+              <div
+                style={clickableHeaderCellStyle}
+                onClick={() => requestSort("fat100")}
+                title="Sorteer op vet"
+              >
+                <SortableHeader
+                  label="Vet"
+                  sortKey="fat100"
+                  sortConfig={sortConfig}
+                  textAlign="left"
+                />
+              </div>
+
+              <div
+                style={clickableHeaderCellStyle}
+                onClick={() => requestSort("kcal100")}
+                title="Sorteer op kcal"
+              >
+                <SortableHeader
+                  label="Kcal"
+                  sortKey="kcal100"
+                  sortConfig={sortConfig}
+                  textAlign="left"
+                />
+              </div>
+
+              <div
+                style={clickableHeaderCellStyle}
+                onClick={() => requestSort("giClass")}
+                title="Sorteer op GI"
+              >
+                <SortableHeader
+                  label="GI"
+                  sortKey="giClass"
+                  sortConfig={sortConfig}
+                  textAlign="left"
+                />
+              </div>
+
+              <div
+                style={clickableHeaderCellStyle}
+                onClick={() => requestSort("timing")}
+                title="Sorteer op timing"
+              >
+                <SortableHeader
+                  label="Timing"
+                  sortKey="timing"
+                  sortConfig={sortConfig}
+                  textAlign="left"
+                />
+              </div>
+
+              <div
+                style={{
+                  ...clickableHeaderCellStyle,
+                  borderRight: "none",
+                }}
+                onClick={() => requestSort("absorptionProfile")}
+                title="Sorteer op absorptie"
+              >
+                <SortableHeader
+                  label="Absorptie"
+                  sortKey="absorptionProfile"
+                  sortConfig={sortConfig}
+                  textAlign="left"
+                />
+              </div>
+            </div>
+
+            {packFilteredProducts.map((p) => {
+              const rowBg =
+                hoveredProductId === p.id
+                  ? "rgba(255,255,255,0.68)"
+                  : getCategoryColor(categories, p.categoryId);
+
+              const canCopyToCurrentPack =
+                activePackFilter === "all" ||
+                (activePackFilter !== "__base__" &&
+                  p.packName !== activePackFilter);
+
+              return (
+                <div
+                  key={p.id}
+                  onMouseEnter={() => setHoveredProductId(p.id)}
+                  onMouseLeave={() => setHoveredProductId(null)}
+                  onClick={() => openEditProductModal(p)}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: productListGridTemplate,
+                    gap: 5,
+                    padding: 6,
+                    border: "1px solid #e5e7eb",
+                    borderRadius: 10,
+                    marginBottom: 5,
+                    fontSize: 12,
+                    alignItems: "stretch",
+                    justifyItems: "stretch",
+                    background: rowBg,
+                    transition: "background 120ms ease, box-shadow 120ms ease",
+                    boxShadow:
+                      hoveredProductId === p.id
+                        ? "0 1px 4px rgba(0,0,0,0.08)"
+                        : "none",
+                    cursor: "pointer",
+                  }}
+                  title="Klik om productdetails te openen"
+                >
+                  <div
+                    style={{
+                      ...bodyCellStyle,
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      onClick={() => toggleFavorite(p.id)}
+                      style={{
+                        ...buttonStyle,
+                        padding: "4px 8px",
+                        fontSize: 16,
+                        fontWeight: 700,
+                        lineHeight: 1,
+                        background: "white",
+                        border: "1px solid #cbd5e1",
+                      }}
+                      title={
+                        p.favorite ? "Favoriet verwijderen" : "Favoriet maken"
+                      }
+                    >
+                      {p.favorite ? "★" : "☆"}
+                    </button>
+
+                    {canCopyToCurrentPack && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          copyProductToCurrentPack(p);
+                        }}
+                        style={{
+                          ...buttonStyle,
+                          padding: "4px 6px",
+                          fontSize: 13,
+                          minWidth: 26,
+                          fontWeight: 700,
+                          lineHeight: 1,
+                          background: "#eef2ff",
+                          border: "1px solid #c7d2fe",
+                          color: "#3730a3",
+                        }}
+                        title="Kopieer naar lijst"
+                      >
+                        ↪
+                      </button>
+                    )}
+                  </div>
+
+                  <div style={bodyCellStyle}>
+                    <div
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        padding: "2px 6px",
+                        borderRadius: 6,
+                        background: "rgba(255,255,255,0.5)",
+                        display: "inline-block",
+                      }}
+                    >
+                      {getCategoryName(categories, p.categoryId)}
+                    </div>
+                  </div>
+
+                  <div style={bodyCellStyle}>
+                    {getMealMomentLabel(p.mealMoment)}
+                  </div>
+
+                  <div
+                    style={{
+                      ...bodyCellStyle,
+                      fontWeight: 700,
+                      fontSize: 13,
+                    }}
+                  >
+                    {p.name}
+                  </div>
+
+                  <div style={bodyCellStyle}>{p.portion}</div>
+                  <div style={bodyCellStyle}>{p.portionGram} g</div>
+                  <div style={bodyCellStyle}>KH/100g {p.kh100}</div>
+                  <div style={bodyCellStyle}>E/100g {p.protein100}</div>
+                  <div style={bodyCellStyle}>V/100g {p.fat100}</div>
+                  <div style={bodyCellStyle}>Kcal/100g {p.kcal100}</div>
+
+                  <div
+                    style={bodyCellStyle}
+                    title={
+                      p.giValue !== "" && p.giValue != null
+                        ? `GI ${p.giValue}`
+                        : "GI onbekend"
+                    }
+                  >
+                    <span
+                      style={{
+                        display: "inline-block",
+                        padding: "2px 6px",
+                        borderRadius: 999,
+                        background: getGiClassMeta(p.giClass, giClassOptions)
+                          .color,
+                      }}
+                    >
+                      {getGiClassMeta(p.giClass, giClassOptions).label}
+                    </span>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      minHeight: 40,
+                      width: "100%",
+                      boxSizing: "border-box",
+                      paddingLeft: 6,
+                      lineHeight: 1.2,
+                      paddingTop: 8,
+                      borderRight: "2px solid rgba(148,163,184,0.5)",
+                      paddingRight: 8,
+                      overflow: "hidden",
+                    }}
+                  >
+                    {getTimingLabel(
+                      p.personalTimingTag || p.timingTag,
+                      timingOptions,
+                    )}
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      minHeight: 40,
+                      width: "100%",
+                      boxSizing: "border-box",
+                      paddingLeft: 6,
+                      overflow: "hidden",
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: "inline-block",
+                        padding: "2px 6px",
+                        borderRadius: 999,
+                        background: getAbsorptionMeta(
+                          p.absorptionProfile,
+                          absorptionProfileOptions,
+                        ).color,
+                      }}
+                    >
+                      {
+                        getAbsorptionMeta(
+                          p.absorptionProfile,
+                          absorptionProfileOptions,
+                        ).label
+                      }
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {productModalOpen && (
@@ -842,7 +986,7 @@ function VoedingslijstTab({
         >
           <div
             style={{
-              width: "min(980px, 96vw)",
+              width: isMobile ? "98vw" : "min(980px, 96vw)",
               maxHeight: "92vh",
               overflowY: "auto",
               background: modalCategoryColor,
@@ -884,7 +1028,9 @@ function VoedingslijstTab({
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "1.4fr 1fr 1fr 0.9fr 1fr",
+                    gridTemplateColumns: isMobile
+                      ? "1fr"
+                      : "1.4fr 1fr 1fr 0.9fr 1fr",
                     gap: 10,
                   }}
                 >
@@ -995,7 +1141,7 @@ function VoedingslijstTab({
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "1fr 1.4fr 1.4fr",
+                      gridTemplateColumns: isMobile ? "1fr" : "1fr 1.4fr 1.4fr",
                       gap: 10,
                     }}
                   >
@@ -1144,7 +1290,9 @@ function VoedingslijstTab({
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "repeat(4, 1fr)",
+                      gridTemplateColumns: isMobile
+                        ? "1fr 1fr"
+                        : "repeat(4, 1fr)",
                       gap: 10,
                     }}
                   >
@@ -1225,7 +1373,7 @@ function VoedingslijstTab({
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
+                      gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
                       gap: 10,
                     }}
                   >
@@ -1271,7 +1419,7 @@ function VoedingslijstTab({
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
+                  gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
                   gap: 16,
                 }}
               >

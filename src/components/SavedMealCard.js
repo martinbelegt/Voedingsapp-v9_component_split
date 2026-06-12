@@ -74,6 +74,39 @@ export function SavedMealCard({
             {meal.rows?.map((r, i) => {
               const product = products.find((p) => p.id === r.productId);
 
+              const factor = Number(r.amount || 0);
+              const grams = Number(product?.portionGram || 0) * factor;
+
+              const portionLabel =
+                grams > 0
+                  ? `${Math.round(grams * 10) / 10} g`
+                  : `${r.amount} portie`;
+
+              function formatSavedMealAmount(row, product) {
+                const factor = Number(row.amount || 0);
+                const productName = String(product?.name || "").toLowerCase();
+                const baseAmount = Number(product?.portionGram || 0);
+
+                if (!product || !factor) return row.amount || "";
+
+                if (productName.includes("hmb")) {
+                  const grams = factor * baseAmount;
+                  const capsules = grams / 0.6;
+
+                  return `${Math.round(grams * 10) / 10} g / ${Math.round(capsules * 10) / 10} capsules`;
+                }
+
+                if (productName.includes("creon")) {
+                  return `${Math.round(factor * 10) / 10} pil`;
+                }
+
+                if (baseAmount > 0) {
+                  return `${Math.round(baseAmount * factor * 10) / 10} g`;
+                }
+
+                return `${factor} portie`;
+              }
+
               return (
                 <div
                   key={i}
@@ -82,7 +115,8 @@ export function SavedMealCard({
                     color: "#334155",
                   }}
                 >
-                  • {product?.name || "Onbekend"} ({r.amount})
+                  • {product?.name || "Onbekend"} •{" "}
+                  {formatSavedMealAmount(r, product)}
                 </div>
               );
             })}

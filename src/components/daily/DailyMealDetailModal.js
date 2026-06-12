@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 export function DailyMealDetailModal({
   meal,
@@ -8,8 +8,19 @@ export function DailyMealDetailModal({
   buttonStyle,
   onClose,
   onChangeTime,
+  onUpdateAlarm,
   onDelete,
 }) {
+  const [alarmEnabled, setAlarmEnabled] = useState(Boolean(meal?.alarmEnabled));
+
+  const [alarmAt, setAlarmAt] = useState(
+    meal?.alarmAt
+      ? meal.alarmAt.slice(0, 16)
+      : meal?.eatenAt
+        ? meal.eatenAt.slice(0, 16)
+        : new Date().toISOString().slice(0, 16),
+  );
+
   // ESC sluit detailvenster
   useEffect(() => {
     function handleKeyDown(e) {
@@ -53,6 +64,70 @@ export function DailyMealDetailModal({
           border: "1px solid #cbd5e1",
         }}
       >
+        <div
+          style={{
+            marginBottom: 14,
+            padding: 10,
+            borderRadius: 12,
+            background: "#eff6ff",
+            border: "1px solid #bfdbfe",
+          }}
+        >
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: 13,
+              fontWeight: 800,
+              color: "#1e3a8a",
+              marginBottom: alarmEnabled ? 8 : 0,
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={alarmEnabled}
+              onChange={(e) => setAlarmEnabled(e.target.checked)}
+            />
+            🔔 Alarm actief voor dit eetmoment
+          </label>
+
+          {alarmEnabled && (
+            <input
+              type="datetime-local"
+              value={alarmAt}
+              onChange={(e) => setAlarmAt(e.target.value)}
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                padding: 8,
+                border: "1px solid #93c5fd",
+                borderRadius: 8,
+                fontSize: 16,
+              }}
+            />
+          )}
+
+          <button
+            onClick={() =>
+              onUpdateAlarm({
+                alarmEnabled,
+                alarmAt: alarmEnabled ? alarmAt : null,
+              })
+            }
+            style={{
+              ...buttonStyle,
+              marginTop: 8,
+              background: "#dbeafe",
+              border: "1px solid #93c5fd",
+              color: "#1d4ed8",
+              fontWeight: 800,
+            }}
+          >
+            Alarm opslaan
+          </button>
+        </div>
+
         {/* Modalheader */}
         <div
           style={{

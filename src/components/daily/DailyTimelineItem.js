@@ -88,7 +88,7 @@ export function DailyTimelineItem({
           ) : null}
         </div>
 
-        {!compact && (
+        {actions || (!compact && detailContent) ? (
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
@@ -99,23 +99,25 @@ export function DailyTimelineItem({
           >
             {actions}
 
-            <button
-              type="button"
-              onClick={onToggle}
-              style={{
-                border: "none",
-                background: "transparent",
-                fontSize: isMobile ? 12 : 14,
-                cursor: "pointer",
-                color: "#64748b",
-                fontWeight: 800,
-                padding: isMobile ? 2 : undefined,
-              }}
-            >
-              {expanded ? "▲" : "▼"}
-            </button>
+            {!compact && detailContent ? (
+              <button
+                type="button"
+                onClick={onToggle}
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  fontSize: isMobile ? 12 : 14,
+                  cursor: "pointer",
+                  color: "#64748b",
+                  fontWeight: 800,
+                  padding: isMobile ? 2 : undefined,
+                }}
+              >
+                {expanded ? "▲" : "▼"}
+              </button>
+            ) : null}
           </div>
-        )}
+        ) : null}
       </div>
 
       {!compact && expanded && detailContent ? (

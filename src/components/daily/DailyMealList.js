@@ -26,6 +26,11 @@ export function DailyMealList({
   updateMovementEvent,
   deleteMovementEvent,
 
+  supplementEventsForDay = [],
+  addSupplementEventToDay,
+  updateSupplementEvent,
+  deleteSupplementEvent,
+
   bowelEventsForDay = [],
   updateBowelEvent,
   deleteBowelEvent,
@@ -41,6 +46,7 @@ export function DailyMealList({
   const [timerEvent, setTimerEvent] = useState(null);
   const [compactTimeline, setCompactTimeline] = useState(false);
   const [timelineFilter, setTimelineFilter] = useState("all");
+  const [showTimelineControls, setShowTimelineControls] = useState(false);
 
   const [visibleTypes, setVisibleTypes] = useState({
     meal: true,
@@ -49,6 +55,7 @@ export function DailyMealList({
     glucose: true,
     glucoseBoost: true,
     movement: true,
+    supplement: true,
     bowel: true,
     note: true,
   });
@@ -125,6 +132,13 @@ export function DailyMealList({
       event,
     })),
 
+    ...(supplementEventsForDay || []).map((event) => ({
+      id: event.id,
+      itemType: "supplement",
+      time: event.eventTime || "",
+      event,
+    })),
+
     ...bowelEventsForDay.map((event) => ({
       id: event.id,
       itemType: "bowel",
@@ -148,7 +162,10 @@ export function DailyMealList({
     if (timelineFilter === "all") return timelineItems;
 
     if (timelineFilter === "movementOnly") {
-      return timelineItems.filter((item) => item.itemType === "movement");
+      return timelineItems.filter(
+        (item) =>
+          item.itemType === "movement" || item.itemType === "supplement",
+      );
     }
 
     if (timelineFilter === "sportFocus") {
@@ -314,6 +331,43 @@ export function DailyMealList({
     );
   }
 
+  function deleteButton(event, type) {
+    return (
+      <button
+        onClick={() => {
+          const ok = window.confirm("Dit item verwijderen?");
+          if (!ok) return;
+
+          if (type === "glucose") {
+            deleteGlucoseEvent(event.id);
+          }
+
+          if (type === "insulin") {
+            deleteInsulinEvent(event.id);
+          }
+
+          if (type === "bowel") {
+            deleteBowelEvent(event.id);
+          }
+          if (type === "glucoseBoost") {
+            deleteGlucoseBoostEvent(event.id);
+          }
+          if (type === "supplement") {
+            deleteSupplementEvent(event.id);
+          }
+        }}
+        style={{
+          ...buttonStyle,
+          background: "#fee2e2",
+          border: "1px solid #fecaca",
+          color: "#991b1b",
+        }}
+      >
+        🗑 Wis
+      </button>
+    );
+  }
+
   if (!selectedDay) {
     return (
       <div style={{ color: "#64748b" }}>
@@ -340,132 +394,158 @@ export function DailyMealList({
 
   return (
     <>
-      <div
-        style={{
-          display: "flex",
-          gap: 6,
-          marginBottom: 8,
-          flexWrap: "wrap",
-          alignItems: "center",
-        }}
-      >
-        <button
-          onClick={() => setCompactTimeline((v) => !v)}
-          style={toggleButtonStyle(compactTimeline)}
-        >
-          {compactTimeline ? "Normale tijdlijn" : "Compacte tijdlijn"}
-        </button>
-
-        <button
-          onClick={() => setTimelineFilter("all")}
-          style={{
-            ...toggleButtonStyle(timelineFilter === "all"),
-            fontSize: window.innerWidth < 900 ? 11 : 12,
-            padding: window.innerWidth < 900 ? "2px 7px" : undefined,
-          }}
-        >
-          Alles
-        </button>
-
-        <button
-          onClick={() => setTimelineFilter("insulin")}
-          style={toggleButtonStyle(timelineFilter === "insulin")}
-        >
-          Alleen insuline
-        </button>
-
-        <button
-          onClick={() => setTimelineFilter("glucose")}
-          style={toggleButtonStyle(timelineFilter === "glucose")}
-        >
-          Alleen glucose
-        </button>
-
-        <button
-          onClick={() => setTimelineFilter("metabolic")}
-          style={{
-            ...toggleButtonStyle(timelineFilter === "metabolic"),
-
-            fontSize: window.innerWidth < 900 ? 11 : 12,
-
-            padding: window.innerWidth < 900 ? "2px 7px" : undefined,
-          }}
-        >
-          Insuline + glucose
-        </button>
-
-        <button
-          onClick={() =>
-            setTimelineFilter((prev) =>
-              prev === "sportFocus" ? "all" : "sportFocus",
-            )
-          }
-          style={toggleButtonStyle(timelineFilter === "sportFocus")}
-        >
-          {timelineFilter === "sportFocus"
-            ? "Sport focus uit"
-            : "Sport focus aan"}
-        </button>
-      </div>
-
       <button
-        onClick={() => {
-          const allExpanded =
-            visibleTimelineItems.length > 0 &&
-            visibleTimelineItems.every((item) => expandedIds.includes(item.id));
-
-          if (allExpanded) {
-            collapseAll();
-          } else {
-            expandAll();
-          }
+        onClick={() => setShowTimelineControls((v) => !v)}
+        style={{
+          ...buttonStyle,
+          width: "100%",
+          marginBottom: 10,
+          background: "#f8fafc",
+          border: "1px solid #cbd5e1",
+          color: "#334155",
+          fontWeight: 700,
         }}
-        style={toggleButtonStyle(
-          visibleTimelineItems.length > 0 &&
-            visibleTimelineItems.every((item) => expandedIds.includes(item.id)),
-        )}
       >
-        {visibleTimelineItems.length > 0 &&
-        visibleTimelineItems.every((item) => expandedIds.includes(item.id))
-          ? "Alles inklappen"
-          : "Alles uitklappen"}
+        {showTimelineControls
+          ? "⚙️ Tijdlijnbesturing ▲"
+          : "⚙️ Tijdlijnbesturing ▼"}
       </button>
 
-      <div
-        style={{
-          display: "flex",
-          gap: 6,
-          flexWrap: "wrap",
-          marginBottom: 8,
-        }}
-      >
-        {[
-          ["meal", "Maaltijden"],
-          ["insulinAdvice", "Advies"],
-          ["insulin", "Insuline"],
-          ["glucose", "Glucose"],
-          ["glucoseBoost", "Boosts"],
-          ["movement", "Sport"],
-          ["bowel", "Stoelgang"],
-        ].map(([type, label]) => (
-          <button
-            key={type}
-            onClick={() => toggleVisibleType(type)}
+      {showTimelineControls && (
+        <>
+          <div
             style={{
-              ...buttonStyle,
-              fontSize: window.innerWidth < 900 ? 11 : 12,
-              padding: window.innerWidth < 900 ? "2px 7px" : undefined,
-              background: visibleTypes[type] ? "#bbf7d0" : "#f8fafc",
-              color: visibleTypes[type] ? "#14532d" : "#166534",
-              border: visibleTypes[type]
-                ? "1px solid #22c55e"
-                : "1px solid #cbd5e1",
+              display: "flex",
+              gap: 6,
+              marginBottom: 8,
+              flexWrap: "wrap",
+              alignItems: "center",
             }}
           >
-            {visibleTypes[type] ? "☑" : "☐"} {label}
+            <button
+              onClick={() => setCompactTimeline((v) => !v)}
+              style={toggleButtonStyle(compactTimeline)}
+            >
+              {compactTimeline ? "Normale tijdlijn" : "Compacte tijdlijn"}
+            </button>
+
+            <button
+              onClick={() => setTimelineFilter("all")}
+              style={{
+                ...toggleButtonStyle(timelineFilter === "all"),
+                fontSize: window.innerWidth < 900 ? 11 : 12,
+                padding: window.innerWidth < 900 ? "2px 7px" : undefined,
+              }}
+            >
+              Alles
+            </button>
+
+            <button
+              onClick={() => setTimelineFilter("insulin")}
+              style={toggleButtonStyle(timelineFilter === "insulin")}
+            >
+              Alleen insuline
+            </button>
+
+            <button
+              onClick={() => setTimelineFilter("glucose")}
+              style={toggleButtonStyle(timelineFilter === "glucose")}
+            >
+              Alleen glucose
+            </button>
+
+            <button
+              onClick={() => setTimelineFilter("metabolic")}
+              style={{
+                ...toggleButtonStyle(timelineFilter === "metabolic"),
+
+                fontSize: window.innerWidth < 900 ? 11 : 12,
+
+                padding: window.innerWidth < 900 ? "2px 7px" : undefined,
+              }}
+            >
+              Insuline + glucose
+            </button>
+
+            <button
+              onClick={() =>
+                setTimelineFilter((prev) =>
+                  prev === "sportFocus" ? "all" : "sportFocus",
+                )
+              }
+              style={toggleButtonStyle(timelineFilter === "sportFocus")}
+            >
+              {timelineFilter === "sportFocus"
+                ? "Sport focus uit"
+                : "Sport focus aan"}
+            </button>
+          </div>
+
+          <button
+            onClick={() => {
+              const allExpanded =
+                visibleTimelineItems.length > 0 &&
+                visibleTimelineItems.every((item) =>
+                  expandedIds.includes(item.id),
+                );
+
+              if (allExpanded) {
+                collapseAll();
+              } else {
+                expandAll();
+              }
+            }}
+            style={toggleButtonStyle(
+              visibleTimelineItems.length > 0 &&
+                visibleTimelineItems.every((item) =>
+                  expandedIds.includes(item.id),
+                ),
+            )}
+          >
+            {visibleTimelineItems.length > 0 &&
+            visibleTimelineItems.every((item) => expandedIds.includes(item.id))
+              ? "Alles inklappen"
+              : "Alles uitklappen"}
           </button>
-        ))}
-      </div>
+
+          <div
+            style={{
+              display: "flex",
+              gap: 6,
+              flexWrap: "wrap",
+              marginBottom: 8,
+            }}
+          >
+            {[
+              ["meal", "Maaltijden"],
+              ["insulinAdvice", "Advies"],
+              ["insulin", "Insuline"],
+              ["glucose", "Glucose"],
+              ["glucoseBoost", "Boosts"],
+              ["supplement", "Supplementen"],
+              ["movement", "Sport"],
+              ["bowel", "Stoelgang"],
+            ].map(([type, label]) => (
+              <button
+                key={type}
+                onClick={() => toggleVisibleType(type)}
+                style={{
+                  ...buttonStyle,
+                  fontSize: window.innerWidth < 900 ? 11 : 12,
+                  padding: window.innerWidth < 900 ? "2px 7px" : undefined,
+                  background: visibleTypes[type] ? "#bbf7d0" : "#f8fafc",
+                  color: visibleTypes[type] ? "#14532d" : "#166534",
+                  border: visibleTypes[type]
+                    ? "1px solid #22c55e"
+                    : "1px solid #cbd5e1",
+                }}
+              >
+                {visibleTypes[type] ? "☑" : "☐"} {label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
 
       {visibleTimelineItems.map((item, index) => {
         if (item.itemType === "meal") {
@@ -526,12 +606,7 @@ export function DailyMealList({
               accentColor="#1d4ed8"
               backgroundColor="#eff6ff"
               borderColor="#93c5fd"
-              actions={
-                <>
-                  {timerButton(event)}
-                  {editButton(event, "insulin")}
-                </>
-              }
+              actions={deleteButton(event, "insulin")}
               detailContent={
                 <div style={{ fontSize: 13, color: "#334155" }}>
                   Werkelijk toegediende insuline.
@@ -544,6 +619,37 @@ export function DailyMealList({
         if (item.itemType === "glucose") {
           const event = item.event;
 
+          const glucoseValue = Number(
+            String(event.glucoseValue).replace(",", "."),
+          );
+
+          const glucoseColors =
+            glucoseValue <= 3.9
+              ? {
+                  accent: "#991b1b",
+                  background: "#fee2e2",
+                  border: "#fca5a5",
+                }
+              : glucoseValue >= 15
+                ? {
+                    accent: "#991b1b",
+                    background: "#fee2e2",
+                    border: "#fca5a5",
+                  }
+                : glucoseValue > 10
+                  ? {
+                      accent: "#c2410c",
+                      background: "#ffedd5",
+                      border: "#fdba74",
+                    }
+                  : {
+                      accent: "#166534",
+                      background: "#dcfce7",
+                      border: "#86efac",
+                    };
+
+          const isDangerGlucose = glucoseValue <= 4 || glucoseValue >= 16;
+
           return (
             <DailyTimelineItem
               key={event.id}
@@ -555,15 +661,10 @@ export function DailyMealList({
               timeLabel={formatTime(event.eventTime)}
               subtitle={null}
               compact={true}
-              accentColor="#075985"
-              backgroundColor="#f0f9ff"
-              borderColor="#7dd3fc"
-              actions={
-                <>
-                  {timerButton(event)}
-                  {editButton(event, "glucose")}
-                </>
-              }
+              accentColor={glucoseColors.accent}
+              backgroundColor={glucoseColors.background}
+              borderColor={glucoseColors.border}
+              actions={deleteButton(event, "glucose")}
               detailContent={null}
             />
           );
@@ -580,7 +681,7 @@ export function DailyMealList({
               onToggle={() => toggleExpanded(event.id)}
               compact={true}
               icon="⚡"
-              title={`⚡ +${event.carbs || "?"}g snelle KH`}
+              title={`⚡ +${event.kh || "?"}g snelle KH`}
               timeLabel={formatTime(event.eventTime)}
               subtitle={`${phasePrefix(item)}${event.source || "Glucoseboost"}${
                 event.note ? ` · ${event.note}` : ""
@@ -588,12 +689,7 @@ export function DailyMealList({
               accentColor="#c2410c"
               backgroundColor="#fff7ed"
               borderColor="#fdba74"
-              actions={
-                <>
-                  {timerButton(event)}
-                  {editButton(event, "glucoseBoost")}
-                </>
-              }
+              actions={deleteButton(event, "glucoseBoost")}
               detailContent={
                 <div style={{ fontSize: 13, color: "#334155" }}>
                   Hypo-correctie / snelle glucoseboost.
@@ -642,6 +738,26 @@ export function DailyMealList({
           );
         }
 
+        if (item.itemType === "supplement") {
+          const event = item.event;
+
+          return (
+            <DailyTimelineItem
+              key={event.id}
+              indentLevel={1}
+              compact={compactTimeline}
+              icon="💊"
+              title={`${event.name} · ${event.dosage}`}
+              timeLabel={formatTime(event.eventTime)}
+              subtitle={event.note || ""}
+              accentColor="#6d28d9"
+              backgroundColor="#f5f3ff"
+              borderColor="#c4b5fd"
+              actions={deleteButton(event, "supplement")}
+            />
+          );
+        }
+
         if (item.itemType === "bowel") {
           const event = item.event;
 
@@ -649,9 +765,9 @@ export function DailyMealList({
             <DailyTimelineItem
               key={event.id}
               indentLevel={1}
-              expanded={expandedIds.includes(event.id)}
-              onToggle={() => toggleExpanded(event.id)}
-              compact={compactTimeline}
+              expanded={false}
+              onToggle={() => {}}
+              compact={true}
               icon="🚽"
               title={`Bristol ${event.bristolScore}`}
               timeLabel={formatTime(event.eventTime)}
@@ -661,17 +777,8 @@ export function DailyMealList({
               accentColor="#92400e"
               backgroundColor="#fffbeb"
               borderColor="#fcd34d"
-              actions={
-                <>
-                  {timerButton(event)}
-                  {editButton(event, "bowel")}
-                </>
-              }
-              detailContent={
-                <div style={{ fontSize: 13, color: "#334155" }}>
-                  Stoelgangmoment in metabole tijdlijn.
-                </div>
-              }
+              actions={<>{deleteButton(event, "bowel")}</>}
+              detailContent={null}
             />
           );
         }

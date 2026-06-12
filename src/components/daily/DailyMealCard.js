@@ -87,7 +87,15 @@ export function DailyMealCard({
     <>
       {/* Eetmoment als uniforme tijdlijnkaart */}
       <DailyTimelineItem
-        icon={meal.mealMoment === "sport" ? "🟢🥤" : "🟢🍽️"}
+        icon={
+          meal.alarmEnabled
+            ? meal.mealMoment === "sport"
+              ? "🔔🥤"
+              : "🔔🍽️"
+            : meal.mealMoment === "sport"
+              ? "🟢🥤"
+              : "🟢🍽️"
+        }
         timeLabel={
           meal.eatenAt
             ? new Date(meal.eatenAt).toLocaleString("nl-NL", {
@@ -97,7 +105,11 @@ export function DailyMealCard({
             : "--:--"
         }
         title={`${mealMomentLabel} · ${meal.totals.kh}g KH · ${meal.totals.protein}g eiwit · ${meal.totals.fat}g vet · ${meal.totals.kcal} kcal`}
-        subtitle={meal.mealNote || ""}
+        subtitle={
+          meal.alarmEnabled
+            ? `🔔 Alarm actief${meal.mealNote ? ` · ${meal.mealNote}` : ""}`
+            : meal.mealNote || ""
+        }
         accentColor="#166534"
         backgroundColor="#f0fdf4"
         borderColor="#bbf7d0"
@@ -126,6 +138,9 @@ export function DailyMealCard({
           buttonStyle={buttonStyle}
           onClose={() => setShowDetails(false)}
           onChangeTime={() => setShowTimeEditor(true)}
+          onUpdateAlarm={(updates) => {
+            onUpdateMedicalLog(meal.id, updates);
+          }}
           onDelete={() => {
             const ok = window.confirm("Deze maaltijd verwijderen?");
             if (!ok) return;
