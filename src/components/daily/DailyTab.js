@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { DailyMealList } from "./DailyMealList";
 import { DailyEventAddModal } from "./DailyEventAddModal";
 import { requestNotificationPermission } from "../../services/notificationService";
+import PlannerPanel from "../planner/PlannerPanel";
 
 import {
   scheduleLocalAlarm,
@@ -48,8 +49,12 @@ export function DailyTab({
   updateNoteEvent,
   deleteNoteEvent,
   noteEventsForDay = selectedDay?.noteEvents || [],
+  addTrainingPlanEventToDay,
+  updateTrainingPlanEvent,
+  deleteTrainingPlanEvent,
 }) {
   const [addEventType, setAddEventType] = useState(null);
+  const [showAddButtons, setShowAddButtons] = useState(false);
   const [activeAlarm, setActiveAlarm] = useState(null);
 
   const mealsForDay = selectedDay?.meals || [];
@@ -352,115 +357,39 @@ export function DailyTab({
           💊 Creon {dayTotals?.creon25 || 0}x25k + {dayTotals?.creon10 || 0}x10k
         </span>
       </div>
+      {false && (
+        <>
+          <button
+            onClick={requestNotificationPermission}
+            style={{
+              ...buttonStyle,
+              width: "100%",
+              marginBottom: 10,
+              background: "#f8fafc",
+              border: "1px solid #cbd5e1",
+              color: "#334155",
+              textAlign: "center",
+            }}
+          >
+            🔔 Test notificatie
+          </button>
 
-      <button
-        onClick={() => setShowTimelineAnalysis((v) => !v)}
-        style={{
-          ...buttonStyle,
-
-          width: "100%",
-
-          marginBottom: 10,
-
-          background: showTimelineAnalysis ? "#dbeafe" : "#f8fafc",
-
-          border: "1px solid #93c5fd",
-
-          color: "#1d4ed8",
-
-          fontWeight: 800,
-
-          textAlign: "center",
-        }}
-      >
-        {showTimelineAnalysis ? "📈 Daganalyse verbergen" : "📈 Daganalyse"}
-      </button>
-
-      <button
-        onClick={requestNotificationPermission}
-        style={{
-          ...buttonStyle,
-          width: "100%",
-          marginBottom: 10,
-          background: "#f8fafc",
-          border: "1px solid #cbd5e1",
-          color: "#334155",
-          textAlign: "center",
-        }}
-      >
-        🔔 Test notificatie
-      </button>
-      <button
-        onClick={enableAlarmSound}
-        style={{
-          ...buttonStyle,
-          width: "100%",
-          marginBottom: 10,
-          background: "#fff7ed",
-          border: "1px solid #fdba74",
-          color: "#c2410c",
-          textAlign: "center",
-          fontWeight: 700,
-        }}
-      >
-        🔊 Alarmgeluid activeren
-      </button>
-
-      {showTimelineAnalysis && (
-        <div
-          style={{
-            ...cardStyle,
-            marginBottom: 10,
-            background: "#eff6ff",
-            border: "1px solid #bfdbfe",
-            color: "#1e3a8a",
-            fontSize: 13,
-            lineHeight: 1.45,
-          }}
-        >
-          <div style={{ fontWeight: 900, marginBottom: 6 }}>📈 Daganalyse</div>
-
-          <div>
-            <strong>Timing:</strong>{" "}
-            {dayTotals?.personalTimingAdvice ||
-              dayTotals?.timingAdvice ||
-              "Nog geen advies"}
-          </div>
-
-          <div>
-            <strong>Insuline:</strong> {actualInsulin}E werkelijk /{" "}
-            {advisedInsulin}E advies · {insulinDiffLabel}
-          </div>
-
-          <div>
-            <strong>Eiwit:</strong> {dayTotals?.protein || 0}g van {proteinGoal}
-            g · nog {proteinRemaining}g te gaan
-          </div>
-
-          <div>
-            <strong>Kcal:</strong> {dayTotals?.kcal || 0} van {targetKcal} kcal
-            · nog {kcalRemaining} kcal ruimte
-          </div>
-
-          <div>
-            <strong>Glucose:</strong> {glucoseEventsForDay.length}{" "}
-            registratie(s) vandaag
-          </div>
-
-          <div>
-            <strong>Sport:</strong> {movementEventsForDay.length}{" "}
-            bewegingsmoment(en)
-          </div>
-
-          <div>
-            <strong>Context:</strong> {noteEventsForDay.length} notitie(s)
-            toegevoegd
-          </div>
-
-          <div>
-            <strong>Darmen:</strong> {bowelEventsForDay.length} registratie(s)
-          </div>
-        </div>
+          <button
+            onClick={enableAlarmSound}
+            style={{
+              ...buttonStyle,
+              width: "100%",
+              marginBottom: 10,
+              background: "#fff7ed",
+              border: "1px solid #fdba74",
+              color: "#c2410c",
+              textAlign: "center",
+              fontWeight: 700,
+            }}
+          >
+            🔊 Alarmgeluid activeren
+          </button>
+        </>
       )}
 
       {/* Tijdlijn van deze dag */}
@@ -536,99 +465,233 @@ export function DailyTab({
             </button>
           </div>
 
-          {/* Event knoppen */}
+          {/* Hoofdknoppen */}
           <div
             style={{
-              display: "flex",
-              gap: 8,
-              flexWrap: "wrap",
-              alignItems: "center",
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 6,
             }}
           >
             <button
-              onClick={() => setAddEventType("insulin")}
+              onClick={() => setShowTimelineAnalysis((v) => !v)}
               style={{
                 ...buttonStyle,
-                background: "#eef2ff",
-                border: "1px solid #c7d2fe",
-                color: "#3730a3",
+                background: showTimelineAnalysis ? "#dbeafe" : "#f8fafc",
+                border: showTimelineAnalysis
+                  ? "1px solid #93c5fd"
+                  : "1px solid #cbd5e1",
+                color: showTimelineAnalysis ? "#1d4ed8" : "#334155",
+                fontWeight: 800,
+                fontSize: window.innerWidth < 900 ? 12 : 14,
+                padding: window.innerWidth < 900 ? "6px 4px" : "8px 10px",
               }}
             >
-              + Insuline
-            </button>
-
-            <button
-              onClick={() => setAddEventType("glucose")}
-              style={{
-                ...buttonStyle,
-                background: "#f0f9ff",
-                border: "1px solid #bae6fd",
-                color: "#0369a1",
-              }}
-            >
-              + Glucose
-            </button>
-
-            <button
-              onClick={() => setAddEventType("glucoseBoost")}
-              style={{
-                ...buttonStyle,
-                background: "#fff7ed",
-                border: "1px solid #fdba74",
-                color: "#c2410c",
-              }}
-            >
-              ⚡ Glucoseboost
-            </button>
-
-            <button
-              onClick={() => setAddEventType("movement")}
-              style={{
-                ...buttonStyle,
-                background: "#ecfeff",
-                border: "1px solid #67e8f9",
-                color: "#0e7490",
-              }}
-            >
-              + Beweging/sport
-            </button>
-
-            <button
-              onClick={() => setAddEventType("bowel")}
-              style={{
-                ...buttonStyle,
-                background: "#fef3c7",
-                border: "1px solid #fcd34d",
-                color: "#92400e",
-              }}
-            >
-              + Stoelgang
-            </button>
-
-            <button
-              onClick={() => setAddEventType("note")}
-              style={{
-                ...buttonStyle,
-                background: "#f8fafc",
-                border: "1px solid #cbd5e1",
-                color: "#334155",
-              }}
-            >
-              + Notitie
+              📈 Daganalyse
             </button>
             <button
-              onClick={() => setAddEventType("supplement")}
+              onClick={() => setShowAddButtons((v) => !v)}
               style={{
                 ...buttonStyle,
-                background: "#ede9fe",
-                border: "1px solid #c4b5fd",
-                color: "#5b21b6",
+                background: showAddButtons ? "#dcfce7" : "#f8fafc",
+                border: showAddButtons
+                  ? "1px solid #86efac"
+                  : "1px solid #cbd5e1",
+                color: showAddButtons ? "#166534" : "#334155",
+                fontWeight: 800,
+                fontSize: window.innerWidth < 900 ? 12 : 14,
+                padding: window.innerWidth < 900 ? "6px 4px" : "8px 10px",
               }}
             >
-              + Supplement
+              ➕ Nieuw
             </button>
           </div>
+
+          {showTimelineAnalysis && (
+            <div
+              style={{
+                ...cardStyle,
+                marginBottom: 0,
+                background: "#eff6ff",
+                border: "1px solid #bfdbfe",
+                color: "#1e3a8a",
+                fontSize: 13,
+                lineHeight: 1.25,
+                padding: window.innerWidth < 900 ? 8 : 12,
+              }}
+            >
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "4px 12px",
+                }}
+              >
+                <div>
+                  <strong>Timing:</strong>{" "}
+                  {dayTotals?.personalTimingAdvice ||
+                    dayTotals?.timingAdvice ||
+                    "Nog geen advies"}
+                </div>
+
+                <div
+                  style={{
+                    borderLeft: "1px solid #bfdbfe",
+                    paddingLeft: 10,
+                  }}
+                >
+                  <strong>Insuline:</strong> {actualInsulin}E werkelijk /{" "}
+                  {advisedInsulin}E advies · {insulinDiffLabel}
+                </div>
+
+                <div>
+                  <strong>Eiwit:</strong> {dayTotals?.protein || 0}g van{" "}
+                  {proteinGoal}g · nog {proteinRemaining}g
+                </div>
+
+                <div
+                  style={{
+                    borderLeft: "1px solid #bfdbfe",
+                    paddingLeft: 10,
+                  }}
+                >
+                  <strong>Kcal:</strong> {dayTotals?.kcal || 0} van {targetKcal}{" "}
+                  kcal · nog {kcalRemaining} kcal
+                </div>
+
+                <div>
+                  <strong>Glucose:</strong> {glucoseEventsForDay.length}{" "}
+                  registratie(s)
+                </div>
+
+                <div
+                  style={{
+                    borderLeft: "1px solid #bfdbfe",
+                    paddingLeft: 10,
+                  }}
+                >
+                  <strong>Sport:</strong> {movementEventsForDay.length}{" "}
+                  moment(en)
+                </div>
+
+                <div>
+                  <strong>Context:</strong> {noteEventsForDay.length} notitie(s)
+                </div>
+
+                <div
+                  style={{
+                    borderLeft: "1px solid #bfdbfe",
+                    paddingLeft: 10,
+                  }}
+                >
+                  <strong>Darmen:</strong> {bowelEventsForDay.length}{" "}
+                  registratie(s)
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showAddButtons && (
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                flexWrap: "wrap",
+                alignItems: "center",
+              }}
+            >
+              <button
+                onClick={() => setAddEventType("insulin")}
+                style={{
+                  ...buttonStyle,
+                  background: "#eef2ff",
+                  border: "1px solid #c7d2fe",
+                  color: "#3730a3",
+                }}
+              >
+                + Insuline
+              </button>
+
+              <button
+                onClick={() => setAddEventType("glucose")}
+                style={{
+                  ...buttonStyle,
+                  background: "#f0f9ff",
+                  border: "1px solid #bae6fd",
+                  color: "#0369a1",
+                }}
+              >
+                + Glucose
+              </button>
+
+              <button
+                onClick={() => setAddEventType("glucoseBoost")}
+                style={{
+                  ...buttonStyle,
+                  background: "#fff7ed",
+                  border: "1px solid #fdba74",
+                  color: "#c2410c",
+                }}
+              >
+                ⚡ Glucoseboost
+              </button>
+
+              <button
+                onClick={() => setAddEventType("movement")}
+                style={{
+                  ...buttonStyle,
+                  background: "#ecfeff",
+                  border: "1px solid #67e8f9",
+                  color: "#0e7490",
+                }}
+              >
+                + Beweging/sport
+              </button>
+
+              <button
+                onClick={() => setAddEventType("bowel")}
+                style={{
+                  ...buttonStyle,
+                  background: "#fef3c7",
+                  border: "1px solid #fcd34d",
+                  color: "#92400e",
+                }}
+              >
+                + Stoelgang
+              </button>
+
+              <button
+                onClick={() => setAddEventType("note")}
+                style={{
+                  ...buttonStyle,
+                  background: "#f8fafc",
+                  border: "1px solid #cbd5e1",
+                  color: "#334155",
+                }}
+              >
+                + Notitie
+              </button>
+
+              <button
+                onClick={() => setAddEventType("supplement")}
+                style={{
+                  ...buttonStyle,
+                  background: "#ede9fe",
+                  border: "1px solid #c4b5fd",
+                  color: "#5b21b6",
+                }}
+              >
+                + Supplement
+              </button>
+            </div>
+          )}
         </div>
+
+        <PlannerPanel
+          selectedDate={selectedDate}
+          selectedDay={selectedDay}
+          addTrainingPlanEventToDay={addTrainingPlanEventToDay}
+        />
 
         {/* Chronologische lijst */}
         <DailyMealList

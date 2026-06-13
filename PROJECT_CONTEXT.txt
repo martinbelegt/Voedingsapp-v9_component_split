@@ -1,105 +1,396 @@
-Inhoud:
+# PROJECT CONTEXT – Leefstijlplanner
 
-korte app-omschrijving (die samenvatting)
-belangrijkste structuren (zoals products, rows)
-evt. naming-afspraken
+## Productnaam
 
-👉 Die plak je bij elke nieuwe chat
+**Leefstijlplanner**
+**Van registratie naar regie**
 
-voorts code app.js en hooks en services bestanden doorgeven
+Voorheen heette dit project intern “VoedingsManager” / “VoedingsApp”. De technische projectmap mag voorlopig `VoedingsApp-v10` blijven, maar de productnaam is vanaf nu **Leefstijlplanner**.
 
-# PROJECT CONTEXT – Voedingsapp
+---
 
-Ik werk aan een React app voor voedings- en insuline ondersteuning (persoonlijk gebruik).
+## Missie
 
-## Doel van de app
+Leefstijlplanner is ontstaan vanuit de praktijk van leven zonder alvleesklier, volledige insulineafhankelijkheid, Creon-gebruik, voeding, sport, supplementen en dagelijks gezondheidsmanagement.
 
-* stabiele bloedsuikers
-* beter inzicht in voeding
-* insulineadvies
-* Creon (enzymen) ondersteuning
-* rekening houden met GI en timing
+De app is geen gewone voedingsapp.
 
-## Belangrijkste functionaliteiten
+De kernfilosofie is:
 
-* maaltijden invoeren (meerdere regels)
-* automatische berekening:
+Registratie
+↓
+Analyse
+↓
+Inzicht
+↓
+Planning
+↓
+Regie
 
-  * KH / eiwit / vet / kcal
-  * insuline
-  * GI (weighted)
-  * timing
-  * Creon advies
-* maaltijden opslaan
-* dag/archief bijhouden
-* productbeheer (incl. GI en timing)
+Registratie levert gegevens.
+Analyse ontdekt patronen.
+Inzicht verklaart waarom iets gebeurt.
+Planning maakt vooruitkijken mogelijk.
+Regie maakt actief sturen mogelijk op gezondheid, prestaties, herstel en kwaliteit van leven.
+
+---
+
+## Hoofddoel
+
+Meer grip krijgen op:
+
+* voeding
+* glucose
+* insuline
+* Creon
+* sport
+* supplementen
+* planning
+* herstel
+* patronen
+* dagelijkse keuzes
+
+De belangrijkste doelgroep is in eerste instantie iemand met diabetes type 1 / diabetes type 3c / leven zonder alvleesklier, maar de app groeit uit tot een bredere leefstijl-, analyse- en planningsapp.
+
+---
+
+## Hoofdmodules
+
+### 1. Registratie
+
+Wat is er gebeurd?
+
+* maaltijden
+* insuline
+* glucose
+* glucoseboosts
+* supplementen
+* beweging / sport
+* stoelgang
+* notities
+* alarmen
+* dagelijkse tijdlijn
+
+### 2. Analyse
+
+Waarom gebeurt het?
+
+* daganalyse
+* patronen herkennen
+* timing-effecten
+* verbanden tussen voeding, insuline, glucose, sport en supplementen
+* later eventueel AI-analyse
+
+### 3. Planner
+
+Wat ga ik doen?
+
+* trainingsplanning
+* supplementplanning
+* voedingsplanning
+* herstelplanning
+* vakantie- en reisplanning
+* herinneringen
+* scenario’s
+
+### 4. Regie
+
+Hoe stuur ik mijn leven?
+
+* persoonlijke doelen
+* leefstijlkeuzes
+* planning aanpassen
+* scenario’s vergelijken
+* besluitondersteuning
+* modules aan/uit zetten
+
+---
+
+## Architectuurprincipe
+
+Alles wordt modulair gebouwd.
+
+Modules moeten:
+
+* zelfstandig kunnen functioneren
+* afzonderlijk aan/uit gezet kunnen worden
+* afzonderlijk ontwikkeld kunnen worden
+* later eventueel premium / commercieel geactiveerd kunnen worden
+
+Mogelijke modules:
+
+* sportmodule
+* supplementmodule
+* slaapmodule
+* vastenmodule
+* ketonenmodule
+* diabetes pro module
+* reis/vakantie module
+* analyse module
+
+---
 
 ## Technische structuur
 
-React met hooks:
+React app met hooks en componenten.
 
-* products
-* categories
-* settings
-* mealRows
-* savedMeals
-* dailyLog
+Belangrijke hooks / services:
 
-Belangrijke files:
+* `useDailyLog`
+* `useProducts`
+* `useCategories`
+* `useSettings`
+* `useMealRows`
+* `useSavedMeals`
+* localStorage services
+* Supabase services
+* alarm/notification services
 
-* App.js
-* useMealRows.ts
-* mealService.ts
-* (eventueel useProducts)
+Belangrijke componentgebieden:
 
-## Productmodel (belangrijk)
+* `daily/`
+* `dashboard/`
+* `voeding/`
+* `sportfocus/`
+* later: `planner/`
+
+---
+
+## DailyLog structuur
+
+`dailyLog` is een array van dag-objecten.
+
+Een dag-object bevat o.a.:
+
+```js
+{
+  date,
+  meals: [],
+  insulinEvents: [],
+  glucoseEvents: [],
+  glucoseBoostEvents: [],
+  movementEvents: [],
+  supplementEvents: [],
+  bowelEvents: [],
+  noteEvents: [],
+  trainingPlanEvents: [],
+  sportSupplementPlanEvents: []
+}
+```
+
+Belangrijk: nieuwe day-objecten moeten altijd via `createEmptyDay(date)` of een vergelijkbare helper worden aangemaakt, zodat arrays niet ontbreken.
+
+---
+
+## Registratie-events
+
+Bestaande eventtypes:
+
+* `meal`
+* `insulin`
+* `glucose`
+* `glucoseBoost`
+* `movement`
+* `supplement`
+* `bowel`
+* `note`
+
+Supplement event:
+
+```js
+{
+  id,
+  type: "supplement",
+  eventTime,
+  name,
+  dosage,
+  note,
+  createdAt
+}
+```
+
+Movement event:
+
+```js
+{
+  id,
+  type: "movement",
+  eventTime,
+  activityType,
+  intensityType,
+  durationMinutes,
+  note,
+  createdAt
+}
+```
+
+---
+
+## Planner-richting
+
+Belangrijk inzicht: trainingen en vaste supplementmomenten zijn geen gewone tijdlijn-events, maar planner-items.
+
+De planner moet weken vooruit kunnen kijken.
+
+Voorbeelden:
+
+* maandag 10:00 borst
+* woensdag 10:00 schouders
+* vrijdag 10:00 benen
+* dagelijks 09:00 chlorella
+* dagelijks vitamine D
+* supplementen rondom training
+* vakantie/weekend meenemen in planning
+
+De planner moet uiteindelijk kunnen tonen:
+
+* vandaag
+* morgen
+* deze week
+* volgende week
+* langere periode vooruit
+
+Planner-items krijgen later waarschijnlijk eigenschappen zoals:
+
+```js
+{
+  id,
+  date,
+  time,
+  title,
+  type,
+  status,
+  repeat,
+  note
+}
+```
+
+Status kan later bijvoorbeeld zijn:
+
+* planned
+* done
+* skipped
+* moved
+
+---
+
+## Productmodel
 
 Producten bevatten o.a.:
 
-* id
-* categoryId
-* name
-* portion
-* portionGram
-* kh100
-* protein100
-* fat100
-* kcal100
-* GI velden (class/value/note)
-* timing velden
-* favorite
-* packName (voor voedingslijsten)
+```js
+{
+  id,
+  categoryId,
+  name,
+  portion,
+  portionGram,
+  kh100,
+  protein100,
+  fat100,
+  kcal100,
+  giClass,
+  giValue,
+  giNote,
+  timing,
+  favorite,
+  packName
+}
+```
+
+Producten kunnen onderdeel zijn van meerdere voedingslijsten/packs.
+
+---
 
 ## Huidige status
 
-* basis werkt stabiel
-* packs/lijsten werken
-* import/export werkt
-* UI deels opgeschoond
-* zit in test- en verfijnfase
+De app bevat inmiddels:
 
-## Werkwijze (BELANGRIJK)
+* maaltijden invoeren
+* productbeheer
+* categoriebeheer
+* voedingslijsten / packs
+* import/export
+* KH/eiwit/vet/kcal berekening
+* insulineadvies
+* Creon advies
+* GI/timing informatie
+* dagtijdlijn
+* glucose events
+* insuline events
+* glucoseboosts
+* beweging/sport events
+* supplement events
+* stoelgang events
+* notities
+* alarmen met popup, snooze en geluid
+* Supabase-koppeling
+* mobiele vaste header
+* compacte tijdlijnbediening
+* eerste SportFocusPanel als aparte module
 
-Ik ben geen ervaren programmeur, dus:
+---
 
-* geef concrete instructies
-* zeg exact:
+## UI-richting
 
-  * waar code staat
-  * wat vervangen moet worden
-* werk stap voor stap
-* hou het overzichtelijk
+Mobiel gebruik is belangrijk.
 
-## Wat ik nu wil doen
+Belangrijke UX-principes:
 
-[HIER JOUW HUIDIGE VRAAG OF DOEL]
-We waren in ch05 (de chat hiervoor) bezig met maken van een uitgebreide voedingslijst speciaal gericht op krachtsport.
-De bedoeling is om meerdere soorten voedingslijsten te gaan maken in de toekomst die ikzelf maar ook andere gebruikers
-in de toekomst kunnen in laden tesamen met andere lijsten waaruit naar hartelust gekozen kan worden. Je had al bij diverse grote instanties gekeken en er twee 
-uitgezocht die ik vrij mag gebruiken.
+* tijdlijn moet centraal staan
+* zo min mogelijk scrollen
+* vaste mobiele kop
+* grote knoppen tijdens sportgebruik
+* modules inklapbaar
+* Sport Focus / Planner moet compact blijven
+* tijdens training vooral snel toegang tot glucose, insuline, boosts en supplementen
 
-## Relevante code
+---
 
-[HIER plak ik de belangrijkste bestanden of stukken code]
+## Werkwijze
 
+De gebruiker is geen ervaren programmeur.
 
+Daarom altijd:
+
+* stap voor stap werken
+* exact aangeven welk bestand
+* exact aangeven waar code moet komen
+* zo min mogelijk tegelijk aanpassen
+* eerst stabiliteit, daarna uitbreiding
+* geen grote herschrijvingen zonder noodzaak
+* bij twijfel eerst bestand uploaden of relevante code tonen
+* liever kleine veilige stappen met build/test ertussen
+
+---
+
+## Belangrijke afspraak
+
+Bij grotere codewijzigingen liever:
+
+* Codex gebruiken in VS Code
+* of volledige bestanden gecontroleerd vervangen
+* niet eindeloos losse haakjes/regels plakken
+
+ChatGPT-downloadlinks werken soms onbetrouwbaar. Daarom liever code als plakbaar codeblok of Codex direct in VS Code gebruiken.
+
+---
+
+## Huidige ontwikkelrichting
+
+Eerst de basis van de Planner / Sport Planner goed ontwerpen.
+
+Niet te snel verder bouwen op `trainingPlanEvents` als gewone dag-events.
+
+Belangrijk ontwerpbesluit:
+
+Tijdlijn = wat gebeurde er?
+Planner = wat ga ik doen?
+
+Volgende logische stappen:
+
+1. SportFocusPanel voorlopig gebruiken als prototype.
+2. Daarna aparte `planner/` map overwegen.
+3. Datastructuur voor planner-items ontwerpen.
+4. Trainingplanning en supplementplanning los van registratie behandelen.
+5. Later registratie en planner met elkaar verbinden.

@@ -399,18 +399,17 @@ export function DailyMealList({
         style={{
           ...buttonStyle,
           width: "100%",
-          marginBottom: 10,
-          background: "#f8fafc",
-          border: "1px solid #cbd5e1",
-          color: "#334155",
-          fontWeight: 700,
+          marginBottom: 8,
+          background: showTimelineControls ? "#fef3c7" : "#f8fafc",
+          border: showTimelineControls
+            ? "1px solid #fcd34d"
+            : "1px solid #cbd5e1",
+          color: showTimelineControls ? "#92400e" : "#334155",
+          fontWeight: 800,
         }}
       >
-        {showTimelineControls
-          ? "⚙️ Tijdlijnbesturing ▲"
-          : "⚙️ Tijdlijnbesturing ▼"}
+        ⚙️ Filters {showTimelineControls ? "▲" : "▼"}
       </button>
-
       {showTimelineControls && (
         <>
           <div

@@ -839,6 +839,9 @@ export default function App() {
     addNoteEventToDay,
     updateNoteEvent,
     deleteNoteEvent,
+    addTrainingPlanEventToDay,
+    updateTrainingPlanEvent,
+    deleteTrainingPlanEvent,
   } = useDailyLog(selectedDate);
   // ======================================================
   // ZOEKANKER: SAVED MEALS / STANDAARDMAALTIJDEN
@@ -1907,7 +1910,7 @@ Producten uit deze categorie gaan naar "Overig".`);
       style={{
         minHeight: "100vh",
         background: "#f8fafc",
-        padding: 16,
+        padding: isMobile ? "112px 16px 16px" : 16,
         fontFamily: "Arial, sans-serif",
       }}
     >
@@ -1920,122 +1923,139 @@ Producten uit deze categorie gaan naar "Overig".`);
         }}
       >
         {isMobile ? (
-          <MobileHeader />
-        ) : (
-          <div style={{ ...cardStyle, marginBottom: 16 }}>
-            <h1 style={{ margin: 0, fontSize: 28 }}>
-              Diabetes + Creon web-app prototype
-            </h1>
-
-            <p style={{ marginTop: 8, color: "#475569" }}>
-              Nu met standaardmaaltijden, categorieën met ids, porties of gram,
-              favorieten, opslag in je browser, sticky kopregel,
-              categoriebeheer, snelle productzoeker, uitgebreider Creon-model,
-              GI / Timing-tabblad, testlogboek en backup/herstel via
-              Instellingen.
-            </p>
-          </div>
-        )}
-
-        {isMobile ? (
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr auto",
-              gap: 4,
-              marginBottom: 10,
-              alignItems: "center",
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 2000,
+              background: "#f8fafc",
+              paddingTop: 8,
+              paddingBottom: 6,
+              paddingLeft: 16,
+              paddingRight: 16,
+              boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
             }}
           >
-            <button
-              onClick={() => setActiveTab("daily")}
-              style={getTabButtonStyle("daily", "#0891b2")}
-            >
-              Tijdlijn
-            </button>
+            <MobileHeader />
 
-            <button
-              onClick={() => setActiveTab("dashboard")}
-              style={getTabButtonStyle("dashboard", "#2563eb")}
-            >
-              Dashboard
-            </button>
-
-            <button
-              onClick={() => setActiveTab("voedingslijst")}
-              style={getTabButtonStyle("voedingslijst", "#16a34a")}
-            >
-              Voeding
-            </button>
-
-            <select
-              value={
-                activeTab === "gi" || activeTab === "settings" ? activeTab : ""
-              }
-              onChange={(e) => {
-                if (e.target.value) {
-                  setActiveTab(e.target.value);
-                }
-              }}
+            <div
               style={{
-                padding: "6px",
-                borderRadius: 4,
-                border: "1px solid #cbd5e1",
-                background: "white",
-                fontSize: 12,
-                fontWeight: 700,
-                color: "#0f172a",
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr 1fr auto",
+                gap: 4,
+                alignItems: "center",
               }}
             >
-              <option value="">Meer</option>
-              <option value="gi">GI / Timing</option>
-              <option value="settings">Instellingen</option>
-            </select>
+              <button
+                onClick={() => setActiveTab("daily")}
+                style={getTabButtonStyle("daily", "#0891b2")}
+              >
+                Tijdlijn
+              </button>
+
+              <button
+                onClick={() => setActiveTab("dashboard")}
+                style={getTabButtonStyle("dashboard", "#2563eb")}
+              >
+                Dashboard
+              </button>
+
+              <button
+                onClick={() => setActiveTab("voedingslijst")}
+                style={getTabButtonStyle("voedingslijst", "#16a34a")}
+              >
+                Voeding
+              </button>
+
+              <select
+                value={
+                  activeTab === "gi" || activeTab === "settings"
+                    ? activeTab
+                    : ""
+                }
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setActiveTab(e.target.value);
+                  }
+                }}
+                style={{
+                  padding: "6px",
+                  borderRadius: 4,
+                  border: "1px solid #cbd5e1",
+                  background: "white",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: "#0f172a",
+                }}
+              >
+                <option value="">Meer</option>
+                <option value="gi">GI / Timing</option>
+                <option value="settings">Instellingen</option>
+              </select>
+            </div>
           </div>
         ) : (
-          <div
-            style={{
-              display: "flex",
-              gap: 8,
-              marginBottom: 16,
-              flexWrap: "wrap",
-            }}
-          >
-            <button
-              onClick={() => setActiveTab("daily")}
-              style={getTabButtonStyle("daily", "#0891b2")}
-            >
-              Tijdlijn
-            </button>
+          <>
+            <div style={{ ...cardStyle, marginBottom: 16 }}>
+              <h1 style={{ margin: 0, fontSize: 28 }}>
+                Diabetes + Creon web-app prototype
+              </h1>
 
-            <button
-              onClick={() => setActiveTab("dashboard")}
-              style={getTabButtonStyle("dashboard", "#2563eb")}
-            >
-              Dashboard
-            </button>
+              <p style={{ marginTop: 8, color: "#475569" }}>
+                Nu met standaardmaaltijden, categorieën met ids, porties of
+                gram, favorieten, opslag in je browser, sticky kopregel,
+                categoriebeheer, snelle productzoeker, uitgebreider Creon-model,
+                GI / Timing-tabblad, testlogboek en backup/herstel via
+                Instellingen.
+              </p>
+            </div>
 
-            <button
-              onClick={() => setActiveTab("voedingslijst")}
-              style={getTabButtonStyle("voedingslijst", "#16a34a")}
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                marginBottom: 16,
+                flexWrap: "wrap",
+              }}
             >
-              Voedingslijst
-            </button>
+              <button
+                onClick={() => setActiveTab("daily")}
+                style={getTabButtonStyle("daily", "#0891b2")}
+              >
+                Tijdlijn
+              </button>
 
-            <button
-              onClick={() => setActiveTab("gi")}
-              style={getTabButtonStyle("gi", "#9333ea")}
-            >
-              GI / Timing
-            </button>
+              <button
+                onClick={() => setActiveTab("dashboard")}
+                style={getTabButtonStyle("dashboard", "#2563eb")}
+              >
+                Dashboard
+              </button>
 
-            <button
-              onClick={() => setActiveTab("settings")}
-              style={getTabButtonStyle("settings", "#475569")}
-            >
-              Instellingen
-            </button>
-          </div>
+              <button
+                onClick={() => setActiveTab("voedingslijst")}
+                style={getTabButtonStyle("voedingslijst", "#16a34a")}
+              >
+                Voedingslijst
+              </button>
+
+              <button
+                onClick={() => setActiveTab("gi")}
+                style={getTabButtonStyle("gi", "#9333ea")}
+              >
+                GI / Timing
+              </button>
+
+              <button
+                onClick={() => setActiveTab("settings")}
+                style={getTabButtonStyle("settings", "#475569")}
+              >
+                Instellingen
+              </button>
+            </div>
+          </>
         )}
         {activeTab === "dashboard" && (
           <DashboardTab
@@ -2205,6 +2225,9 @@ Producten uit deze categorie gaan naar "Overig".`);
             addNoteEventToDay={addNoteEventToDay}
             updateNoteEvent={updateNoteEvent}
             deleteNoteEvent={deleteNoteEvent}
+            addTrainingPlanEventToDay={addTrainingPlanEventToDay}
+            updateTrainingPlanEvent={updateTrainingPlanEvent}
+            deleteTrainingPlanEvent={deleteTrainingPlanEvent}
           />
         )}
       </div>
