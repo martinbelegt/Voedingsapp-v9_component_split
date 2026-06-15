@@ -20,7 +20,7 @@ export function MobileHeader() {
           letterSpacing: "-0.3px",
         }}
       >
-        VoedingsManager
+        Companion
       </div>
 
       <div
@@ -31,7 +31,7 @@ export function MobileHeader() {
           lineHeight: 1.2,
         }}
       >
-        Grip op voeding, patronen en gezondheid
+        Jouw persoonlijke gezondheidsmaatje
       </div>
     </div>
   );

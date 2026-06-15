@@ -1,4 +1,107 @@
+Toekomstige merknaam / positionering
+
+Companion
+
+Een persoonlijke gezondheids- en leefstijlbegeleider
+die helpt patronen te begrijpen,
+niet alleen data te registreren.
+
+
 # PROJECT CONTEXT – Leefstijlplanner
+
+
+
+MISSIE VAN DE LEEFSTIJLPLANNER
+Waarom bouwen we deze app?
+
+De Leefstijlplanner helpt mensen hun eigen lichaam beter te begrijpen.
+
+Niet door ingewikkelde medische termen.
+
+Niet door eindeloze grafieken.
+
+Niet door de gebruiker te overladen met cijfers.
+
+Maar door begrijpelijke uitleg, persoonlijke context en herkenbare patronen.
+
+Onze filosofie
+
+De app moet aanvoelen als een medische vriend of vriendin die het beste met jou voor heeft.
+
+Niet als een spreadsheet.
+
+Niet als een medisch dossier.
+
+Niet als een verzameling losse metingen.
+
+De app kent jouw persoonlijke situatie en helpt je begrijpen waarom dingen gebeuren.
+
+Ontwerpregel #1
+
+De app praat mét de gebruiker, niet tégen de gebruiker.
+
+Geen vakjargon als het ook in gewone mensentaal kan.
+
+Geen uitleg voor artsen.
+
+Uitleg voor mensen.
+
+Ontwerpregel #2
+
+De gebruiker staat centraal.
+
+Niet de ziekte.
+
+Niet de meting.
+
+Niet de techniek.
+
+De app draait om de persoon.
+
+Iedere gebruiker heeft een eigen profiel, een eigen lichaam, een eigen leefstijl en een eigen verhaal.
+
+Ontwerpregel #3
+
+De app helpt patronen herkennen.
+
+Niet alleen laten zien wat er gebeurt.
+
+Maar ook helpen begrijpen waarom het gebeurt.
+
+Voorbeelden:
+
+Waarom stijgt mijn glucose?
+Waarom daalt mijn glucose?
+Wat doet sport met mijn lichaam?
+Wat doet voeding?
+Wat doet insuline?
+Wat doet stress?
+Wat doet slaap?
+Ontwerpregel #4
+
+Gebruiksgemak boven perfectie.
+
+Elke drempel die verdwijnt verhoogt de kans dat iemand de app blijft gebruiken.
+
+Registreren moet eenvoudig, snel en prettig zijn.
+
+Ontwerpregel #5
+
+Plezier is geen luxe.
+
+Een app die prettig voelt wordt gebruikt.
+
+Een app die gebruikt wordt levert data op.
+
+Data levert inzichten op.
+
+Inzichten helpen mensen.
+
+Uiteindelijk doel
+
+De Leefstijlplanner moet een persoonlijke begeleider worden die zegt:
+
+"Ik ken jouw situatie. Laten we samen kijken wat er vandaag gebeurde."
 
 ## Productnaam
 
@@ -394,3 +497,373 @@ Volgende logische stappen:
 3. Datastructuur voor planner-items ontwerpen.
 4. Trainingplanning en supplementplanning los van registratie behandelen.
 5. Later registratie en planner met elkaar verbinden.
+=========================================================
+BELANGRIJKE ONTWERPBESLUITEN
+============================
+
+Deze sectie bevat belangrijke ontwerpkeuzes die richting geven aan de verdere ontwikkeling van Leefstijlplanner.
+
+Nieuwe inzichten en architectuurbesluiten worden hier toegevoegd zodat toekomstige chats, ontwikkelaars en AI-assistenten begrijpen waarom bepaalde keuzes zijn gemaakt.
+
+---
+
+### 2026-06-13 – Productnaam gewijzigd
+
+VoedingsManager wordt vervangen door:
+
+Leefstijlplanner
+
+Slogan:
+
+Van registratie naar regie
+
+Reden:
+
+De applicatie is uitgegroeid van een voedingsregistratie-app naar een systeem voor:
+
+* registratie
+* analyse
+* planning
+* regie
+
+De oude naam dekt de lading niet meer.
+
+---
+
+### 2026-06-13 – Missie vastgesteld
+
+De kernfilosofie van Leefstijlplanner is:
+
+Registratie
+↓
+Analyse
+↓
+Inzicht
+↓
+Planning
+↓
+Regie
+
+Betekenis:
+
+Registratie levert gegevens.
+
+Analyse ontdekt patronen.
+
+Inzicht verklaart waarom iets gebeurt.
+
+Planning maakt vooruitkijken mogelijk.
+
+Regie maakt actief sturen mogelijk op gezondheid, prestaties, herstel en kwaliteit van leven.
+
+Alle toekomstige functionaliteit moet bijdragen aan één of meer van deze stappen.
+
+---
+
+### 2026-06-13 – Tijdlijn en Planner gescheiden
+
+Belangrijk architectuurbesluit:
+
+Tijdlijn = Wat gebeurde er?
+
+Planner = Wat ga ik doen?
+
+Voorbeelden Tijdlijn:
+
+* maaltijd gegeten
+* insuline gespoten
+* glucose gemeten
+* training uitgevoerd
+* supplement ingenomen
+
+Voorbeelden Planner:
+
+* training gepland
+* supplementmoment gepland
+* voedingsmoment gepland
+* vakantieplanning
+* herstelplanning
+
+Registratie en planning worden beschouwd als twee fundamenteel verschillende processen.
+
+---
+
+### 2026-06-13 – Analyse wordt kernmodule
+
+Belangrijk inzicht:
+
+Registratie heeft alleen waarde als deze leidt tot analyse.
+
+Analyse heeft alleen waarde als deze leidt tot inzicht.
+
+Inzicht heeft alleen waarde als deze leidt tot betere beslissingen.
+
+Daarom wordt Analyse beschouwd als een toekomstige hoofdmodule van Leefstijlplanner.
+
+Mogelijke onderdelen:
+
+* Daganalyse
+* Patronenanalyse
+* Trendanalyse
+* Verbanden tussen voeding, glucose, insuline, sport en supplementen
+* AI-analyse
+
+---
+
+### 2026-06-13 – SportFocusPanel herpositionering
+
+Oorspronkelijke gedachte:
+
+SportFocusPanel als uitbreiding van de Tijdlijn.
+
+Nieuwe visie:
+
+SportFocusPanel wordt beschouwd als het eerste prototype van de toekomstige Planner-module.
+
+Belangrijk inzicht:
+
+Trainingen zijn geen gebeurtenissen.
+
+Trainingen zijn plannen.
+
+Hetzelfde geldt voor:
+
+* supplementschema's
+* voedingsschema's
+* herstelmomenten
+* vakantieaanpassingen
+
+---
+
+### 2026-06-13 – Planner wordt toekomstig zelfstandig systeem
+
+De Planner ontwikkelt zich tot een zelfstandige hoofdmodule.
+
+Mogelijke toekomstige structuur:
+
+Planner
+
+* Trainingsplanner
+* Supplementplanner
+* Voedingsplanner
+* Herstelplanner
+* Vakantieplanner
+* Herinneringen
+* Scenario's
+
+Doel:
+
+Weken vooruit kunnen kijken.
+
+Activiteiten op elkaar afstemmen.
+
+Actief sturen op gezondheid en prestaties.
+
+---
+
+### 2026-06-13 – Modulariteit is verplicht ontwerpprincipe
+
+Alle nieuwe functionaliteit moet modulair worden gebouwd.
+
+Modules moeten:
+
+* zelfstandig functioneren
+* afzonderlijk ontwikkeld kunnen worden
+* afzonderlijk geactiveerd kunnen worden
+* afzonderlijk gedeactiveerd kunnen worden
+
+Voorbeelden:
+
+* Sportmodule
+* Supplementmodule
+* Slaapmodule
+* Vastenmodule
+* Ketonenmodule
+* Diabetes Pro module
+
+Dit ondersteunt toekomstige uitbreidingen en eventuele commerciële versies.
+
+---
+
+### 2026-06-13 – Primaire doelgroep
+
+Leefstijlplanner is ontstaan vanuit de praktijk van:
+
+* diabetes type 1
+* diabetes type 3c
+* leven zonder alvleesklier
+* Creon-gebruik
+* insulineafhankelijkheid
+
+Belangrijk uitgangspunt:
+
+Mensen met deze aandoeningen hebben niet alleen behoefte aan registratie.
+
+Zij hebben behoefte aan:
+
+* inzicht
+* overzicht
+* planning
+* ondersteuning bij besluitvorming
+* meer regie over hun dagelijks leven
+
+Deze doelgroep blijft de belangrijkste referentie bij ontwerpbeslissingen.
+
+---
+
+### 2026-06-13 – Definitie van succes
+
+Leefstijlplanner is succesvol wanneer de gebruiker:
+
+niet alleen weet wat er gebeurd is,
+
+maar begrijpt waarom het gebeurde,
+
+kan voorspellen wat waarschijnlijk gaat gebeuren,
+
+en actief kan sturen op wat hij wil laten gebeuren.
+
+Kort samengevat:
+
+Meer inzicht.
+Meer overzicht.
+Meer planning.
+Meer regie.
+
+2026-06-13
+
+Supplementplanner wordt uitgebreid naar
+Innameplanner.
+
+Domeinen:
+
+- Medicatie
+- Supplementen
+- Enzymen
+
+Reden:
+
+Voor de gebruiker staat de innamehandeling centraal,
+niet de juridische classificatie van het product.
+
+DOMEINMODEL
+
+Elk leefstijldomein bestaat uit:
+
+1. Bibliotheek
+2. Planner
+3. Registratie
+4. Analyse
+
+Voorbeelden:
+
+Voeding
+- Productbibliotheek
+- Voedingsplanner
+- Registratie
+- Analyse
+
+Inname
+- Innamebibliotheek
+- Innameplanner
+- Registratie
+- Analyse
+
+Sport
+- Bewegingsbibliotheek
+- Trainingsplanner
+- Registratie
+- Analyse
+
+CENTRAAL PRINCIPE
+
+Leefstijlplanner gebruikt één centrale tijdlijn.
+
+Alle domeinen leveren gebeurtenissen aan dezelfde tijdlijn.
+
+Reden:
+
+De kracht van analyse zit niet in afzonderlijke domeinen,
+maar in de verbanden tussen domeinen.
+
+Voorbeelden:
+
+- voeding ↔ glucose
+- glucose ↔ insuline
+- sport ↔ glucose
+- supplementen ↔ sport
+- medicatie ↔ voeding
+- planning ↔ uitvoering
+
+Ontwerpbesluit
+
+Innamebibliotheek gebruikt:
+
+- category
+- subCategory
+
+Hoofdcategorieën blijven beperkt tot:
+
+💊 Medicatie
+🧬 Enzymen
+🌿 Supplementen
+
+Fijnmazige indeling gebeurt via subCategory.
+
+DOMEINPATROON BEVESTIGD
+
+De Productbibliotheek blijkt het generieke model
+voor nieuwe domeinen.
+
+Nieuwe domeinen worden opgebouwd als:
+
+Bibliotheek
+↓
+Planner
+↓
+Tijdlijn
+↓
+Analyse
+
+Eerste succesvolle implementaties:
+
+- Productbibliotheek
+- Innamebibliotheek
+
+ONTWERPBESLUIT – BEWEGINGSBIBLIOTHEEK
+
+Bibliotheek-items zijn trainingssessies en activiteiten.
+
+Voorbeelden:
+
+🏋️ Borsttraining
+🏋️ Rugtraining
+🏋️ Schoudertraining
+🏋️ Benentraining
+
+🚶 Wandelen
+🚴 Fietsen
+🏊 Zwemmen
+
+🧘 Mobiliteit
+🧘 Hersteltraining
+
+Niet:
+
+Bench Press
+Cable Fly
+Lat Pulldown
+
+Oefeningen vormen later een onderliggende bibliotheek
+en kunnen gekoppeld worden aan een trainingssessie.
+
+Structuur:
+
+Trainingssessie
+↓
+Oefeningen
+↓
+Uitvoering
+↓
+Analyse
+

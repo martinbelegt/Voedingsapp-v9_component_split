@@ -23,6 +23,8 @@ import { scrollRefIntoView } from "./services/scrollService";
 import { useTestLog } from "./hooks/useTestLog";
 import { useMealTimers } from "./hooks/useMealTimers";
 import { calculateMealRows } from "./services/mealRowCalculationService";
+import IntakeLibrary from "./components/planner/intake/IntakeLibrary";
+import MovementLibrary from "./components/planner/movement/MovementLibrary";
 
 import {
   getCategoryById,
@@ -1991,6 +1993,7 @@ Producten uit deze categorie gaan naar "Overig".`);
                 }}
               >
                 <option value="">Meer</option>
+                <option value="libraries">Bibliotheken</option>
                 <option value="gi">GI / Timing</option>
                 <option value="settings">Instellingen</option>
               </select>
@@ -1999,9 +2002,26 @@ Producten uit deze categorie gaan naar "Overig".`);
         ) : (
           <>
             <div style={{ ...cardStyle, marginBottom: 16 }}>
-              <h1 style={{ margin: 0, fontSize: 28 }}>
-                Diabetes + Creon web-app prototype
+              <h1
+                style={{
+                  margin: 0,
+                  fontSize: 28,
+                  fontWeight: 900,
+                  color: "#0f766e",
+                }}
+              >
+                Companion
               </h1>
+
+              <div
+                style={{
+                  color: "#64748b",
+                  marginTop: 4,
+                  fontSize: 14,
+                }}
+              >
+                Jouw persoonlijke gezondheidsmaatje
+              </div>
 
               <p style={{ marginTop: 8, color: "#475569" }}>
                 Nu met standaardmaaltijden, categorieën met ids, porties of
@@ -2042,6 +2062,13 @@ Producten uit deze categorie gaan naar "Overig".`);
               </button>
 
               <button
+                onClick={() => setActiveTab("libraries")}
+                style={getTabButtonStyle("libraries", "#7c3aed")}
+              >
+                Bibliotheken
+              </button>
+
+              <button
                 onClick={() => setActiveTab("gi")}
                 style={getTabButtonStyle("gi", "#9333ea")}
               >
@@ -2052,7 +2079,7 @@ Producten uit deze categorie gaan naar "Overig".`);
                 onClick={() => setActiveTab("settings")}
                 style={getTabButtonStyle("settings", "#475569")}
               >
-                Instellingen
+                👤 Mijn Profiel
               </button>
             </div>
           </>
@@ -2075,6 +2102,17 @@ Producten uit deze categorie gaan naar "Overig".`);
             dayTotals={dayTotals}
             settings={settings}
           />
+        )}
+        {activeTab === "libraries" && (
+          <div
+            style={{
+              display: "grid",
+              gap: 12,
+            }}
+          >
+            <IntakeLibrary />
+            <MovementLibrary />
+          </div>
         )}
         {activeTab === "voedingslijst" && (
           <VoedingslijstTab

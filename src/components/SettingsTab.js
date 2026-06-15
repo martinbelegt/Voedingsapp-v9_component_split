@@ -64,7 +64,25 @@ export function SettingsTab({
   return (
     <div style={{ display: "grid", gap: 16, marginTop: 16 }}>
       <div style={cardStyle}>
-        <h2 style={{ marginTop: 0, marginBottom: 12 }}>Instellingen</h2>
+        <div style={{ marginBottom: 16 }}>
+          <h2
+            style={{
+              marginTop: 0,
+              marginBottom: 4,
+            }}
+          >
+            👤 Mijn Profiel
+          </h2>
+
+          <div
+            style={{
+              fontSize: 13,
+              color: "#64748b",
+            }}
+          >
+            Jouw persoonlijke kenmerken, voorkeuren en gezondheidsgegevens
+          </div>
+        </div>
 
         <div style={{ display: "grid", gap: 16 }}>
           <div
@@ -136,7 +154,32 @@ export function SettingsTab({
               </div>
 
               <div>
-                <label style={labelStyle}>Gram KH per 1E insuline</label>
+                <label style={labelStyle}>
+                  🍽️ Als je gaat eten
+                  <span
+                    style={{ color: "#64748b", fontSize: 12, fontWeight: 700 }}
+                  >
+                    {" "}
+                    (koolhydraatratio)
+                  </span>
+                </label>
+
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: "#64748b",
+                    marginTop: 4,
+                    marginBottom: 6,
+                  }}
+                >
+                  Hoeveel koolhydraten kun je eten per 1 eenheid insuline?
+                  <br />
+                  <br />
+                  Kortom:
+                  <br />
+                  Je berekent hoeveel insuline je nodig hebt voor de maaltijd
+                  die voor je staat, zodat je bloedsuiker netjes stabiel blijft.
+                </div>
                 <input
                   value={settings.gramsKhPerUnit}
                   onChange={(e) =>
@@ -144,8 +187,157 @@ export function SettingsTab({
                   }
                   style={inputStyle}
                 />
-                <div style={helperStyle}>
-                  Basisverhouding voor koolhydraten → insuline.
+
+                <div>
+                  <label style={labelStyle}>
+                    📈 Als je bloedsuiker te hoog is (Je correctie-getal)
+                    <span
+                      style={{
+                        color: "#64748b",
+                        fontSize: 12,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {" "}
+                      (correctiefactor / insulinegevoeligheidsfactor)
+                    </span>
+                  </label>
+
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: "#64748b",
+                      marginTop: 4,
+                      marginBottom: 6,
+                    }}
+                  >
+                    Hoeveel zakt je bloedsuiker door 1 eenheid insuline?
+                    <br />
+                    <br />
+                    Kortom:
+                    <br />
+                    Zit je na het eten nog te hoog, maar ga je nog niet eten?
+                    Dan helpt dit getal bepalen hoeveel extra insuline nodig is
+                    om weer richting je gewenste waarde te gaan.
+                  </div>
+                  <input
+                    value={settings.correctionFactor}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        correctionFactor: e.target.value,
+                      })
+                    }
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>🎯 Gewenste glucosewaarde</label>
+
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: "#64748b",
+                      marginTop: 4,
+                      marginBottom: 6,
+                    }}
+                  >
+                    Naar welke glucosewaarde probeer je meestal terug te keren?
+                  </div>
+                  <input
+                    value={settings.targetGlucose}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        targetGlucose: e.target.value,
+                      })
+                    }
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>
+                    <input
+                      type="checkbox"
+                      checked={settings.dawnPhenomenonEnabled}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          dawnPhenomenonEnabled: e.target.checked,
+                        })
+                      }
+                      style={{ marginRight: 8 }}
+                    />
+                    🌅 Mijn bloedsuiker stijgt vaak in de ochtend zonder dat ik
+                    gegeten heb
+                  </label>
+                </div>
+
+                {settings.dawnPhenomenonEnabled && (
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: 10,
+                    }}
+                  >
+                    <div>
+                      <label style={labelStyle}>Van</label>
+                      <input
+                        type="time"
+                        value={settings.dawnStart}
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            dawnStart: e.target.value,
+                          })
+                        }
+                        style={inputStyle}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={labelStyle}>Tot</label>
+                      <input
+                        type="time"
+                        value={settings.dawnEnd}
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            dawnEnd: e.target.value,
+                          })
+                        }
+                        style={inputStyle}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div
+                  style={{
+                    marginTop: 12,
+                    padding: 10,
+                    borderRadius: 10,
+                    background: "#f8fafc",
+                    border: "1px solid #e2e8f0",
+                    fontSize: 12,
+                    color: "#475569",
+                    lineHeight: 1.45,
+                  }}
+                >
+                  <strong>💡 Belangrijk</strong>
+                  <br />
+                  <br />
+                  Deze waarden zijn persoonlijk.
+                  <br />
+                  Spreek ze altijd af met je diabetesverpleegkundige, diëtist of
+                  behandelaar.
+                  <br />
+                  <br />
+                  Wat voor de ene persoon werkt, kan voor een andere persoon
+                  heel anders zijn.
                 </div>
               </div>
             </div>

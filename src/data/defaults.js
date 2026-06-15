@@ -4,7 +4,12 @@ export const defaultSettings = {
   basalInsulinName: "Tresiba",
   bolusInsulinName: "Novorapid",
 
-  gramsKhPerUnit: "8",
+  gramsKhPerUnit: "3",
+  targetGlucose: "6.5",
+  correctionFactor: "",
+  dawnPhenomenonEnabled: false,
+  dawnStart: "05:00",
+  dawnEnd: "10:00",
 
   useCreon35000: true,
   useCreon25000: true,

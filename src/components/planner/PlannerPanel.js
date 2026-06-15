@@ -1,5 +1,6 @@
 import React from "react";
-import SupplementPlanner from "./supplements/SupplementPlanner";
+import IntakeLibrary from "./intake/IntakeLibrary";
+import MovementLibrary from "./movement/MovementLibrary";
 
 export default function PlannerPanel() {
   return (
@@ -23,7 +24,8 @@ export default function PlannerPanel() {
         📅 Planner
       </div>
 
-      <SupplementPlanner />
+      <IntakeLibrary />
+      <MovementLibrary />
     </div>
   );
 }

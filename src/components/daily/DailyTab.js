@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { DailyMealList } from "./DailyMealList";
 import { DailyEventAddModal } from "./DailyEventAddModal";
 import { requestNotificationPermission } from "../../services/notificationService";
-import PlannerPanel from "../planner/PlannerPanel";
 
 import {
   scheduleLocalAlarm,
@@ -686,12 +685,6 @@ export function DailyTab({
             </div>
           )}
         </div>
-
-        <PlannerPanel
-          selectedDate={selectedDate}
-          selectedDay={selectedDay}
-          addTrainingPlanEventToDay={addTrainingPlanEventToDay}
-        />
 
         {/* Chronologische lijst */}
         <DailyMealList
