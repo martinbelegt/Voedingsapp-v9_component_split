@@ -38,6 +38,8 @@ export function DailyMealList({
   noteEventsForDay = [],
   updateNoteEvent,
   deleteNoteEvent,
+  showTimelineControls = false,
+  setShowTimelineControls,
 }) {
   const [expandedIds, setExpandedIds] = useState([]);
   const [editingEvent, setEditingEvent] = useState(null);
@@ -46,7 +48,6 @@ export function DailyMealList({
   const [timerEvent, setTimerEvent] = useState(null);
   const [compactTimeline, setCompactTimeline] = useState(false);
   const [timelineFilter, setTimelineFilter] = useState("all");
-  const [showTimelineControls, setShowTimelineControls] = useState(false);
 
   const [visibleTypes, setVisibleTypes] = useState({
     meal: true,
@@ -394,22 +395,6 @@ export function DailyMealList({
 
   return (
     <>
-      <button
-        onClick={() => setShowTimelineControls((v) => !v)}
-        style={{
-          ...buttonStyle,
-          width: "100%",
-          marginBottom: 8,
-          background: showTimelineControls ? "#fef3c7" : "#f8fafc",
-          border: showTimelineControls
-            ? "1px solid #fcd34d"
-            : "1px solid #cbd5e1",
-          color: showTimelineControls ? "#92400e" : "#334155",
-          fontWeight: 800,
-        }}
-      >
-        ⚙️ Filters {showTimelineControls ? "▲" : "▼"}
-      </button>
       {showTimelineControls && (
         <>
           <div

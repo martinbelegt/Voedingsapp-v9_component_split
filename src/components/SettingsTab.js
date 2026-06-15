@@ -100,8 +100,28 @@ export function SettingsTab({
                 border: "1px solid #bfdbfe",
               }}
             >
-              <div style={{ fontWeight: 800, fontSize: 16, color: "#1d4ed8" }}>
-                Insuline
+              <div style={{ marginBottom: 14 }}>
+                <div
+                  style={{
+                    fontWeight: 900,
+                    fontSize: 18,
+                    color: "#1d4ed8",
+                  }}
+                >
+                  💉 Diabetes & Glucose
+                </div>
+
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: "#475569",
+                    marginTop: 4,
+                    lineHeight: 1.4,
+                  }}
+                >
+                  Hier leg je vast hoe jouw lichaam meestal reageert op
+                  insuline, eten, hoge bloedsuiker en ochtendstijging.
+                </div>
               </div>
 
               {/* Insulineprofiel: langwerkend en kortwerkend */}
@@ -190,7 +210,7 @@ export function SettingsTab({
 
                 <div>
                   <label style={labelStyle}>
-                    📈 Als je bloedsuiker te hoog is (Je correctie-getal)
+                    📈 Als je bloedsuiker te hoog is
                     <span
                       style={{
                         color: "#64748b",

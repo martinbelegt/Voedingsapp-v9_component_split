@@ -1995,7 +1995,7 @@ Producten uit deze categorie gaan naar "Overig".`);
                 <option value="">Meer</option>
                 <option value="libraries">Bibliotheken</option>
                 <option value="gi">GI / Timing</option>
-                <option value="settings">Instellingen</option>
+                <option value="settings">Mijn Profiel</option>
               </select>
             </div>
           </div>

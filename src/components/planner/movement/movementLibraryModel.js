@@ -24,8 +24,10 @@ export const starterMovementItems = [
     category: "strength",
     subCategory: "Schouders",
     muscleGroup: "Schouders",
+
     defaultSets: "",
     defaultReps: "",
+
     intensity: "",
     defaultDurationMinutes: 75,
     note: "Krachttraining schouders.",

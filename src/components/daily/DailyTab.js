@@ -54,6 +54,7 @@ export function DailyTab({
 }) {
   const [addEventType, setAddEventType] = useState(null);
   const [showAddButtons, setShowAddButtons] = useState(false);
+  const [showTimelineControls, setShowTimelineControls] = useState(false);
   const [activeAlarm, setActiveAlarm] = useState(null);
 
   const mealsForDay = selectedDay?.meals || [];
@@ -468,7 +469,7 @@ export function DailyTab({
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr",
+              gridTemplateColumns: "1fr 1fr 1fr",
               gap: 6,
             }}
           >
@@ -503,6 +504,22 @@ export function DailyTab({
               }}
             >
               ➕ Nieuw
+            </button>
+            <button
+              onClick={() => setShowTimelineControls((v) => !v)}
+              style={{
+                ...buttonStyle,
+                background: showTimelineControls ? "#fef3c7" : "#f8fafc",
+                border: showTimelineControls
+                  ? "1px solid #fcd34d"
+                  : "1px solid #cbd5e1",
+                color: showTimelineControls ? "#92400e" : "#334155",
+                fontWeight: 800,
+                fontSize: window.innerWidth < 900 ? 12 : 14,
+                padding: window.innerWidth < 900 ? "6px 4px" : "8px 10px",
+              }}
+            >
+              ⚙️ Filters
             </button>
           </div>
 
@@ -717,6 +734,8 @@ export function DailyTab({
           noteEventsForDay={noteEventsForDay}
           updateNoteEvent={updateNoteEvent}
           deleteNoteEvent={deleteNoteEvent}
+          showTimelineControls={showTimelineControls}
+          setShowTimelineControls={setShowTimelineControls}
         />
       </div>
 
