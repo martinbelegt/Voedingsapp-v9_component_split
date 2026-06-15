@@ -418,23 +418,12 @@ export function DailyTab({
               flexWrap: "wrap",
             }}
           >
-            <div>
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: window.innerWidth < 900 ? 18 : 30,
-                  fontWeight: 700,
-                  color: "#0f766e",
-                }}
-              >
-                Vandaag ({totalTimelineItems} items)
-              </h2>
-
+            <div style={{ display: "grid", gap: 1 }}>
               <div
                 style={{
                   fontSize: 11,
                   color: "#64748b",
-                  marginTop: 2,
+                  lineHeight: 1.1,
                 }}
               >
                 {totalTimelineItems} item(s), nieuwste bovenaan
@@ -459,6 +448,12 @@ export function DailyTab({
                 background: "#fee2e2",
                 border: "1px solid #fecaca",
                 color: "#991b1b",
+                minHeight: 32,
+                padding: "4px 8px",
+                borderRadius: 5,
+                fontSize: 11,
+                fontWeight: 700,
+                lineHeight: 1.05,
               }}
             >
               Wis deze dag
@@ -468,6 +463,10 @@ export function DailyTab({
           {/* Hoofdknoppen */}
           <div
             style={{
+              background: "#f8fafc",
+              border: "1px solid #e2e8f0",
+              borderRadius: 6,
+              padding: 5,
               display: "grid",
               gridTemplateColumns: "1fr 1fr 1fr",
               gap: 6,
@@ -482,9 +481,12 @@ export function DailyTab({
                   ? "1px solid #93c5fd"
                   : "1px solid #cbd5e1",
                 color: showTimelineAnalysis ? "#1d4ed8" : "#334155",
-                fontWeight: 800,
-                fontSize: window.innerWidth < 900 ? 12 : 14,
-                padding: window.innerWidth < 900 ? "6px 4px" : "8px 10px",
+                fontWeight: 700,
+                fontSize: window.innerWidth < 900 ? 12 : 13,
+                padding: "5px 6px",
+                minHeight: 34,
+                borderRadius: 4,
+                lineHeight: 1.05,
               }}
             >
               📈 Daganalyse
@@ -498,9 +500,12 @@ export function DailyTab({
                   ? "1px solid #86efac"
                   : "1px solid #cbd5e1",
                 color: showAddButtons ? "#166534" : "#334155",
-                fontWeight: 800,
-                fontSize: window.innerWidth < 900 ? 12 : 14,
-                padding: window.innerWidth < 900 ? "6px 4px" : "8px 10px",
+                fontWeight: 700,
+                fontSize: window.innerWidth < 900 ? 12 : 13,
+                padding: "5px 6px",
+                minHeight: 34,
+                borderRadius: 4,
+                lineHeight: 1.05,
               }}
             >
               ➕ Nieuw
@@ -514,9 +519,12 @@ export function DailyTab({
                   ? "1px solid #fcd34d"
                   : "1px solid #cbd5e1",
                 color: showTimelineControls ? "#92400e" : "#334155",
-                fontWeight: 800,
-                fontSize: window.innerWidth < 900 ? 12 : 14,
-                padding: window.innerWidth < 900 ? "6px 4px" : "8px 10px",
+                fontWeight: 700,
+                fontSize: window.innerWidth < 900 ? 12 : 13,
+                padding: "5px 6px",
+                minHeight: 34,
+                borderRadius: 4,
+                lineHeight: 1.05,
               }}
             >
               ⚙️ Filters
@@ -613,33 +621,10 @@ export function DailyTab({
                 display: "flex",
                 gap: 8,
                 flexWrap: "wrap",
-                alignItems: "center",
+                alignItems: "stretch",
+                marginTop: 6,
               }}
             >
-              <button
-                onClick={() => setAddEventType("insulin")}
-                style={{
-                  ...buttonStyle,
-                  background: "#eef2ff",
-                  border: "1px solid #c7d2fe",
-                  color: "#3730a3",
-                }}
-              >
-                + Insuline
-              </button>
-
-              <button
-                onClick={() => setAddEventType("glucose")}
-                style={{
-                  ...buttonStyle,
-                  background: "#f0f9ff",
-                  border: "1px solid #bae6fd",
-                  color: "#0369a1",
-                }}
-              >
-                + Glucose
-              </button>
-
               <button
                 onClick={() => setAddEventType("glucoseBoost")}
                 style={{
@@ -647,6 +632,12 @@ export function DailyTab({
                   background: "#fff7ed",
                   border: "1px solid #fdba74",
                   color: "#c2410c",
+                  minHeight: 42,
+                  padding: "8px 10px",
+                  borderRadius: 12,
+                  fontSize: window.innerWidth < 900 ? 12 : 13,
+                  fontWeight: 700,
+                  flex: "1 1 calc(50% - 8px)",
                 }}
               >
                 ⚡ Glucoseboost
@@ -659,6 +650,12 @@ export function DailyTab({
                   background: "#ecfeff",
                   border: "1px solid #67e8f9",
                   color: "#0e7490",
+                  minHeight: 42,
+                  padding: "8px 10px",
+                  borderRadius: 12,
+                  fontSize: window.innerWidth < 900 ? 12 : 13,
+                  fontWeight: 700,
+                  flex: "1 1 calc(50% - 8px)",
                 }}
               >
                 + Beweging/sport
@@ -671,6 +668,12 @@ export function DailyTab({
                   background: "#fef3c7",
                   border: "1px solid #fcd34d",
                   color: "#92400e",
+                  minHeight: 42,
+                  padding: "8px 10px",
+                  borderRadius: 12,
+                  fontSize: window.innerWidth < 900 ? 12 : 13,
+                  fontWeight: 700,
+                  flex: "1 1 calc(50% - 8px)",
                 }}
               >
                 + Stoelgang
@@ -683,6 +686,12 @@ export function DailyTab({
                   background: "#f8fafc",
                   border: "1px solid #cbd5e1",
                   color: "#334155",
+                  minHeight: 42,
+                  padding: "8px 10px",
+                  borderRadius: 12,
+                  fontSize: window.innerWidth < 900 ? 12 : 13,
+                  fontWeight: 700,
+                  flex: "1 1 calc(50% - 8px)",
                 }}
               >
                 + Notitie
@@ -695,6 +704,12 @@ export function DailyTab({
                   background: "#ede9fe",
                   border: "1px solid #c4b5fd",
                   color: "#5b21b6",
+                  minHeight: 42,
+                  padding: "8px 10px",
+                  borderRadius: 12,
+                  fontSize: window.innerWidth < 900 ? 12 : 13,
+                  fontWeight: 700,
+                  flex: "1 1 calc(50% - 8px)",
                 }}
               >
                 + Supplement
@@ -736,6 +751,7 @@ export function DailyTab({
           deleteNoteEvent={deleteNoteEvent}
           showTimelineControls={showTimelineControls}
           setShowTimelineControls={setShowTimelineControls}
+          setAddEventType={setAddEventType}
         />
       </div>
 

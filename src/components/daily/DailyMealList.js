@@ -40,6 +40,7 @@ export function DailyMealList({
   deleteNoteEvent,
   showTimelineControls = false,
   setShowTimelineControls,
+  setAddEventType,
 }) {
   const [expandedIds, setExpandedIds] = useState([]);
   const [editingEvent, setEditingEvent] = useState(null);
@@ -393,22 +394,106 @@ export function DailyMealList({
     };
   }
 
+  const allExpanded =
+    visibleTimelineItems.length > 0 &&
+    visibleTimelineItems.every((item) => expandedIds.includes(item.id));
+
+  function handleToggleExpandAll() {
+    if (allExpanded) {
+      collapseAll();
+    } else {
+      expandAll();
+    }
+  }
+
   return (
     <>
+      <div
+        style={{
+          background: "#f8fafc",
+          border: "1px solid #e2e8f0",
+          borderRadius: 6,
+          padding: 6,
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr 1fr",
+          gap: 8,
+          marginBottom: 8,
+        }}
+      >
+        <button
+          onClick={() => setAddEventType("insulin")}
+          style={{
+            ...buttonStyle,
+            background: "#eef2ff",
+            border: "1px solid #c7d2fe",
+            color: "#3730a3",
+            minHeight: 34,
+            padding: "5px 6px",
+            borderRadius: 4,
+            fontSize: window.innerWidth < 900 ? 12 : 13,
+            fontWeight: 700,
+            lineHeight: 1.05,
+          }}
+        >
+          💉 + Insuline
+        </button>
+
+        <button
+          onClick={() => setAddEventType("glucose")}
+          style={{
+            ...buttonStyle,
+            background: "#f0f9ff",
+            border: "1px solid #bae6fd",
+            color: "#0369a1",
+            minHeight: 34,
+            padding: "5px 6px",
+            borderRadius: 4,
+            fontSize: window.innerWidth < 900 ? 12 : 13,
+            fontWeight: 700,
+            lineHeight: 1.05,
+          }}
+        >
+          📈 + Glucose
+        </button>
+
+        <button
+          onClick={handleToggleExpandAll}
+          style={{
+            ...toggleButtonStyle(allExpanded),
+            minHeight: 34,
+            padding: "5px 6px",
+            borderRadius: 4,
+            fontSize: window.innerWidth < 900 ? 12 : 13,
+            fontWeight: 700,
+            lineHeight: 1.05,
+          }}
+        >
+          ▾ {allExpanded ? "Alles inklappen" : "Alles uitklappen"}
+        </button>
+      </div>
+
       {showTimelineControls && (
         <>
           <div
             style={{
               display: "flex",
-              gap: 6,
+              gap: 8,
               marginBottom: 8,
               flexWrap: "wrap",
-              alignItems: "center",
+              alignItems: "stretch",
             }}
           >
             <button
               onClick={() => setCompactTimeline((v) => !v)}
-              style={toggleButtonStyle(compactTimeline)}
+              style={{
+                ...toggleButtonStyle(compactTimeline),
+                minHeight: 40,
+                padding: "8px 10px",
+                borderRadius: 10,
+                fontSize: window.innerWidth < 900 ? 12 : 13,
+                fontWeight: 700,
+                flex: "1 1 calc(50% - 8px)",
+              }}
             >
               {compactTimeline ? "Normale tijdlijn" : "Compacte tijdlijn"}
             </button>
@@ -417,8 +502,12 @@ export function DailyMealList({
               onClick={() => setTimelineFilter("all")}
               style={{
                 ...toggleButtonStyle(timelineFilter === "all"),
-                fontSize: window.innerWidth < 900 ? 11 : 12,
-                padding: window.innerWidth < 900 ? "2px 7px" : undefined,
+                minHeight: 40,
+                padding: "8px 10px",
+                borderRadius: 10,
+                fontSize: window.innerWidth < 900 ? 12 : 13,
+                fontWeight: 700,
+                flex: "1 1 calc(50% - 8px)",
               }}
             >
               Alles
@@ -426,14 +515,30 @@ export function DailyMealList({
 
             <button
               onClick={() => setTimelineFilter("insulin")}
-              style={toggleButtonStyle(timelineFilter === "insulin")}
+              style={{
+                ...toggleButtonStyle(timelineFilter === "insulin"),
+                minHeight: 40,
+                padding: "8px 10px",
+                borderRadius: 10,
+                fontSize: window.innerWidth < 900 ? 12 : 13,
+                fontWeight: 700,
+                flex: "1 1 calc(50% - 8px)",
+              }}
             >
               Alleen insuline
             </button>
 
             <button
               onClick={() => setTimelineFilter("glucose")}
-              style={toggleButtonStyle(timelineFilter === "glucose")}
+              style={{
+                ...toggleButtonStyle(timelineFilter === "glucose"),
+                minHeight: 40,
+                padding: "8px 10px",
+                borderRadius: 10,
+                fontSize: window.innerWidth < 900 ? 12 : 13,
+                fontWeight: 700,
+                flex: "1 1 calc(50% - 8px)",
+              }}
             >
               Alleen glucose
             </button>
@@ -442,10 +547,12 @@ export function DailyMealList({
               onClick={() => setTimelineFilter("metabolic")}
               style={{
                 ...toggleButtonStyle(timelineFilter === "metabolic"),
-
-                fontSize: window.innerWidth < 900 ? 11 : 12,
-
-                padding: window.innerWidth < 900 ? "2px 7px" : undefined,
+                minHeight: 40,
+                padding: "8px 10px",
+                borderRadius: 10,
+                fontSize: window.innerWidth < 900 ? 12 : 13,
+                fontWeight: 700,
+                flex: "1 1 calc(50% - 8px)",
               }}
             >
               Insuline + glucose
@@ -457,7 +564,15 @@ export function DailyMealList({
                   prev === "sportFocus" ? "all" : "sportFocus",
                 )
               }
-              style={toggleButtonStyle(timelineFilter === "sportFocus")}
+              style={{
+                ...toggleButtonStyle(timelineFilter === "sportFocus"),
+                minHeight: 40,
+                padding: "8px 10px",
+                borderRadius: 10,
+                fontSize: window.innerWidth < 900 ? 12 : 13,
+                fontWeight: 700,
+                flex: "1 1 calc(50% - 8px)",
+              }}
             >
               {timelineFilter === "sportFocus"
                 ? "Sport focus uit"
@@ -465,39 +580,13 @@ export function DailyMealList({
             </button>
           </div>
 
-          <button
-            onClick={() => {
-              const allExpanded =
-                visibleTimelineItems.length > 0 &&
-                visibleTimelineItems.every((item) =>
-                  expandedIds.includes(item.id),
-                );
-
-              if (allExpanded) {
-                collapseAll();
-              } else {
-                expandAll();
-              }
-            }}
-            style={toggleButtonStyle(
-              visibleTimelineItems.length > 0 &&
-                visibleTimelineItems.every((item) =>
-                  expandedIds.includes(item.id),
-                ),
-            )}
-          >
-            {visibleTimelineItems.length > 0 &&
-            visibleTimelineItems.every((item) => expandedIds.includes(item.id))
-              ? "Alles inklappen"
-              : "Alles uitklappen"}
-          </button>
-
           <div
             style={{
               display: "flex",
-              gap: 6,
+              gap: 8,
               flexWrap: "wrap",
               marginBottom: 8,
+              alignItems: "stretch",
             }}
           >
             {[
@@ -515,8 +604,12 @@ export function DailyMealList({
                 onClick={() => toggleVisibleType(type)}
                 style={{
                   ...buttonStyle,
-                  fontSize: window.innerWidth < 900 ? 11 : 12,
-                  padding: window.innerWidth < 900 ? "2px 7px" : undefined,
+                  minHeight: 40,
+                  padding: "8px 10px",
+                  borderRadius: 10,
+                  fontSize: window.innerWidth < 900 ? 12 : 13,
+                  fontWeight: 700,
+                  flex: "1 1 calc(50% - 8px)",
                   background: visibleTypes[type] ? "#bbf7d0" : "#f8fafc",
                   color: visibleTypes[type] ? "#14532d" : "#166534",
                   border: visibleTypes[type]
