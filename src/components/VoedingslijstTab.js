@@ -127,6 +127,48 @@ function VoedingslijstTab({
     newProduct.categoryId || "cat-overig",
   );
 
+  const modalCardStyle = {
+    ...cardStyle,
+    padding: isMobile ? 6 : 14,
+    ...(isMobile ? { borderRadius: 8 } : {}),
+  };
+
+  const modalHeadingStyle = {
+    marginTop: 0,
+    marginBottom: isMobile ? 6 : 12,
+    fontSize: isMobile ? 15 : undefined,
+    lineHeight: 1.2,
+  };
+
+  const modalGridGap = isMobile ? 6 : 10;
+  const modalStackGap = isMobile ? 6 : 16;
+
+  const deleteModalProduct = () => {
+    if (!editingProductId) return;
+
+    if (
+      !window.confirm(
+        `Product "${newProduct.name || "dit product"}" verwijderen?`,
+      )
+    ) {
+      return;
+    }
+
+    deleteProduct(editingProductId);
+    closeProductModal();
+    resetNewProductForm();
+  };
+
+  const cancelProductModal = () => {
+    resetNewProductForm();
+    closeProductModal();
+  };
+
+  const saveProductModal = () => {
+    addProduct();
+    closeProductModal();
+  };
+
   return (
     <div
       style={{
@@ -1000,7 +1042,7 @@ function VoedingslijstTab({
               borderRadius: isMobile ? 10 : 18,
               border: "1px solid #e5e7eb",
               boxShadow: "0 20px 40px rgba(0,0,0,0.18)",
-              padding: isMobile ? 10 : 18,
+              padding: isMobile ? 6 : 18,
               WebkitOverflowScrolling: "touch",
               overscrollBehavior: "contain",
               touchAction: "pan-y",
@@ -1008,18 +1050,18 @@ function VoedingslijstTab({
           >
             <div
               style={{
-                display: "flex",
+                display: isMobile ? "grid" : "flex",
                 justifyContent: "space-between",
-                alignItems: "center",
-                gap: 8,
-                marginBottom: isMobile ? 8 : 14,
+                alignItems: isMobile ? "stretch" : "center",
+                gap: isMobile ? 6 : 8,
+                marginBottom: isMobile ? 6 : 14,
               }}
             >
-              <div style={{ minWidth: 0 }}>
+              <div style={{ minWidth: 0, order: isMobile ? 2 : 0 }}>
                 <h2
                   style={{
                     margin: 0,
-                    fontSize: isMobile ? 18 : undefined,
+                    fontSize: isMobile ? 16 : undefined,
                     lineHeight: 1.15,
                   }}
                 >
@@ -1032,38 +1074,35 @@ function VoedingslijstTab({
                     fontSize: 12,
                     color: "#475569",
                     marginTop: 3,
+                    display: isMobile ? "none" : undefined,
                   }}
                 >
                   Alle productgegevens overzichtelijk op één plek.
                 </div>
               </div>
 
-              <button
-                onClick={closeProductModal}
-                style={{
-                  ...buttonStyle,
-                  flexShrink: 0,
-                  padding: isMobile ? "6px 8px" : buttonStyle?.padding,
-                  fontSize: isMobile ? 12 : buttonStyle?.fontSize,
-                }}
-              >
-                Sluiten
-              </button>
+              {!isMobile && (
+                <button
+                  onClick={closeProductModal}
+                  style={{
+                    ...buttonStyle,
+                    flexShrink: 0,
+                  }}
+                >
+                  Sluiten
+                </button>
+              )}
               {isMobile && (
-                <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr 1fr",
+                    gap: 5,
+                    order: 1,
+                  }}
+                >
                   <button
-                    onClick={() => {
-                      if (
-                        editingProductId &&
-                        window.confirm(
-                          `Product "${newProduct.name || "dit product"}" verwijderen?`,
-                        )
-                      ) {
-                        deleteProduct(editingProductId);
-                        closeProductModal();
-                        resetNewProductForm();
-                      }
-                    }}
+                    onClick={deleteModalProduct}
                     disabled={!editingProductId}
                     style={{
                       ...buttonStyle,
@@ -1072,36 +1111,34 @@ function VoedingslijstTab({
                         ? "1px solid #fecaca"
                         : "1px solid #e5e7eb",
                       color: editingProductId ? "#991b1b" : "#94a3b8",
-                      padding: "6px 8px",
-                      fontSize: 12,
+                      cursor: editingProductId ? "pointer" : "not-allowed",
+                      padding: "5px 6px",
+                      fontSize: 11,
+                      lineHeight: 1.15,
                     }}
                   >
-                    🗑
+                    Verwijderen
                   </button>
 
                   <button
-                    onClick={() => {
-                      resetNewProductForm();
-                      closeProductModal();
-                    }}
+                    onClick={cancelProductModal}
                     style={{
                       ...buttonStyle,
-                      padding: "6px 8px",
-                      fontSize: 12,
+                      padding: "5px 6px",
+                      fontSize: 11,
+                      lineHeight: 1.15,
                     }}
                   >
-                    Annuleer
+                    Annuleren
                   </button>
 
                   <button
-                    onClick={() => {
-                      addProduct();
-                      closeProductModal();
-                    }}
+                    onClick={saveProductModal}
                     style={{
                       ...primaryButtonStyle,
-                      padding: "6px 8px",
-                      fontSize: 12,
+                      padding: "5px 6px",
+                      fontSize: 11,
+                      lineHeight: 1.15,
                     }}
                   >
                     Opslaan
@@ -1110,9 +1147,9 @@ function VoedingslijstTab({
               )}
             </div>
 
-            <div style={{ display: "grid", gap: isMobile ? 8 : 16 }}>
-              <div style={{ ...cardStyle, padding: isMobile ? 8 : 14 }}>
-                <h3 style={{ marginTop: 0, marginBottom: 12 }}>Basis</h3>
+            <div style={{ display: "grid", gap: modalStackGap }}>
+              <div style={modalCardStyle}>
+                <h3 style={modalHeadingStyle}>Basis</h3>
 
                 <div
                   style={{
@@ -1120,7 +1157,7 @@ function VoedingslijstTab({
                     gridTemplateColumns: isMobile
                       ? "1fr"
                       : "1.4fr 1fr 1fr 1fr 0.9fr 1fr",
-                    gap: 10,
+                    gap: modalGridGap,
                   }}
                 >
                   <div>
@@ -1223,19 +1260,24 @@ function VoedingslijstTab({
                 </div>
               </div>
 
-              <div style={{ ...cardStyle, padding: isMobile ? 8 : 14 }}>
-                <h3 style={{ marginTop: 0, marginBottom: 12 }}>
+              <div style={modalCardStyle}>
+                <h3 style={modalHeadingStyle}>
                   Voedingswaarden
                 </h3>
 
                 {/* Bron / herkomst van voedingsgegevens */}
-                <div style={{ ...cardStyle, padding: isMobile ? 8 : 14 }}>
-                  <h3 style={{ marginTop: 0, marginBottom: 12 }}>
+                <div style={modalCardStyle}>
+                  <h3 style={modalHeadingStyle}>
                     Bron / herkomst
                   </h3>
 
                   <div
-                    style={{ fontSize: 12, color: "#64748b", marginBottom: 10 }}
+                    style={{
+                      fontSize: 12,
+                      color: "#64748b",
+                      marginBottom: isMobile ? 6 : 10,
+                      display: isMobile ? "none" : undefined,
+                    }}
                   >
                     Leg vast waar je voedingswaarden of GI-inschatting vandaan
                     komen. Handig voor controle, latere correcties en
@@ -1246,7 +1288,7 @@ function VoedingslijstTab({
                     style={{
                       display: "grid",
                       gridTemplateColumns: isMobile ? "1fr" : "1fr 1.4fr 1.4fr",
-                      gap: 10,
+                      gap: modalGridGap,
                     }}
                   >
                     <div>
@@ -1297,7 +1339,12 @@ function VoedingslijstTab({
                 </div>
 
                 <div
-                  style={{ fontSize: 12, color: "#64748b", marginBottom: 8 }}
+                  style={{
+                    fontSize: 12,
+                    color: "#64748b",
+                    marginBottom: isMobile ? 6 : 8,
+                    display: isMobile ? "none" : undefined,
+                  }}
                 >
                   Kies of je invoert per 100 g of per portie. Bij omschakelen
                   worden de waarden automatisch omgerekend.
@@ -1306,7 +1353,7 @@ function VoedingslijstTab({
                 <div
                   style={{
                     display: "grid",
-                    gap: 14,
+                    gap: isMobile ? 6 : 14,
                   }}
                 >
                   <div>
@@ -1397,7 +1444,7 @@ function VoedingslijstTab({
                       gridTemplateColumns: isMobile
                         ? "1fr 1fr"
                         : "repeat(4, 1fr)",
-                      gap: 10,
+                      gap: modalGridGap,
                     }}
                   >
                     <div>
@@ -1478,7 +1525,7 @@ function VoedingslijstTab({
                     style={{
                       display: "grid",
                       gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-                      gap: 10,
+                      gap: modalGridGap,
                     }}
                   >
                     <div>
@@ -1524,13 +1571,13 @@ function VoedingslijstTab({
                 style={{
                   display: "grid",
                   gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-                  gap: 16,
+                  gap: modalStackGap,
                 }}
               >
-                <div style={{ ...cardStyle, padding: isMobile ? 8 : 14 }}>
-                  <h3 style={{ marginTop: 0, marginBottom: 12 }}>GI</h3>
+                <div style={modalCardStyle}>
+                  <h3 style={modalHeadingStyle}>GI</h3>
 
-                  <div style={{ display: "grid", gap: 10 }}>
+                  <div style={{ display: "grid", gap: modalGridGap }}>
                     <div>
                       <label style={labelStyle}>GI-klasse</label>
                       <select
@@ -1599,7 +1646,7 @@ function VoedingslijstTab({
                         }
                         style={{
                           ...inputStyle,
-                          minHeight: 70,
+                          minHeight: isMobile ? 52 : 70,
                           resize: "vertical",
                           lineHeight: 1.35,
                         }}
@@ -1609,10 +1656,10 @@ function VoedingslijstTab({
                   </div>
                 </div>
 
-                <div style={{ ...cardStyle, padding: isMobile ? 8 : 14 }}>
-                  <h3 style={{ marginTop: 0, marginBottom: 12 }}>Timing</h3>
+                <div style={modalCardStyle}>
+                  <h3 style={modalHeadingStyle}>Timing</h3>
 
-                  <div style={{ display: "grid", gap: 10 }}>
+                  <div style={{ display: "grid", gap: modalGridGap }}>
                     <div>
                       <label style={labelStyle}>Standaard timing</label>
                       <select
@@ -1694,22 +1741,20 @@ function VoedingslijstTab({
                 </div>
               </div>
 
-              <div style={{ ...cardStyle, padding: isMobile ? 8 : 14 }}>
-                <h3 style={{ marginTop: 0, marginBottom: isMobile ? 6 : 12 }}>
-                  Extra
-                </h3>
+              <div style={modalCardStyle}>
+                <h3 style={modalHeadingStyle}>Extra</h3>
 
                 <label
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 10,
-                    padding: "10px 12px",
+                    gap: isMobile ? 6 : 10,
+                    padding: isMobile ? "6px 8px" : "10px 12px",
                     border: "1px solid #cbd5e1",
-                    borderRadius: 12,
+                    borderRadius: isMobile ? 8 : 12,
                     background: "#f8fafc",
                     cursor: "pointer",
-                    fontSize: 14,
+                    fontSize: isMobile ? 13 : 14,
                   }}
                 >
                   <input
