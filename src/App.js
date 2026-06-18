@@ -44,7 +44,7 @@ import {
   inputStyle,
   buttonStyle,
   primaryButtonStyle,
-} from "./styles/uiStyles";
+} from "./services/uiStyles";
 
 import {
   giClassOptions,

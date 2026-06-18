@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import SortableHeader from "./SortableHeader";
 
 export default VoedingslijstTab;
@@ -83,6 +83,15 @@ function VoedingslijstTab({
   const [hoveredProductId, setHoveredProductId] = useState(null);
 
   const [showMobileListManager, setShowMobileListManager] = useState(false);
+  const [showMobileSourceDetails, setShowMobileSourceDetails] =
+    useState(false);
+  const [showMobileGiDetails, setShowMobileGiDetails] = useState(false);
+  const [showMobileTimingDetails, setShowMobileTimingDetails] =
+    useState(false);
+  const productModalScrollRef = useRef(null);
+  const sourceDetailsRef = useRef(null);
+  const giDetailsRef = useRef(null);
+  const timingDetailsRef = useRef(null);
 
   const isMobile = window.innerWidth < 768;
 
@@ -94,6 +103,29 @@ function VoedingslijstTab({
       );
     } catch {}
   }, [showCategoryManager]);
+
+  useEffect(() => {
+    if (!productModalOpen || typeof document === "undefined") {
+      return undefined;
+    }
+
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousBodyTouchAction = document.body.style.touchAction;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousHtmlTouchAction = document.documentElement.style.touchAction;
+
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+    document.documentElement.style.overflow = "hidden";
+    document.documentElement.style.touchAction = "none";
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.body.style.touchAction = previousBodyTouchAction;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.documentElement.style.touchAction = previousHtmlTouchAction;
+    };
+  }, [productModalOpen]);
 
   const headerCellStyle = {
     minWidth: 0,
@@ -130,7 +162,15 @@ function VoedingslijstTab({
   const modalCardStyle = {
     ...cardStyle,
     padding: isMobile ? 6 : 14,
-    ...(isMobile ? { borderRadius: 8 } : {}),
+    ...(isMobile
+      ? {
+          borderRadius: 8,
+          minWidth: 0,
+          maxWidth: "100%",
+          overflowX: "hidden",
+          boxSizing: "border-box",
+        }
+      : {}),
   };
 
   const modalHeadingStyle = {
@@ -142,6 +182,30 @@ function VoedingslijstTab({
 
   const modalGridGap = isMobile ? 6 : 10;
   const modalStackGap = isMobile ? 6 : 16;
+  const modalInputStyle = {
+    ...inputStyle,
+    ...(isMobile
+      ? {
+          fontSize: 16,
+          width: "100%",
+          maxWidth: "100%",
+          minWidth: 0,
+          boxSizing: "border-box",
+        }
+      : {}),
+  };
+  const modalFieldStyle = isMobile ? { minWidth: 0, maxWidth: "100%" } : {};
+  const mobileCollapseButtonStyle = {
+    ...buttonStyle,
+    width: "100%",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: isMobile ? "6px 8px" : buttonStyle?.padding,
+    fontSize: isMobile ? 13 : buttonStyle?.fontSize,
+    fontWeight: 800,
+    background: isMobile ? "#f8fafc" : buttonStyle?.background,
+  };
 
   const deleteModalProduct = () => {
     if (!editingProductId) return;
@@ -167,6 +231,60 @@ function VoedingslijstTab({
   const saveProductModal = () => {
     addProduct();
     closeProductModal();
+  };
+
+  const scrollMobileModalTo = (ref) => {
+    if (!isMobile) return;
+
+    const scrollToTarget = () => {
+      const container = productModalScrollRef.current;
+      const target = ref.current;
+
+      if (!container || !target) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const stickyHeaderOffset = 96;
+      const nextTop =
+        container.scrollTop +
+        targetRect.top -
+        containerRect.top -
+        stickyHeaderOffset;
+
+      container.scrollTo({
+        top: Math.max(0, nextTop),
+        behavior: "smooth",
+      });
+    };
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(scrollToTarget);
+    });
+    setTimeout(scrollToTarget, 180);
+  };
+
+  const toggleMobileSourceDetails = () => {
+    setShowMobileSourceDetails((open) => {
+      const nextOpen = !open;
+      if (nextOpen) scrollMobileModalTo(sourceDetailsRef);
+      return nextOpen;
+    });
+  };
+
+  const toggleMobileGiDetails = () => {
+    setShowMobileGiDetails((open) => {
+      const nextOpen = !open;
+      if (nextOpen) scrollMobileModalTo(giDetailsRef);
+      return nextOpen;
+    });
+  };
+
+  const toggleMobileTimingDetails = () => {
+    setShowMobileTimingDetails((open) => {
+      const nextOpen = !open;
+      if (nextOpen) scrollMobileModalTo(timingDetailsRef);
+      return nextOpen;
+    });
   };
 
   return (
@@ -1017,13 +1135,13 @@ function VoedingslijstTab({
         <div
           style={{
             position: "fixed",
-            top: isMobile ? 132 : 0,
-            left: isMobile ? 8 : 0,
-            right: isMobile ? 8 : 0,
-            bottom: isMobile ? 8 : 0,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
             background: "rgba(15,23,42,0.45)",
             display: "block",
-            zIndex: 1000,
+            zIndex: 20000,
             boxSizing: "border-box",
             overflow: "hidden",
             overscrollBehavior: "contain",
@@ -1031,6 +1149,7 @@ function VoedingslijstTab({
           }}
         >
           <div
+            ref={productModalScrollRef}
             style={{
               width: "100%",
               height: "100%",
@@ -1039,10 +1158,10 @@ function VoedingslijstTab({
               overflowX: "hidden",
               boxSizing: "border-box",
               background: modalCategoryColor,
-              borderRadius: isMobile ? 10 : 18,
+              borderRadius: isMobile ? 0 : 18,
               border: "1px solid #e5e7eb",
               boxShadow: "0 20px 40px rgba(0,0,0,0.18)",
-              padding: isMobile ? 6 : 18,
+              padding: isMobile ? 0 : 18,
               WebkitOverflowScrolling: "touch",
               overscrollBehavior: "contain",
               touchAction: "pan-y",
@@ -1055,6 +1174,17 @@ function VoedingslijstTab({
                 alignItems: isMobile ? "stretch" : "center",
                 gap: isMobile ? 6 : 8,
                 marginBottom: isMobile ? 6 : 14,
+                position: isMobile ? "sticky" : undefined,
+                top: isMobile ? 0 : undefined,
+                zIndex: isMobile ? 20001 : undefined,
+                background: isMobile ? modalCategoryColor : undefined,
+                padding: isMobile
+                  ? "calc(env(safe-area-inset-top, 0px) + 8px) 8px 8px"
+                  : undefined,
+                borderBottom: isMobile ? "1px solid #e2e8f0" : undefined,
+                boxShadow: isMobile
+                  ? "0 2px 10px rgba(15,23,42,0.12)"
+                  : undefined,
               }}
             >
               <div style={{ minWidth: 0, order: isMobile ? 2 : 0 }}>
@@ -1147,7 +1277,13 @@ function VoedingslijstTab({
               )}
             </div>
 
-            <div style={{ display: "grid", gap: modalStackGap }}>
+            <div
+              style={{
+                display: "grid",
+                gap: modalStackGap,
+                padding: isMobile ? "0 8px 14px" : undefined,
+              }}
+            >
               <div style={modalCardStyle}>
                 <h3 style={modalHeadingStyle}>Basis</h3>
 
@@ -1155,7 +1291,7 @@ function VoedingslijstTab({
                   style={{
                     display: "grid",
                     gridTemplateColumns: isMobile
-                      ? "1fr"
+                      ? "minmax(0, 1fr)"
                       : "1.4fr 1fr 1fr 1fr 0.9fr 1fr",
                     gap: modalGridGap,
                   }}
@@ -1167,7 +1303,7 @@ function VoedingslijstTab({
                       onChange={(e) =>
                         setNewProduct({ ...newProduct, name: e.target.value })
                       }
-                      style={inputStyle}
+                      style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                     />
                   </div>
 
@@ -1181,7 +1317,7 @@ function VoedingslijstTab({
                           brand: e.target.value,
                         })
                       }
-                      style={inputStyle}
+                      style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                       placeholder="bijv. Calvé, Lidl, AH, MyProtein"
                     />
                   </div>
@@ -1196,7 +1332,7 @@ function VoedingslijstTab({
                           categoryId: e.target.value,
                         })
                       }
-                      style={inputStyle}
+                      style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                     >
                       {manageableCategories
                         .concat(
@@ -1220,7 +1356,7 @@ function VoedingslijstTab({
                           portion: e.target.value,
                         })
                       }
-                      style={inputStyle}
+                      style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                     />
                   </div>
 
@@ -1234,7 +1370,7 @@ function VoedingslijstTab({
                           portionGram: e.target.value,
                         })
                       }
-                      style={inputStyle}
+                      style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                     />
                   </div>
 
@@ -1248,7 +1384,7 @@ function VoedingslijstTab({
                           mealMoment: e.target.value,
                         })
                       }
-                      style={inputStyle}
+                      style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                     >
                       {MEAL_MOMENTS.map((m) => (
                         <option key={m.id} value={m.id}>
@@ -1258,6 +1394,38 @@ function VoedingslijstTab({
                     </select>
                   </div>
                 </div>
+
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: isMobile ? 6 : 10,
+                    marginTop: isMobile ? 6 : 12,
+                    padding: isMobile ? "6px 8px" : "10px 12px",
+                    border: "1px solid #cbd5e1",
+                    borderRadius: isMobile ? 8 : 12,
+                    background: "#f8fafc",
+                    cursor: "pointer",
+                    fontSize: isMobile ? 13 : 14,
+                    maxWidth: "100%",
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={!!newProduct.favorite}
+                    onChange={(e) =>
+                      setNewProduct({
+                        ...newProduct,
+                        favorite: e.target.checked,
+                      })
+                    }
+                    style={isMobile ? { fontSize: 16 } : undefined}
+                  />
+                  <span>
+                    {newProduct.favorite ? "Favoriet" : "Geen favoriet"}
+                  </span>
+                </label>
               </div>
 
               <div style={modalCardStyle}>
@@ -1266,76 +1434,91 @@ function VoedingslijstTab({
                 </h3>
 
                 {/* Bron / herkomst van voedingsgegevens */}
-                <div style={modalCardStyle}>
-                  <h3 style={modalHeadingStyle}>
-                    Bron / herkomst
-                  </h3>
+                <div ref={sourceDetailsRef} style={modalCardStyle}>
+                  {isMobile ? (
+                    <button
+                      type="button"
+                      onClick={toggleMobileSourceDetails}
+                      style={mobileCollapseButtonStyle}
+                    >
+                      <span>Bron / herkomst</span>
+                      <span>{showMobileSourceDetails ? "▲" : "▼"}</span>
+                    </button>
+                  ) : (
+                    <h3 style={modalHeadingStyle}>Bron / herkomst</h3>
+                  )}
 
-                  <div
-                    style={{
-                      fontSize: 12,
-                      color: "#64748b",
-                      marginBottom: isMobile ? 6 : 10,
-                      display: isMobile ? "none" : undefined,
-                    }}
-                  >
-                    Leg vast waar je voedingswaarden of GI-inschatting vandaan
-                    komen. Handig voor controle, latere correcties en
-                    betrouwbare productlijsten.
-                  </div>
+                  {(!isMobile || showMobileSourceDetails) && (
+                    <>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: "#64748b",
+                          marginBottom: isMobile ? 6 : 10,
+                          display: isMobile ? "none" : undefined,
+                        }}
+                      >
+                        Leg vast waar je voedingswaarden of GI-inschatting vandaan
+                        komen. Handig voor controle, latere correcties en
+                        betrouwbare productlijsten.
+                      </div>
 
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: isMobile ? "1fr" : "1fr 1.4fr 1.4fr",
-                      gap: modalGridGap,
-                    }}
-                  >
-                    <div>
-                      <label style={labelStyle}>Bron</label>
-                      <input
-                        value={newProduct.sourceName || ""}
-                        onChange={(e) =>
-                          setNewProduct({
-                            ...newProduct,
-                            sourceName: e.target.value,
-                          })
-                        }
-                        style={inputStyle}
-                        placeholder="bijv. etiket, Open Food Facts, USDA"
-                      />
-                    </div>
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: isMobile
+                            ? "minmax(0, 1fr)"
+                            : "1fr 1.4fr 1.4fr",
+                          gap: modalGridGap,
+                        }}
+                      >
+                        <div style={modalFieldStyle}>
+                          <label style={labelStyle}>Bron</label>
+                          <input
+                            value={newProduct.sourceName || ""}
+                            onChange={(e) =>
+                              setNewProduct({
+                                ...newProduct,
+                                sourceName: e.target.value,
+                              })
+                            }
+                            style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
+                            placeholder="bijv. etiket, Open Food Facts, USDA"
+                          />
+                        </div>
 
-                    <div>
-                      <label style={labelStyle}>Bronlink</label>
-                      <input
-                        value={newProduct.sourceUrl || ""}
-                        onChange={(e) =>
-                          setNewProduct({
-                            ...newProduct,
-                            sourceUrl: e.target.value,
-                          })
-                        }
-                        style={inputStyle}
-                        placeholder="https://..."
-                      />
-                    </div>
+                        <div style={modalFieldStyle}>
+                          <label style={labelStyle}>Bronlink</label>
+                          <input
+                            value={newProduct.sourceUrl || ""}
+                            onChange={(e) =>
+                              setNewProduct({
+                                ...newProduct,
+                                sourceUrl: e.target.value,
+                              })
+                            }
+                            style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
+                            placeholder="https://..."
+                          />
+                        </div>
 
-                    <div>
-                      <label style={labelStyle}>Bronnotitie</label>
-                      <input
-                        value={newProduct.sourceNotes || ""}
-                        onChange={(e) =>
-                          setNewProduct({
-                            ...newProduct,
-                            sourceNotes: e.target.value,
-                          })
-                        }
-                        style={inputStyle}
-                        placeholder="bijv. GI geschat op vergelijkbaar product"
-                      />
-                    </div>
-                  </div>
+                        <div style={modalFieldStyle}>
+                          <label style={labelStyle}>Bronnotitie</label>
+                          <input
+                            value={newProduct.sourceNotes || ""}
+                            onChange={(e) =>
+                              setNewProduct({
+                                ...newProduct,
+                                sourceNotes: e.target.value,
+                              })
+                            }
+                            style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
+                            placeholder="bijv. GI geschat op vergelijkbaar product"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div
@@ -1430,7 +1613,7 @@ function VoedingslijstTab({
                           });
                         }
                       }}
-                      style={inputStyle}
+                      style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                     >
                       <option value="per100">Per 100 g</option>
                       <option value="perPortion">Per portie</option>
@@ -1442,7 +1625,7 @@ function VoedingslijstTab({
                     style={{
                       display: "grid",
                       gridTemplateColumns: isMobile
-                        ? "1fr 1fr"
+                        ? "minmax(0, 1fr) minmax(0, 1fr)"
                         : "repeat(4, 1fr)",
                       gap: modalGridGap,
                     }}
@@ -1461,7 +1644,7 @@ function VoedingslijstTab({
                             khInput: e.target.value,
                           })
                         }
-                        style={inputStyle}
+                        style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                       />
                     </div>
 
@@ -1479,7 +1662,7 @@ function VoedingslijstTab({
                             proteinInput: e.target.value,
                           })
                         }
-                        style={inputStyle}
+                        style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                       />
                     </div>
 
@@ -1497,7 +1680,7 @@ function VoedingslijstTab({
                             fatInput: e.target.value,
                           })
                         }
-                        style={inputStyle}
+                        style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                       />
                     </div>
 
@@ -1515,7 +1698,7 @@ function VoedingslijstTab({
                             kcalInput: e.target.value,
                           })
                         }
-                        style={inputStyle}
+                        style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                       />
                     </div>
                   </div>
@@ -1524,7 +1707,9 @@ function VoedingslijstTab({
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+                      gridTemplateColumns: isMobile
+                        ? "minmax(0, 1fr)"
+                        : "1fr 1fr",
                       gap: modalGridGap,
                     }}
                   >
@@ -1542,7 +1727,7 @@ function VoedingslijstTab({
                             fiberInput: e.target.value,
                           })
                         }
-                        style={inputStyle}
+                        style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                       />
                     </div>
 
@@ -1560,7 +1745,7 @@ function VoedingslijstTab({
                             saltInput: e.target.value,
                           })
                         }
-                        style={inputStyle}
+                        style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                       />
                     </div>
                   </div>
@@ -1570,208 +1755,216 @@ function VoedingslijstTab({
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+                  gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "1fr 1fr",
                   gap: modalStackGap,
                 }}
               >
-                <div style={modalCardStyle}>
-                  <h3 style={modalHeadingStyle}>GI</h3>
+                <div ref={giDetailsRef} style={modalCardStyle}>
+                  {isMobile ? (
+                    <button
+                      type="button"
+                      onClick={toggleMobileGiDetails}
+                      style={mobileCollapseButtonStyle}
+                    >
+                      <span>GI</span>
+                      <span>{showMobileGiDetails ? "▲" : "▼"}</span>
+                    </button>
+                  ) : (
+                    <h3 style={modalHeadingStyle}>GI</h3>
+                  )}
 
-                  <div style={{ display: "grid", gap: modalGridGap }}>
-                    <div>
-                      <label style={labelStyle}>GI-klasse</label>
-                      <select
-                        value={newProduct.giClass}
-                        onChange={(e) =>
-                          setNewProduct({
-                            ...newProduct,
-                            giClass: e.target.value,
-                          })
-                        }
-                        style={inputStyle}
-                      >
-                        {giClassOptions.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                  {(!isMobile || showMobileGiDetails) && (
+                    <div
+                      style={{
+                        display: "grid",
+                        gap: modalGridGap,
+                        marginTop: isMobile ? 6 : 0,
+                      }}
+                    >
+                      <div style={modalFieldStyle}>
+                        <label style={labelStyle}>GI-klasse</label>
+                        <select
+                          value={newProduct.giClass}
+                          onChange={(e) =>
+                            setNewProduct({
+                              ...newProduct,
+                              giClass: e.target.value,
+                            })
+                          }
+                          style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
+                        >
+                          {giClassOptions.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                    <div>
-                      <label style={labelStyle}>GI-waarde</label>
-                      <input
-                        value={newProduct.giValue}
-                        onChange={(e) =>
-                          setNewProduct({
-                            ...newProduct,
-                            giValue: e.target.value,
-                          })
-                        }
-                        style={inputStyle}
-                      />
-                    </div>
+                      <div style={modalFieldStyle}>
+                        <label style={labelStyle}>GI-waarde</label>
+                        <input
+                          value={newProduct.giValue}
+                          onChange={(e) =>
+                            setNewProduct({
+                              ...newProduct,
+                              giValue: e.target.value,
+                            })
+                          }
+                          style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
+                        />
+                      </div>
 
-                    <div>
-                      <label style={labelStyle}>GI-notitie</label>
-                      <input
-                        value={newProduct.giNotes}
-                        onChange={(e) =>
-                          setNewProduct({
-                            ...newProduct,
-                            giNotes: e.target.value,
-                          })
-                        }
-                        style={inputStyle}
-                      />
-                    </div>
-                    <div style={{ display: "grid", gap: 4 }}>
-                      <label
-                        style={{
-                          ...labelStyle,
-                          display: "block",
-                          alignSelf: "start",
-                        }}
-                      >
-                        GI-bronnotitie
-                      </label>
+                      <div style={modalFieldStyle}>
+                        <label style={labelStyle}>GI-notitie</label>
+                        <input
+                          value={newProduct.giNotes}
+                          onChange={(e) =>
+                            setNewProduct({
+                              ...newProduct,
+                              giNotes: e.target.value,
+                            })
+                          }
+                          style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
+                        />
+                      </div>
+                      <div style={{ display: "grid", gap: 4, ...modalFieldStyle }}>
+                        <label
+                          style={{
+                            ...labelStyle,
+                            display: "block",
+                            alignSelf: "start",
+                          }}
+                        >
+                          GI-bronnotitie
+                        </label>
 
-                      <textarea
-                        value={newProduct.giSourceNotes || ""}
-                        onChange={(e) =>
-                          setNewProduct({
-                            ...newProduct,
-                            giSourceNotes: e.target.value,
-                          })
-                        }
-                        style={{
-                          ...inputStyle,
-                          minHeight: isMobile ? 52 : 70,
-                          resize: "vertical",
-                          lineHeight: 1.35,
-                        }}
-                        placeholder="Bijv. gevonden via Sydney GI Database; vergelijkbaar product gebruikt"
-                      />
+                        <textarea
+                          value={newProduct.giSourceNotes || ""}
+                          onChange={(e) =>
+                            setNewProduct({
+                              ...newProduct,
+                              giSourceNotes: e.target.value,
+                            })
+                          }
+                          style={{
+                            ...modalInputStyle,
+                            fontSize: isMobile ? 16 : modalInputStyle.fontSize,
+                            minHeight: isMobile ? 52 : 70,
+                            resize: "vertical",
+                            lineHeight: 1.35,
+                          }}
+                          placeholder="Bijv. gevonden via Sydney GI Database; vergelijkbaar product gebruikt"
+                        />
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
-                <div style={modalCardStyle}>
-                  <h3 style={modalHeadingStyle}>Timing</h3>
+                <div ref={timingDetailsRef} style={modalCardStyle}>
+                  {isMobile ? (
+                    <button
+                      type="button"
+                      onClick={toggleMobileTimingDetails}
+                      style={mobileCollapseButtonStyle}
+                    >
+                      <span>Timing</span>
+                      <span>{showMobileTimingDetails ? "▲" : "▼"}</span>
+                    </button>
+                  ) : (
+                    <h3 style={modalHeadingStyle}>Timing</h3>
+                  )}
 
-                  <div style={{ display: "grid", gap: modalGridGap }}>
-                    <div>
-                      <label style={labelStyle}>Standaard timing</label>
-                      <select
-                        value={newProduct.timingTag}
-                        onChange={(e) =>
-                          setNewProduct({
-                            ...newProduct,
-                            timingTag: e.target.value,
-                          })
-                        }
-                        style={inputStyle}
-                      >
-                        {timingOptions.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                  {(!isMobile || showMobileTimingDetails) && (
+                    <div
+                      style={{
+                        display: "grid",
+                        gap: modalGridGap,
+                        marginTop: isMobile ? 6 : 0,
+                      }}
+                    >
+                      <div style={modalFieldStyle}>
+                        <label style={labelStyle}>Standaard timing</label>
+                        <select
+                          value={newProduct.timingTag}
+                          onChange={(e) =>
+                            setNewProduct({
+                              ...newProduct,
+                              timingTag: e.target.value,
+                            })
+                          }
+                          style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
+                        >
+                          {timingOptions.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                    <div>
-                      <label style={labelStyle}>Persoonlijke timing</label>
-                      <select
-                        value={
-                          newProduct.personalTimingTag || newProduct.timingTag
-                        }
-                        onChange={(e) =>
-                          setNewProduct({
-                            ...newProduct,
-                            personalTimingTag: e.target.value,
-                          })
-                        }
-                        style={inputStyle}
-                      >
-                        {timingOptions.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                      <div style={modalFieldStyle}>
+                        <label style={labelStyle}>Persoonlijke timing</label>
+                        <select
+                          value={
+                            newProduct.personalTimingTag || newProduct.timingTag
+                          }
+                          onChange={(e) =>
+                            setNewProduct({
+                              ...newProduct,
+                              personalTimingTag: e.target.value,
+                            })
+                          }
+                          style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
+                        >
+                          {timingOptions.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                    <div>
-                      <label style={labelStyle}>Opnameprofiel</label>
-                      <select
-                        value={newProduct.absorptionProfile || "steady"}
-                        onChange={(e) =>
-                          setNewProduct({
-                            ...newProduct,
-                            absorptionProfile: e.target.value,
-                          })
-                        }
-                        style={inputStyle}
-                      >
-                        {absorptionProfileOptions.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                      <div style={modalFieldStyle}>
+                        <label style={labelStyle}>Opnameprofiel</label>
+                        <select
+                          value={newProduct.absorptionProfile || "steady"}
+                          onChange={(e) =>
+                            setNewProduct({
+                              ...newProduct,
+                              absorptionProfile: e.target.value,
+                            })
+                          }
+                          style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
+                        >
+                          {absorptionProfileOptions.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                    <div>
-                      <label style={labelStyle}>
-                        Persoonlijke timingnotitie
-                      </label>
-                      <input
-                        value={newProduct.personalTimingNotes || ""}
-                        onChange={(e) =>
-                          setNewProduct({
-                            ...newProduct,
-                            personalTimingNotes: e.target.value,
-                          })
-                        }
-                        style={inputStyle}
-                      />
+                      <div style={modalFieldStyle}>
+                        <label style={labelStyle}>
+                          Persoonlijke timingnotitie
+                        </label>
+                        <input
+                          value={newProduct.personalTimingNotes || ""}
+                          onChange={(e) =>
+                            setNewProduct({
+                              ...newProduct,
+                              personalTimingNotes: e.target.value,
+                            })
+                          }
+                          style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
+                        />
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
-              <div style={modalCardStyle}>
-                <h3 style={modalHeadingStyle}>Extra</h3>
-
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: isMobile ? 6 : 10,
-                    padding: isMobile ? "6px 8px" : "10px 12px",
-                    border: "1px solid #cbd5e1",
-                    borderRadius: isMobile ? 8 : 12,
-                    background: "#f8fafc",
-                    cursor: "pointer",
-                    fontSize: isMobile ? 13 : 14,
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={!!newProduct.favorite}
-                    onChange={(e) =>
-                      setNewProduct({
-                        ...newProduct,
-                        favorite: e.target.checked,
-                      })
-                    }
-                  />
-                  <span>
-                    {newProduct.favorite ? "Favoriet" : "Geen favoriet"}
-                  </span>
-                </label>
-              </div>
             </div>
 
             {!isMobile && (

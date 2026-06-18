@@ -1,3 +1,6 @@
+const isMobileViewport =
+  typeof window !== "undefined" && window.innerWidth < 768;
+
 export const sectionBadgeStyle = {
   border: "1px solid #cbd5e1",
   borderRadius: 999,
@@ -36,7 +39,7 @@ export const inputStyle = {
   padding: "10px 12px",
   borderRadius: 12,
   border: "1px solid #cbd5e1",
-  fontSize: 14,
+  fontSize: isMobileViewport ? 16 : 14,
   boxSizing: "border-box",
 };
 
