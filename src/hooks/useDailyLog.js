@@ -278,6 +278,7 @@ export function useDailyLog(selectedDate) {
       creonTime: input.creonTime || "",
       rows: input.rows || [],
       totals: normalizeTotals(input.totals),
+      repeat: input.repeat || "none",
     };
 
     return addEntryToDay(input, "meals", mealEntry);
@@ -444,6 +445,7 @@ export function useDailyLog(selectedDate) {
       durationMinutes: input.durationMinutes || "",
       note: input.note || "",
       createdAt: new Date().toLocaleString("nl-NL"),
+      repeat: input.repeat || "none",
     };
 
     return addEntryToDay(input, "movementEvents", eventEntry);
@@ -466,6 +468,7 @@ export function useDailyLog(selectedDate) {
       dosage: input.dosage || "",
       note: input.note || "",
       createdAt: new Date().toLocaleString("nl-NL"),
+      repeat: input.repeat || "none",
     };
 
     return addEntryToDay(input, "supplementEvents", eventEntry);
@@ -548,6 +551,81 @@ export function useDailyLog(selectedDate) {
     deleteEntryFromSelectedDay("trainingPlanEvents", eventId);
   }
 
+  function fillDailyRepeats() {
+    const previousDate = new Date(selectedDate);
+    previousDate.setDate(previousDate.getDate() - 1);
+
+    const previousDateString = previousDate.toISOString().slice(0, 10);
+
+    const sourceDay = dailyLog.find((day) => day.date === previousDateString);
+
+    if (!sourceDay) return;
+
+    setDailyLog((prev) => {
+      const existingTargetDay =
+        prev.find((day) => day.date === selectedDate) ||
+        createEmptyDay(selectedDate);
+
+      const repeatedMeals = (sourceDay.meals || [])
+        .filter((meal) => meal.repeat === "daily")
+        .map((meal) => ({
+          ...meal,
+          id: createId("daily-meal"),
+          eatenAt: `${selectedDate}T${String(meal.eatenAt || "").slice(11, 16) || "12:00"}`,
+          createdAt: new Date().toLocaleString("nl-NL"),
+        }));
+
+      const repeatedSupplements = (sourceDay.supplementEvents || [])
+        .filter((item) => item.repeat === "daily")
+        .map((item) => ({
+          ...item,
+          id: createId("supplement-event"),
+          eventTime: `${selectedDate}T${String(item.eventTime || "").slice(11, 16) || "08:00"}`,
+          createdAt: new Date().toLocaleString("nl-NL"),
+        }));
+
+      const repeatedMovements = (sourceDay.movementEvents || [])
+        .filter((item) => item.repeat === "daily")
+        .map((item) => ({
+          ...item,
+          id: createId("movement-event"),
+          eventTime: `${selectedDate}T${String(item.eventTime || "").slice(11, 16) || "10:00"}`,
+          createdAt: new Date().toLocaleString("nl-NL"),
+        }));
+
+      if (
+        repeatedMeals.length === 0 &&
+        repeatedSupplements.length === 0 &&
+        repeatedMovements.length === 0
+      ) {
+        return prev;
+      }
+
+      const nextTargetDay = {
+        ...normalizeDay(existingTargetDay),
+
+        meals: [...(existingTargetDay.meals || []), ...repeatedMeals],
+
+        supplementEvents: [
+          ...(existingTargetDay.supplementEvents || []),
+          ...repeatedSupplements,
+        ],
+
+        movementEvents: [
+          ...(existingTargetDay.movementEvents || []),
+          ...repeatedMovements,
+        ],
+      };
+
+      const withoutTarget = prev.filter((day) => day.date !== selectedDate);
+
+      return sortDaysNewestFirst([
+        ...withoutTarget.map(normalizeDay),
+        nextTargetDay,
+      ]);
+    });
+  }
+
   function clearDailyLog() {
     setDailyLog((prev) => prev.filter((day) => day.date !== selectedDate));
   }
@@ -565,6 +643,7 @@ export function useDailyLog(selectedDate) {
     updateMealTime,
     updateMealMedicalLog,
 
+    fillDailyRepeats,
     clearDailyLog,
 
     addInsulinEventToDay,

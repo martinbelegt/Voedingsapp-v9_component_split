@@ -789,6 +789,7 @@ export default function App() {
     new Date().toISOString().slice(0, 10),
   );
   const [dayMealMoment, setDayMealMoment] = useState("breakfast");
+  const [dayMealRepeat, setDayMealRepeat] = useState("none");
   const [dayMealTime, setDayMealTime] = useState(() =>
     new Date().toTimeString().slice(0, 5),
   );
@@ -820,6 +821,7 @@ export default function App() {
     updateMealTime,
     updateMealMedicalLog,
     clearDailyLog,
+    fillDailyRepeats,
     addInsulinEventToDay,
     updateInsulinEvent,
     deleteInsulinEvent,
@@ -1255,6 +1257,7 @@ export default function App() {
       rows: snapshot.rows,
       totals: snapshot.totals,
       createdAt: snapshot.createdAt,
+      repeat: dayMealRepeat,
     });
   }
 
@@ -1278,6 +1281,7 @@ export default function App() {
       rows: snapshot.rows,
       totals: snapshot.totals,
       createdAt: snapshot.createdAt,
+      repeat: dayMealRepeat,
     });
 
     clearMeal();
@@ -1836,6 +1840,8 @@ Producten uit deze categorie gaan naar "Overig".`);
     setDayMealDate,
     dayMealTime,
     setDayMealTime,
+    dayMealRepeat,
+    setDayMealRepeat,
     logCurrentMealToDay,
     setLogCurrentMealToDay,
     addCurrentMealToSelectedDay,
@@ -2234,6 +2240,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             dayTotals={dayTotals}
             selectedDay={selectedDay}
             clearDailyLog={clearDailyLog}
+            fillDailyRepeats={fillDailyRepeats}
             products={products}
             deleteMealFromDay={deleteMealFromDay}
             updateMealTime={updateMealTime}

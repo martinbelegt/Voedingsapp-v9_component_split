@@ -13,6 +13,8 @@ export function QuickAddSection(props) {
     buttonStyle,
     dayMealDate,
     setDayMealDate,
+    dayMealRepeat,
+    setDayMealRepeat,
   } = props;
 
   const [flashAction, setFlashAction] = useState(null);
@@ -37,7 +39,7 @@ export function QuickAddSection(props) {
           display: "grid",
           gridTemplateColumns: isMobile
             ? "1fr 1fr"
-            : "150px 140px 110px 1fr 1fr",
+            : "150px 140px 110px 130px 1fr 1fr",
           gap: isMobile ? 6 : 8,
           alignItems: "center",
         }}
@@ -87,6 +89,18 @@ export function QuickAddSection(props) {
           style={inputStyle}
           title="Tijd van eetmoment"
         />
+        <select
+          value={dayMealRepeat}
+          onChange={(e) => setDayMealRepeat(e.target.value)}
+          style={{
+            ...inputStyle,
+            gridColumn: isMobile ? "1 / -1" : "auto",
+          }}
+          title="Herhalen"
+        >
+          <option value="none">Niet herhalen</option>
+          <option value="daily">Dagelijks</option>
+        </select>
 
         <button
           onClick={() => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { DailyMealList } from "./DailyMealList";
 import { DailyEventAddModal } from "./DailyEventAddModal";
 import { requestNotificationPermission } from "../../services/notificationService";
@@ -18,6 +18,7 @@ export function DailyTab({
   dayTotals,
   selectedDay,
   clearDailyLog,
+  fillDailyRepeats,
   products,
   deleteMealFromDay,
   updateMealTime,
@@ -56,6 +57,7 @@ export function DailyTab({
   const [showAddButtons, setShowAddButtons] = useState(false);
   const [showTimelineControls, setShowTimelineControls] = useState(false);
   const [activeAlarm, setActiveAlarm] = useState(null);
+  const dateInputRef = useRef(null);
 
   const mealsForDay = selectedDay?.meals || [];
   const insulinEventsForDay = selectedDay?.insulinEvents || [];
@@ -88,6 +90,14 @@ export function DailyTab({
       : selectedDate === today
         ? "Vandaag"
         : "Archiefdag";
+
+  const formattedSelectedDate = new Date(
+    `${selectedDate}T00:00:00`,
+  ).toLocaleDateString("nl-NL", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 
   const dayTotalTitle =
     dayMode === "Geplande dag"
@@ -126,6 +136,7 @@ export function DailyTab({
     value2,
     value3,
     bowelColor,
+    repeat,
   }) {
     const date = eventTime.slice(0, 10);
 
@@ -166,6 +177,7 @@ export function DailyTab({
         intensityType: value2,
         durationMinutes: value3,
         note: "",
+        repeat: repeat || "none",
       });
     }
     if (eventType === "supplement") {
@@ -175,6 +187,7 @@ export function DailyTab({
         name: value1,
         dosage: value2,
         note: value3,
+        repeat: repeat || "none",
       });
     }
 
@@ -259,104 +272,113 @@ export function DailyTab({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns:
-              window.innerWidth < 900 ? "auto 1fr" : "auto 220px 1fr",
-            gap: window.innerWidth < 900 ? 6 : 10,
-            alignItems: "center",
+            gap: 8,
           }}
         >
           <div
             style={{
-              fontWeight: 700,
-              color: "#1e3a8a",
               display: "flex",
               alignItems: "center",
               gap: 8,
+              width: "100%",
             }}
           >
-            Datum
-            <span
-              style={{
-                padding: "2px 8px",
-                borderRadius: 999,
-                background: "#dcfce7",
-                border: "1px solid #86efac",
-                color: "#166534",
-                fontSize: 11,
-                fontWeight: 700,
-              }}
-            >
-              {dayMode}
-            </span>
+            <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
+              <button
+                type="button"
+                onClick={() => {
+                  if (dateInputRef.current?.showPicker) {
+                    dateInputRef.current.showPicker();
+                  } else {
+                    dateInputRef.current?.focus();
+                    dateInputRef.current?.click();
+                  }
+                }}
+                style={{
+                  ...buttonStyle,
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 8,
+                  background: "#fff",
+                  border: "1px solid #bfdbfe",
+                  color: "#0f172a",
+                  borderRadius: 10,
+                  minHeight: 42,
+                  padding: "8px 10px",
+                  textAlign: "left",
+                  cursor: "pointer",
+                }}
+              >
+                <span
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    fontSize: 12,
+                    fontWeight: 800,
+                    lineHeight: 1.1,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <span aria-hidden="true">📅</span>
+                  <span>
+                    {dayMode} • {formattedSelectedDate}
+                  </span>
+                </span>
+              </button>
+              <input
+                ref={dateInputRef}
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                style={
+                  /iPhone|iPad|iPod/i.test(navigator.userAgent)
+                    ? {
+                        position: "absolute",
+                        inset: 0,
+                        width: "100%",
+                        height: "100%",
+                        opacity: 0,
+                        cursor: "pointer",
+                      }
+                    : {
+                        position: "absolute",
+                        opacity: 0,
+                        width: 1,
+                        height: 1,
+                        pointerEvents: "none",
+                      }
+                }
+              />
+            </div>
+
+            {selectedDate !== today && (
+              <button
+                type="button"
+                onClick={() => setSelectedDate(today)}
+                style={{
+                  ...buttonStyle,
+                  background: "#dbeafe",
+                  border: "1px solid #93c5fd",
+                  color: "#1d4ed8",
+                  minHeight: 32,
+                  padding: "4px 8px",
+                  borderRadius: 999,
+                  fontSize: 11,
+                  fontWeight: 800,
+                  lineHeight: 1.05,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Vandaag
+              </button>
+            )}
           </div>
-
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            onClick={(e) => {
-              if (e.currentTarget.showPicker) {
-                e.currentTarget.showPicker();
-              }
-            }}
-            style={{
-              ...inputStyle,
-              minWidth: 0,
-              cursor: "pointer",
-              minHeight: 38,
-            }}
-          />
-
-          <div />
         </div>
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          gap: 6,
-          flexWrap: "wrap",
-          alignItems: "center",
-          marginBottom: 10,
-        }}
-      >
-        <span
-          style={{
-            fontSize: 11,
-            fontWeight: 800,
-            color: "#64748b",
-            marginRight: 2,
-          }}
-        >
-          Dagtotaal
-        </span>
-
-        <span style={totalsChip("#dbeafe", "#1d4ed8")}>
-          KH {dayTotals?.kh || 0}g
-        </span>
-
-        <span style={totalsChip("#ede9fe", "#6d28d9")}>
-          Eiwit {dayTotals?.protein || 0}g van {proteinGoal}g
-        </span>
-
-        <span style={totalsChip("#ffedd5", "#c2410c")}>
-          Vet {dayTotals?.fat || 0}g
-        </span>
-
-        <span style={totalsChip("#dcfce7", "#166534")}>
-          {dayTotals?.kcal || 0} van {targetKcal} kcal
-        </span>
-
-        <span style={totalsChip("#eff6ff", "#2563eb")}>
-          💉 {(Number(actualInsulin) || 0).toFixed(1)}E / advies{" "}
-          {(Number(advisedInsulin) || 0).toFixed(1)}E /{" "}
-          {insulinDiff >= 0 ? "+" : ""}
-          {(Number(insulinDiff) || 0).toFixed(1)}E
-        </span>
-        <span style={totalsChip("#fef3c7", "#a16207")}>
-          💊 Creon {dayTotals?.creon25 || 0}x25k + {dayTotals?.creon10 || 0}x10k
-        </span>
-      </div>
       {false && (
         <>
           <button
@@ -417,48 +439,7 @@ export function DailyTab({
               gap: 8,
               flexWrap: "wrap",
             }}
-          >
-            <div style={{ display: "grid", gap: 1 }}>
-              <div
-                style={{
-                  fontSize: 11,
-                  color: "#64748b",
-                  lineHeight: 1.1,
-                }}
-              >
-                {totalTimelineItems} item(s), nieuwste bovenaan
-              </div>
-            </div>
-
-            {/* Dag wissen */}
-            <button
-              onClick={() => {
-                if (!selectedDay) return;
-
-                const ok = window.confirm(
-                  `Alle tijdlijnmomenten van ${selectedDate} verwijderen?`,
-                );
-
-                if (!ok) return;
-
-                clearDailyLog();
-              }}
-              style={{
-                ...buttonStyle,
-                background: "#fee2e2",
-                border: "1px solid #fecaca",
-                color: "#991b1b",
-                minHeight: 32,
-                padding: "4px 8px",
-                borderRadius: 5,
-                fontSize: 11,
-                fontWeight: 700,
-                lineHeight: 1.05,
-              }}
-            >
-              Wis deze dag
-            </button>
-          </div>
+          />
 
           {/* Hoofdknoppen */}
           <div
@@ -544,72 +525,110 @@ export function DailyTab({
                 padding: window.innerWidth < 900 ? 8 : 12,
               }}
             >
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "4px 12px",
-                }}
-              >
-                <div>
-                  <strong>Timing:</strong>{" "}
-                  {dayTotals?.personalTimingAdvice ||
-                    dayTotals?.timingAdvice ||
-                    "Nog geen advies"}
+              <div style={{ display: "grid", gap: 8 }}>
+                <div style={{ display: "grid", gap: 4 }}>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 800,
+                      color: "#1e3a8a",
+                      textTransform: "uppercase",
+                      letterSpacing: 0.3,
+                    }}
+                  >
+                    Dagtotaal
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    <span style={totalsChip("#dbeafe", "#1d4ed8")}>
+                      KH {dayTotals?.kh || 0}g
+                    </span>
+                    <span style={totalsChip("#ede9fe", "#6d28d9")}>
+                      Eiwit {dayTotals?.protein || 0}g
+                    </span>
+                    <span style={totalsChip("#ffedd5", "#c2410c")}>
+                      Vet {dayTotals?.fat || 0}g
+                    </span>
+                    <span style={totalsChip("#dcfce7", "#166534")}>
+                      {dayTotals?.kcal || 0} kcal
+                    </span>
+                    <span style={totalsChip("#eff6ff", "#2563eb")}>
+                      💉 {(Number(actualInsulin) || 0).toFixed(1)}E
+                    </span>
+                    <span style={totalsChip("#fef3c7", "#a16207")}>
+                      💊 Creon {dayTotals?.creon25 || 0}x25k +{" "}
+                      {dayTotals?.creon10 || 0}x10k
+                    </span>
+                  </div>
                 </div>
 
                 <div
                   style={{
-                    borderLeft: "1px solid #bfdbfe",
-                    paddingLeft: 10,
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "4px 12px",
                   }}
                 >
-                  <strong>Insuline:</strong> {actualInsulin}E werkelijk /{" "}
-                  {advisedInsulin}E advies · {insulinDiffLabel}
-                </div>
+                  <div>
+                    <strong>Timing:</strong>{" "}
+                    {dayTotals?.personalTimingAdvice ||
+                      dayTotals?.timingAdvice ||
+                      "Nog geen advies"}
+                  </div>
 
-                <div>
-                  <strong>Eiwit:</strong> {dayTotals?.protein || 0}g van{" "}
-                  {proteinGoal}g · nog {proteinRemaining}g
-                </div>
+                  <div
+                    style={{
+                      borderLeft: "1px solid #bfdbfe",
+                      paddingLeft: 10,
+                    }}
+                  >
+                    <strong>Insuline:</strong> {actualInsulin}E werkelijk /{" "}
+                    {advisedInsulin}E advies · {insulinDiffLabel}
+                  </div>
 
-                <div
-                  style={{
-                    borderLeft: "1px solid #bfdbfe",
-                    paddingLeft: 10,
-                  }}
-                >
-                  <strong>Kcal:</strong> {dayTotals?.kcal || 0} van {targetKcal}{" "}
-                  kcal · nog {kcalRemaining} kcal
-                </div>
+                  <div>
+                    <strong>Eiwit:</strong> {dayTotals?.protein || 0}g van{" "}
+                    {proteinGoal}g · nog {proteinRemaining}g
+                  </div>
 
-                <div>
-                  <strong>Glucose:</strong> {glucoseEventsForDay.length}{" "}
-                  registratie(s)
-                </div>
+                  <div
+                    style={{
+                      borderLeft: "1px solid #bfdbfe",
+                      paddingLeft: 10,
+                    }}
+                  >
+                    <strong>Kcal:</strong> {dayTotals?.kcal || 0} van{" "}
+                    {targetKcal} kcal · nog {kcalRemaining} kcal
+                  </div>
 
-                <div
-                  style={{
-                    borderLeft: "1px solid #bfdbfe",
-                    paddingLeft: 10,
-                  }}
-                >
-                  <strong>Sport:</strong> {movementEventsForDay.length}{" "}
-                  moment(en)
-                </div>
+                  <div>
+                    <strong>Glucose:</strong> {glucoseEventsForDay.length}{" "}
+                    registratie(s)
+                  </div>
 
-                <div>
-                  <strong>Context:</strong> {noteEventsForDay.length} notitie(s)
-                </div>
+                  <div
+                    style={{
+                      borderLeft: "1px solid #bfdbfe",
+                      paddingLeft: 10,
+                    }}
+                  >
+                    <strong>Sport:</strong> {movementEventsForDay.length}{" "}
+                    moment(en)
+                  </div>
 
-                <div
-                  style={{
-                    borderLeft: "1px solid #bfdbfe",
-                    paddingLeft: 10,
-                  }}
-                >
-                  <strong>Darmen:</strong> {bowelEventsForDay.length}{" "}
-                  registratie(s)
+                  <div>
+                    <strong>Context:</strong> {noteEventsForDay.length}{" "}
+                    notitie(s)
+                  </div>
+
+                  <div
+                    style={{
+                      borderLeft: "1px solid #bfdbfe",
+                      paddingLeft: 10,
+                    }}
+                  >
+                    <strong>Darmen:</strong> {bowelEventsForDay.length}{" "}
+                    registratie(s)
+                  </div>
                 </div>
               </div>
             </div>
@@ -752,6 +771,11 @@ export function DailyTab({
           showTimelineControls={showTimelineControls}
           setShowTimelineControls={setShowTimelineControls}
           setAddEventType={setAddEventType}
+          totalTimelineItems={totalTimelineItems}
+          selectedDate={selectedDate}
+          selectedDay={selectedDay}
+          clearDailyLog={clearDailyLog}
+          fillDailyRepeats={fillDailyRepeats}
         />
       </div>
 

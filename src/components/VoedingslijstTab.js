@@ -82,6 +82,8 @@ function VoedingslijstTab({
 
   const [hoveredProductId, setHoveredProductId] = useState(null);
 
+  const [showMobileListManager, setShowMobileListManager] = useState(false);
+
   const isMobile = window.innerWidth < 768;
 
   useEffect(() => {
@@ -250,131 +252,168 @@ function VoedingslijstTab({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr auto",
-            alignItems: "center",
-            gap: 12,
-            marginBottom: 10,
+            gap: 6,
+            marginBottom: 8,
           }}
         >
-          <div style={sectionBadgeStyle}>Voedingslijsten</div>
-
-          <div
+          <button
+            type="button"
+            onClick={() =>
+              isMobile
+                ? setShowMobileListManager((v) => !v)
+                : setShowMobileListManager(true)
+            }
             style={{
+              ...buttonStyle,
+              width: "100%",
               display: "flex",
+              justifyContent: "space-between",
               alignItems: "center",
-              justifyContent: "flex-end",
-              gap: 8,
-              flexWrap: "wrap",
+              background: "#f8fafc",
+              border: "1px solid #e2e8f0",
+              padding: isMobile ? "7px 9px" : "8px 12px",
+              fontWeight: 800,
+              fontSize: isMobile ? 13 : 14,
             }}
           >
-            <select
-              value={activePackFilter}
-              onChange={(e) => setActivePackFilter(e.target.value)}
+            <span>📚 {activePackFilter}</span>
+            <span>{isMobile && showMobileListManager ? "▲" : "▼"}</span>
+          </button>
+
+          {(!isMobile || showMobileListManager) && (
+            <div
               style={{
-                ...inputStyle,
-                width: 140,
-                minWidth: 140,
-                padding: "6px 8px",
-                fontSize: 13,
+                display: "grid",
+                gap: 8,
+                padding: isMobile ? 8 : 10,
+                border: "1px solid #e2e8f0",
+                borderRadius: 10,
+                background: "#f8fafc",
               }}
             >
-              {packFilterOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              <select
+                value={activePackFilter}
+                onChange={(e) => setActivePackFilter(e.target.value)}
+                style={{
+                  ...inputStyle,
+                  width: "100%",
+                  padding: "6px 8px",
+                  fontSize: isMobile ? 13 : 14,
+                }}
+              >
+                {packFilterOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
 
-            {activePackNames.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {activePackNames.map((name) => {
-                  const isActive = activePackFilter === name;
+              {activePackNames.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+                  {activePackNames.map((name) => {
+                    const isActive = activePackFilter === name;
 
-                  return (
-                    <button
-                      key={name}
-                      onClick={() => setActivePackFilter(name)}
-                      style={{
-                        ...buttonStyle,
-                        padding: "4px 9px",
-                        borderRadius: 999,
-                        fontSize: 12,
-                        fontWeight: 700,
-                        background: isActive ? "#3730a3" : "#e0e7ff",
-                        border: "1px solid #c7d2fe",
-                        color: isActive ? "white" : "#3730a3",
-                      }}
-                      title={`Toon alleen lijst: ${name}`}
-                    >
-                      {name}
-                    </button>
-                  );
-                })}
+                    return (
+                      <button
+                        key={name}
+                        onClick={() => setActivePackFilter(name)}
+                        style={{
+                          ...buttonStyle,
+                          padding: "4px 8px",
+                          borderRadius: 999,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          background: isActive ? "#3730a3" : "#e0e7ff",
+                          border: "1px solid #c7d2fe",
+                          color: isActive ? "white" : "#3730a3",
+                        }}
+                        title={`Toon alleen lijst: ${name}`}
+                      >
+                        {name}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, auto)",
+                  gap: 6,
+                }}
+              >
+                <button
+                  onClick={createNewPackList}
+                  style={{
+                    ...buttonStyle,
+                    padding: "7px 8px",
+                    fontSize: 12,
+                    background: "#ecfdf5",
+                    border: "1px solid #bbf7d0",
+                    color: "#166534",
+                    fontWeight: 700,
+                  }}
+                >
+                  Nieuwe lijst
+                </button>
+
+                <button
+                  onClick={() => productImportFileRef.current?.click()}
+                  style={{
+                    ...buttonStyle,
+                    padding: "7px 8px",
+                    fontSize: 12,
+                  }}
+                >
+                  Import
+                </button>
+
+                <input
+                  ref={productImportFileRef}
+                  type="file"
+                  accept="application/json"
+                  onChange={importBackupFromFile}
+                  style={{ display: "none" }}
+                />
+
+                <button
+                  onClick={exportCurrentPack}
+                  style={{
+                    ...buttonStyle,
+                    padding: "7px 8px",
+                    fontSize: 12,
+                    background: "#eff6ff",
+                    border: "1px solid #bfdbfe",
+                    color: "#1d4ed8",
+                  }}
+                >
+                  Export
+                </button>
+
+                <button
+                  onClick={deleteCurrentPackList}
+                  style={{
+                    ...buttonStyle,
+                    padding: "7px 8px",
+                    fontSize: 12,
+                    background:
+                      activePackFilter === "all" ? "#f8fafc" : "#fee2e2",
+                    border:
+                      activePackFilter === "all"
+                        ? "1px solid #e5e7eb"
+                        : "1px solid #fecaca",
+                    color: activePackFilter === "all" ? "#94a3b8" : "#991b1b",
+                    cursor:
+                      activePackFilter === "all" ? "not-allowed" : "pointer",
+                  }}
+                  disabled={activePackFilter === "all"}
+                >
+                  Verwijder
+                </button>
               </div>
-            )}
-
-            <button
-              onClick={createNewPackList}
-              style={{
-                ...buttonStyle,
-                padding: "8px 12px",
-                fontSize: 13,
-                background: "#ecfdf5",
-                border: "1px solid #bbf7d0",
-                color: "#166534",
-                fontWeight: 700,
-              }}
-            >
-              Nieuwe lijst
-            </button>
-
-            <button
-              onClick={() => productImportFileRef.current?.click()}
-              style={buttonStyle}
-            >
-              Productlijst importeren
-            </button>
-
-            <input
-              ref={productImportFileRef}
-              type="file"
-              accept="application/json"
-              onChange={importBackupFromFile}
-              style={{ display: "none" }}
-            />
-            <button
-              onClick={exportCurrentPack}
-              style={{
-                ...buttonStyle,
-                padding: "8px 12px",
-                fontSize: 13,
-                background: "#eff6ff",
-                border: "1px solid #bfdbfe",
-                color: "#1d4ed8",
-              }}
-            >
-              Exporteer huidige lijst
-            </button>
-
-            <button
-              onClick={deleteCurrentPackList}
-              style={{
-                ...buttonStyle,
-                padding: "8px 12px",
-                fontSize: 13,
-                background: activePackFilter === "all" ? "#f8fafc" : "#fee2e2",
-                border:
-                  activePackFilter === "all"
-                    ? "1px solid #e5e7eb"
-                    : "1px solid #fecaca",
-                color: activePackFilter === "all" ? "#94a3b8" : "#991b1b",
-                cursor: activePackFilter === "all" ? "not-allowed" : "pointer",
-              }}
-              disabled={activePackFilter === "all"}
-            >
-              Verwijder huidige lijst
-            </button>
-          </div>
+            </div>
+          )}
         </div>
 
         <div
@@ -419,18 +458,12 @@ function VoedingslijstTab({
 
         <div
           style={{
-            fontSize: 12,
-            marginBottom: 10,
-            padding: "8px 10px",
-            borderRadius: 10,
-            background: "#eff6ff",
-            border: "1px solid #bfdbfe",
-            color: "#1e3a8a",
+            fontSize: 11,
+            marginBottom: 6,
+            color: "#64748b",
           }}
         >
-          Klik op een hele rij om het detailvenster te openen. Daar beheer je
-          basisgegevens, voedingswaarden, GI, timing, opnameprofiel (PPP) en
-          verwijderen op één plek.
+          Tik op een product voor details.
         </div>
 
         <div
@@ -452,7 +485,7 @@ function VoedingslijstTab({
         </div>
 
         {isMobile && (
-          <div style={{ display: "grid", gap: 8 }}>
+          <div style={{ display: "grid", gap: 5 }}>
             {packFilteredProducts.map((p) => {
               const bg = getCategoryColor(categories, p.categoryId);
 
@@ -463,10 +496,10 @@ function VoedingslijstTab({
                   style={{
                     background: bg,
                     border: "1px solid #e5e7eb",
-                    borderRadius: 12,
-                    padding: 10,
+                    borderRadius: 8,
+                    padding: "7px 8px",
                     display: "grid",
-                    gap: 6,
+                    gap: 3,
                     cursor: "pointer",
                     maxWidth: "100%",
                     boxSizing: "border-box",
@@ -474,17 +507,21 @@ function VoedingslijstTab({
                 >
                   <div
                     style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: 8,
-                      alignItems: "flex-start",
+                      display: "grid",
+                      gridTemplateColumns: "1fr auto",
+                      gap: 6,
+                      alignItems: "center",
                     }}
                   >
                     <div
                       style={{
-                        fontWeight: 900,
-                        fontSize: 15,
+                        fontWeight: 850,
+                        fontSize: 14,
                         color: "#0f172a",
+                        lineHeight: 1.15,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
                       }}
                     >
                       {p.name}
@@ -497,9 +534,10 @@ function VoedingslijstTab({
                       }}
                       style={{
                         ...buttonStyle,
-                        padding: "3px 7px",
-                        fontSize: 16,
+                        padding: "2px 6px",
+                        fontSize: 14,
                         lineHeight: 1,
+                        minHeight: 24,
                         background: "white",
                         border: "1px solid #cbd5e1",
                       }}
@@ -509,62 +547,24 @@ function VoedingslijstTab({
                   </div>
 
                   <div
-                    style={{ fontSize: 12, color: "#334155", fontWeight: 700 }}
+                    style={{
+                      fontSize: 11,
+                      color: "#334155",
+                      fontWeight: 700,
+                      lineHeight: 1.15,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
                   >
                     {getCategoryName(categories, p.categoryId)} ·{" "}
                     {getMealMomentLabel(p.mealMoment)}
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: 6,
-                      fontSize: 12,
-                      color: "#0f172a",
-                    }}
-                  >
-                    <span>KH {p.kh100}/100g</span>
-                    <span>Eiwit {p.protein100}/100g</span>
-                    <span>Vet {p.fat100}/100g</span>
-                    <span>{p.kcal100} kcal</span>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: 6,
-                      fontSize: 11,
-                      color: "#334155",
-                    }}
-                  >
-                    <span>{p.portion || "portie"}</span>
-                    <span>{p.portionGram}g</span>
-                    <span>
-                      GI {getGiClassMeta(p.giClass, giClassOptions).label}
-                    </span>
-                    <span>
-                      {getTimingLabel(
-                        p.personalTimingTag || p.timingTag,
-                        timingOptions,
-                      )}
-                    </span>
-                    <span>
-                      {
-                        getAbsorptionMeta(
-                          p.absorptionProfile,
-                          absorptionProfileOptions,
-                        ).label
-                      }
-                    </span>
                   </div>
                 </div>
               );
             })}
           </div>
         )}
-
         {!isMobile && (
           <div
             style={{
@@ -975,25 +975,35 @@ function VoedingslijstTab({
         <div
           style={{
             position: "fixed",
-            inset: 0,
+            top: isMobile ? 132 : 0,
+            left: isMobile ? 8 : 0,
+            right: isMobile ? 8 : 0,
+            bottom: isMobile ? 8 : 0,
             background: "rgba(15,23,42,0.45)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            display: "block",
             zIndex: 1000,
-            padding: 20,
+            boxSizing: "border-box",
+            overflow: "hidden",
+            overscrollBehavior: "contain",
+            touchAction: "none",
           }}
         >
           <div
             style={{
-              width: isMobile ? "98vw" : "min(980px, 96vw)",
-              maxHeight: "92vh",
+              width: "100%",
+              height: "100%",
+              maxHeight: "100%",
               overflowY: "auto",
+              overflowX: "hidden",
+              boxSizing: "border-box",
               background: modalCategoryColor,
-              borderRadius: 18,
+              borderRadius: isMobile ? 10 : 18,
               border: "1px solid #e5e7eb",
               boxShadow: "0 20px 40px rgba(0,0,0,0.18)",
-              padding: 18,
+              padding: isMobile ? 10 : 18,
+              WebkitOverflowScrolling: "touch",
+              overscrollBehavior: "contain",
+              touchAction: "pan-y",
             }}
           >
             <div
@@ -1001,28 +1011,107 @@ function VoedingslijstTab({
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                gap: 12,
-                marginBottom: 14,
+                gap: 8,
+                marginBottom: isMobile ? 8 : 14,
               }}
             >
-              <div>
-                <h2 style={{ margin: 0 }}>
+              <div style={{ minWidth: 0 }}>
+                <h2
+                  style={{
+                    margin: 0,
+                    fontSize: isMobile ? 18 : undefined,
+                    lineHeight: 1.15,
+                  }}
+                >
                   {newProduct.name
                     ? `Product bewerken: ${newProduct.name}`
                     : "Nieuw product"}
                 </h2>
-                <div style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: "#475569",
+                    marginTop: 3,
+                  }}
+                >
                   Alle productgegevens overzichtelijk op één plek.
                 </div>
               </div>
 
-              <button onClick={closeProductModal} style={buttonStyle}>
+              <button
+                onClick={closeProductModal}
+                style={{
+                  ...buttonStyle,
+                  flexShrink: 0,
+                  padding: isMobile ? "6px 8px" : buttonStyle?.padding,
+                  fontSize: isMobile ? 12 : buttonStyle?.fontSize,
+                }}
+              >
                 Sluiten
               </button>
+              {isMobile && (
+                <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+                  <button
+                    onClick={() => {
+                      if (
+                        editingProductId &&
+                        window.confirm(
+                          `Product "${newProduct.name || "dit product"}" verwijderen?`,
+                        )
+                      ) {
+                        deleteProduct(editingProductId);
+                        closeProductModal();
+                        resetNewProductForm();
+                      }
+                    }}
+                    disabled={!editingProductId}
+                    style={{
+                      ...buttonStyle,
+                      background: editingProductId ? "#fee2e2" : "#f8fafc",
+                      border: editingProductId
+                        ? "1px solid #fecaca"
+                        : "1px solid #e5e7eb",
+                      color: editingProductId ? "#991b1b" : "#94a3b8",
+                      padding: "6px 8px",
+                      fontSize: 12,
+                    }}
+                  >
+                    🗑
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      resetNewProductForm();
+                      closeProductModal();
+                    }}
+                    style={{
+                      ...buttonStyle,
+                      padding: "6px 8px",
+                      fontSize: 12,
+                    }}
+                  >
+                    Annuleer
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      addProduct();
+                      closeProductModal();
+                    }}
+                    style={{
+                      ...primaryButtonStyle,
+                      padding: "6px 8px",
+                      fontSize: 12,
+                    }}
+                  >
+                    Opslaan
+                  </button>
+                </div>
+              )}
             </div>
 
-            <div style={{ display: "grid", gap: 16 }}>
-              <div style={{ ...cardStyle, padding: 14 }}>
+            <div style={{ display: "grid", gap: isMobile ? 8 : 16 }}>
+              <div style={{ ...cardStyle, padding: isMobile ? 8 : 14 }}>
                 <h3 style={{ marginTop: 0, marginBottom: 12 }}>Basis</h3>
 
                 <div
@@ -1030,7 +1119,7 @@ function VoedingslijstTab({
                     display: "grid",
                     gridTemplateColumns: isMobile
                       ? "1fr"
-                      : "1.4fr 1fr 1fr 0.9fr 1fr",
+                      : "1.4fr 1fr 1fr 1fr 0.9fr 1fr",
                     gap: 10,
                   }}
                 >
@@ -1042,6 +1131,21 @@ function VoedingslijstTab({
                         setNewProduct({ ...newProduct, name: e.target.value })
                       }
                       style={inputStyle}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={labelStyle}>Merk / producent</label>
+                    <input
+                      value={newProduct.brand || ""}
+                      onChange={(e) =>
+                        setNewProduct({
+                          ...newProduct,
+                          brand: e.target.value,
+                        })
+                      }
+                      style={inputStyle}
+                      placeholder="bijv. Calvé, Lidl, AH, MyProtein"
                     />
                   </div>
 
@@ -1119,13 +1223,13 @@ function VoedingslijstTab({
                 </div>
               </div>
 
-              <div style={{ ...cardStyle, padding: 14 }}>
+              <div style={{ ...cardStyle, padding: isMobile ? 8 : 14 }}>
                 <h3 style={{ marginTop: 0, marginBottom: 12 }}>
                   Voedingswaarden
                 </h3>
 
                 {/* Bron / herkomst van voedingsgegevens */}
-                <div style={{ ...cardStyle, padding: 14 }}>
+                <div style={{ ...cardStyle, padding: isMobile ? 8 : 14 }}>
                   <h3 style={{ marginTop: 0, marginBottom: 12 }}>
                     Bron / herkomst
                   </h3>
@@ -1423,7 +1527,7 @@ function VoedingslijstTab({
                   gap: 16,
                 }}
               >
-                <div style={{ ...cardStyle, padding: 14 }}>
+                <div style={{ ...cardStyle, padding: isMobile ? 8 : 14 }}>
                   <h3 style={{ marginTop: 0, marginBottom: 12 }}>GI</h3>
 
                   <div style={{ display: "grid", gap: 10 }}>
@@ -1505,7 +1609,7 @@ function VoedingslijstTab({
                   </div>
                 </div>
 
-                <div style={{ ...cardStyle, padding: 14 }}>
+                <div style={{ ...cardStyle, padding: isMobile ? 8 : 14 }}>
                   <h3 style={{ marginTop: 0, marginBottom: 12 }}>Timing</h3>
 
                   <div style={{ display: "grid", gap: 10 }}>
@@ -1590,8 +1694,10 @@ function VoedingslijstTab({
                 </div>
               </div>
 
-              <div style={{ ...cardStyle, padding: 14 }}>
-                <h3 style={{ marginTop: 0, marginBottom: 12 }}>Extra</h3>
+              <div style={{ ...cardStyle, padding: isMobile ? 8 : 14 }}>
+                <h3 style={{ marginTop: 0, marginBottom: isMobile ? 6 : 12 }}>
+                  Extra
+                </h3>
 
                 <label
                   style={{
@@ -1623,68 +1729,68 @@ function VoedingslijstTab({
               </div>
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: 8,
-                marginTop: 16,
-              }}
-            >
-              <div>
-                <button
-                  onClick={() => {
-                    if (
-                      !window.confirm(
-                        `Product "${
-                          newProduct.name || "dit product"
-                        }" verwijderen?`,
-                      )
-                    ) {
-                      return;
-                    }
+            {!isMobile && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 8,
+                  marginTop: 16,
+                }}
+              >
+                <div>
+                  <button
+                    onClick={() => {
+                      if (
+                        !window.confirm(
+                          `Product "${newProduct.name || "dit product"}" verwijderen?`,
+                        )
+                      ) {
+                        return;
+                      }
 
-                    deleteProduct(editingProductId);
-                    closeProductModal();
-                    resetNewProductForm();
-                  }}
-                  disabled={!editingProductId}
-                  style={{
-                    ...buttonStyle,
-                    background: editingProductId ? "#fee2e2" : "#f8fafc",
-                    border: editingProductId
-                      ? "1px solid #fecaca"
-                      : "1px solid #e5e7eb",
-                    color: editingProductId ? "#991b1b" : "#94a3b8",
-                    cursor: editingProductId ? "pointer" : "not-allowed",
-                  }}
-                >
-                  Verwijderen
-                </button>
+                      deleteProduct(editingProductId);
+                      closeProductModal();
+                      resetNewProductForm();
+                    }}
+                    disabled={!editingProductId}
+                    style={{
+                      ...buttonStyle,
+                      background: editingProductId ? "#fee2e2" : "#f8fafc",
+                      border: editingProductId
+                        ? "1px solid #fecaca"
+                        : "1px solid #e5e7eb",
+                      color: editingProductId ? "#991b1b" : "#94a3b8",
+                      cursor: editingProductId ? "pointer" : "not-allowed",
+                    }}
+                  >
+                    Verwijderen
+                  </button>
+                </div>
+
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button
+                    onClick={() => {
+                      resetNewProductForm();
+                      closeProductModal();
+                    }}
+                    style={buttonStyle}
+                  >
+                    Annuleren
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      addProduct();
+                      closeProductModal();
+                    }}
+                    style={primaryButtonStyle}
+                  >
+                    Opslaan product
+                  </button>
+                </div>
               </div>
-
-              <div style={{ display: "flex", gap: 8 }}>
-                <button
-                  onClick={() => {
-                    resetNewProductForm();
-                    closeProductModal();
-                  }}
-                  style={buttonStyle}
-                >
-                  Annuleren
-                </button>
-
-                <button
-                  onClick={() => {
-                    addProduct();
-                    closeProductModal();
-                  }}
-                  style={primaryButtonStyle}
-                >
-                  Opslaan product
-                </button>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       )}

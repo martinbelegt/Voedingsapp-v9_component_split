@@ -67,6 +67,7 @@ export function DailyEventAddModal({
   const [value2, setValue2] = useState("");
   const [value3, setValue3] = useState("");
   const [bowelColor, setBowelColor] = useState("brown");
+  const [repeat, setRepeat] = useState("none");
 
   const isMobile =
     window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
@@ -140,6 +141,8 @@ export function DailyEventAddModal({
 
   if (!config) return null;
 
+  console.log("DailyEventAddModal eventType:", eventType);
+
   function save() {
     onSave({
       eventType,
@@ -148,6 +151,7 @@ export function DailyEventAddModal({
       value2,
       value3,
       bowelColor,
+      repeat,
     });
     onClose();
   }
@@ -299,6 +303,25 @@ export function DailyEventAddModal({
                 />
               </>
             )}
+          </>
+        )}
+
+        {(eventType === "supplement" || eventType === "movement") && (
+          <>
+            <label style={{ fontSize: 13, fontWeight: 800 }}>Herhalen</label>
+
+            <select
+              value={repeat}
+              onChange={(e) => setRepeat(e.target.value)}
+              style={{
+                ...mobileInputStyle,
+                marginTop: 4,
+                marginBottom: 14,
+              }}
+            >
+              <option value="none">Niet herhalen</option>
+              <option value="daily">Dagelijks</option>
+            </select>
           </>
         )}
 

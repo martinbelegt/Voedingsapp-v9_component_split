@@ -41,6 +41,10 @@ export function DailyMealList({
   showTimelineControls = false,
   setShowTimelineControls,
   setAddEventType,
+  totalTimelineItems = 0,
+  selectedDate,
+  clearDailyLog,
+  fillDailyRepeats,
 }) {
   const [expandedIds, setExpandedIds] = useState([]);
   const [editingEvent, setEditingEvent] = useState(null);
@@ -49,6 +53,7 @@ export function DailyMealList({
   const [timerEvent, setTimerEvent] = useState(null);
   const [compactTimeline, setCompactTimeline] = useState(false);
   const [timelineFilter, setTimelineFilter] = useState("all");
+  const [timelineOrder, setTimelineOrder] = useState("newest");
 
   const [visibleTypes, setVisibleTypes] = useState({
     meal: true,
@@ -212,8 +217,19 @@ export function DailyMealList({
     return timelineItems;
   }
 
-  const visibleTimelineItems = getFilteredTimelineItems().filter(
-    (item) => visibleTypes[item.itemType],
+  function getSortedTimelineItems(items) {
+    const sorted = [...items].sort((a, b) => {
+      const timeA = new Date(a.sortTime || a.time || 0).getTime();
+      const timeB = new Date(b.sortTime || b.time || 0).getTime();
+
+      return timelineOrder === "newest" ? timeB - timeA : timeA - timeB;
+    });
+
+    return sorted;
+  }
+
+  const visibleTimelineItems = getSortedTimelineItems(
+    getFilteredTimelineItems().filter((item) => visibleTypes[item.itemType]),
   );
 
   function getSportPhaseLabel(item) {
@@ -367,14 +383,6 @@ export function DailyMealList({
       >
         🗑 Wis
       </button>
-    );
-  }
-
-  if (!selectedDay) {
-    return (
-      <div style={{ color: "#64748b" }}>
-        Geen tijdlijnmomenten opgeslagen voor deze dag.
-      </div>
     );
   }
 
@@ -624,283 +632,416 @@ export function DailyMealList({
         </>
       )}
 
-      {visibleTimelineItems.map((item, index) => {
-        if (item.itemType === "meal") {
-          return (
-            <DailyMealCard
-              key={item.meal.id}
-              meal={item.meal}
-              index={index}
-              products={products}
-              onDelete={deleteMealFromDay}
-              onUpdateTime={updateMealTime}
-              onUpdateMedicalLog={updateMealMedicalLog}
-              buttonStyle={buttonStyle}
-              compact={compactTimeline}
-            />
-          );
-        }
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr 1fr 1fr",
+          gap: 4,
+          marginTop: 2,
+          marginBottom: 4,
+        }}
+      >
+        <button
+          type="button"
+          onClick={() =>
+            setTimelineOrder((prev) =>
+              prev === "newest" ? "oldest" : "newest",
+            )
+          }
+          aria-label={
+            timelineOrder === "newest" ? "Nieuwste bovenaan" : "Oudste bovenaan"
+          }
+          style={{
+            ...buttonStyle,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: timelineOrder === "newest" ? "#eff6ff" : "#f8fafc",
+            border:
+              timelineOrder === "newest"
+                ? "1px solid #bfdbfe"
+                : "1px solid #cbd5e1",
+            color: timelineOrder === "newest" ? "#1d4ed8" : "#334155",
+            height: 28,
+            minHeight: 28,
+            padding: "1px 4px",
+            borderRadius: 3,
+            fontSize: 12,
+            fontWeight: 700,
+            lineHeight: 1,
+            whiteSpace: "nowrap",
+          }}
+        >
+          {timelineOrder === "newest" ? "↓↑" : "↑↓"}
+        </button>
 
-        if (item.itemType === "insulinAdvice") {
-          const meal = item.meal;
+        <button
+          type="button"
+          onClick={fillDailyRepeats}
+          style={{
+            ...buttonStyle,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "#f5f3ff",
+            border: "1px solid #c4b5fd",
+            color: "#5b21b6",
+            height: 28,
+            minHeight: 28,
+            padding: "1px 4px",
+            borderRadius: 3,
+            fontSize: 12,
+            fontWeight: 700,
+            lineHeight: 1,
+            whiteSpace: "nowrap",
+          }}
+        >
+          🔁 Herhaal
+        </button>
 
-          return (
-            <DailyTimelineItem
-              key={item.id}
-              indentLevel={0}
-              compact={true}
-              icon="💡"
-              title={`💡 Advies NovoRapid ${
-                meal.totals?.insulin != null
-                  ? Math.round(Number(meal.totals.insulin) * 100) / 100
-                  : "?"
-              }E`}
-              timeLabel={formatTime(meal.eatenAt)}
-              subtitle={null}
-              accentColor="#166534"
-              backgroundColor="#eff6ff"
-              borderColor="#93c5fd"
-              expanded={false}
-              detailContent={null}
-            />
-          );
-        }
+        <span
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            color: "#166534",
+            background: "#ecfdf5",
+            border: "1px solid #86efac",
+            borderRadius: 3,
+            height: 28,
+            minHeight: 28,
+            padding: "1px 4px",
+            fontSize: 12,
+            fontWeight: 700,
+            lineHeight: 1,
+            whiteSpace: "nowrap",
+          }}
+        >
+          {totalTimelineItems} items
+        </span>
 
-        if (item.itemType === "insulin") {
-          const event = item.event;
+        <button
+          type="button"
+          onClick={() => {
+            if (!selectedDay) return;
+            const ok = window.confirm(
+              `Alle tijdlijnmomenten van ${selectedDate} verwijderen?`,
+            );
+            if (!ok) return;
+            clearDailyLog();
+          }}
+          style={{
+            ...buttonStyle,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "#fee2e2",
+            border: "1px solid #fecaca",
+            color: "#991b1b",
+            height: 28,
+            minHeight: 28,
+            padding: "1px 4px",
+            borderRadius: 3,
+            fontSize: 12,
+            fontWeight: 700,
+            lineHeight: 1,
+            whiteSpace: "nowrap",
+          }}
+        >
+          🗑 Wis
+        </button>
+      </div>
 
-          return (
-            <DailyTimelineItem
-              key={event.id}
-              indentLevel={2}
-              expanded={expandedIds.includes(event.id)}
-              onToggle={() => toggleExpanded(event.id)}
-              icon="💉"
-              title={`💉 ${event.insulinType || "Insuline"} ${event.units}E`}
-              timeLabel={formatTime(event.eventTime)}
-              subtitle={null}
-              compact={true}
-              accentColor="#1d4ed8"
-              backgroundColor="#eff6ff"
-              borderColor="#93c5fd"
-              actions={deleteButton(event, "insulin")}
-              detailContent={
-                <div style={{ fontSize: 13, color: "#334155" }}>
-                  Werkelijk toegediende insuline.
-                </div>
-              }
-            />
-          );
-        }
+      {!selectedDay || visibleTimelineItems.length === 0 ? (
+        <div
+          style={{
+            color: "#64748b",
+            fontSize: 13,
+            padding: "8px 4px",
+          }}
+        >
+          Geen tijdlijnmomenten opgeslagen voor deze dag.
+        </div>
+      ) : (
+        visibleTimelineItems.map((item, index) => {
+          if (item.itemType === "meal") {
+            return (
+              <DailyMealCard
+                key={item.meal.id}
+                meal={item.meal}
+                index={index}
+                products={products}
+                onDelete={deleteMealFromDay}
+                onUpdateTime={updateMealTime}
+                onUpdateMedicalLog={updateMealMedicalLog}
+                buttonStyle={buttonStyle}
+                compact={compactTimeline}
+              />
+            );
+          }
 
-        if (item.itemType === "glucose") {
-          const event = item.event;
+          if (item.itemType === "insulinAdvice") {
+            const meal = item.meal;
 
-          const glucoseValue = Number(
-            String(event.glucoseValue).replace(",", "."),
-          );
+            return (
+              <DailyTimelineItem
+                key={item.id}
+                indentLevel={0}
+                compact={true}
+                icon="💡"
+                title={`💡 Advies NovoRapid ${
+                  meal.totals?.insulin != null
+                    ? Math.round(Number(meal.totals.insulin) * 100) / 100
+                    : "?"
+                }E`}
+                timeLabel={formatTime(meal.eatenAt)}
+                subtitle={null}
+                accentColor="#166534"
+                backgroundColor="#eff6ff"
+                borderColor="#93c5fd"
+                expanded={false}
+                detailContent={null}
+              />
+            );
+          }
 
-          const glucoseColors =
-            glucoseValue <= 3.9
-              ? {
-                  accent: "#991b1b",
-                  background: "#fee2e2",
-                  border: "#fca5a5",
+          if (item.itemType === "insulin") {
+            const event = item.event;
+
+            return (
+              <DailyTimelineItem
+                key={event.id}
+                indentLevel={2}
+                expanded={expandedIds.includes(event.id)}
+                onToggle={() => toggleExpanded(event.id)}
+                icon="💉"
+                title={`💉 ${event.insulinType || "Insuline"} ${event.units}E`}
+                timeLabel={formatTime(event.eventTime)}
+                subtitle={null}
+                compact={true}
+                accentColor="#1d4ed8"
+                backgroundColor="#eff6ff"
+                borderColor="#93c5fd"
+                actions={deleteButton(event, "insulin")}
+                detailContent={
+                  <div style={{ fontSize: 13, color: "#334155" }}>
+                    Werkelijk toegediende insuline.
+                  </div>
                 }
-              : glucoseValue >= 15
+              />
+            );
+          }
+
+          if (item.itemType === "glucose") {
+            const event = item.event;
+
+            const glucoseValue = Number(
+              String(event.glucoseValue).replace(",", "."),
+            );
+
+            const glucoseColors =
+              glucoseValue <= 3.9
                 ? {
                     accent: "#991b1b",
                     background: "#fee2e2",
                     border: "#fca5a5",
                   }
-                : glucoseValue > 10
+                : glucoseValue >= 15
                   ? {
-                      accent: "#c2410c",
-                      background: "#ffedd5",
-                      border: "#fdba74",
+                      accent: "#991b1b",
+                      background: "#fee2e2",
+                      border: "#fca5a5",
                     }
-                  : {
-                      accent: "#166534",
-                      background: "#dcfce7",
-                      border: "#86efac",
-                    };
+                  : glucoseValue > 10
+                    ? {
+                        accent: "#c2410c",
+                        background: "#ffedd5",
+                        border: "#fdba74",
+                      }
+                    : {
+                        accent: "#166534",
+                        background: "#dcfce7",
+                        border: "#86efac",
+                      };
 
-          const isDangerGlucose = glucoseValue <= 4 || glucoseValue >= 16;
+            const isDangerGlucose = glucoseValue <= 4 || glucoseValue >= 16;
 
-          return (
-            <DailyTimelineItem
-              key={event.id}
-              indentLevel={3}
-              expanded={false}
-              onToggle={() => {}}
-              icon="📈"
-              title={`${event.glucoseValue} mmol/L`}
-              timeLabel={formatTime(event.eventTime)}
-              subtitle={null}
-              compact={true}
-              accentColor={glucoseColors.accent}
-              backgroundColor={glucoseColors.background}
-              borderColor={glucoseColors.border}
-              actions={deleteButton(event, "glucose")}
-              detailContent={null}
-            />
-          );
-        }
+            return (
+              <DailyTimelineItem
+                key={event.id}
+                indentLevel={3}
+                expanded={false}
+                onToggle={() => {}}
+                icon="📈"
+                title={`${event.glucoseValue} mmol/L`}
+                timeLabel={formatTime(event.eventTime)}
+                subtitle={null}
+                compact={true}
+                accentColor={glucoseColors.accent}
+                backgroundColor={glucoseColors.background}
+                borderColor={glucoseColors.border}
+                actions={deleteButton(event, "glucose")}
+                detailContent={null}
+              />
+            );
+          }
 
-        if (item.itemType === "glucoseBoost") {
-          const event = item.event;
+          if (item.itemType === "glucoseBoost") {
+            const event = item.event;
 
-          return (
-            <DailyTimelineItem
-              key={event.id}
-              indentLevel={2}
-              expanded={expandedIds.includes(event.id)}
-              onToggle={() => toggleExpanded(event.id)}
-              compact={true}
-              icon="⚡"
-              title={`⚡ +${event.kh || "?"}g snelle KH`}
-              timeLabel={formatTime(event.eventTime)}
-              subtitle={`${phasePrefix(item)}${event.source || "Glucoseboost"}${
-                event.note ? ` · ${event.note}` : ""
-              }`}
-              accentColor="#c2410c"
-              backgroundColor="#fff7ed"
-              borderColor="#fdba74"
-              actions={deleteButton(event, "glucoseBoost")}
-              detailContent={
-                <div style={{ fontSize: 13, color: "#334155" }}>
-                  Hypo-correctie / snelle glucoseboost.
-                </div>
-              }
-            />
-          );
-        }
+            return (
+              <DailyTimelineItem
+                key={event.id}
+                indentLevel={2}
+                expanded={expandedIds.includes(event.id)}
+                onToggle={() => toggleExpanded(event.id)}
+                compact={true}
+                icon="⚡"
+                title={`⚡ +${event.kh || "?"}g snelle KH`}
+                timeLabel={formatTime(event.eventTime)}
+                subtitle={`${phasePrefix(item)}${event.source || "Glucoseboost"}${
+                  event.note ? ` · ${event.note}` : ""
+                }`}
+                accentColor="#c2410c"
+                backgroundColor="#fff7ed"
+                borderColor="#fdba74"
+                actions={deleteButton(event, "glucoseBoost")}
+                detailContent={
+                  <div style={{ fontSize: 13, color: "#334155" }}>
+                    Hypo-correctie / snelle glucoseboost.
+                  </div>
+                }
+              />
+            );
+          }
 
-        if (item.itemType === "movement") {
-          const event = item.event;
+          if (item.itemType === "movement") {
+            const event = item.event;
 
-          return (
-            <DailyTimelineItem
-              key={event.id}
-              expanded={expandedIds.includes(event.id)}
-              onToggle={() => toggleExpanded(event.id)}
-              compact={compactTimeline}
-              icon={
-                event.activityType?.toLowerCase().includes("kracht")
-                  ? "🟠🏋️"
-                  : "🟠🚶"
-              }
-              title={`${event.activityType || "Beweging"}${
-                event.durationMinutes ? ` · ${event.durationMinutes} min` : ""
-              }`}
-              timeLabel={formatTime(event.eventTime)}
-              subtitle={`${phasePrefix(item)}${
-                event.intensityType || "Belasting onbekend"
-              }${event.note ? ` · ${event.note}` : ""}`}
-              accentColor="#4c1d95"
-              backgroundColor="#f5f3ff"
-              borderColor="#c4b5fd"
-              actions={
-                <>
-                  {timerButton(event)}
-                  {editButton(event, "movement")}
-                </>
-              }
-              detailContent={
-                <div style={{ fontSize: 13, color: "#334155" }}>
-                  Beweging/sportmoment in metabole tijdlijn.
-                </div>
-              }
-            />
-          );
-        }
+            return (
+              <DailyTimelineItem
+                key={event.id}
+                expanded={expandedIds.includes(event.id)}
+                onToggle={() => toggleExpanded(event.id)}
+                compact={compactTimeline}
+                icon={
+                  event.activityType?.toLowerCase().includes("kracht")
+                    ? "🟠🏋️"
+                    : "🟠🚶"
+                }
+                title={`${event.activityType || "Beweging"}${
+                  event.durationMinutes ? ` · ${event.durationMinutes} min` : ""
+                }`}
+                timeLabel={formatTime(event.eventTime)}
+                subtitle={`${phasePrefix(item)}${
+                  event.intensityType || "Belasting onbekend"
+                }${event.note ? ` · ${event.note}` : ""}`}
+                accentColor="#4c1d95"
+                backgroundColor="#f5f3ff"
+                borderColor="#c4b5fd"
+                actions={
+                  <>
+                    {timerButton(event)}
+                    {editButton(event, "movement")}
+                  </>
+                }
+                detailContent={
+                  <div style={{ fontSize: 13, color: "#334155" }}>
+                    Beweging/sportmoment in metabole tijdlijn.
+                  </div>
+                }
+              />
+            );
+          }
 
-        if (item.itemType === "supplement") {
-          const event = item.event;
+          if (item.itemType === "supplement") {
+            const event = item.event;
 
-          return (
-            <DailyTimelineItem
-              key={event.id}
-              indentLevel={1}
-              compact={compactTimeline}
-              icon="💊"
-              title={`${event.name} · ${event.dosage}`}
-              timeLabel={formatTime(event.eventTime)}
-              subtitle={event.note || ""}
-              accentColor="#6d28d9"
-              backgroundColor="#f5f3ff"
-              borderColor="#c4b5fd"
-              actions={deleteButton(event, "supplement")}
-            />
-          );
-        }
+            return (
+              <DailyTimelineItem
+                key={event.id}
+                indentLevel={1}
+                compact={compactTimeline}
+                icon="💊"
+                title={`${event.name} · ${event.dosage}`}
+                timeLabel={formatTime(event.eventTime)}
+                subtitle={event.note || ""}
+                accentColor="#6d28d9"
+                backgroundColor="#f5f3ff"
+                borderColor="#c4b5fd"
+                actions={deleteButton(event, "supplement")}
+              />
+            );
+          }
 
-        if (item.itemType === "bowel") {
-          const event = item.event;
+          if (item.itemType === "bowel") {
+            const event = item.event;
 
-          return (
-            <DailyTimelineItem
-              key={event.id}
-              indentLevel={1}
-              expanded={false}
-              onToggle={() => {}}
-              compact={true}
-              icon="🚽"
-              title={`Bristol ${event.bristolScore}`}
-              timeLabel={formatTime(event.eventTime)}
-              subtitle={`${phasePrefix(item)}${event.urgency || ""}${
-                event.note ? ` · ${event.note}` : ""
-              }`}
-              accentColor="#92400e"
-              backgroundColor="#fffbeb"
-              borderColor="#fcd34d"
-              actions={<>{deleteButton(event, "bowel")}</>}
-              detailContent={null}
-            />
-          );
-        }
-        if (item.itemType === "note") {
-          const event = item.event;
+            return (
+              <DailyTimelineItem
+                key={event.id}
+                indentLevel={1}
+                expanded={false}
+                onToggle={() => {}}
+                compact={true}
+                icon="🚽"
+                title={`Bristol ${event.bristolScore}`}
+                timeLabel={formatTime(event.eventTime)}
+                subtitle={`${phasePrefix(item)}${event.urgency || ""}${
+                  event.note ? ` · ${event.note}` : ""
+                }`}
+                accentColor="#92400e"
+                backgroundColor="#fffbeb"
+                borderColor="#fcd34d"
+                actions={<>{deleteButton(event, "bowel")}</>}
+                detailContent={null}
+              />
+            );
+          }
+          if (item.itemType === "note") {
+            const event = item.event;
 
-          return (
-            <DailyTimelineItem
-              key={event.id}
-              indentLevel={1}
-              expanded={expandedIds.includes(event.id)}
-              onToggle={() => toggleExpanded(event.id)}
-              compact={compactTimeline}
-              icon={event.alarmEnabled ? "🔔📝" : "📝"}
-              title={event.note || "Notitie"}
-              timeLabel={formatTime(event.eventTime)}
-              subtitle={
-                event.alarmEnabled
-                  ? `🔔 Alarm actief${event.context ? ` · ${event.context}` : ""}`
-                  : `${phasePrefix(item)}${event.context || ""}`
-              }
-              accentColor="#475569"
-              backgroundColor="#f8fafc"
-              borderColor="#cbd5e1"
-              actions={
-                <>
-                  {timerButton(event)}
-                  {editButton(event, "note")}
-                </>
-              }
-              detailContent={
-                <div style={{ fontSize: 13, color: "#334155" }}>
-                  {event.note}
-                  {event.context ? (
-                    <div style={{ marginTop: 6 }}>
-                      <strong>Context:</strong> {event.context}
-                    </div>
-                  ) : null}
-                </div>
-              }
-            />
-          );
-        }
-        return null;
-      })}
+            return (
+              <DailyTimelineItem
+                key={event.id}
+                indentLevel={1}
+                expanded={expandedIds.includes(event.id)}
+                onToggle={() => toggleExpanded(event.id)}
+                compact={compactTimeline}
+                icon={event.alarmEnabled ? "🔔📝" : "📝"}
+                title={event.note || "Notitie"}
+                timeLabel={formatTime(event.eventTime)}
+                subtitle={
+                  event.alarmEnabled
+                    ? `🔔 Alarm actief${event.context ? ` · ${event.context}` : ""}`
+                    : `${phasePrefix(item)}${event.context || ""}`
+                }
+                accentColor="#475569"
+                backgroundColor="#f8fafc"
+                borderColor="#cbd5e1"
+                actions={
+                  <>
+                    {timerButton(event)}
+                    {editButton(event, "note")}
+                  </>
+                }
+                detailContent={
+                  <div style={{ fontSize: 13, color: "#334155" }}>
+                    {event.note}
+                    {event.context ? (
+                      <div style={{ marginTop: 6 }}>
+                        <strong>Context:</strong> {event.context}
+                      </div>
+                    ) : null}
+                  </div>
+                }
+              />
+            );
+          }
+          return null;
+        })
+      )}
 
       {timeEditorEvent && (
         <DailyEventTimeEditorModal
