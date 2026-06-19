@@ -46,6 +46,7 @@ export function DailyMealList({
   clearDailyLog,
   fillDailyRepeats,
 }) {
+  const isMobile = window.innerWidth < 900;
   const [expandedIds, setExpandedIds] = useState([]);
   const [editingEvent, setEditingEvent] = useState(null);
   const [editingType, setEditingType] = useState(null);
@@ -441,11 +442,11 @@ export function DailyMealList({
           background: "#f8fafc",
           border: "1px solid #e2e8f0",
           borderRadius: 6,
-          padding: 6,
+          padding: isMobile ? 3 : 6,
           display: "grid",
           gridTemplateColumns: "1fr 1fr 1fr",
-          gap: 8,
-          marginBottom: 8,
+          gap: isMobile ? 4 : 8,
+          marginBottom: isMobile ? 4 : 8,
         }}
       >
         <button
@@ -455,10 +456,10 @@ export function DailyMealList({
             background: "#eef2ff",
             border: "1px solid #c7d2fe",
             color: "#3730a3",
-            minHeight: 34,
-            padding: "5px 6px",
+            minHeight: isMobile ? 30 : 34,
+            padding: isMobile ? "4px 6px" : "5px 6px",
             borderRadius: 4,
-            fontSize: window.innerWidth < 900 ? 12 : 13,
+            fontSize: isMobile ? 12 : 13,
             fontWeight: 700,
             lineHeight: 1.05,
           }}
@@ -473,10 +474,10 @@ export function DailyMealList({
             background: "#f0f9ff",
             border: "1px solid #bae6fd",
             color: "#0369a1",
-            minHeight: 34,
-            padding: "5px 6px",
+            minHeight: isMobile ? 30 : 34,
+            padding: isMobile ? "4px 6px" : "5px 6px",
             borderRadius: 4,
-            fontSize: window.innerWidth < 900 ? 12 : 13,
+            fontSize: isMobile ? 12 : 13,
             fontWeight: 700,
             lineHeight: 1.05,
           }}
@@ -488,10 +489,10 @@ export function DailyMealList({
           onClick={handleToggleExpandAll}
           style={{
             ...toggleButtonStyle(allExpanded),
-            minHeight: 34,
-            padding: "5px 6px",
+            minHeight: isMobile ? 30 : 34,
+            padding: isMobile ? "4px 6px" : "5px 6px",
             borderRadius: 4,
-            fontSize: window.innerWidth < 900 ? 12 : 13,
+            fontSize: isMobile ? 12 : 13,
             fontWeight: 700,
             lineHeight: 1.05,
           }}
@@ -505,8 +506,8 @@ export function DailyMealList({
           <div
             style={{
               display: "flex",
-              gap: 8,
-              marginBottom: 8,
+              gap: isMobile ? 4 : 8,
+              marginBottom: isMobile ? 4 : 8,
               flexWrap: "wrap",
               alignItems: "stretch",
             }}
@@ -515,12 +516,13 @@ export function DailyMealList({
               onClick={() => setCompactTimeline((v) => !v)}
               style={{
                 ...toggleButtonStyle(compactTimeline),
-                minHeight: 40,
-                padding: "8px 10px",
-                borderRadius: 10,
-                fontSize: window.innerWidth < 900 ? 12 : 13,
+                minHeight: isMobile ? 30 : 40,
+                padding: isMobile ? "4px 6px" : "8px 10px",
+                borderRadius: isMobile ? 6 : 10,
+                fontSize: isMobile ? 12 : 13,
                 fontWeight: 700,
                 flex: "1 1 calc(50% - 8px)",
+                lineHeight: isMobile ? 1.05 : undefined,
               }}
             >
               {compactTimeline ? "Normale tijdlijn" : "Compacte tijdlijn"}
@@ -530,12 +532,13 @@ export function DailyMealList({
               onClick={() => setTimelineFilter("all")}
               style={{
                 ...toggleButtonStyle(timelineFilter === "all"),
-                minHeight: 40,
-                padding: "8px 10px",
-                borderRadius: 10,
-                fontSize: window.innerWidth < 900 ? 12 : 13,
+                minHeight: isMobile ? 30 : 40,
+                padding: isMobile ? "4px 6px" : "8px 10px",
+                borderRadius: isMobile ? 6 : 10,
+                fontSize: isMobile ? 12 : 13,
                 fontWeight: 700,
                 flex: "1 1 calc(50% - 8px)",
+                lineHeight: isMobile ? 1.05 : undefined,
               }}
             >
               Alles
@@ -545,12 +548,13 @@ export function DailyMealList({
               onClick={() => setTimelineFilter("insulin")}
               style={{
                 ...toggleButtonStyle(timelineFilter === "insulin"),
-                minHeight: 40,
-                padding: "8px 10px",
-                borderRadius: 10,
-                fontSize: window.innerWidth < 900 ? 12 : 13,
+                minHeight: isMobile ? 30 : 40,
+                padding: isMobile ? "4px 6px" : "8px 10px",
+                borderRadius: isMobile ? 6 : 10,
+                fontSize: isMobile ? 12 : 13,
                 fontWeight: 700,
                 flex: "1 1 calc(50% - 8px)",
+                lineHeight: isMobile ? 1.05 : undefined,
               }}
             >
               Alleen insuline
@@ -560,12 +564,13 @@ export function DailyMealList({
               onClick={() => setTimelineFilter("glucose")}
               style={{
                 ...toggleButtonStyle(timelineFilter === "glucose"),
-                minHeight: 40,
-                padding: "8px 10px",
-                borderRadius: 10,
-                fontSize: window.innerWidth < 900 ? 12 : 13,
+                minHeight: isMobile ? 30 : 40,
+                padding: isMobile ? "4px 6px" : "8px 10px",
+                borderRadius: isMobile ? 6 : 10,
+                fontSize: isMobile ? 12 : 13,
                 fontWeight: 700,
                 flex: "1 1 calc(50% - 8px)",
+                lineHeight: isMobile ? 1.05 : undefined,
               }}
             >
               Alleen glucose
@@ -575,12 +580,13 @@ export function DailyMealList({
               onClick={() => setTimelineFilter("metabolic")}
               style={{
                 ...toggleButtonStyle(timelineFilter === "metabolic"),
-                minHeight: 40,
-                padding: "8px 10px",
-                borderRadius: 10,
-                fontSize: window.innerWidth < 900 ? 12 : 13,
+                minHeight: isMobile ? 30 : 40,
+                padding: isMobile ? "4px 6px" : "8px 10px",
+                borderRadius: isMobile ? 6 : 10,
+                fontSize: isMobile ? 12 : 13,
                 fontWeight: 700,
                 flex: "1 1 calc(50% - 8px)",
+                lineHeight: isMobile ? 1.05 : undefined,
               }}
             >
               Insuline + glucose
@@ -594,12 +600,13 @@ export function DailyMealList({
               }
               style={{
                 ...toggleButtonStyle(timelineFilter === "sportFocus"),
-                minHeight: 40,
-                padding: "8px 10px",
-                borderRadius: 10,
-                fontSize: window.innerWidth < 900 ? 12 : 13,
+                minHeight: isMobile ? 30 : 40,
+                padding: isMobile ? "4px 6px" : "8px 10px",
+                borderRadius: isMobile ? 6 : 10,
+                fontSize: isMobile ? 12 : 13,
                 fontWeight: 700,
                 flex: "1 1 calc(50% - 8px)",
+                lineHeight: isMobile ? 1.05 : undefined,
               }}
             >
               {timelineFilter === "sportFocus"
@@ -611,9 +618,9 @@ export function DailyMealList({
           <div
             style={{
               display: "flex",
-              gap: 8,
+              gap: isMobile ? 4 : 8,
               flexWrap: "wrap",
-              marginBottom: 8,
+              marginBottom: isMobile ? 4 : 8,
               alignItems: "stretch",
             }}
           >
@@ -632,12 +639,13 @@ export function DailyMealList({
                 onClick={() => toggleVisibleType(type)}
                 style={{
                   ...buttonStyle,
-                  minHeight: 40,
-                  padding: "8px 10px",
-                  borderRadius: 10,
-                  fontSize: window.innerWidth < 900 ? 12 : 13,
+                  minHeight: isMobile ? 30 : 40,
+                  padding: isMobile ? "4px 6px" : "8px 10px",
+                  borderRadius: isMobile ? 6 : 10,
+                  fontSize: isMobile ? 12 : 13,
                   fontWeight: 700,
                   flex: "1 1 calc(50% - 8px)",
+                  lineHeight: isMobile ? 1.05 : undefined,
                   background: visibleTypes[type] ? "#bbf7d0" : "#f8fafc",
                   color: visibleTypes[type] ? "#14532d" : "#166534",
                   border: visibleTypes[type]

@@ -53,6 +53,7 @@ export function DailyTab({
   updateTrainingPlanEvent,
   deleteTrainingPlanEvent,
 }) {
+  const isMobile = window.innerWidth < 900;
   const [addEventType, setAddEventType] = useState(null);
   const [showAddButtons, setShowAddButtons] = useState(false);
   const [showTimelineControls, setShowTimelineControls] = useState(false);
@@ -420,20 +421,21 @@ export function DailyTab({
           ...cardStyle,
           background: "#f8fafc",
           border: "1px solid #cbd5e1",
+          padding: isMobile ? "6px 8px" : cardStyle?.padding,
         }}
       >
         {/* Tijdlijnkop + eventknoppen */}
         <div
           style={{
             display: "grid",
-            gap: 12,
-            marginBottom: 10,
+            gap: isMobile ? 4 : 12,
+            marginBottom: isMobile ? 4 : 10,
           }}
         >
           {/* Titel */}
           <div
             style={{
-              display: "flex",
+              display: isMobile ? "none" : "flex",
               justifyContent: "space-between",
               alignItems: "center",
               gap: 8,
@@ -447,10 +449,10 @@ export function DailyTab({
               background: "#f8fafc",
               border: "1px solid #e2e8f0",
               borderRadius: 6,
-              padding: 5,
+              padding: isMobile ? 3 : 5,
               display: "grid",
               gridTemplateColumns: "1fr 1fr 1fr",
-              gap: 6,
+              gap: isMobile ? 4 : 6,
             }}
           >
             <button
@@ -463,9 +465,9 @@ export function DailyTab({
                   : "1px solid #cbd5e1",
                 color: showTimelineAnalysis ? "#1d4ed8" : "#334155",
                 fontWeight: 700,
-                fontSize: window.innerWidth < 900 ? 12 : 13,
-                padding: "5px 6px",
-                minHeight: 34,
+                fontSize: isMobile ? 12 : 13,
+                padding: isMobile ? "4px 6px" : "5px 6px",
+                minHeight: isMobile ? 30 : 34,
                 borderRadius: 4,
                 lineHeight: 1.05,
               }}
@@ -482,9 +484,9 @@ export function DailyTab({
                   : "1px solid #cbd5e1",
                 color: showAddButtons ? "#166534" : "#334155",
                 fontWeight: 700,
-                fontSize: window.innerWidth < 900 ? 12 : 13,
-                padding: "5px 6px",
-                minHeight: 34,
+                fontSize: isMobile ? 12 : 13,
+                padding: isMobile ? "4px 6px" : "5px 6px",
+                minHeight: isMobile ? 30 : 34,
                 borderRadius: 4,
                 lineHeight: 1.05,
               }}
@@ -501,9 +503,9 @@ export function DailyTab({
                   : "1px solid #cbd5e1",
                 color: showTimelineControls ? "#92400e" : "#334155",
                 fontWeight: 700,
-                fontSize: window.innerWidth < 900 ? 12 : 13,
-                padding: "5px 6px",
-                minHeight: 34,
+                fontSize: isMobile ? 12 : 13,
+                padding: isMobile ? "4px 6px" : "5px 6px",
+                minHeight: isMobile ? 30 : 34,
                 borderRadius: 4,
                 lineHeight: 1.05,
               }}
@@ -638,10 +640,10 @@ export function DailyTab({
             <div
               style={{
                 display: "flex",
-                gap: 8,
+                gap: isMobile ? 4 : 8,
                 flexWrap: "wrap",
                 alignItems: "stretch",
-                marginTop: 6,
+                marginTop: isMobile ? 2 : 6,
               }}
             >
               <button
@@ -651,12 +653,13 @@ export function DailyTab({
                   background: "#fff7ed",
                   border: "1px solid #fdba74",
                   color: "#c2410c",
-                  minHeight: 42,
-                  padding: "8px 10px",
-                  borderRadius: 12,
-                  fontSize: window.innerWidth < 900 ? 12 : 13,
+                  minHeight: isMobile ? 30 : 42,
+                  padding: isMobile ? "4px 6px" : "8px 10px",
+                  borderRadius: isMobile ? 6 : 12,
+                  fontSize: isMobile ? 12 : 13,
                   fontWeight: 700,
                   flex: "1 1 calc(50% - 8px)",
+                  lineHeight: isMobile ? 1.05 : undefined,
                 }}
               >
                 ⚡ Glucoseboost
@@ -669,12 +672,13 @@ export function DailyTab({
                   background: "#ecfeff",
                   border: "1px solid #67e8f9",
                   color: "#0e7490",
-                  minHeight: 42,
-                  padding: "8px 10px",
-                  borderRadius: 12,
-                  fontSize: window.innerWidth < 900 ? 12 : 13,
+                  minHeight: isMobile ? 30 : 42,
+                  padding: isMobile ? "4px 6px" : "8px 10px",
+                  borderRadius: isMobile ? 6 : 12,
+                  fontSize: isMobile ? 12 : 13,
                   fontWeight: 700,
                   flex: "1 1 calc(50% - 8px)",
+                  lineHeight: isMobile ? 1.05 : undefined,
                 }}
               >
                 + Beweging/sport
@@ -687,12 +691,13 @@ export function DailyTab({
                   background: "#fef3c7",
                   border: "1px solid #fcd34d",
                   color: "#92400e",
-                  minHeight: 42,
-                  padding: "8px 10px",
-                  borderRadius: 12,
-                  fontSize: window.innerWidth < 900 ? 12 : 13,
+                  minHeight: isMobile ? 30 : 42,
+                  padding: isMobile ? "4px 6px" : "8px 10px",
+                  borderRadius: isMobile ? 6 : 12,
+                  fontSize: isMobile ? 12 : 13,
                   fontWeight: 700,
                   flex: "1 1 calc(50% - 8px)",
+                  lineHeight: isMobile ? 1.05 : undefined,
                 }}
               >
                 + Stoelgang
@@ -705,12 +710,13 @@ export function DailyTab({
                   background: "#f8fafc",
                   border: "1px solid #cbd5e1",
                   color: "#334155",
-                  minHeight: 42,
-                  padding: "8px 10px",
-                  borderRadius: 12,
-                  fontSize: window.innerWidth < 900 ? 12 : 13,
+                  minHeight: isMobile ? 30 : 42,
+                  padding: isMobile ? "4px 6px" : "8px 10px",
+                  borderRadius: isMobile ? 6 : 12,
+                  fontSize: isMobile ? 12 : 13,
                   fontWeight: 700,
                   flex: "1 1 calc(50% - 8px)",
+                  lineHeight: isMobile ? 1.05 : undefined,
                 }}
               >
                 + Notitie
@@ -723,12 +729,13 @@ export function DailyTab({
                   background: "#ede9fe",
                   border: "1px solid #c4b5fd",
                   color: "#5b21b6",
-                  minHeight: 42,
-                  padding: "8px 10px",
-                  borderRadius: 12,
-                  fontSize: window.innerWidth < 900 ? 12 : 13,
+                  minHeight: isMobile ? 30 : 42,
+                  padding: isMobile ? "4px 6px" : "8px 10px",
+                  borderRadius: isMobile ? 6 : 12,
+                  fontSize: isMobile ? 12 : 13,
                   fontWeight: 700,
                   flex: "1 1 calc(50% - 8px)",
+                  lineHeight: isMobile ? 1.05 : undefined,
                 }}
               >
                 + Supplement
