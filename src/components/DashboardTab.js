@@ -59,27 +59,58 @@ export function DashboardTab(props) {
           buttonStyle={buttonStyle}
         />
 
-        <CategoryFilterSection
-          {...categoryFilterProps}
-          cardStyle={cardStyle}
-          buttonStyle={buttonStyle}
-        />
+        {!isMobile && (
+          <CategoryFilterSection
+            {...categoryFilterProps}
+            cardStyle={cardStyle}
+            buttonStyle={buttonStyle}
+          />
+        )}
 
-        <SavedMealsSection
-          categories={categories}
-          {...savedMealProps}
-          products={products}
-          cardStyle={cardStyle}
-          buttonStyle={buttonStyle}
-          inputStyle={inputStyle}
-        />
+        {isMobile ? (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1.35fr 0.85fr",
+              gap: 4,
+              alignItems: "start",
+            }}
+          >
+            <SavedMealsSection
+              categories={categories}
+              {...savedMealProps}
+              products={products}
+              cardStyle={cardStyle}
+              buttonStyle={buttonStyle}
+              inputStyle={inputStyle}
+            />
 
-        <FavoritesSection
-          categories={categories}
-          {...favoritesProps}
-          cardStyle={cardStyle}
-          buttonStyle={buttonStyle}
-        />
+            <FavoritesSection
+              categories={categories}
+              {...favoritesProps}
+              cardStyle={cardStyle}
+              buttonStyle={buttonStyle}
+            />
+          </div>
+        ) : (
+          <>
+            <SavedMealsSection
+              categories={categories}
+              {...savedMealProps}
+              products={products}
+              cardStyle={cardStyle}
+              buttonStyle={buttonStyle}
+              inputStyle={inputStyle}
+            />
+
+            <FavoritesSection
+              categories={categories}
+              {...favoritesProps}
+              cardStyle={cardStyle}
+              buttonStyle={buttonStyle}
+            />
+          </>
+        )}
 
         <QuickAddSection
           {...dailyMealProps}

@@ -331,13 +331,88 @@ function VoedingslijstTab({
       }}
     >
       <div style={cardStyle}>
+        {isMobile && (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 4,
+              marginBottom: 6,
+            }}
+          >
+            <button
+              onClick={() => setShowCategoryManager((v) => !v)}
+              style={{
+                ...buttonStyle,
+                width: "100%",
+                minWidth: 0,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: 4,
+                background: "#f8fafc",
+                fontWeight: 700,
+                padding: "5px 7px",
+                fontSize: 12,
+                lineHeight: 1.05,
+                borderRadius: 6,
+              }}
+            >
+              <span
+                style={{
+                  ...sectionBadgeStyle,
+                  padding: "2px 6px",
+                  fontSize: 11,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                Categoriebeheer
+              </span>
+              <span>{showCategoryManager ? "▲" : "▼"}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowMobileListManager((v) => !v)}
+              style={{
+                ...buttonStyle,
+                width: "100%",
+                minWidth: 0,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: 4,
+                background: "#f8fafc",
+                border: "1px solid #e2e8f0",
+                padding: "5px 7px",
+                fontWeight: 800,
+                fontSize: 12,
+                lineHeight: 1.05,
+                borderRadius: 6,
+              }}
+            >
+              <span
+                style={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                📚 {activePackFilter}
+              </span>
+              <span>{showMobileListManager ? "▲" : "▼"}</span>
+            </button>
+          </div>
+        )}
+
         <button
           onClick={() => setShowCategoryManager((v) => !v)}
           style={{
             ...buttonStyle,
             width: "100%",
             textAlign: "left",
-            display: "flex",
+            display: isMobile ? "none" : "flex",
             justifyContent: "space-between",
             alignItems: "center",
             background: "#f8fafc",
@@ -459,7 +534,7 @@ function VoedingslijstTab({
             style={{
               ...buttonStyle,
               width: "100%",
-              display: "flex",
+              display: isMobile ? "none" : "flex",
               justifyContent: "space-between",
               alignItems: "center",
               background: "#f8fafc",
@@ -612,16 +687,16 @@ function VoedingslijstTab({
         <div
           style={{
             ...cardStyle,
-            padding: 12,
-            marginBottom: 12,
+            padding: isMobile ? 6 : 12,
+            marginBottom: isMobile ? 8 : 12,
             background: "#f8fafc",
           }}
         >
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: isMobile ? "1fr" : "auto 1fr auto",
-              gap: 8,
+              gridTemplateColumns: isMobile ? "1fr 1fr" : "auto 1fr auto",
+              gap: isMobile ? 5 : 8,
               alignItems: "center",
             }}
           >
@@ -631,9 +706,15 @@ function VoedingslijstTab({
                 ...primaryButtonStyle,
                 ...(isMobile
                   ? {
+                      order: 1,
                       background: "#dcfce7",
                       border: "1px solid #86efac",
                       color: "#14532d",
+                      padding: "5px 8px",
+                      minHeight: 32,
+                      fontSize: 12,
+                      lineHeight: 1.05,
+                      borderRadius: 6,
                     }
                   : {}),
               }}
@@ -645,10 +726,38 @@ function VoedingslijstTab({
               placeholder="Zoek product of categorie"
               value={productSearch}
               onChange={(e) => setProductSearch(e.target.value)}
-              style={inputStyle}
+              style={{
+                ...inputStyle,
+                ...(isMobile
+                  ? {
+                      order: 3,
+                      gridColumn: "1 / -1",
+                      padding: "6px 8px",
+                      minHeight: 34,
+                      fontSize: 16,
+                      lineHeight: 1.1,
+                      borderRadius: 6,
+                    }
+                  : {}),
+              }}
             />
 
-            <button onClick={() => setProductSearch("")} style={buttonStyle}>
+            <button
+              onClick={() => setProductSearch("")}
+              style={{
+                ...buttonStyle,
+                ...(isMobile
+                  ? {
+                      order: 2,
+                      padding: "5px 8px",
+                      minHeight: 32,
+                      fontSize: 12,
+                      lineHeight: 1.05,
+                      borderRadius: 6,
+                    }
+                  : {}),
+              }}
+            >
               Wis zoekveld
             </button>
           </div>

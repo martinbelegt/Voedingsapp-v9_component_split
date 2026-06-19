@@ -22,8 +22,9 @@ export function MealRowCard({
 
   const compactInputStyle = {
     ...inputStyle,
-    padding: isMobile ? "6px 7px" : "7px 9px",
-    fontSize: isMobile ? 12 : 13,
+    padding: isMobile ? "5px 8px" : "7px 9px",
+    fontSize: isMobile ? 16 : 13,
+    lineHeight: isMobile ? 1.1 : undefined,
     borderRadius: isMobile ? 6 : 10,
     minHeight: isMobile ? 34 : undefined,
     minWidth: 0,
@@ -43,8 +44,8 @@ export function MealRowCard({
       style={{
         border: "1px solid #e5e7eb",
         borderRadius: isMobile ? 6 : 12,
-        padding: isMobile ? 6 : 8,
-        marginBottom: isMobile ? 5 : 6,
+        padding: isMobile ? 5 : 8,
+        marginBottom: isMobile ? 4 : 6,
         background: backgroundColor,
         overflow: "hidden",
       }}
@@ -53,9 +54,9 @@ export function MealRowCard({
         style={{
           display: "grid",
           gridTemplateColumns: isMobile
-            ? "1fr 70px 48px"
+            ? "1fr 68px 46px"
             : "minmax(220px, 2fr) 110px 95px auto",
-          gap: isMobile ? 5 : 6,
+          gap: isMobile ? 4 : 6,
           alignItems: "center",
         }}
       >
@@ -99,7 +100,7 @@ export function MealRowCard({
 
             minHeight: 0,
 
-            height: isMobile ? 29 : undefined,
+            height: isMobile ? 32 : undefined,
 
             padding: 0,
 
@@ -107,7 +108,7 @@ export function MealRowCard({
 
             textAlign: "center",
 
-            lineHeight: "30px",
+            lineHeight: isMobile ? "32px" : "30px",
 
             boxSizing: "border-box",
 
@@ -126,8 +127,10 @@ export function MealRowCard({
           onClick={() => onRemove(row.id)}
           style={{
             ...buttonStyle,
-            padding: isMobile ? "6px 7px" : "7px 10px",
-            fontSize: isMobile ? 11 : 13,
+            padding: isMobile ? "4px 6px" : "7px 10px",
+            minHeight: isMobile ? 30 : undefined,
+            fontSize: isMobile ? 12 : 13,
+            lineHeight: isMobile ? 1.05 : undefined,
             borderRadius: isMobile ? 6 : 10,
             display: "inline-block",
             minWidth: 0,
@@ -139,9 +142,9 @@ export function MealRowCard({
 
       <div
         style={{
-          marginTop: isMobile ? 5 : 6,
+          marginTop: isMobile ? 4 : 6,
           display: "flex",
-          gap: isMobile ? 4 : 6,
+          gap: isMobile ? 3 : 6,
           flexWrap: "wrap",
           alignItems: "center",
           color: "#334155",

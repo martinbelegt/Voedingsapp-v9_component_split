@@ -42,6 +42,42 @@ export function MealRowsSection(props) {
 
   const [showMealAnalysis, setShowMealAnalysis] = useState(false);
 
+  const dashboardInputStyle = {
+    ...inputStyle,
+    ...(isMobile
+      ? {
+          padding: "5px 8px",
+          minHeight: 34,
+          fontSize: 16,
+          lineHeight: 1.1,
+          borderRadius: 6,
+        }
+      : {}),
+  };
+
+  const quickSearchInputStyle = {
+    ...dashboardInputStyle,
+    ...(isMobile
+      ? {
+          background: "#f0fdf4",
+          border: "1px solid #86efac",
+        }
+      : {}),
+  };
+
+  const dashboardButtonStyle = {
+    ...buttonStyle,
+    ...(isMobile
+      ? {
+          padding: "4px 8px",
+          minHeight: 32,
+          fontSize: 12,
+          lineHeight: 1.05,
+          borderRadius: 6,
+        }
+      : {}),
+  };
+
   const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
 
   const previewTotals = {
@@ -58,30 +94,35 @@ export function MealRowsSection(props) {
   return (
     <>
       {/* Knoppen voor huidige maaltijd */}
-      <div style={cardStyle}>
+      <div
+        style={{
+          ...cardStyle,
+          padding: isMobile ? 5 : cardStyle?.padding,
+        }}
+      >
         <div
           style={{
             display: "flex",
-            gap: 8,
+            gap: isMobile ? 4 : 8,
             flexWrap: "wrap",
             justifyContent: "flex-start",
           }}
         >
-          <button onClick={addRow} style={buttonStyle}>
+          <button onClick={addRow} style={dashboardButtonStyle}>
             Rij toevoegen
           </button>
 
           <button
             onClick={clearMeal}
             style={{
-              ...buttonStyle,
+              ...dashboardButtonStyle,
               background: "#dbeafe",
               color: "#1d4ed8",
               border: "1px solid #93c5fd",
               fontWeight: 700,
             }}
           >
-            Nieuwe maaltijd
+            Leeg maken
           </button>
         </div>
       </div>
@@ -91,8 +132,17 @@ export function MealRowsSection(props) {
         style={{
           ...buttonStyle,
           width: "100%",
-          marginTop: 8,
-          marginBottom: 10,
+          marginTop: isMobile ? 4 : 8,
+          marginBottom: isMobile ? 5 : 10,
+          ...(isMobile
+            ? {
+                padding: "4px 8px",
+                minHeight: 32,
+                fontSize: 12,
+                lineHeight: 1.05,
+                borderRadius: 6,
+              }
+            : {}),
           background: showMealAnalysis ? "#dbeafe" : "#f8fafc",
           border: "1px solid #93c5fd",
           color: "#1d4ed8",
@@ -116,21 +166,26 @@ export function MealRowsSection(props) {
       )}
 
       {/* Snel product toevoegen + dagtotaal */}
-      <div style={cardStyle}>
+      <div
+        style={{
+          ...cardStyle,
+          padding: isMobile ? 5 : cardStyle?.padding,
+        }}
+      >
         <input
           value={quickSearch}
           onChange={(e) => setQuickSearch(e.target.value)}
           placeholder="Snel product toevoegen..."
-          style={inputStyle}
+          style={quickSearchInputStyle}
         />
 
         <div
           style={{
             display: "flex",
-            gap: 6,
+            gap: isMobile ? 4 : 6,
             flexWrap: "wrap",
             alignItems: "center",
-            marginTop: 8,
+            marginTop: isMobile ? 5 : 8,
           }}
         >
           <span
@@ -162,7 +217,13 @@ export function MealRowsSection(props) {
         </div>
 
         {quickSearch && (
-          <div style={{ marginTop: 6, display: "grid", gap: 4 }}>
+          <div
+            style={{
+              marginTop: isMobile ? 4 : 6,
+              display: "grid",
+              gap: isMobile ? 3 : 4,
+            }}
+          >
             {quickSearchResults.length === 0 && (
               <div style={{ fontSize: 12, color: "#64748b" }}>
                 Geen resultaten
@@ -177,10 +238,8 @@ export function MealRowsSection(props) {
                   setQuickSearch("");
                 }}
                 style={{
-                  ...buttonStyle,
+                  ...dashboardButtonStyle,
                   textAlign: "left",
-                  padding: "6px 8px",
-                  fontSize: 13,
                   background: getCategoryColor(categories, p.categoryId),
                 }}
               >

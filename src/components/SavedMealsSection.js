@@ -23,6 +23,35 @@ export function SavedMealsSection(props) {
     inputStyle,
   } = props;
 
+  const isMobile =
+    window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
+
+  const dashboardInputStyle = {
+    ...inputStyle,
+    ...(isMobile
+      ? {
+          padding: "5px 8px",
+          minHeight: 34,
+          fontSize: 16,
+          lineHeight: 1.1,
+          borderRadius: 6,
+        }
+      : {}),
+  };
+
+  const dashboardButtonStyle = {
+    ...buttonStyle,
+    ...(isMobile
+      ? {
+          padding: "4px 8px",
+          minHeight: 32,
+          fontSize: 12,
+          lineHeight: 1.05,
+          borderRadius: 6,
+        }
+      : {}),
+  };
+
   function editSavedMeal(id) {
     const meal = savedMeals.find((m) => m.id === id);
     if (!meal) return;
@@ -37,10 +66,9 @@ export function SavedMealsSection(props) {
     <div
       style={{
         ...cardStyle,
-        marginBottom: window.innerWidth < 900 ? 4 : 16,
-        padding: window.innerWidth < 900 ? 4 : cardStyle?.padding,
-        border:
-          window.innerWidth < 900 ? "1px solid #e5e7eb" : cardStyle?.border,
+        marginBottom: isMobile ? 0 : 16,
+        padding: isMobile ? 4 : cardStyle?.padding,
+        border: isMobile ? "1px solid #e5e7eb" : cardStyle?.border,
       }}
     >
       <button
@@ -48,6 +76,8 @@ export function SavedMealsSection(props) {
         style={{
           ...buttonStyle,
           width: "100%",
+          height: isMobile ? 32 : undefined,
+          minHeight: isMobile ? 32 : undefined,
           textAlign: "left",
           display: "flex",
           justifyContent: "space-between",
@@ -56,11 +86,11 @@ export function SavedMealsSection(props) {
           border: "1px solid #d8b4fe",
           color: "#4c1d95",
           fontWeight: 700,
-          fontWeight: 700,
-          padding: window.innerWidth < 900 ? "2px 8px" : undefined,
-          fontSize: window.innerWidth < 900 ? 12 : undefined,
-          lineHeight: window.innerWidth < 900 ? 1.1 : undefined,
-          borderRadius: window.innerWidth < 900 ? 2 : buttonStyle?.borderRadius,
+          padding: isMobile ? "4px 8px" : undefined,
+          fontSize: isMobile ? 12 : undefined,
+          lineHeight: isMobile ? 1.05 : undefined,
+          borderRadius: isMobile ? 6 : buttonStyle?.borderRadius,
+          boxSizing: "border-box",
         }}
       >
         <span>Standaardmaaltijden ({savedMeals.length})</span>
@@ -68,26 +98,26 @@ export function SavedMealsSection(props) {
       </button>
 
       {showSavedMeals && (
-        <div style={{ marginTop: window.innerWidth < 900 ? 5 : 12 }}>
+        <div style={{ marginTop: isMobile ? 4 : 12 }}>
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: window.innerWidth < 900 ? "1fr" : "2fr auto",
-              gap: window.innerWidth < 900 ? 5 : 8,
-              marginBottom: window.innerWidth < 900 ? 6 : 12,
+              gridTemplateColumns: isMobile ? "1fr" : "2fr auto",
+              gap: isMobile ? 4 : 8,
+              marginBottom: isMobile ? 5 : 12,
             }}
           >
             <div
               style={{
                 display: "grid",
                 gridTemplateColumns: "2fr 90px",
-                gap: 6,
+                gap: isMobile ? 4 : 6,
               }}
             >
               <input
                 value={mealName}
                 onChange={(e) => setMealName(e.target.value)}
-                style={inputStyle}
+                style={dashboardInputStyle}
                 placeholder="Naam van maaltijd"
               />
 
@@ -96,7 +126,7 @@ export function SavedMealsSection(props) {
                 min="1"
                 value={mealServings}
                 onChange={(e) => setMealServings(Number(e.target.value) || 1)}
-                style={inputStyle}
+                style={dashboardInputStyle}
                 placeholder="Porties"
               />
             </div>
@@ -104,7 +134,7 @@ export function SavedMealsSection(props) {
             <button
               onClick={saveCurrentMeal}
               style={{
-                ...buttonStyle,
+                ...dashboardButtonStyle,
                 background: "#dcfce7",
                 color: "#166534",
                 border: "1px solid #86efac",
@@ -115,7 +145,7 @@ export function SavedMealsSection(props) {
             </button>
           </div>
 
-          <div style={{ display: "grid", gap: 8 }}>
+          <div style={{ display: "grid", gap: isMobile ? 4 : 8 }}>
             {savedMeals.length === 0 && (
               <div style={{ color: "#64748b", fontSize: 14 }}>
                 Nog geen standaardmaaltijden opgeslagen.
