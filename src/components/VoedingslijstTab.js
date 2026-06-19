@@ -195,6 +195,23 @@ function VoedingslijstTab({
       : {}),
   };
   const modalFieldStyle = isMobile ? { minWidth: 0, maxWidth: "100%" } : {};
+  const mobileModalActionBarStyle = {
+    display: "flex",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    gap: 6,
+    flexShrink: 0,
+    width: "100%",
+    minWidth: 0,
+    order: 1,
+  };
+  const mobileModalActionButtonStyle = {
+    padding: "5px 6px",
+    fontSize: 11,
+    lineHeight: 1.15,
+    whiteSpace: "nowrap",
+    flexShrink: 0,
+  };
   const mobileCollapseButtonStyle = {
     ...buttonStyle,
     width: "100%",
@@ -1223,55 +1240,45 @@ function VoedingslijstTab({
                 </button>
               )}
               {isMobile && (
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr 1fr",
-                    gap: 5,
-                    order: 1,
-                  }}
-                >
+                <div style={mobileModalActionBarStyle}>
                   <button
                     onClick={deleteModalProduct}
                     disabled={!editingProductId}
                     style={{
                       ...buttonStyle,
+                      ...mobileModalActionButtonStyle,
                       background: editingProductId ? "#fee2e2" : "#f8fafc",
                       border: editingProductId
                         ? "1px solid #fecaca"
                         : "1px solid #e5e7eb",
                       color: editingProductId ? "#991b1b" : "#94a3b8",
                       cursor: editingProductId ? "pointer" : "not-allowed",
-                      padding: "5px 6px",
-                      fontSize: 11,
-                      lineHeight: 1.15,
                     }}
                   >
                     Verwijderen
                   </button>
 
                   <button
-                    onClick={cancelProductModal}
-                    style={{
-                      ...buttonStyle,
-                      padding: "5px 6px",
-                      fontSize: 11,
-                      lineHeight: 1.15,
-                    }}
-                  >
-                    Annuleren
-                  </button>
-
-                  <button
                     onClick={saveProductModal}
                     style={{
                       ...primaryButtonStyle,
-                      padding: "5px 6px",
-                      fontSize: 11,
-                      lineHeight: 1.15,
+                      ...mobileModalActionButtonStyle,
+                      background: "#dcfce7",
+                      border: "1px solid #86efac",
+                      color: "#14532d",
                     }}
                   >
                     Opslaan
+                  </button>
+
+                  <button
+                    onClick={cancelProductModal}
+                    style={{
+                      ...buttonStyle,
+                      ...mobileModalActionButtonStyle,
+                    }}
+                  >
+                    Annuleren
                   </button>
                 </div>
               )}
