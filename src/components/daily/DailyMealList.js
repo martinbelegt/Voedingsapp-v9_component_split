@@ -342,7 +342,18 @@ export function DailyMealList({
           setEditingEvent(event);
           setEditingType(type);
         }}
-        style={buttonStyle}
+        style={{
+          ...buttonStyle,
+          ...(window.innerWidth < 900
+            ? {
+                padding: "3px 6px",
+                fontSize: 11,
+                lineHeight: 1,
+                minHeight: 24,
+                borderRadius: 4,
+              }
+            : {}),
+        }}
       >
         Wijzig
       </button>
@@ -376,6 +387,15 @@ export function DailyMealList({
         }}
         style={{
           ...buttonStyle,
+          ...(window.innerWidth < 900
+            ? {
+                padding: "3px 6px",
+                fontSize: 11,
+                lineHeight: 1,
+                minHeight: 24,
+                borderRadius: 4,
+              }
+            : {}),
           background: "#fee2e2",
           border: "1px solid #fecaca",
           color: "#991b1b",

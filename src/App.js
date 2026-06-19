@@ -1049,7 +1049,14 @@ export default function App() {
         categories,
         p.categoryId,
       ).toLowerCase();
-      return p.name.toLowerCase().includes(q) || categoryName.includes(q);
+      const productName = String(p.name || "").toLowerCase();
+      const brandName = String(p.brand || "").toLowerCase();
+
+      return (
+        productName.includes(q) ||
+        brandName.includes(q) ||
+        categoryName.includes(q)
+      );
     });
   }, [sortedProducts, productSearch, categories]);
 
@@ -1100,7 +1107,14 @@ export default function App() {
             categories,
             p.categoryId,
           ).toLowerCase();
-          return p.name.toLowerCase().includes(q) || categoryName.includes(q);
+          const productName = String(p.name || "").toLowerCase();
+          const brandName = String(p.brand || "").toLowerCase();
+
+          return (
+            productName.includes(q) ||
+            brandName.includes(q) ||
+            categoryName.includes(q)
+          );
         })
       : sortedProducts;
 
