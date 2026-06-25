@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { CompanionModalShell } from "../ui/modals/CompanionModalShell";
 import { CompanionDateTimePicker } from "../ui/pickers/CompanionDateTimePicker";
 
 const BOWEL_COLOR_OPTIONS = [
@@ -99,35 +100,73 @@ export function DailyEventEditModal({
   const isInsulin = eventType === "insulin";
   const isBowel = eventType === "bowel";
 
-  return (
-    <div
-      onClick={onClose}
+  const footerStart = (
+    <button
+      onClick={() => {
+        const ok = window.confirm("Dit moment verwijderen?");
+        if (!ok) return;
+        onDelete(event.id);
+        onClose();
+      }}
       style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(15,23,42,0.45)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 12,
-        zIndex: 9999,
+        ...buttonStyle,
+        background: "#fee2e2",
+        border: "1px solid #fecaca",
+        color: "#991b1b",
+        fontWeight: 800,
       }}
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
+      Verwijder
+    </button>
+  );
+
+  const footer = (
+    <>
+      <button onClick={onClose} style={buttonStyle}>
+        Annuleer
+      </button>
+
+      <button
+        onClick={() => {
+          onSave(event.id, {
+            eventTime,
+            ...(isInsulin ? { units: value1 } : {}),
+            ...(isGlucose ? { glucoseValue: value1 } : {}),
+            ...(isBowel ? { bristolScore: value1, bowelColor } : {}),
+            ...(eventType === "note" ? { note: value1 } : {}),
+            ...(eventType === "note" ? { context: note } : { note }),
+            ...(eventType === "note"
+              ? {
+                  alarmEnabled,
+                  alarmAt: alarmEnabled ? alarmAt : null,
+                }
+              : {}),
+          });
+
+          onClose();
+        }}
         style={{
-          width: "min(430px, 95vw)",
-          maxHeight: "85vh",
-          overflowY: "auto",
-          background: "white",
-          borderRadius: 12,
-          padding: 14,
-          border: "1px solid #cbd5e1",
-          boxShadow: "0 20px 50px rgba(0,0,0,0.25)",
+          ...buttonStyle,
+          background: "#dcfce7",
+          border: "1px solid #86efac",
+          color: "#166534",
+          fontWeight: 800,
         }}
       >
-        <h3 style={{ marginTop: 0, marginBottom: 12 }}>Moment wijzigen</h3>
+        Opslaan
+      </button>
+    </>
+  );
 
+  return (
+    <CompanionModalShell
+      open
+      onClose={onClose}
+      title="Moment wijzigen"
+      size="sm"
+      footerStart={footerStart}
+      footer={footer}
+    >
         <CompanionDateTimePicker
           value={eventTime}
           onChange={setEventTime}
@@ -274,65 +313,6 @@ export function DailyEventEditModal({
             />
           </div>
         )}
-
-        <div
-          style={{ display: "flex", gap: 8, justifyContent: "space-between" }}
-        >
-          <button
-            onClick={() => {
-              const ok = window.confirm("Dit moment verwijderen?");
-              if (!ok) return;
-              onDelete(event.id);
-              onClose();
-            }}
-            style={{
-              ...buttonStyle,
-              background: "#fee2e2",
-              border: "1px solid #fecaca",
-              color: "#991b1b",
-              fontWeight: 800,
-            }}
-          >
-            Verwijder
-          </button>
-
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={onClose} style={buttonStyle}>
-              Annuleer
-            </button>
-
-            <button
-              onClick={() => {
-                onSave(event.id, {
-                  eventTime,
-                  ...(isInsulin ? { units: value1 } : {}),
-                  ...(isGlucose ? { glucoseValue: value1 } : {}),
-                  ...(isBowel ? { bristolScore: value1, bowelColor } : {}),
-                  ...(eventType === "note" ? { note: value1 } : {}),
-                  ...(eventType === "note" ? { context: note } : { note }),
-                  ...(eventType === "note"
-                    ? {
-                        alarmEnabled,
-                        alarmAt: alarmEnabled ? alarmAt : null,
-                      }
-                    : {}),
-                });
-
-                onClose();
-              }}
-              style={{
-                ...buttonStyle,
-                background: "#dcfce7",
-                border: "1px solid #86efac",
-                color: "#166534",
-                fontWeight: 800,
-              }}
-            >
-              Opslaan
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    </CompanionModalShell>
   );
 }

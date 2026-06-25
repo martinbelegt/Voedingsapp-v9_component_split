@@ -31,6 +31,7 @@ export function CompanionModalShell({
   title,
   subtitle,
   size = "md",
+  footerStart,
   footer,
   children,
 }) {
@@ -159,11 +160,12 @@ export function CompanionModalShell({
           {children}
         </div>
 
-        {footer ? (
+        {footer || footerStart ? (
           <footer
             style={{
               display: "flex",
-              justifyContent: "flex-end",
+              justifyContent: footerStart ? "space-between" : "flex-end",
+              alignItems: "center",
               gap: 8,
               flexWrap: "wrap",
               padding: "12px 16px 16px",
@@ -171,7 +173,16 @@ export function CompanionModalShell({
               background: COLORS.sageValue,
             }}
           >
-            {footer}
+            {footerStart ? (
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {footerStart}
+              </div>
+            ) : null}
+            {footer ? (
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {footer}
+              </div>
+            ) : null}
           </footer>
         ) : null}
       </section>
