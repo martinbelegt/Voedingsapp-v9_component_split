@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { CompanionDateTimePicker } from "../ui/pickers/CompanionDateTimePicker";
+import { CompanionModalShell } from "../ui/modals/CompanionModalShell";
 
 const colors = {
   sage: "#6D9F71",
@@ -76,7 +77,13 @@ function Swatch({ name, value, background }) {
   );
 }
 
-function DemoButton({ variant, children, large = false, small = false }) {
+function DemoButton({
+  variant,
+  children,
+  large = false,
+  small = false,
+  onClick,
+}) {
   const styles = {
     primary: {
       background: colors.sage,
@@ -98,6 +105,7 @@ function DemoButton({ variant, children, large = false, small = false }) {
   return (
     <button
       type="button"
+      onClick={onClick}
       style={{
         minHeight: large ? 56 : small ? 34 : 44,
         padding: large ? "14px 20px" : small ? "6px 10px" : "10px 14px",
@@ -146,6 +154,8 @@ export function CompanionDesignLab() {
   const [dateValue, setDateValue] = useState("2026-06-24");
   const [timeValue, setTimeValue] = useState("08:30");
   const [dateTimeValue, setDateTimeValue] = useState("2026-06-24T08:30");
+  const [activeModal, setActiveModal] = useState(null);
+  const closeModal = () => setActiveModal(null);
 
   return (
     <main
@@ -227,6 +237,23 @@ export function CompanionDesignLab() {
           <DemoCard title="Soft Alert Card" tone="alert">
             Lichte contextkaart voor aandacht zonder alarmgevoel.
           </DemoCard>
+        </div>
+      </Section>
+
+      <Section title="Modals">
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <DemoButton variant="secondary" onClick={() => setActiveModal("small")}>
+            Kleine modal
+          </DemoButton>
+          <DemoButton variant="secondary" onClick={() => setActiveModal("medium")}>
+            Medium modal
+          </DemoButton>
+          <DemoButton variant="secondary" onClick={() => setActiveModal("scroll")}>
+            Scrollbare modal
+          </DemoButton>
+          <DemoButton variant="primary" onClick={() => setActiveModal("footer")}>
+            Modal met footer
+          </DemoButton>
         </div>
       </Section>
 
@@ -322,6 +349,88 @@ export function CompanionDesignLab() {
           ))}
         </div>
       </Section>
+
+      <CompanionModalShell
+        open={activeModal === "small"}
+        onClose={closeModal}
+        title="Kleine modal"
+        subtitle="Compacte bevestiging of korte uitleg."
+        size="sm"
+      >
+        <div style={{ color: colors.text, lineHeight: 1.5 }}>
+          Een kleine Companion modal voor korte beslissingen, heldere feedback
+          of een compacte instelling.
+        </div>
+      </CompanionModalShell>
+
+      <CompanionModalShell
+        open={activeModal === "medium"}
+        onClose={closeModal}
+        title="Medium modal"
+        subtitle="Basisformaat voor de meeste Companion dialogen."
+        size="md"
+      >
+        <div style={{ display: "grid", gap: 12 }}>
+          <DemoCard title="Rustige inhoud" tone="highlight">
+            De shell houdt header, body en sluitknop consistent, terwijl de body
+            vrij blijft voor feature-inhoud.
+          </DemoCard>
+          <DemoCard title="Veilige mobiele basis">
+            De inhoud blijft binnen het scherm en kan intern scrollen wanneer
+            dat nodig is.
+          </DemoCard>
+        </div>
+      </CompanionModalShell>
+
+      <CompanionModalShell
+        open={activeModal === "scroll"}
+        onClose={closeModal}
+        title="Lange scrollbare inhoud"
+        subtitle="De body scrollt binnen de modal."
+        size="md"
+      >
+        <div style={{ display: "grid", gap: 10 }}>
+          {Array.from({ length: 12 }, (_, index) => (
+            <div
+              key={index}
+              style={{
+                padding: 12,
+                borderRadius: 14,
+                background: colors.sageValue,
+                border: `1px solid ${colors.sageBorder}`,
+                color: colors.text,
+                lineHeight: 1.4,
+              }}
+            >
+              Scroll item {index + 1}: voorbeeldinhoud voor langere lijsten,
+              instellingen of context rond een gezondheidsmoment.
+            </div>
+          ))}
+        </div>
+      </CompanionModalShell>
+
+      <CompanionModalShell
+        open={activeModal === "footer"}
+        onClose={closeModal}
+        title="Modal met footer"
+        subtitle="Acties blijven gescheiden van de inhoud."
+        size="lg"
+        footer={
+          <>
+            <DemoButton variant="ghost" small onClick={closeModal}>
+              Annuleren
+            </DemoButton>
+            <DemoButton variant="primary" small onClick={closeModal}>
+              Opslaan
+            </DemoButton>
+          </>
+        }
+      >
+        <div style={{ color: colors.text, lineHeight: 1.55 }}>
+          Footer-acties krijgen een vaste, rustige plek onderaan. Dit is bedoeld
+          voor toekomstige formulieren, bevestigingen en begeleide workflows.
+        </div>
+      </CompanionModalShell>
     </main>
   );
 }
