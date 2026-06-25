@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { CompanionButton } from "../ui/buttons/CompanionButton";
 import { CompanionDateTimePicker } from "../ui/pickers/CompanionDateTimePicker";
 import { CompanionModalShell } from "../ui/modals/CompanionModalShell";
 
@@ -213,16 +214,47 @@ export function CompanionDesignLab() {
       </Section>
 
       <Section title="Buttons">
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <DemoButton variant="primary">Primary button</DemoButton>
-          <DemoButton variant="secondary">Secondary button</DemoButton>
-          <DemoButton variant="ghost">Ghost button</DemoButton>
-          <DemoButton variant="secondary" small>
-            Small button
-          </DemoButton>
-          <DemoButton variant="primary" large>
-            Large touch button
-          </DemoButton>
+        <div style={{ display: "grid", gap: 16 }}>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <CompanionButton variant="primary">Primary</CompanionButton>
+            <CompanionButton variant="secondary">Secondary</CompanionButton>
+            <CompanionButton variant="danger">Danger</CompanionButton>
+            <CompanionButton variant="ghost">Ghost</CompanionButton>
+          </div>
+
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <CompanionButton variant="primary" size="sm">
+              Small
+            </CompanionButton>
+            <CompanionButton variant="primary" size="md">
+              Medium
+            </CompanionButton>
+            <CompanionButton variant="primary" size="lg">
+              Large
+            </CompanionButton>
+          </div>
+
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <CompanionButton variant="primary" icon="plus">
+              Icon links
+            </CompanionButton>
+            <CompanionButton variant="secondary" iconRight="chevronRight">
+              Icon rechts
+            </CompanionButton>
+            <CompanionButton variant="danger" icon="trash">
+              Verwijderen
+            </CompanionButton>
+            <CompanionButton variant="secondary" disabled>
+              Disabled
+            </CompanionButton>
+            <CompanionButton variant="primary" loading>
+              Opslaan
+            </CompanionButton>
+          </div>
+
+          <CompanionButton variant="primary" fullWidth>
+            Full width button
+          </CompanionButton>
         </div>
       </Section>
 
