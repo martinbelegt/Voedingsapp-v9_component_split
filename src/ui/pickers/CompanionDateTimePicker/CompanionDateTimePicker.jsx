@@ -520,6 +520,9 @@ export function CompanionDateTimePicker({
     collapseAfterSelection();
   }
 
+  const modalTopOffset = "max(150px, calc(env(safe-area-inset-top) + 120px))";
+  const modalMaxHeight = `min(85vh, calc(100vh - ${modalTopOffset} - 12px))`;
+
   const compactSummary = (
     <button
       type="button"
@@ -620,7 +623,7 @@ export function CompanionDateTimePicker({
       style={{
         width: "100%",
         maxWidth: compact ? 420 : "none",
-        maxHeight: compact ? "85vh" : "none",
+        maxHeight: compact ? modalMaxHeight : "none",
         overflowY: compact ? "auto" : "visible",
         boxSizing: "border-box",
         border: `1px solid ${COLORS.border}`,
@@ -979,7 +982,7 @@ export function CompanionDateTimePicker({
             display: "flex",
             alignItems: "flex-start",
             justifyContent: "center",
-            padding: "70px 12px 12px",
+            padding: `${modalTopOffset} 12px 12px`,
             background: "rgba(15, 23, 42, 0.22)",
             boxSizing: "border-box",
             overflowY: "auto",
@@ -993,7 +996,7 @@ export function CompanionDateTimePicker({
             style={{
               width: "calc(100vw - 24px)",
               maxWidth: 420,
-              maxHeight: "85vh",
+              maxHeight: modalMaxHeight,
             }}
           >
             {pickerPanel}
