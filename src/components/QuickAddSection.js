@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { DailyEventTimeEditorModal } from "./daily/DailyEventTimeEditorModal";
+import { CompanionDateTimePicker } from "../ui/pickers/CompanionDateTimePicker";
 
 export function QuickAddSection(props) {
   const {
@@ -19,7 +19,6 @@ export function QuickAddSection(props) {
   } = props;
 
   const [flashAction, setFlashAction] = useState(null);
-  const [showTimeEditor, setShowTimeEditor] = useState(false);
 
   const isMobile =
     window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
@@ -28,12 +27,10 @@ export function QuickAddSection(props) {
     ...inputStyle,
     ...(isMobile
       ? {
-          padding: "2px 6px",
-          height: 32,
-          minHeight: 32,
-          maxHeight: 32,
+          padding: "5px 8px",
+          minHeight: 34,
           fontSize: 16,
-          lineHeight: 1,
+          lineHeight: 1.1,
           borderRadius: 6,
           boxSizing: "border-box",
           width: "100%",
@@ -49,7 +46,6 @@ export function QuickAddSection(props) {
     ...(isMobile
       ? {
           padding: "4px 8px",
-          height: 32,
           minHeight: 32,
           fontSize: 12,
           lineHeight: 1,
@@ -63,116 +59,28 @@ export function QuickAddSection(props) {
     setTimeout(() => setFlashAction(null), 650);
   }
 
-  const dateTimeValue = `${dayMealDate}T${dayMealTime || "00:00"}`;
-  const dateTimeLabel = (() => {
-    const date = dayMealDate
-      ? new Date(`${dayMealDate}T12:00:00`).toLocaleDateString("nl-NL", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })
-      : "Kies datum";
-
-    return `${date} • ${dayMealTime || "--:--"}`;
-  })();
-
-  if (isMobile) {
-    return (
-      <div
-        style={{
-          ...cardStyle,
-          padding: 5,
-        }}
-      >
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "0.9fr 1.45fr",
-            gap: 4,
-            alignItems: "center",
-          }}
-        >
-          <select
-            value={dayMealMoment}
-            onChange={(e) => setDayMealMoment(e.target.value)}
-            style={dashboardInputStyle}
-          >
-            <option value="breakfast">Ontbijt</option>
-            <option value="lunch">Lunch</option>
-            <option value="dinner">Diner</option>
-            <option value="eveningMeal">Avondeten</option>
-            <option value="nightMeal">Nocturnal Protection 21:30</option>
-            <option value="lateMeal">Late maaltijd/snack</option>
-            <option value="pppMeal">PPP / vertraagde maaltijd</option>
-            <option value="snack">Snack</option>
-            <option value="dessert">Toetje</option>
-            <option value="fruit">Fruit</option>
-            <option value="sport">Sportvoeding</option>
-            <option value="recovery">Herstelmoment</option>
-            <option value="neutral">Algemeen</option>
-          </select>
-
-          <button
-            type="button"
-            onClick={() => setShowTimeEditor(true)}
-            style={{
-              ...dashboardInputStyle,
-              cursor: "pointer",
-              textAlign: "left",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {dateTimeLabel}
-          </button>
-
-          <button
-            onClick={() => {
-              addCurrentMealToSelectedDay();
-              flash("add");
-            }}
-            style={{
-              ...dashboardButtonStyle,
-              gridColumn: "1 / -1",
-              background: flashAction === "add" ? "#22c55e" : "#dcfce7",
-              color: flashAction === "add" ? "white" : "#166534",
-              border: "1px solid #86efac",
-              fontWeight: 700,
-            }}
-          >
-            Voeg toe
-          </button>
-        </div>
-
-        {showTimeEditor && (
-          <DailyEventTimeEditorModal
-            initialValue={dateTimeValue}
-            buttonStyle={buttonStyle}
-            onSave={(nextValue) => {
-              const [nextDate, nextTime] = String(nextValue).split("T");
-              if (nextDate) setDayMealDate(nextDate);
-              if (nextTime) setDayMealTime(nextTime.slice(0, 5));
-            }}
-            onClose={() => setShowTimeEditor(false)}
-          />
-        )}
-      </div>
-    );
+  function updateMealDateTime(nextValue) {
+    const [nextDate, nextTime] = String(nextValue).split("T");
+    if (nextDate) setDayMealDate(nextDate);
+    if (nextTime) setDayMealTime(nextTime.slice(0, 5));
   }
+
+  const dateTimeValue = `${dayMealDate}T${dayMealTime || "00:00"}`;
 
   return (
     <div
       style={{
         ...cardStyle,
-        padding: cardStyle?.padding,
+        padding: isMobile ? 5 : cardStyle?.padding,
       }}
     >
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "150px 140px 110px 130px 1fr 1fr",
-          gap: 8,
+          gridTemplateColumns: isMobile
+            ? "1fr"
+            : "150px minmax(280px, 1fr) 130px 1fr 1fr",
+          gap: isMobile ? 6 : 8,
           alignItems: "center",
         }}
       >
@@ -196,27 +104,13 @@ export function QuickAddSection(props) {
           <option value="neutral">Algemeen</option>
         </select>
 
-        <input
-          type="date"
-          value={dayMealDate}
-          onChange={(e) => setDayMealDate(e.target.value)}
-          onClick={(e) => {
-            if (e.currentTarget.showPicker) {
-              e.currentTarget.showPicker();
-            }
-          }}
-          style={{
-            ...dashboardInputStyle,
-            cursor: "pointer",
-          }}
-        />
-
-        <input
-          type="time"
-          value={dayMealTime}
-          onChange={(e) => setDayMealTime(e.target.value)}
-          style={dashboardInputStyle}
-          title="Tijd van eetmoment"
+        <CompanionDateTimePicker
+          value={dateTimeValue}
+          onChange={updateMealDateTime}
+          mode="datetime"
+          label="Datum en tijd"
+          compact
+          contextItems={[]}
         />
 
         <select
@@ -245,21 +139,23 @@ export function QuickAddSection(props) {
           Voeg toe
         </button>
 
-        <button
-          onClick={() => {
-            addCurrentMealToSelectedDayAndClear();
-            flash("addClear");
-          }}
-          style={{
-            ...dashboardButtonStyle,
-            background: flashAction === "addClear" ? "#2563eb" : "#eff6ff",
-            color: flashAction === "addClear" ? "white" : "#1d4ed8",
-            border: "1px solid #bfdbfe",
-            fontWeight: 700,
-          }}
-        >
-          + nieuwe maaltijd
-        </button>
+        {!isMobile && (
+          <button
+            onClick={() => {
+              addCurrentMealToSelectedDayAndClear();
+              flash("addClear");
+            }}
+            style={{
+              ...dashboardButtonStyle,
+              background: flashAction === "addClear" ? "#2563eb" : "#eff6ff",
+              color: flashAction === "addClear" ? "white" : "#1d4ed8",
+              border: "1px solid #bfdbfe",
+              fontWeight: 700,
+            }}
+          >
+            + nieuwe maaltijd
+          </button>
+        )}
       </div>
     </div>
   );

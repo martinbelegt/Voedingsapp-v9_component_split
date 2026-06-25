@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import { CompanionDateTimePicker } from "../ui/pickers/CompanionDateTimePicker";
 
 const colors = {
-  amber: "#D89A3A",
-  amberSoft: "#FFF4E0",
-  amberBorder: "#F2C879",
-  sage: "#8FAF87",
-  sageSoft: "#F0F7EE",
+  sage: "#6D9F71",
+  sageDark: "#4F7D55",
+  sageSoft: "#A7CFAF",
+  sageVeryLight: "#EAF3EC",
+  sageValue: "#EEF7F0",
+  sageBorder: "#C9DDCE",
   teal: "#6AAEAA",
   tealSoft: "#EEF8F7",
   blue: "#9CB7D6",
@@ -19,9 +20,12 @@ const colors = {
   card: "#FFFFFF",
 };
 
+const fontStack =
+  '"Segoe UI", "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif';
+
 const sectionStyle = {
   background: colors.card,
-  border: "1px solid #edf0ed",
+  border: `1px solid ${colors.sageBorder}`,
   borderRadius: 24,
   padding: 20,
   boxShadow: "0 14px 36px rgba(31, 41, 51, 0.08)",
@@ -75,14 +79,14 @@ function Swatch({ name, value, background }) {
 function DemoButton({ variant, children, large = false, small = false }) {
   const styles = {
     primary: {
-      background: colors.amber,
-      border: `1px solid ${colors.amber}`,
+      background: colors.sage,
+      border: `1px solid ${colors.sage}`,
       color: "#ffffff",
     },
     secondary: {
-      background: colors.amberSoft,
-      border: `1px solid ${colors.amberBorder}`,
-      color: "#8A5A16",
+      background: colors.sageVeryLight,
+      border: `1px solid ${colors.sageBorder}`,
+      color: colors.text,
     },
     ghost: {
       background: "transparent",
@@ -102,7 +106,7 @@ function DemoButton({ variant, children, large = false, small = false }) {
         fontWeight: 900,
         cursor: "pointer",
         boxShadow:
-          variant === "primary" ? "0 8px 20px rgba(216, 154, 58, 0.22)" : "none",
+          variant === "primary" ? "0 8px 20px rgba(109, 159, 113, 0.22)" : "none",
         ...styles[variant],
       }}
     >
@@ -114,9 +118,9 @@ function DemoButton({ variant, children, large = false, small = false }) {
 function DemoCard({ title, children, tone = "basic" }) {
   const toneStyle =
     tone === "highlight"
-      ? { background: colors.amberSoft, border: `1px solid ${colors.amberBorder}` }
+      ? { background: colors.sageVeryLight, border: `1px solid ${colors.sageBorder}` }
       : tone === "alert"
-        ? { background: colors.linenSoft, border: "1px solid #e7d7ba" }
+        ? { background: colors.sageValue, border: "1px solid #D8E7DB" }
         : { background: colors.card, border: "1px solid #e5e7eb" };
 
   return (
@@ -150,12 +154,13 @@ export function CompanionDesignLab() {
         gap: 18,
         background: colors.app,
         color: colors.text,
+        fontFamily: fontStack,
       }}
     >
       <header style={sectionStyle}>
         <div
           style={{
-            color: colors.amber,
+            color: colors.sageDark,
             fontSize: 12,
             fontWeight: 900,
             textTransform: "uppercase",
@@ -183,11 +188,17 @@ export function CompanionDesignLab() {
 
       <Section title="Kleurpalet">
         <div style={gridStyle}>
-          <Swatch name="Warm Amber" value="#D89A3A" background={colors.amber} />
-          <Swatch name="Sage Green" value="#8FAF87" background={colors.sage} />
+          <Swatch name="Primary Sage" value="#6D9F71" background={colors.sage} />
+          <Swatch name="Soft Sage" value="#A7CFAF" background={colors.sageSoft} />
+          <Swatch
+            name="Very Light Sage"
+            value="#EAF3EC"
+            background={colors.sageVeryLight}
+          />
           <Swatch name="Soft Teal" value="#6AAEAA" background={colors.teal} />
           <Swatch name="Mist Blue" value="#9CB7D6" background={colors.blue} />
           <Swatch name="Sand / Linen" value="#E8DCC8" background={colors.linen} />
+          <Swatch name="Text Dark Blue" value="#0F172A" background={colors.text} />
         </div>
       </Section>
 
@@ -211,10 +222,10 @@ export function CompanionDesignLab() {
             Rustige basiskaart voor informatie, instellingen of kleine tools.
           </DemoCard>
           <DemoCard title="Highlight Card" tone="highlight">
-            Zachte amberkaart voor positieve nadruk of actieve selectie.
+            Zachte sagekaart voor positieve nadruk of actieve selectie.
           </DemoCard>
           <DemoCard title="Soft Alert Card" tone="alert">
-            Warme, niet-schreeuwerige kaart voor context of aandacht.
+            Lichte contextkaart voor aandacht zonder alarmgevoel.
           </DemoCard>
         </div>
       </Section>
@@ -264,6 +275,38 @@ export function CompanionDesignLab() {
           >
             Small label
           </div>
+        </div>
+      </Section>
+
+      <Section title="Contextruimte">
+        <div style={gridStyle}>
+          {[
+            ["Laatste maaltijd", "Havermout · 08:10"],
+            ["Geplande medicatie", "Creon bij lunch · 12:00"],
+            ["Glucosemeting", "Laatste waarde 6.8 mmol/L"],
+          ].map(([title, text]) => (
+            <div
+              key={title}
+              style={{
+                padding: 16,
+                borderRadius: 20,
+                background: colors.sageValue,
+                border: `1px solid ${colors.sageBorder}`,
+              }}
+            >
+              <div style={{ color: colors.text, fontWeight: 800 }}>{title}</div>
+              <div
+                style={{
+                  color: colors.muted,
+                  fontSize: 14,
+                  lineHeight: 1.45,
+                  marginTop: 4,
+                }}
+              >
+                {text}
+              </div>
+            </div>
+          ))}
         </div>
       </Section>
     </main>

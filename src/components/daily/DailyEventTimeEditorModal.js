@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { CompanionDateTimePicker } from "../../ui/pickers/CompanionDateTimePicker";
 
 export function DailyEventTimeEditorModal({
   initialValue,
@@ -7,9 +8,6 @@ export function DailyEventTimeEditorModal({
   onClose,
 }) {
   const [draftValue, setDraftValue] = useState(initialValue || "");
-
-  const isMobile =
-    window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
 
   return (
     <div
@@ -61,37 +59,13 @@ export function DailyEventTimeEditorModal({
           Kies de werkelijke of geplande datum en tijd van dit eetmoment.
         </div>
 
-        {/* Datum/tijd invoer */}
-        <input
-          type="datetime-local"
+        <CompanionDateTimePicker
           value={draftValue}
-          onChange={(e) => setDraftValue(e.target.value)}
-          onClick={(e) => {
-            if (e.currentTarget.showPicker) {
-              e.currentTarget.showPicker();
-            }
-          }}
-          style={{
-            width: "100%",
-
-            boxSizing: "border-box",
-
-            padding: isMobile ? "12px 11px" : "10px 11px",
-
-            borderRadius: 10,
-
-            border: "1px solid #cbd5e1",
-
-            fontSize: isMobile ? 16 : 14,
-
-            marginBottom: 14,
-
-            cursor: "pointer",
-
-            minHeight: 46,
-
-            WebkitAppearance: "none",
-          }}
+          onChange={setDraftValue}
+          mode="datetime"
+          label="Datum en tijd"
+          compact
+          contextItems={[]}
         />
 
         {/* Acties */}

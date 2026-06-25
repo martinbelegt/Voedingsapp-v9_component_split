@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DailyMealList } from "./DailyMealList";
 import { DailyEventAddModal } from "./DailyEventAddModal";
 import { requestNotificationPermission } from "../../services/notificationService";
+import { CompanionDateTimePicker } from "../../ui/pickers/CompanionDateTimePicker";
 
 import {
   scheduleLocalAlarm,
@@ -58,7 +59,6 @@ export function DailyTab({
   const [showAddButtons, setShowAddButtons] = useState(false);
   const [showTimelineControls, setShowTimelineControls] = useState(false);
   const [activeAlarm, setActiveAlarm] = useState(null);
-  const dateInputRef = useRef(null);
 
   const mealsForDay = selectedDay?.meals || [];
   const insulinEventsForDay = selectedDay?.insulinEvents || [];
@@ -284,76 +284,17 @@ export function DailyTab({
               width: "100%",
             }}
           >
-            <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
-              <button
-                type="button"
-                onClick={() => {
-                  if (dateInputRef.current?.showPicker) {
-                    dateInputRef.current.showPicker();
-                  } else {
-                    dateInputRef.current?.focus();
-                    dateInputRef.current?.click();
-                  }
-                }}
-                style={{
-                  ...buttonStyle,
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 8,
-                  background: "#fff",
-                  border: "1px solid #bfdbfe",
-                  color: "#0f172a",
-                  borderRadius: 10,
-                  minHeight: 42,
-                  padding: "8px 10px",
-                  textAlign: "left",
-                  cursor: "pointer",
-                }}
-              >
-                <span
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    fontSize: 12,
-                    fontWeight: 800,
-                    lineHeight: 1.1,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <span aria-hidden="true">📅</span>
-                  <span>
-                    {dayMode} • {formattedSelectedDate}
-                  </span>
-                </span>
-              </button>
-              <input
-                ref={dateInputRef}
-                type="date"
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <CompanionDateTimePicker
                 value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                style={
-                  /iPhone|iPad|iPod/i.test(navigator.userAgent)
-                    ? {
-                        position: "absolute",
-                        inset: 0,
-                        width: "100%",
-                        height: "100%",
-                        opacity: 0,
-                        cursor: "pointer",
-                      }
-                    : {
-                        position: "absolute",
-                        opacity: 0,
-                        width: 1,
-                        height: 1,
-                        pointerEvents: "none",
-                      }
-                }
+                onChange={setSelectedDate}
+                mode="date"
+                label={`${dayMode} · ${formattedSelectedDate}`}
+                compact
+                contextItems={[]}
               />
             </div>
+
 
             {selectedDate !== today && (
               <button

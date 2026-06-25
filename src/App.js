@@ -2136,10 +2136,10 @@ Producten uit deze categorie gaan naar "Overig".`);
                     ? primaryButtonStyle
                     : buttonStyle),
                   borderRadius: 999,
-                  border: "1px solid #D89A3A",
+                  border: "1px solid #6D9F71",
                   background:
-                    activeDevTab === "playground" ? "#D89A3A" : "#FFF4E0",
-                  color: activeDevTab === "playground" ? "#ffffff" : "#8A5A16",
+                    activeDevTab === "playground" ? "#6D9F71" : "#EAF3EC",
+                  color: activeDevTab === "playground" ? "#ffffff" : "#0F172A",
                   fontWeight: 900,
                 }}
               >
@@ -2153,10 +2153,10 @@ Producten uit deze categorie gaan naar "Overig".`);
                     ? primaryButtonStyle
                     : buttonStyle),
                   borderRadius: 999,
-                  border: "1px solid #D89A3A",
+                  border: "1px solid #6D9F71",
                   background:
-                    activeDevTab === "designLab" ? "#D89A3A" : "#FFF4E0",
-                  color: activeDevTab === "designLab" ? "#ffffff" : "#8A5A16",
+                    activeDevTab === "designLab" ? "#6D9F71" : "#EAF3EC",
+                  color: activeDevTab === "designLab" ? "#ffffff" : "#0F172A",
                   fontWeight: 900,
                 }}
               >

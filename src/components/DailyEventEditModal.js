@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { CompanionDateTimePicker } from "../ui/pickers/CompanionDateTimePicker";
 
 const BOWEL_COLOR_OPTIONS = [
   {
@@ -127,21 +128,13 @@ export function DailyEventEditModal({
       >
         <h3 style={{ marginTop: 0, marginBottom: 12 }}>Moment wijzigen</h3>
 
-        <label style={{ fontSize: 13, fontWeight: 800 }}>Datum en tijd</label>
-        <input
-          type="datetime-local"
+        <CompanionDateTimePicker
           value={eventTime}
-          onChange={(e) => setEventTime(e.target.value)}
-          style={{
-            width: "100%",
-            boxSizing: "border-box",
-            fontSize: 16,
-            padding: "10px 11px",
-            marginTop: 4,
-            marginBottom: 10,
-            borderRadius: 8,
-            border: "1px solid #cbd5e1",
-          }}
+          onChange={setEventTime}
+          mode="datetime"
+          label="Datum en tijd"
+          compact
+          contextItems={[]}
         />
 
         <label style={{ fontSize: 13, fontWeight: 800 }}>
@@ -271,17 +264,13 @@ export function DailyEventEditModal({
               Alarmtijd
             </label>
 
-            <input
-              type="datetime-local"
+            <CompanionDateTimePicker
               value={alarmAt}
-              onChange={(e) => setAlarmAt(e.target.value)}
-              style={{
-                width: "100%",
-                padding: 8,
-                border: "1px solid #cbd5e1",
-                borderRadius: 8,
-                fontSize: 16,
-              }}
+              onChange={setAlarmAt}
+              mode="datetime"
+              label="Alarmtijd"
+              compact
+              contextItems={[]}
             />
           </div>
         )}

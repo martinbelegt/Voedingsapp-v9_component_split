@@ -10,15 +10,42 @@ import {
 
 const VALID_MODES = new Set(["date", "time", "datetime"]);
 const COLORS = {
-  primary: "#D89A3A",
-  soft: "#FFF4E0",
-  hover: "#FFE8B8",
-  border: "#F2C879",
-  text: "#1F2933",
+  primary: "#6D9F71",
+  primaryDark: "#4F7D55",
+  soft: "#A7CFAF",
+  veryLight: "#EAF3EC",
+  value: "#EEF7F0",
+  border: "#C9DDCE",
+  borderStrong: "#8DBB95",
+  text: "#0F172A",
   muted: "#6B7280",
   card: "#FFFFFF",
   app: "#FAFBFA",
 };
+
+const FONT_STACK =
+  '"Segoe UI", "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif';
+
+const DEMO_CONTEXT_ITEMS = [
+  {
+    id: "meal",
+    icon: "M",
+    title: "Geplande maaltijd",
+    meta: "Lunch met Emma · 12:00-13:00",
+  },
+  {
+    id: "medication",
+    icon: "Rx",
+    title: "Medicatie",
+    meta: "Herinnering om 15:00",
+  },
+  {
+    id: "movement",
+    icon: "S",
+    title: "Sportmoment",
+    meta: "Hardlopen · 18:30-19:15",
+  },
+];
 
 function pad2(value) {
   return String(value).padStart(2, "0");
@@ -33,8 +60,10 @@ function todayDate(offsetDays = 0) {
   )}`;
 }
 
-function currentTime() {
+function currentTime(offsetMinutes = 0) {
   const date = new Date();
+  date.setMinutes(date.getMinutes() + offsetMinutes);
+
   return `${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
 }
 
@@ -97,9 +126,9 @@ function getDisplayValue(mode, value) {
 }
 
 function fieldLabel(mode) {
-  if (mode === "date") return "Datum";
-  if (mode === "time") return "Tijd";
-  return "Datum en tijd";
+  if (mode === "date") return "Kies datum";
+  if (mode === "time") return "Kies tijd";
+  return "Kies datum en tijd";
 }
 
 function quickChoices(mode) {
@@ -123,41 +152,254 @@ function quickChoices(mode) {
   return choices;
 }
 
-function NumberField({ label, value, width, onChange, disabled }) {
+function buildValueBlocks(mode, dateParts, timeParts) {
+  const dateValue = buildDateValue(dateParts);
+  const timeValue = buildTimeValue(timeParts);
+  const blocks = [];
+
+  if (mode === "date" || mode === "datetime") {
+    blocks.push({
+      key: "date",
+      label: "Datum",
+      value: formatDateForDisplay(dateValue) || "Kies datum",
+    });
+  }
+
+  if (mode === "time" || mode === "datetime") {
+    blocks.push({
+      key: "time",
+      label: "Tijd",
+      value: formatTimeForDisplay(timeValue) || "Kies tijd",
+    });
+  }
+
+  return blocks;
+}
+
+function adjustDatePart(parts, key, direction) {
+  const currentDate = buildDateValue(parts) || todayDate();
+  const [year, month, day] = currentDate.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+
+  if (key === "day") date.setDate(date.getDate() + direction);
+  if (key === "month") date.setMonth(date.getMonth() + direction);
+  if (key === "year") date.setFullYear(date.getFullYear() + direction);
+
+  return createDateParts(
+    `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(
+      date.getDate(),
+    )}`,
+  );
+}
+
+function adjustTimePart(parts, key, direction) {
+  const currentTimeValue = buildTimeValue(parts) || currentTime();
+  const [hour, minute] = currentTimeValue.split(":").map(Number);
+  const date = new Date();
+  date.setHours(hour);
+  date.setMinutes(minute);
+  date.setSeconds(0);
+  date.setMilliseconds(0);
+
+  if (key === "hour") date.setHours(date.getHours() + direction);
+  if (key === "minute") date.setMinutes(date.getMinutes() + direction * 5);
+
+  return createTimeParts(`${pad2(date.getHours())}:${pad2(date.getMinutes())}`);
+}
+
+function StepperField({ label, value, onAdjust, disabled }) {
   return (
-    <label style={{ display: "grid", gap: 6, minWidth: 0 }}>
-      <span
+    <div
+      style={{
+        minWidth: 0,
+        border: `1px solid ${COLORS.border}`,
+        borderRadius: 16,
+        background: COLORS.value,
+        padding: 8,
+        display: "grid",
+        gap: 6,
+      }}
+    >
+      <div
         style={{
-          fontSize: 11,
-          fontWeight: 900,
           color: COLORS.muted,
+          fontSize: 11,
+          fontWeight: 700,
+          letterSpacing: 0.2,
           textTransform: "uppercase",
         }}
       >
         {label}
-      </span>
-      <input
-        value={value}
-        disabled={disabled}
-        inputMode="numeric"
-        onChange={(event) => onChange(event.target.value.replace(/\D/g, ""))}
+      </div>
+      <div
         style={{
-          width,
-          maxWidth: "100%",
-          minHeight: 48,
-          boxSizing: "border-box",
-          border: `1px solid ${COLORS.border}`,
-          borderRadius: 14,
-          background: disabled ? "#f3f4f6" : COLORS.card,
-          color: disabled ? "#9ca3af" : COLORS.text,
-          padding: "10px 12px",
-          fontSize: 16,
-          fontWeight: 900,
-          textAlign: "center",
-          outlineColor: COLORS.primary,
+          display: "grid",
+          gridTemplateColumns: "38px 1fr 38px",
+          gap: 6,
+          alignItems: "center",
         }}
-      />
-    </label>
+      >
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => onAdjust(-1)}
+          aria-label={`${label} verlagen`}
+          style={{
+            minHeight: 38,
+            borderRadius: 12,
+            border: `1px solid ${COLORS.border}`,
+            background: disabled ? "#F3F4F6" : COLORS.card,
+            color: disabled ? "#9CA3AF" : COLORS.primaryDark,
+            cursor: disabled ? "not-allowed" : "pointer",
+            fontSize: 18,
+            fontWeight: 800,
+            lineHeight: 1,
+          }}
+        >
+          -
+        </button>
+        <div
+          style={{
+            minHeight: 38,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: COLORS.text,
+            fontSize: 18,
+            fontWeight: 750,
+            fontVariantNumeric: "tabular-nums",
+          }}
+        >
+          {value}
+        </div>
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => onAdjust(1)}
+          aria-label={`${label} verhogen`}
+          style={{
+            minHeight: 38,
+            borderRadius: 12,
+            border: `1px solid ${COLORS.border}`,
+            background: disabled ? "#F3F4F6" : COLORS.card,
+            color: disabled ? "#9CA3AF" : COLORS.primaryDark,
+            cursor: disabled ? "not-allowed" : "pointer",
+            fontSize: 18,
+            fontWeight: 800,
+            lineHeight: 1,
+          }}
+        >
+          +
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ContextPanel({ items }) {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gap: 10,
+        borderTop: "1px solid #E5EEE7",
+        paddingTop: 14,
+      }}
+    >
+      <div>
+        <div
+          style={{
+            color: COLORS.text,
+            fontSize: 14,
+            fontWeight: 750,
+            lineHeight: 1.25,
+          }}
+        >
+          Context rond dit moment
+        </div>
+        <div
+          style={{
+            color: COLORS.muted,
+            fontSize: 13,
+            lineHeight: 1.4,
+            marginTop: 2,
+          }}
+        >
+          Ruimte voor maaltijden, medicatie, sport, glucose en herinneringen.
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gap: 8 }}>
+        {items.map((item) => (
+          <div
+            key={item.id}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "34px 1fr auto",
+              gap: 10,
+              alignItems: "center",
+              padding: "10px 11px",
+              borderRadius: 16,
+              border: "1px solid #E4ECE6",
+              background: "#FCFDFC",
+            }}
+          >
+            <div
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 12,
+                background: COLORS.veryLight,
+                color: COLORS.primaryDark,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 12,
+                fontWeight: 850,
+              }}
+            >
+              {item.icon}
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  color: COLORS.text,
+                  fontSize: 14,
+                  fontWeight: 750,
+                  lineHeight: 1.25,
+                }}
+              >
+                {item.title}
+              </div>
+              <div
+                style={{
+                  color: COLORS.muted,
+                  fontSize: 13,
+                  marginTop: 2,
+                  lineHeight: 1.3,
+                }}
+              >
+                {item.meta}
+              </div>
+            </div>
+            <span
+              style={{
+                color: COLORS.primaryDark,
+                background: COLORS.veryLight,
+                border: `1px solid ${COLORS.border}`,
+                borderRadius: 999,
+                padding: "4px 8px",
+                fontSize: 12,
+                fontWeight: 750,
+                whiteSpace: "nowrap",
+              }}
+            >
+              Demo
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -168,6 +410,7 @@ export function CompanionDateTimePicker({
   label,
   disabled = false,
   compact = false,
+  contextItems = DEMO_CONTEXT_ITEMS,
 }) {
   const safeMode = VALID_MODES.has(mode) ? mode : "datetime";
   const normalizedValue = normalizeDateTimeValue(value, safeMode);
@@ -198,6 +441,11 @@ export function CompanionDateTimePicker({
     [safeMode, normalizedValue],
   );
 
+  const valueBlocks = useMemo(
+    () => buildValueBlocks(safeMode, dateParts, timeParts),
+    [dateParts, safeMode, timeParts],
+  );
+
   function emitDateTime(nextDateParts, nextTimeParts) {
     const nextDate = buildDateValue(nextDateParts);
     const nextTime = buildTimeValue(nextTimeParts);
@@ -217,17 +465,12 @@ export function CompanionDateTimePicker({
     }
   }
 
-  function updateDatePart(key, nextValue) {
-    const nextParts = {
-      ...dateParts,
-      [key]: nextValue.slice(0, key === "year" ? 4 : 2),
-    };
+  function updateDateParts(nextParts) {
     setDateParts(nextParts);
     emitDateTime(nextParts, timeParts);
   }
 
-  function updateTimePart(key, nextValue) {
-    const nextParts = { ...timeParts, [key]: nextValue.slice(0, 2) };
+  function updateTimeParts(nextParts) {
     setTimeParts(nextParts);
     emitDateTime(dateParts, nextParts);
   }
@@ -246,6 +489,7 @@ export function CompanionDateTimePicker({
   const title = label || fieldLabel(safeMode);
   const showDate = safeMode === "date" || safeMode === "datetime";
   const showTime = safeMode === "time" || safeMode === "datetime";
+  const visibleContextItems = compact ? [] : contextItems;
 
   return (
     <section
@@ -254,40 +498,43 @@ export function CompanionDateTimePicker({
         width: "100%",
         boxSizing: "border-box",
         border: `1px solid ${COLORS.border}`,
-        borderRadius: compact ? 18 : 24,
+        borderRadius: compact ? 20 : 28,
         background: COLORS.card,
-        boxShadow: "0 16px 40px rgba(216, 154, 58, 0.14)",
-        padding: compact ? 14 : 18,
+        boxShadow: "0 18px 44px rgba(15, 23, 42, 0.08)",
+        padding: compact ? 16 : 22,
         display: "grid",
-        gap: compact ? 12 : 16,
+        gap: compact ? 14 : 18,
+        color: COLORS.text,
+        fontFamily: FONT_STACK,
       }}
     >
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          gap: 12,
+          gap: 14,
           alignItems: "flex-start",
         }}
       >
-        <div>
+        <div style={{ minWidth: 0 }}>
           <div
             style={{
+              color: COLORS.primaryDark,
               fontSize: 12,
-              fontWeight: 900,
-              color: COLORS.primary,
+              fontWeight: 800,
+              letterSpacing: 0.2,
               textTransform: "uppercase",
-              marginBottom: 4,
+              marginBottom: 6,
             }}
           >
-            Companion Picker
+            Companion moment
           </div>
           <div
             style={{
               color: COLORS.text,
-              fontSize: compact ? 18 : 20,
-              fontWeight: 900,
-              lineHeight: 1.15,
+              fontSize: compact ? 20 : 22,
+              fontWeight: 800,
+              lineHeight: 1.14,
             }}
           >
             {title}
@@ -296,20 +543,70 @@ export function CompanionDateTimePicker({
 
         <div
           style={{
-            minHeight: 38,
+            minHeight: 36,
             display: "flex",
             alignItems: "center",
-            padding: "7px 10px",
+            padding: "7px 11px",
             borderRadius: 999,
-            background: COLORS.soft,
-            color: COLORS.primary,
+            background: COLORS.veryLight,
+            color: COLORS.text,
+            border: `1px solid ${COLORS.border}`,
             fontSize: 12,
-            fontWeight: 900,
+            fontWeight: 750,
             whiteSpace: "nowrap",
           }}
         >
           {safeMode}
         </div>
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gap: 10,
+          gridTemplateColumns:
+            valueBlocks.length > 1
+              ? "repeat(auto-fit, minmax(180px, 1fr))"
+              : "1fr",
+        }}
+      >
+        {valueBlocks.map((block) => (
+          <div
+            key={block.key}
+            style={{
+              minHeight: 72,
+              display: "grid",
+              alignContent: "center",
+              gap: 4,
+              padding: "14px 16px",
+              borderRadius: 18,
+              background: COLORS.value,
+              border: `1px solid ${COLORS.borderStrong}`,
+            }}
+          >
+            <div
+              style={{
+                color: COLORS.primaryDark,
+                fontSize: 12,
+                fontWeight: 750,
+                textTransform: "uppercase",
+                letterSpacing: 0.2,
+              }}
+            >
+              {block.label}
+            </div>
+            <div
+              style={{
+                color: COLORS.text,
+                fontSize: 20,
+                fontWeight: 800,
+                lineHeight: 1.2,
+              }}
+            >
+              {block.value}
+            </div>
+          </div>
+        ))}
       </div>
 
       <div
@@ -328,22 +625,22 @@ export function CompanionDateTimePicker({
             onMouseEnter={() => setHoveredChoice(choice.key)}
             onMouseLeave={() => setHoveredChoice(null)}
             style={{
-              minHeight: 42,
-              padding: "9px 13px",
-              borderRadius: 999,
+              minHeight: 44,
+              padding: "10px 14px",
+              borderRadius: 14,
               border: `1px solid ${COLORS.border}`,
               background:
                 !disabled && hoveredChoice === choice.key
-                  ? COLORS.hover
+                  ? COLORS.veryLight
                   : disabled
-                    ? "#f8fafc"
-                    : COLORS.soft,
-              color: disabled ? "#9ca3af" : COLORS.primary,
+                    ? "#F8FAFC"
+                    : COLORS.card,
+              color: disabled ? "#9CA3AF" : COLORS.text,
               cursor: disabled ? "not-allowed" : "pointer",
               fontSize: 14,
-              fontWeight: 900,
-              boxShadow: "0 1px 2px rgba(216, 154, 58, 0.12)",
-              transition: "background 140ms ease, transform 140ms ease",
+              fontWeight: 750,
+              boxShadow: "0 1px 2px rgba(15, 23, 42, 0.05)",
+              transition: "background 140ms ease, border-color 140ms ease",
             }}
           >
             {choice.label}
@@ -357,9 +654,8 @@ export function CompanionDateTimePicker({
           gap: 12,
           gridTemplateColumns:
             showDate && showTime
-              ? "repeat(auto-fit, minmax(180px, 1fr))"
+              ? "repeat(auto-fit, minmax(220px, 1fr))"
               : "1fr",
-          alignItems: "start",
         }}
       >
         {showDate ? (
@@ -368,41 +664,44 @@ export function CompanionDateTimePicker({
               display: "grid",
               gap: 10,
               padding: 12,
-              borderRadius: 18,
+              borderRadius: 20,
               background: COLORS.app,
-              border: "1px solid #f3eadb",
+              border: "1px solid #E5EEE7",
             }}
           >
-            <div style={{ color: COLORS.muted, fontSize: 13, fontWeight: 900 }}>
-              Datum
+            <div style={{ color: COLORS.text, fontSize: 14, fontWeight: 750 }}>
+              Datum verfijnen
             </div>
             <div
               style={{
                 display: "grid",
                 gap: 8,
-                gridTemplateColumns: "repeat(auto-fit, minmax(68px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fit, minmax(72px, 1fr))",
               }}
             >
-              <NumberField
+              <StepperField
                 label="Dag"
                 value={dateParts.day}
-                width="100%"
                 disabled={disabled}
-                onChange={(nextValue) => updateDatePart("day", nextValue)}
+                onAdjust={(direction) =>
+                  updateDateParts(adjustDatePart(dateParts, "day", direction))
+                }
               />
-              <NumberField
+              <StepperField
                 label="Maand"
                 value={dateParts.month}
-                width="100%"
                 disabled={disabled}
-                onChange={(nextValue) => updateDatePart("month", nextValue)}
+                onAdjust={(direction) =>
+                  updateDateParts(adjustDatePart(dateParts, "month", direction))
+                }
               />
-              <NumberField
+              <StepperField
                 label="Jaar"
                 value={dateParts.year}
-                width="100%"
                 disabled={disabled}
-                onChange={(nextValue) => updateDatePart("year", nextValue)}
+                onAdjust={(direction) =>
+                  updateDateParts(adjustDatePart(dateParts, "year", direction))
+                }
               />
             </div>
           </div>
@@ -414,13 +713,13 @@ export function CompanionDateTimePicker({
               display: "grid",
               gap: 10,
               padding: 12,
-              borderRadius: 18,
+              borderRadius: 20,
               background: COLORS.app,
-              border: "1px solid #f3eadb",
+              border: "1px solid #E5EEE7",
             }}
           >
-            <div style={{ color: COLORS.muted, fontSize: 13, fontWeight: 900 }}>
-              Tijd
+            <div style={{ color: COLORS.text, fontSize: 14, fontWeight: 750 }}>
+              Tijd verfijnen
             </div>
             <div
               style={{
@@ -429,19 +728,21 @@ export function CompanionDateTimePicker({
                 gridTemplateColumns: "1fr 1fr",
               }}
             >
-              <NumberField
+              <StepperField
                 label="Uur"
                 value={timeParts.hour}
-                width="100%"
                 disabled={disabled}
-                onChange={(nextValue) => updateTimePart("hour", nextValue)}
+                onAdjust={(direction) =>
+                  updateTimeParts(adjustTimePart(timeParts, "hour", direction))
+                }
               />
-              <NumberField
+              <StepperField
                 label="Min"
                 value={timeParts.minute}
-                width="100%"
                 disabled={disabled}
-                onChange={(nextValue) => updateTimePart("minute", nextValue)}
+                onAdjust={(direction) =>
+                  updateTimeParts(adjustTimePart(timeParts, "minute", direction))
+                }
               />
             </div>
           </div>
@@ -451,34 +752,39 @@ export function CompanionDateTimePicker({
       <div
         style={{
           display: "grid",
-          gap: 4,
-          padding: "12px 14px",
+          gap: 5,
+          padding: "13px 15px",
           borderRadius: 18,
-          background: `linear-gradient(135deg, ${COLORS.soft} 0%, #ffffff 100%)`,
-          border: `1px solid ${COLORS.border}`,
+          background: "linear-gradient(135deg, #F7FBF8 0%, #FFFFFF 100%)",
+          border: "1px solid #E5EEE7",
         }}
       >
         <div
           style={{
-            color: COLORS.primary,
-            fontSize: 11,
-            fontWeight: 900,
+            color: COLORS.muted,
+            fontSize: 12,
+            fontWeight: 750,
             textTransform: "uppercase",
+            letterSpacing: 0.2,
           }}
         >
-          Preview
+          Geselecteerde waarde
         </div>
         <div
           style={{
             color: COLORS.text,
             fontSize: 16,
-            fontWeight: 900,
+            fontWeight: 800,
             lineHeight: 1.25,
           }}
         >
           {displayValue || "Nog geen geldige waarde"}
         </div>
       </div>
+
+      {visibleContextItems.length > 0 ? (
+        <ContextPanel items={visibleContextItems} />
+      ) : null}
     </section>
   );
 }

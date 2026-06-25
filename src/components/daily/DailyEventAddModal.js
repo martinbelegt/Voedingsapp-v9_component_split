@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { CompanionDateTimePicker } from "../../ui/pickers/CompanionDateTimePicker";
 
 const BOWEL_COLOR_OPTIONS = [
   {
@@ -194,18 +195,13 @@ export function DailyEventAddModal({
           {config.title}
         </div>
 
-        <label style={{ fontSize: 13, fontWeight: 800 }}>Datum en tijd</label>
-        <input
-          type="datetime-local"
+        <CompanionDateTimePicker
           value={eventTime}
-          onChange={(e) => setEventTime(e.target.value)}
-          onClick={(e) => e.currentTarget.showPicker?.()}
-          style={{
-            ...mobileInputStyle,
-            marginTop: 4,
-            marginBottom: 12,
-            cursor: "pointer",
-          }}
+          onChange={setEventTime}
+          mode="datetime"
+          label="Datum en tijd"
+          compact
+          contextItems={[]}
         />
 
         <label style={{ fontSize: 13, fontWeight: 800 }}>{config.label1}</label>
