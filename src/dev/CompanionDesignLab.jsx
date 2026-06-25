@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { CompanionButton } from "../ui/buttons/CompanionButton";
+import { CompanionToolbarButton } from "../ui/buttons/CompanionToolbarButton";
 import { CompanionDateTimePicker } from "../ui/pickers/CompanionDateTimePicker";
 import { CompanionModalShell } from "../ui/modals/CompanionModalShell";
 
@@ -255,6 +256,36 @@ export function CompanionDesignLab() {
           <CompanionButton variant="primary" fullWidth>
             Full width button
           </CompanionButton>
+        </div>
+      </Section>
+
+      <Section title="Toolbar Buttons">
+        <div style={{ display: "grid", gap: 16 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <CompanionToolbarButton active icon="chart" label="Daganalyse" />
+            <CompanionToolbarButton icon="plus" label="Nieuw" />
+            <CompanionToolbarButton icon="gear" label="Filters" />
+            <CompanionToolbarButton label="Vandaag" />
+            <CompanionToolbarButton label="Morgen" />
+            <CompanionToolbarButton label="Nu" />
+          </div>
+
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <CompanionToolbarButton active label="Actief" />
+            <CompanionToolbarButton label="Niet actief" />
+            <CompanionToolbarButton icon="filter" label="Met icoon" />
+            <CompanionToolbarButton label="Zonder icoon" />
+            <CompanionToolbarButton label="Badge" badge={3} />
+            <CompanionToolbarButton disabled label="Disabled" />
+          </div>
+
+          <CompanionToolbarButton
+            fullWidth
+            active
+            icon="check"
+            label="Full width toolbar button"
+            badge="12"
+          />
         </div>
       </Section>
 
