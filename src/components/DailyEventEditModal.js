@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { CompanionButton } from "../ui/buttons/CompanionButton";
 import { CompanionModalShell } from "../ui/modals/CompanionModalShell";
 import { CompanionDateTimePicker } from "../ui/pickers/CompanionDateTimePicker";
 
@@ -57,7 +58,6 @@ function getBowelColorInfo(value) {
 export function DailyEventEditModal({
   eventType,
   event,
-  buttonStyle,
   onClose,
   onSave,
   onDelete,
@@ -101,32 +101,27 @@ export function DailyEventEditModal({
   const isBowel = eventType === "bowel";
 
   const footerStart = (
-    <button
+    <CompanionButton
+      variant="danger"
       onClick={() => {
         const ok = window.confirm("Dit moment verwijderen?");
         if (!ok) return;
         onDelete(event.id);
         onClose();
       }}
-      style={{
-        ...buttonStyle,
-        background: "#fee2e2",
-        border: "1px solid #fecaca",
-        color: "#991b1b",
-        fontWeight: 800,
-      }}
     >
       Verwijder
-    </button>
+    </CompanionButton>
   );
 
   const footer = (
     <>
-      <button onClick={onClose} style={buttonStyle}>
+      <CompanionButton variant="secondary" onClick={onClose}>
         Annuleer
-      </button>
+      </CompanionButton>
 
-      <button
+      <CompanionButton
+        variant="primary"
         onClick={() => {
           onSave(event.id, {
             eventTime,
@@ -145,16 +140,9 @@ export function DailyEventEditModal({
 
           onClose();
         }}
-        style={{
-          ...buttonStyle,
-          background: "#dcfce7",
-          border: "1px solid #86efac",
-          color: "#166534",
-          fontWeight: 800,
-        }}
       >
         Opslaan
-      </button>
+      </CompanionButton>
     </>
   );
 

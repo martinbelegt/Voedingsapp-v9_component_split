@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { CompanionButton } from "../ui/buttons/CompanionButton";
 import { CompanionDateTimePicker } from "../ui/pickers/CompanionDateTimePicker";
 
 export function QuickAddSection(props) {
@@ -123,21 +124,16 @@ export function QuickAddSection(props) {
           <option value="daily">Dagelijks</option>
         </select>
 
-        <button
+        <CompanionButton
+          variant="primary"
+          size={isMobile ? "sm" : "md"}
           onClick={() => {
             addCurrentMealToSelectedDay();
             flash("add");
           }}
-          style={{
-            ...dashboardButtonStyle,
-            background: flashAction === "add" ? "#22c55e" : "#dcfce7",
-            color: flashAction === "add" ? "white" : "#166534",
-            border: "1px solid #86efac",
-            fontWeight: 700,
-          }}
         >
           Voeg toe
-        </button>
+        </CompanionButton>
 
         {!isMobile && (
           <button

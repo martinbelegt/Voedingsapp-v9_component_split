@@ -1,10 +1,10 @@
 import React, { useState } from "react";
+import { CompanionButton } from "../../ui/buttons/CompanionButton";
 import { CompanionModalShell } from "../../ui/modals/CompanionModalShell";
 import { CompanionDateTimePicker } from "../../ui/pickers/CompanionDateTimePicker";
 
 export function DailyEventTimeEditorModal({
   initialValue,
-  buttonStyle,
   onSave,
   onClose,
 }) {
@@ -12,38 +12,24 @@ export function DailyEventTimeEditorModal({
 
   const footer = (
     <>
-      <button
+      <CompanionButton
+        variant="secondary"
         onClick={onClose}
-        style={{
-          ...buttonStyle,
-          padding: "8px 12px",
-          borderRadius: 10,
-          background: "#f8fafc",
-          border: "1px solid #cbd5e1",
-        }}
       >
         Annuleren
-      </button>
+      </CompanionButton>
 
-      <button
+      <CompanionButton
+        variant="primary"
         onClick={() => {
           if (!draftValue) return;
 
           onSave(draftValue);
           onClose();
         }}
-        style={{
-          ...buttonStyle,
-          padding: "8px 12px",
-          borderRadius: 10,
-          background: "#eff6ff",
-          border: "1px solid #bfdbfe",
-          color: "#1d4ed8",
-          fontWeight: 800,
-        }}
       >
         Opslaan
-      </button>
+      </CompanionButton>
     </>
   );
 

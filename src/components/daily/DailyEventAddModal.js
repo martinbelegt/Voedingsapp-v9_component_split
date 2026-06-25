@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { CompanionButton } from "../../ui/buttons/CompanionButton";
 import { CompanionModalShell } from "../../ui/modals/CompanionModalShell";
 import { CompanionDateTimePicker } from "../../ui/pickers/CompanionDateTimePicker";
 
@@ -57,7 +58,6 @@ function getBowelColorInfo(value) {
 export function DailyEventAddModal({
   eventType,
   selectedDate,
-  buttonStyle,
   onClose,
   onSave,
 }) {
@@ -160,22 +160,16 @@ export function DailyEventAddModal({
 
   const footer = (
     <>
-      <button onClick={onClose} style={buttonStyle}>
+      <CompanionButton variant="secondary" onClick={onClose}>
         Annuleren
-      </button>
+      </CompanionButton>
 
-      <button
+      <CompanionButton
+        variant="primary"
         onClick={save}
-        style={{
-          ...buttonStyle,
-          background: "#eff6ff",
-          border: "1px solid #bfdbfe",
-          color: "#1d4ed8",
-          fontWeight: 800,
-        }}
       >
         Opslaan
-      </button>
+      </CompanionButton>
     </>
   );
 
