@@ -498,7 +498,6 @@ export function CompanionDateTimePicker({
   const showDate = safeMode === "date" || safeMode === "datetime";
   const showTime = safeMode === "time" || safeMode === "datetime";
   const visibleContextItems = compact ? [] : contextItems;
-  const isExpanded = !isCompactPresentation || isOpen;
 
   useEffect(() => {
     setIsOpen(defaultOpen ?? resolvedPresentation === "expanded");
@@ -522,14 +521,16 @@ export function CompanionDateTimePicker({
       onClick={() => setIsOpen((open) => !open)}
       style={{
         width: "100%",
-        minHeight: compact ? 48 : 56,
+        minHeight: compact ? 44 : 56,
         boxSizing: "border-box",
         display: "grid",
-        gridTemplateColumns: compact ? "28px minmax(0, 1fr) 18px" : "34px 1fr auto",
+        gridTemplateColumns: compact
+          ? "minmax(0, 1fr) 16px"
+          : "34px minmax(0, 1fr) auto",
         gap: compact ? 8 : 12,
         alignItems: "center",
-        padding: compact ? "7px 10px" : "11px 14px",
-        borderRadius: compact ? 12 : 18,
+        padding: compact ? "7px 10px 7px 12px" : "11px 14px",
+        borderRadius: compact ? 10 : 18,
         border: `1px solid ${COLORS.borderStrong}`,
         background: COLORS.value,
         color: COLORS.text,
@@ -541,36 +542,40 @@ export function CompanionDateTimePicker({
           : "0 6px 18px rgba(15, 23, 42, 0.05)",
       }}
     >
-      <span
-        aria-hidden="true"
-        style={{
-          width: compact ? 28 : 34,
-          height: compact ? 28 : 34,
-          borderRadius: compact ? 9 : 12,
-          background: COLORS.card,
-          border: `1px solid ${COLORS.border}`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: COLORS.primaryDark,
-          fontWeight: 850,
-          fontSize: compact ? 12 : 15,
-        }}
-      >
-        {safeMode === "time" ? "T" : "D"}
-      </span>
-      <span style={{ minWidth: 0, display: "grid", gap: compact ? 1 : 2 }}>
+      {!compact ? (
         <span
+          aria-hidden="true"
           style={{
-            color: COLORS.muted,
-            fontSize: compact ? 10 : 11,
-            fontWeight: 750,
-            letterSpacing: 0.2,
-            textTransform: "uppercase",
+            width: 34,
+            height: 34,
+            borderRadius: 12,
+            background: COLORS.card,
+            border: `1px solid ${COLORS.border}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: COLORS.primaryDark,
+            fontWeight: 850,
+            fontSize: 15,
           }}
         >
-          {label || fieldLabel(safeMode)}
+          {safeMode === "time" ? "T" : "D"}
         </span>
+      ) : null}
+      <span style={{ minWidth: 0, display: "grid", gap: compact ? 0 : 2 }}>
+        {!compact ? (
+          <span
+            style={{
+              color: COLORS.muted,
+              fontSize: 11,
+              fontWeight: 750,
+              letterSpacing: 0.2,
+              textTransform: "uppercase",
+            }}
+          >
+            {label || fieldLabel(safeMode)}
+          </span>
+        ) : null}
         <span
           style={{
             color: COLORS.text,
@@ -603,11 +608,14 @@ export function CompanionDateTimePicker({
     return compactSummary;
   }
 
-  return (
+  const pickerPanel = (
     <section
       aria-label={title}
       style={{
         width: "100%",
+        maxWidth: compact ? 420 : "none",
+        maxHeight: compact ? "calc(100vh - 48px)" : "none",
+        overflowY: compact ? "auto" : "visible",
         boxSizing: "border-box",
         border: `1px solid ${COLORS.border}`,
         borderRadius: compact ? 14 : 28,
@@ -622,8 +630,6 @@ export function CompanionDateTimePicker({
         fontFamily: FONT_STACK,
       }}
     >
-      {isCompactPresentation ? compactSummary : null}
-
       {!compact ? (
         <div
           style={{
@@ -783,8 +789,8 @@ export function CompanionDateTimePicker({
               gap: compact ? 7 : 10,
               padding: compact ? 8 : 12,
               borderRadius: compact ? 13 : 20,
-              background: COLORS.app,
-              border: "1px solid #E5EEE7",
+              background: compact ? "transparent" : COLORS.app,
+              border: compact ? "none" : "1px solid #E5EEE7",
             }}
           >
             <div
@@ -843,8 +849,8 @@ export function CompanionDateTimePicker({
               gap: compact ? 7 : 10,
               padding: compact ? 8 : 12,
               borderRadius: compact ? 13 : 20,
-              background: COLORS.app,
-              border: "1px solid #E5EEE7",
+              background: compact ? "transparent" : COLORS.app,
+              border: compact ? "none" : "1px solid #E5EEE7",
             }}
           >
             <div
@@ -945,6 +951,44 @@ export function CompanionDateTimePicker({
       ) : null}
     </section>
   );
+
+  if (isCompactPresentation) {
+    return (
+      <>
+        {compactSummary}
+        <div
+          role="presentation"
+          onClick={() => setIsOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "center",
+            padding: "12px",
+            background: "rgba(15, 23, 42, 0.22)",
+            boxSizing: "border-box",
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={title}
+            onClick={(event) => event.stopPropagation()}
+            style={{
+              width: "100%",
+              maxWidth: 420,
+            }}
+          >
+            {pickerPanel}
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  return pickerPanel;
 }
 
 export default CompanionDateTimePicker;
