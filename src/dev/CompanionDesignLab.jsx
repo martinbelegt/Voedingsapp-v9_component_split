@@ -237,18 +237,21 @@ export function CompanionDesignLab() {
             label="Datum"
             value={dateValue}
             onChange={setDateValue}
+            presentation="expanded"
           />
           <CompanionDateTimePicker
             mode="time"
             label="Tijd"
             value={timeValue}
             onChange={setTimeValue}
+            presentation="expanded"
           />
           <CompanionDateTimePicker
             mode="datetime"
             label="Datum en tijd"
             value={dateTimeValue}
             onChange={setDateTimeValue}
+            presentation="expanded"
           />
         </div>
       </Section>

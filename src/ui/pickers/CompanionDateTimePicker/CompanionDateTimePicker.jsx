@@ -410,9 +410,17 @@ export function CompanionDateTimePicker({
   label,
   disabled = false,
   compact = false,
+  presentation,
+  defaultOpen,
   contextItems = DEMO_CONTEXT_ITEMS,
 }) {
   const safeMode = VALID_MODES.has(mode) ? mode : "datetime";
+  const resolvedPresentation =
+    presentation || (compact ? "compact" : "expanded");
+  const isCompactPresentation = resolvedPresentation === "compact";
+  const [isOpen, setIsOpen] = useState(
+    defaultOpen ?? resolvedPresentation === "expanded",
+  );
   const normalizedValue = normalizeDateTimeValue(value, safeMode);
   const splitValue = splitDateTime(normalizedValue);
   const [dateParts, setDateParts] = useState(() =>
@@ -490,6 +498,107 @@ export function CompanionDateTimePicker({
   const showDate = safeMode === "date" || safeMode === "datetime";
   const showTime = safeMode === "time" || safeMode === "datetime";
   const visibleContextItems = compact ? [] : contextItems;
+  const isExpanded = !isCompactPresentation || isOpen;
+
+  useEffect(() => {
+    setIsOpen(defaultOpen ?? resolvedPresentation === "expanded");
+  }, [defaultOpen, resolvedPresentation]);
+
+  function collapseAfterSelection() {
+    if (isCompactPresentation) {
+      setIsOpen(false);
+    }
+  }
+
+  function handleQuickChoice(choice) {
+    applyQuickChoice(choice);
+    collapseAfterSelection();
+  }
+
+  const compactSummary = (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={() => setIsOpen((open) => !open)}
+      style={{
+        width: "100%",
+        minHeight: compact ? 50 : 56,
+        boxSizing: "border-box",
+        display: "grid",
+        gridTemplateColumns: "34px 1fr auto",
+        gap: 12,
+        alignItems: "center",
+        padding: compact ? "9px 11px" : "11px 14px",
+        borderRadius: compact ? 16 : 18,
+        border: `1px solid ${COLORS.borderStrong}`,
+        background: COLORS.value,
+        color: COLORS.text,
+        cursor: disabled ? "not-allowed" : "pointer",
+        fontFamily: FONT_STACK,
+        textAlign: "left",
+        boxShadow: "0 6px 18px rgba(15, 23, 42, 0.05)",
+      }}
+    >
+      <span
+        aria-hidden="true"
+        style={{
+          width: 34,
+          height: 34,
+          borderRadius: 12,
+          background: COLORS.card,
+          border: `1px solid ${COLORS.border}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: COLORS.primaryDark,
+          fontWeight: 850,
+          fontSize: 15,
+        }}
+      >
+        {safeMode === "time" ? "T" : "D"}
+      </span>
+      <span style={{ minWidth: 0, display: "grid", gap: 2 }}>
+        <span
+          style={{
+            color: COLORS.muted,
+            fontSize: 11,
+            fontWeight: 750,
+            letterSpacing: 0.2,
+            textTransform: "uppercase",
+          }}
+        >
+          {label || fieldLabel(safeMode)}
+        </span>
+        <span
+          style={{
+            color: COLORS.text,
+            fontSize: compact ? 16 : 18,
+            fontWeight: 800,
+            lineHeight: 1.2,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {displayValue || "Kies moment"}
+        </span>
+      </span>
+      <span
+        style={{
+          color: COLORS.primaryDark,
+          fontSize: 18,
+          fontWeight: 800,
+          lineHeight: 1,
+        }}
+      >
+        {isOpen ? "⌃" : "⌄"}
+      </span>
+    </button>
+  );
+
+  if (isCompactPresentation && !isOpen) {
+    return compactSummary;
+  }
 
   return (
     <section
@@ -508,6 +617,8 @@ export function CompanionDateTimePicker({
         fontFamily: FONT_STACK,
       }}
     >
+      {isCompactPresentation ? compactSummary : null}
+
       <div
         style={{
           display: "flex",
@@ -621,7 +732,7 @@ export function CompanionDateTimePicker({
             key={choice.key}
             type="button"
             disabled={disabled}
-            onClick={() => applyQuickChoice(choice)}
+            onClick={() => handleQuickChoice(choice)}
             onMouseEnter={() => setHoveredChoice(choice.key)}
             onMouseLeave={() => setHoveredChoice(null)}
             style={{
@@ -676,7 +787,7 @@ export function CompanionDateTimePicker({
               style={{
                 display: "grid",
                 gap: 8,
-                gridTemplateColumns: "repeat(auto-fit, minmax(72px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fit, minmax(112px, 1fr))",
               }}
             >
               <StepperField
@@ -784,6 +895,25 @@ export function CompanionDateTimePicker({
 
       {visibleContextItems.length > 0 ? (
         <ContextPanel items={visibleContextItems} />
+      ) : null}
+
+      {isCompactPresentation ? (
+        <button
+          type="button"
+          onClick={() => setIsOpen(false)}
+          style={{
+            minHeight: 42,
+            borderRadius: 14,
+            border: `1px solid ${COLORS.border}`,
+            background: COLORS.veryLight,
+            color: COLORS.text,
+            cursor: "pointer",
+            fontSize: 14,
+            fontWeight: 800,
+          }}
+        >
+          Klaar
+        </button>
       ) : null}
     </section>
   );

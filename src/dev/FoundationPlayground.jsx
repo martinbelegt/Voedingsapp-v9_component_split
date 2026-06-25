@@ -39,6 +39,7 @@ function PickerExample({ title, mode, value, onChange }) {
         value={value}
         onChange={onChange}
         label={title}
+        presentation="expanded"
       />
 
       <div style={outputStyle}>Output: {value || "(leeg)"}</div>
