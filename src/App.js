@@ -25,6 +25,8 @@ import { useMealTimers } from "./hooks/useMealTimers";
 import { calculateMealRows } from "./services/mealRowCalculationService";
 import IntakeLibrary from "./components/planner/intake/IntakeLibrary";
 import MovementLibrary from "./components/planner/movement/MovementLibrary";
+import { CompanionDesignLab } from "./dev/CompanionDesignLab";
+import { FoundationPlayground } from "./dev/FoundationPlayground";
 
 import {
   getCategoryById,
@@ -713,6 +715,7 @@ export default function App() {
   // home screen
   // ======================================================
   const [activeTab, setActiveTab] = useState("daily");
+  const [activeDevTab, setActiveDevTab] = useState("playground");
   const isMobile =
     window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
   const [editingProductId, setEditingProductId] = useState(null);
@@ -1993,7 +1996,9 @@ Producten uit deze categorie gaan naar "Overig".`);
 
               <select
                 value={
-                  activeTab === "gi" || activeTab === "settings"
+                  activeTab === "gi" ||
+                  activeTab === "settings" ||
+                  activeTab === "foundation"
                     ? activeTab
                     : ""
                 }
@@ -2016,6 +2021,7 @@ Producten uit deze categorie gaan naar "Overig".`);
                 <option value="libraries">Bibliotheken</option>
                 <option value="gi">GI / Timing</option>
                 <option value="settings">Mijn Profiel</option>
+                <option value="foundation">Foundation Playground</option>
               </select>
             </div>
           </div>
@@ -2101,8 +2107,69 @@ Producten uit deze categorie gaan naar "Overig".`);
               >
                 👤 Mijn Profiel
               </button>
+
+              <button
+                onClick={() => setActiveTab("foundation")}
+                style={getTabButtonStyle("foundation", "#0f766e")}
+              >
+                Foundation Playground
+              </button>
             </div>
           </>
+        )}
+        {activeTab === "foundation" && (
+          <div style={{ display: "grid", gap: 12 }}>
+            <div
+              style={{
+                ...cardStyle,
+                display: "flex",
+                gap: 8,
+                flexWrap: "wrap",
+                alignItems: "center",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setActiveDevTab("playground")}
+                style={{
+                  ...(activeDevTab === "playground"
+                    ? primaryButtonStyle
+                    : buttonStyle),
+                  borderRadius: 999,
+                  border: "1px solid #D89A3A",
+                  background:
+                    activeDevTab === "playground" ? "#D89A3A" : "#FFF4E0",
+                  color: activeDevTab === "playground" ? "#ffffff" : "#8A5A16",
+                  fontWeight: 900,
+                }}
+              >
+                Foundation Playground
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveDevTab("designLab")}
+                style={{
+                  ...(activeDevTab === "designLab"
+                    ? primaryButtonStyle
+                    : buttonStyle),
+                  borderRadius: 999,
+                  border: "1px solid #D89A3A",
+                  background:
+                    activeDevTab === "designLab" ? "#D89A3A" : "#FFF4E0",
+                  color: activeDevTab === "designLab" ? "#ffffff" : "#8A5A16",
+                  fontWeight: 900,
+                }}
+              >
+                Companion Design Lab
+              </button>
+            </div>
+
+            {activeDevTab === "playground" ? (
+              <FoundationPlayground />
+            ) : (
+              <CompanionDesignLab />
+            )}
+          </div>
         )}
         {activeTab === "dashboard" && (
           <DashboardTab
