@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   combineDateAndTime,
   formatDateForDisplay,
@@ -436,6 +436,8 @@ export function CompanionDateTimePicker({
     createTimeParts(splitValue.time),
   );
   const [hoveredChoice, setHoveredChoice] = useState(null);
+  const [popoverRect, setPopoverRect] = useState(null);
+  const triggerRef = useRef(null);
 
   useEffect(() => {
     const nextValue = normalizeDateTimeValue(value, safeMode);
@@ -520,14 +522,52 @@ export function CompanionDateTimePicker({
     collapseAfterSelection();
   }
 
-  const modalTopOffset = "max(150px, calc(env(safe-area-inset-top) + 120px))";
-  const modalMaxHeight = `min(85vh, calc(100vh - ${modalTopOffset} - 12px))`;
+  function updatePopoverPosition() {
+    const trigger = triggerRef.current;
+    if (!trigger || typeof window === "undefined") return;
+
+    const rect = trigger.getBoundingClientRect();
+    const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+    const viewportHeight =
+      window.innerHeight || document.documentElement.clientHeight;
+    const viewportMargin = 12;
+    const popoverGap = 6;
+    const width = Math.min(rect.width, viewportWidth - viewportMargin * 2);
+    const left = Math.min(
+      Math.max(rect.left, viewportMargin),
+      Math.max(viewportMargin, viewportWidth - width - viewportMargin),
+    );
+    const top = rect.bottom + popoverGap;
+    const maxHeight = Math.max(
+      160,
+      Math.min(viewportHeight * 0.85, viewportHeight - top - viewportMargin),
+    );
+
+    setPopoverRect({ left, top, width, maxHeight });
+  }
+
+  useEffect(() => {
+    if (!isCompactPresentation || !isOpen) return undefined;
+
+    updatePopoverPosition();
+    window.addEventListener("resize", updatePopoverPosition);
+    window.addEventListener("scroll", updatePopoverPosition, true);
+
+    return () => {
+      window.removeEventListener("resize", updatePopoverPosition);
+      window.removeEventListener("scroll", updatePopoverPosition, true);
+    };
+  }, [isCompactPresentation, isOpen]);
 
   const compactSummary = (
     <button
+      ref={triggerRef}
       type="button"
       disabled={disabled}
-      onClick={() => setIsOpen((open) => !open)}
+      onClick={() => {
+        setIsOpen((open) => !open);
+        window.requestAnimationFrame?.(updatePopoverPosition);
+      }}
       style={{
         width: "100%",
         minHeight: compact ? 34 : 56,
@@ -622,8 +662,12 @@ export function CompanionDateTimePicker({
       aria-label={title}
       style={{
         width: "100%",
-        maxWidth: compact ? 420 : "none",
-        maxHeight: compact ? modalMaxHeight : "none",
+        maxWidth: "none",
+        maxHeight: compact
+          ? popoverRect
+            ? `${popoverRect.maxHeight}px`
+            : "85vh"
+          : "none",
         overflowY: compact ? "auto" : "visible",
         boxSizing: "border-box",
         border: `1px solid ${COLORS.border}`,
@@ -979,13 +1023,8 @@ export function CompanionDateTimePicker({
             position: "fixed",
             inset: 0,
             zIndex: 1000,
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "center",
-            padding: `${modalTopOffset} 12px 12px`,
-            background: "rgba(15, 23, 42, 0.22)",
+            background: "transparent",
             boxSizing: "border-box",
-            overflowY: "auto",
           }}
         >
           <div
@@ -994,11 +1033,29 @@ export function CompanionDateTimePicker({
             aria-label={title}
             onClick={(event) => event.stopPropagation()}
             style={{
-              width: "calc(100vw - 24px)",
-              maxWidth: 420,
-              maxHeight: modalMaxHeight,
+              position: "fixed",
+              top: popoverRect ? popoverRect.top : 0,
+              left: popoverRect ? popoverRect.left : 12,
+              width: popoverRect ? popoverRect.width : "calc(100vw - 24px)",
+              maxHeight: popoverRect ? popoverRect.maxHeight : "85vh",
+              visibility: popoverRect ? "visible" : "hidden",
             }}
           >
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                top: -5,
+                left: "50%",
+                width: 10,
+                height: 10,
+                transform: "translateX(-50%) rotate(45deg)",
+                background: COLORS.card,
+                borderLeft: `1px solid ${COLORS.border}`,
+                borderTop: `1px solid ${COLORS.border}`,
+                zIndex: 1,
+              }}
+            />
             {pickerPanel}
           </div>
         </div>
