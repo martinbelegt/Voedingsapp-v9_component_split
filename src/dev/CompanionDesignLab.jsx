@@ -258,6 +258,17 @@ export function CompanionDesignLab() {
       </Section>
 
       <Section title="Pickers">
+        <div
+          style={{
+            color: colors.muted,
+            fontSize: 14,
+            lineHeight: 1.45,
+            marginBottom: 12,
+          }}
+        >
+          De compacte v1 staat onderaan als app-weergave. De drie grote
+          voorbeelden zijn design demo's voor visuele states.
+        </div>
         <div style={gridStyle}>
           <CompanionDateTimePicker
             mode="date"

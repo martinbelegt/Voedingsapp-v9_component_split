@@ -20,7 +20,7 @@ const outputStyle = {
   fontWeight: 700,
 };
 
-function PickerExample({ title, mode, value, onChange }) {
+function PickerExample({ title, mode, value, onChange, expanded = false }) {
   return (
     <div style={cardStyle}>
       <h3
@@ -39,35 +39,9 @@ function PickerExample({ title, mode, value, onChange }) {
         value={value}
         onChange={onChange}
         label={title}
-        presentation="expanded"
-      />
-
-      <div style={outputStyle}>Output: {value || "(leeg)"}</div>
-    </div>
-  );
-}
-
-function CompactPickerExample({ value, onChange }) {
-  return (
-    <div style={cardStyle}>
-      <h3
-        style={{
-          marginTop: 0,
-          marginBottom: 12,
-          color: "#0f172a",
-          fontSize: 18,
-        }}
-      >
-        Compact app example
-      </h3>
-
-      <CompanionDateTimePicker
-        mode="datetime"
-        value={value}
-        onChange={onChange}
-        label="Datum en tijd"
-        compact
-        contextItems={[]}
+        {...(expanded
+          ? { presentation: "expanded" }
+          : { compact: true, contextItems: [] })}
       />
 
       <div style={outputStyle}>Output: {value || "(leeg)"}</div>
@@ -94,7 +68,8 @@ export function FoundationPlayground() {
           Foundation Playground
         </h2>
         <div style={{ color: "#64748b", fontSize: 14 }}>
-          Tijdelijke developer playground voor de CompanionDateTimePicker.
+          Actuele CompanionDateTimePicker v1 zoals gebruikt in Dashboard en
+          Tijdlijn: compacte trigger met popover.
         </div>
       </div>
 
@@ -126,9 +101,12 @@ export function FoundationPlayground() {
         />
       </div>
 
-      <CompactPickerExample
+      <PickerExample
+        title="Design demo: oude/expanded variant"
+        mode="datetime"
         value={dateTimeValue}
         onChange={setDateTimeValue}
+        expanded
       />
     </div>
   );
