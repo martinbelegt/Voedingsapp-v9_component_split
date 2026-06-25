@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { CompanionModalShell } from "../../ui/modals/CompanionModalShell";
 import { CompanionDateTimePicker } from "../../ui/pickers/CompanionDateTimePicker";
 
 const BOWEL_COLOR_OPTIONS = [
@@ -157,44 +158,35 @@ export function DailyEventAddModal({
     onClose();
   }
 
-  return (
-    <div
-      onClick={onClose}
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(15, 23, 42, 0.45)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 18,
-        zIndex: 9999,
-      }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
+  const footer = (
+    <>
+      <button onClick={onClose} style={buttonStyle}>
+        Annuleren
+      </button>
+
+      <button
+        onClick={save}
         style={{
-          width: "min(460px,95vw)",
-          maxHeight: isMobile ? "85vh" : "90vh",
-          overflowY: "auto",
-          background: "white",
-          borderRadius: isMobile ? 10 : 18,
-          padding: isMobile ? 12 : 18,
-          border: "1px solid #cbd5e1",
-          boxShadow: "0 20px 50px rgba(0,0,0,0.25)",
+          ...buttonStyle,
+          background: "#eff6ff",
+          border: "1px solid #bfdbfe",
+          color: "#1d4ed8",
+          fontWeight: 800,
         }}
       >
-        <div
-          style={{
-            fontWeight: 900,
-            fontSize: 18,
-            color: "#0f172a",
-            marginBottom: 12,
-          }}
-        >
-          {config.title}
-        </div>
+        Opslaan
+      </button>
+    </>
+  );
 
+  return (
+    <CompanionModalShell
+      open
+      onClose={onClose}
+      title={config.title}
+      size="sm"
+      footer={footer}
+    >
         <CompanionDateTimePicker
           value={eventTime}
           onChange={setEventTime}
@@ -320,26 +312,6 @@ export function DailyEventAddModal({
             </select>
           </>
         )}
-
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-          <button onClick={onClose} style={buttonStyle}>
-            Annuleren
-          </button>
-
-          <button
-            onClick={save}
-            style={{
-              ...buttonStyle,
-              background: "#eff6ff",
-              border: "1px solid #bfdbfe",
-              color: "#1d4ed8",
-              fontWeight: 800,
-            }}
-          >
-            Opslaan
-          </button>
-        </div>
-      </div>
-    </div>
+    </CompanionModalShell>
   );
 }

@@ -61,7 +61,7 @@ export function CompanionModalShell({
       style={{
         position: "fixed",
         inset: 0,
-        zIndex: 1200,
+        zIndex: 9999,
         display: "grid",
         placeItems: "center",
         padding: "max(16px, env(safe-area-inset-top)) 12px max(16px, env(safe-area-inset-bottom))",
