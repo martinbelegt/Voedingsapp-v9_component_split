@@ -254,6 +254,16 @@ export function CompanionDesignLab() {
             presentation="expanded"
           />
         </div>
+        <div style={{ marginTop: 14 }}>
+          <CompanionDateTimePicker
+            mode="datetime"
+            label="Compacte app-weergave"
+            value={dateTimeValue}
+            onChange={setDateTimeValue}
+            compact
+            contextItems={[]}
+          />
+        </div>
       </Section>
 
       <Section title="Typography">

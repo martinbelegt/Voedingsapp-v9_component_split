@@ -47,6 +47,34 @@ function PickerExample({ title, mode, value, onChange }) {
   );
 }
 
+function CompactPickerExample({ value, onChange }) {
+  return (
+    <div style={cardStyle}>
+      <h3
+        style={{
+          marginTop: 0,
+          marginBottom: 12,
+          color: "#0f172a",
+          fontSize: 18,
+        }}
+      >
+        Compact app example
+      </h3>
+
+      <CompanionDateTimePicker
+        mode="datetime"
+        value={value}
+        onChange={onChange}
+        label="Datum en tijd"
+        compact
+        contextItems={[]}
+      />
+
+      <div style={outputStyle}>Output: {value || "(leeg)"}</div>
+    </div>
+  );
+}
+
 export function FoundationPlayground() {
   const [dateValue, setDateValue] = useState("2026-06-24");
   const [timeValue, setTimeValue] = useState("22:15");
@@ -97,6 +125,11 @@ export function FoundationPlayground() {
           onChange={setDateTimeValue}
         />
       </div>
+
+      <CompactPickerExample
+        value={dateTimeValue}
+        onChange={setDateTimeValue}
+      />
     </div>
   );
 }

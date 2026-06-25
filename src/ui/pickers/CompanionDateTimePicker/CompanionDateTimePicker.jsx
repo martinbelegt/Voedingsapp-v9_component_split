@@ -207,23 +207,23 @@ function adjustTimePart(parts, key, direction) {
   return createTimeParts(`${pad2(date.getHours())}:${pad2(date.getMinutes())}`);
 }
 
-function StepperField({ label, value, onAdjust, disabled }) {
+function StepperField({ label, value, onAdjust, disabled, compact = false }) {
   return (
     <div
       style={{
         minWidth: 0,
         border: `1px solid ${COLORS.border}`,
-        borderRadius: 16,
+        borderRadius: compact ? 12 : 16,
         background: COLORS.value,
-        padding: 8,
+        padding: compact ? 6 : 8,
         display: "grid",
-        gap: 6,
+        gap: compact ? 4 : 6,
       }}
     >
       <div
         style={{
           color: COLORS.muted,
-          fontSize: 11,
+          fontSize: compact ? 10 : 11,
           fontWeight: 700,
           letterSpacing: 0.2,
           textTransform: "uppercase",
@@ -234,8 +234,8 @@ function StepperField({ label, value, onAdjust, disabled }) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "38px 1fr 38px",
-          gap: 6,
+          gridTemplateColumns: compact ? "32px 1fr 32px" : "38px 1fr 38px",
+          gap: compact ? 4 : 6,
           alignItems: "center",
         }}
       >
@@ -245,13 +245,13 @@ function StepperField({ label, value, onAdjust, disabled }) {
           onClick={() => onAdjust(-1)}
           aria-label={`${label} verlagen`}
           style={{
-            minHeight: 38,
-            borderRadius: 12,
+            minHeight: compact ? 32 : 38,
+            borderRadius: compact ? 10 : 12,
             border: `1px solid ${COLORS.border}`,
             background: disabled ? "#F3F4F6" : COLORS.card,
             color: disabled ? "#9CA3AF" : COLORS.primaryDark,
             cursor: disabled ? "not-allowed" : "pointer",
-            fontSize: 18,
+            fontSize: compact ? 15 : 18,
             fontWeight: 800,
             lineHeight: 1,
           }}
@@ -260,12 +260,12 @@ function StepperField({ label, value, onAdjust, disabled }) {
         </button>
         <div
           style={{
-            minHeight: 38,
+            minHeight: compact ? 32 : 38,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             color: COLORS.text,
-            fontSize: 18,
+            fontSize: compact ? 16 : 18,
             fontWeight: 750,
             fontVariantNumeric: "tabular-nums",
           }}
@@ -278,13 +278,13 @@ function StepperField({ label, value, onAdjust, disabled }) {
           onClick={() => onAdjust(1)}
           aria-label={`${label} verhogen`}
           style={{
-            minHeight: 38,
-            borderRadius: 12,
+            minHeight: compact ? 32 : 38,
+            borderRadius: compact ? 10 : 12,
             border: `1px solid ${COLORS.border}`,
             background: disabled ? "#F3F4F6" : COLORS.card,
             color: disabled ? "#9CA3AF" : COLORS.primaryDark,
             cursor: disabled ? "not-allowed" : "pointer",
-            fontSize: 18,
+            fontSize: compact ? 15 : 18,
             fontWeight: 800,
             lineHeight: 1,
           }}
@@ -522,29 +522,31 @@ export function CompanionDateTimePicker({
       onClick={() => setIsOpen((open) => !open)}
       style={{
         width: "100%",
-        minHeight: compact ? 50 : 56,
+        minHeight: compact ? 48 : 56,
         boxSizing: "border-box",
         display: "grid",
-        gridTemplateColumns: "34px 1fr auto",
-        gap: 12,
+        gridTemplateColumns: compact ? "28px minmax(0, 1fr) 18px" : "34px 1fr auto",
+        gap: compact ? 8 : 12,
         alignItems: "center",
-        padding: compact ? "9px 11px" : "11px 14px",
-        borderRadius: compact ? 16 : 18,
+        padding: compact ? "7px 10px" : "11px 14px",
+        borderRadius: compact ? 12 : 18,
         border: `1px solid ${COLORS.borderStrong}`,
         background: COLORS.value,
         color: COLORS.text,
         cursor: disabled ? "not-allowed" : "pointer",
         fontFamily: FONT_STACK,
         textAlign: "left",
-        boxShadow: "0 6px 18px rgba(15, 23, 42, 0.05)",
+        boxShadow: compact
+          ? "0 1px 3px rgba(15, 23, 42, 0.05)"
+          : "0 6px 18px rgba(15, 23, 42, 0.05)",
       }}
     >
       <span
         aria-hidden="true"
         style={{
-          width: 34,
-          height: 34,
-          borderRadius: 12,
+          width: compact ? 28 : 34,
+          height: compact ? 28 : 34,
+          borderRadius: compact ? 9 : 12,
           background: COLORS.card,
           border: `1px solid ${COLORS.border}`,
           display: "flex",
@@ -552,16 +554,16 @@ export function CompanionDateTimePicker({
           justifyContent: "center",
           color: COLORS.primaryDark,
           fontWeight: 850,
-          fontSize: 15,
+          fontSize: compact ? 12 : 15,
         }}
       >
         {safeMode === "time" ? "T" : "D"}
       </span>
-      <span style={{ minWidth: 0, display: "grid", gap: 2 }}>
+      <span style={{ minWidth: 0, display: "grid", gap: compact ? 1 : 2 }}>
         <span
           style={{
             color: COLORS.muted,
-            fontSize: 11,
+            fontSize: compact ? 10 : 11,
             fontWeight: 750,
             letterSpacing: 0.2,
             textTransform: "uppercase",
@@ -572,9 +574,9 @@ export function CompanionDateTimePicker({
         <span
           style={{
             color: COLORS.text,
-            fontSize: compact ? 16 : 18,
+            fontSize: compact ? 15 : 18,
             fontWeight: 800,
-            lineHeight: 1.2,
+            lineHeight: compact ? 1.15 : 1.2,
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
@@ -586,9 +588,10 @@ export function CompanionDateTimePicker({
       <span
         style={{
           color: COLORS.primaryDark,
-          fontSize: 18,
+          fontSize: compact ? 14 : 18,
           fontWeight: 800,
           lineHeight: 1,
+          textAlign: "center",
         }}
       >
         {isOpen ? "⌃" : "⌄"}
@@ -607,77 +610,81 @@ export function CompanionDateTimePicker({
         width: "100%",
         boxSizing: "border-box",
         border: `1px solid ${COLORS.border}`,
-        borderRadius: compact ? 20 : 28,
+        borderRadius: compact ? 14 : 28,
         background: COLORS.card,
-        boxShadow: "0 18px 44px rgba(15, 23, 42, 0.08)",
-        padding: compact ? 16 : 22,
+        boxShadow: compact
+          ? "0 8px 20px rgba(15, 23, 42, 0.07)"
+          : "0 18px 44px rgba(15, 23, 42, 0.08)",
+        padding: compact ? 8 : 22,
         display: "grid",
-        gap: compact ? 14 : 18,
+        gap: compact ? 8 : 18,
         color: COLORS.text,
         fontFamily: FONT_STACK,
       }}
     >
       {isCompactPresentation ? compactSummary : null}
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          gap: 14,
-          alignItems: "flex-start",
-        }}
-      >
-        <div style={{ minWidth: 0 }}>
-          <div
-            style={{
-              color: COLORS.primaryDark,
-              fontSize: 12,
-              fontWeight: 800,
-              letterSpacing: 0.2,
-              textTransform: "uppercase",
-              marginBottom: 6,
-            }}
-          >
-            Companion moment
-          </div>
-          <div
-            style={{
-              color: COLORS.text,
-              fontSize: compact ? 20 : 22,
-              fontWeight: 800,
-              lineHeight: 1.14,
-            }}
-          >
-            {title}
-          </div>
-        </div>
-
+      {!compact ? (
         <div
           style={{
-            minHeight: 36,
             display: "flex",
-            alignItems: "center",
-            padding: "7px 11px",
-            borderRadius: 999,
-            background: COLORS.veryLight,
-            color: COLORS.text,
-            border: `1px solid ${COLORS.border}`,
-            fontSize: 12,
-            fontWeight: 750,
-            whiteSpace: "nowrap",
+            justifyContent: "space-between",
+            gap: 14,
+            alignItems: "flex-start",
           }}
         >
-          {safeMode}
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                color: COLORS.primaryDark,
+                fontSize: 12,
+                fontWeight: 800,
+                letterSpacing: 0.2,
+                textTransform: "uppercase",
+                marginBottom: 6,
+              }}
+            >
+              Companion moment
+            </div>
+            <div
+              style={{
+                color: COLORS.text,
+                fontSize: 22,
+                fontWeight: 800,
+                lineHeight: 1.14,
+              }}
+            >
+              {title}
+            </div>
+          </div>
+
+          <div
+            style={{
+              minHeight: 36,
+              display: "flex",
+              alignItems: "center",
+              padding: "7px 11px",
+              borderRadius: 999,
+              background: COLORS.veryLight,
+              color: COLORS.text,
+              border: `1px solid ${COLORS.border}`,
+              fontSize: 12,
+              fontWeight: 750,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {safeMode}
+          </div>
         </div>
-      </div>
+      ) : null}
 
       <div
         style={{
           display: "grid",
-          gap: 10,
+          gap: compact ? 6 : 10,
           gridTemplateColumns:
             valueBlocks.length > 1
-              ? "repeat(auto-fit, minmax(180px, 1fr))"
+              ? `repeat(auto-fit, minmax(${compact ? "132px" : "180px"}, 1fr))`
               : "1fr",
         }}
       >
@@ -685,12 +692,12 @@ export function CompanionDateTimePicker({
           <div
             key={block.key}
             style={{
-              minHeight: 72,
+              minHeight: compact ? 48 : 72,
               display: "grid",
               alignContent: "center",
-              gap: 4,
-              padding: "14px 16px",
-              borderRadius: 18,
+              gap: compact ? 2 : 4,
+              padding: compact ? "8px 10px" : "14px 16px",
+              borderRadius: compact ? 12 : 18,
               background: COLORS.value,
               border: `1px solid ${COLORS.borderStrong}`,
             }}
@@ -698,7 +705,7 @@ export function CompanionDateTimePicker({
             <div
               style={{
                 color: COLORS.primaryDark,
-                fontSize: 12,
+                fontSize: compact ? 10 : 12,
                 fontWeight: 750,
                 textTransform: "uppercase",
                 letterSpacing: 0.2,
@@ -709,9 +716,9 @@ export function CompanionDateTimePicker({
             <div
               style={{
                 color: COLORS.text,
-                fontSize: 20,
+                fontSize: compact ? 15 : 20,
                 fontWeight: 800,
-                lineHeight: 1.2,
+                lineHeight: compact ? 1.15 : 1.2,
               }}
             >
               {block.value}
@@ -723,7 +730,7 @@ export function CompanionDateTimePicker({
       <div
         style={{
           display: "flex",
-          gap: 8,
+          gap: compact ? 6 : 8,
           flexWrap: "wrap",
         }}
       >
@@ -736,9 +743,9 @@ export function CompanionDateTimePicker({
             onMouseEnter={() => setHoveredChoice(choice.key)}
             onMouseLeave={() => setHoveredChoice(null)}
             style={{
-              minHeight: 44,
-              padding: "10px 14px",
-              borderRadius: 14,
+              minHeight: compact ? 36 : 44,
+              padding: compact ? "7px 10px" : "10px 14px",
+              borderRadius: compact ? 11 : 14,
               border: `1px solid ${COLORS.border}`,
               background:
                 !disabled && hoveredChoice === choice.key
@@ -748,7 +755,7 @@ export function CompanionDateTimePicker({
                     : COLORS.card,
               color: disabled ? "#9CA3AF" : COLORS.text,
               cursor: disabled ? "not-allowed" : "pointer",
-              fontSize: 14,
+              fontSize: compact ? 13 : 14,
               fontWeight: 750,
               boxShadow: "0 1px 2px rgba(15, 23, 42, 0.05)",
               transition: "background 140ms ease, border-color 140ms ease",
@@ -762,10 +769,10 @@ export function CompanionDateTimePicker({
       <div
         style={{
           display: "grid",
-          gap: 12,
+          gap: compact ? 8 : 12,
           gridTemplateColumns:
             showDate && showTime
-              ? "repeat(auto-fit, minmax(220px, 1fr))"
+              ? `repeat(auto-fit, minmax(${compact ? "180px" : "220px"}, 1fr))`
               : "1fr",
         }}
       >
@@ -773,27 +780,36 @@ export function CompanionDateTimePicker({
           <div
             style={{
               display: "grid",
-              gap: 10,
-              padding: 12,
-              borderRadius: 20,
+              gap: compact ? 7 : 10,
+              padding: compact ? 8 : 12,
+              borderRadius: compact ? 13 : 20,
               background: COLORS.app,
               border: "1px solid #E5EEE7",
             }}
           >
-            <div style={{ color: COLORS.text, fontSize: 14, fontWeight: 750 }}>
+            <div
+              style={{
+                color: COLORS.text,
+                fontSize: compact ? 13 : 14,
+                fontWeight: 750,
+              }}
+            >
               Datum verfijnen
             </div>
             <div
               style={{
                 display: "grid",
-                gap: 8,
-                gridTemplateColumns: "repeat(auto-fit, minmax(112px, 1fr))",
+                gap: compact ? 6 : 8,
+                gridTemplateColumns: compact
+                  ? "1fr"
+                  : "repeat(auto-fit, minmax(112px, 1fr))",
               }}
             >
               <StepperField
                 label="Dag"
                 value={dateParts.day}
                 disabled={disabled}
+                compact={compact}
                 onAdjust={(direction) =>
                   updateDateParts(adjustDatePart(dateParts, "day", direction))
                 }
@@ -802,6 +818,7 @@ export function CompanionDateTimePicker({
                 label="Maand"
                 value={dateParts.month}
                 disabled={disabled}
+                compact={compact}
                 onAdjust={(direction) =>
                   updateDateParts(adjustDatePart(dateParts, "month", direction))
                 }
@@ -810,6 +827,7 @@ export function CompanionDateTimePicker({
                 label="Jaar"
                 value={dateParts.year}
                 disabled={disabled}
+                compact={compact}
                 onAdjust={(direction) =>
                   updateDateParts(adjustDatePart(dateParts, "year", direction))
                 }
@@ -822,20 +840,26 @@ export function CompanionDateTimePicker({
           <div
             style={{
               display: "grid",
-              gap: 10,
-              padding: 12,
-              borderRadius: 20,
+              gap: compact ? 7 : 10,
+              padding: compact ? 8 : 12,
+              borderRadius: compact ? 13 : 20,
               background: COLORS.app,
               border: "1px solid #E5EEE7",
             }}
           >
-            <div style={{ color: COLORS.text, fontSize: 14, fontWeight: 750 }}>
+            <div
+              style={{
+                color: COLORS.text,
+                fontSize: compact ? 13 : 14,
+                fontWeight: 750,
+              }}
+            >
               Tijd verfijnen
             </div>
             <div
               style={{
                 display: "grid",
-                gap: 8,
+                gap: compact ? 6 : 8,
                 gridTemplateColumns: "1fr 1fr",
               }}
             >
@@ -843,6 +867,7 @@ export function CompanionDateTimePicker({
                 label="Uur"
                 value={timeParts.hour}
                 disabled={disabled}
+                compact={compact}
                 onAdjust={(direction) =>
                   updateTimeParts(adjustTimePart(timeParts, "hour", direction))
                 }
@@ -851,6 +876,7 @@ export function CompanionDateTimePicker({
                 label="Min"
                 value={timeParts.minute}
                 disabled={disabled}
+                compact={compact}
                 onAdjust={(direction) =>
                   updateTimeParts(adjustTimePart(timeParts, "minute", direction))
                 }
@@ -860,38 +886,40 @@ export function CompanionDateTimePicker({
         ) : null}
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gap: 5,
-          padding: "13px 15px",
-          borderRadius: 18,
-          background: "linear-gradient(135deg, #F7FBF8 0%, #FFFFFF 100%)",
-          border: "1px solid #E5EEE7",
-        }}
-      >
+      {!compact ? (
         <div
           style={{
-            color: COLORS.muted,
-            fontSize: 12,
-            fontWeight: 750,
-            textTransform: "uppercase",
-            letterSpacing: 0.2,
+            display: "grid",
+            gap: 5,
+            padding: "13px 15px",
+            borderRadius: 18,
+            background: "linear-gradient(135deg, #F7FBF8 0%, #FFFFFF 100%)",
+            border: "1px solid #E5EEE7",
           }}
         >
-          Geselecteerde waarde
+          <div
+            style={{
+              color: COLORS.muted,
+              fontSize: 12,
+              fontWeight: 750,
+              textTransform: "uppercase",
+              letterSpacing: 0.2,
+            }}
+          >
+            Geselecteerde waarde
+          </div>
+          <div
+            style={{
+              color: COLORS.text,
+              fontSize: 16,
+              fontWeight: 800,
+              lineHeight: 1.25,
+            }}
+          >
+            {displayValue || "Nog geen geldige waarde"}
+          </div>
         </div>
-        <div
-          style={{
-            color: COLORS.text,
-            fontSize: 16,
-            fontWeight: 800,
-            lineHeight: 1.25,
-          }}
-        >
-          {displayValue || "Nog geen geldige waarde"}
-        </div>
-      </div>
+      ) : null}
 
       {visibleContextItems.length > 0 ? (
         <ContextPanel items={visibleContextItems} />
@@ -902,13 +930,13 @@ export function CompanionDateTimePicker({
           type="button"
           onClick={() => setIsOpen(false)}
           style={{
-            minHeight: 42,
-            borderRadius: 14,
+            minHeight: 38,
+            borderRadius: 12,
             border: `1px solid ${COLORS.border}`,
             background: COLORS.veryLight,
             color: COLORS.text,
             cursor: "pointer",
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: 800,
           }}
         >
