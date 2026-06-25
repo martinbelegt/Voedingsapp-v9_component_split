@@ -530,16 +530,16 @@ export function CompanionDateTimePicker({
       onClick={() => setIsOpen((open) => !open)}
       style={{
         width: "100%",
-        minHeight: compact ? 44 : 56,
+        minHeight: compact ? 34 : 56,
         boxSizing: "border-box",
         display: "grid",
         gridTemplateColumns: compact
-          ? "minmax(0, 1fr) 16px"
+          ? "minmax(0, 1fr) 14px"
           : "34px minmax(0, 1fr) auto",
-        gap: compact ? 8 : 12,
+        gap: compact ? 6 : 12,
         alignItems: "center",
-        padding: compact ? "7px 10px 7px 12px" : "11px 14px",
-        borderRadius: compact ? 10 : 18,
+        padding: compact ? "4px 8px 4px 10px" : "11px 14px",
+        borderRadius: compact ? 7 : 18,
         border: `1px solid ${COLORS.borderStrong}`,
         background: COLORS.value,
         color: COLORS.text,
@@ -547,7 +547,7 @@ export function CompanionDateTimePicker({
         fontFamily: FONT_STACK,
         textAlign: "left",
         boxShadow: compact
-          ? "0 1px 3px rgba(15, 23, 42, 0.05)"
+          ? "0 1px 2px rgba(15, 23, 42, 0.04)"
           : "0 6px 18px rgba(15, 23, 42, 0.05)",
       }}
     >
@@ -588,9 +588,9 @@ export function CompanionDateTimePicker({
         <span
           style={{
             color: COLORS.text,
-            fontSize: compact ? 15 : 18,
-            fontWeight: 800,
-            lineHeight: compact ? 1.15 : 1.2,
+            fontSize: compact ? 13 : 18,
+            fontWeight: compact ? 700 : 800,
+            lineHeight: compact ? 1.05 : 1.2,
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
@@ -602,8 +602,8 @@ export function CompanionDateTimePicker({
       <span
         style={{
           color: COLORS.primaryDark,
-          fontSize: compact ? 14 : 18,
-          fontWeight: 800,
+          fontSize: compact ? 12 : 18,
+          fontWeight: compact ? 700 : 800,
           lineHeight: 1,
           textAlign: "center",
         }}
