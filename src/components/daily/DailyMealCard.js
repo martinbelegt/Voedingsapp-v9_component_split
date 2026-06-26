@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { DailyMealMedicalLogBlock } from "./DailyMealMedicalLogBlock";
 import { DailyMealActions } from "./DailyMealActions";
 import { DailyMealDetailModal } from "./DailyMealDetailModal";
 import { DailyTimelineItem } from "./DailyTimelineItem";
@@ -7,7 +6,6 @@ import { DailyEventTimeEditorModal } from "./DailyEventTimeEditorModal";
 
 export function DailyMealCard({
   meal,
-  index,
   products,
   onDelete,
   onUpdateTime,
@@ -16,10 +14,8 @@ export function DailyMealCard({
   compact = false,
 }) {
   const [showDetails, setShowDetails] = useState(false);
-
   const [showTimeEditor, setShowTimeEditor] = useState(false);
 
-  // ESC sluit detailvenster
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.key === "Escape") {
@@ -47,7 +43,6 @@ export function DailyMealCard({
     pppMeal: "PPP / vertraagde maaltijd",
     snack: "Snack",
     sport: "Sportvoeding",
-    recovery: "Herstelmoment",
     dessert: "Toetje",
     fruit: "Fruit",
     neutral: "Algemeen",
@@ -83,19 +78,46 @@ export function DailyMealCard({
       })
     : meal.createdAt;
 
+  const mealProductLines = (meal.rows || [])
+    .filter((row) => row.productId)
+    .map((row) => {
+      const product = products.find((p) => p.id === row.productId);
+      const productName = product?.name || "Onbekend product";
+      const amount = Number(row.amount) || 0;
+
+      if (!amount) return productName;
+      if (row.mode === "gram") return `${amount} g ${productName}`;
+
+      return amount === 1 ? productName : `${amount}x ${productName}`;
+    });
+
+  const mealSubtitle = (
+    <div style={{ display: "grid", gap: 2 }}>
+      {mealProductLines.length > 0 ? (
+        mealProductLines.map((line, lineIndex) => (
+          <React.Fragment key={`${line}-${lineIndex}`}>
+            {lineIndex > 0 ? <span>+</span> : null}
+            <span>{line}</span>
+          </React.Fragment>
+        ))
+      ) : (
+        <span>Geen producten vastgelegd</span>
+      )}
+
+      {meal.alarmEnabled || meal.mealNote ? (
+        <span style={{ marginTop: 2, color: "#166534", fontWeight: 700 }}>
+          {meal.alarmEnabled ? "Alarm actief" : ""}
+          {meal.alarmEnabled && meal.mealNote ? " - " : ""}
+          {meal.mealNote || ""}
+        </span>
+      ) : null}
+    </div>
+  );
+
   return (
     <>
-      {/* Eetmoment als uniforme tijdlijnkaart */}
       <DailyTimelineItem
-        icon={
-          meal.alarmEnabled
-            ? meal.mealMoment === "sport"
-              ? "🔔🥤"
-              : "🔔🍽️"
-            : meal.mealMoment === "sport"
-              ? "🟢🥤"
-              : "🟢🍽️"
-        }
+        icon={meal.mealMoment === "sport" ? "Training" : "Maaltijd"}
         timeLabel={
           meal.eatenAt
             ? new Date(meal.eatenAt).toLocaleString("nl-NL", {
@@ -104,12 +126,8 @@ export function DailyMealCard({
               })
             : "--:--"
         }
-        title={`${mealMomentLabel} · ${meal.totals.kh}g KH · ${meal.totals.protein}g eiwit · ${meal.totals.fat}g vet · ${meal.totals.kcal} kcal`}
-        subtitle={
-          meal.alarmEnabled
-            ? `🔔 Alarm actief${meal.mealNote ? ` · ${meal.mealNote}` : ""}`
-            : meal.mealNote || ""
-        }
+        title={mealMomentLabel}
+        subtitle={mealSubtitle}
         accentColor="#166534"
         backgroundColor="#f0fdf4"
         borderColor="#bbf7d0"
@@ -129,6 +147,7 @@ export function DailyMealCard({
         }
         detailContent={null}
       />
+
       {showDetails && (
         <DailyMealDetailModal
           meal={meal}

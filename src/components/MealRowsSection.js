@@ -10,8 +10,6 @@ export function MealRowsSection(props) {
     categories,
     updateRow,
     removeRow,
-    addRow,
-    clearMeal,
     newRowRef,
     cardStyle,
     buttonStyle,
@@ -20,15 +18,17 @@ export function MealRowsSection(props) {
     totals,
     dayTotals,
     settings,
-
     quickSearch,
     setQuickSearch,
     quickSearchResults,
     quickAddProduct,
+    children,
   } = props;
 
   const isMobile =
     window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
+
+  const [showMealAnalysis, setShowMealAnalysis] = useState(false);
 
   const totalsChip = (bg, color) => ({
     background: bg,
@@ -39,8 +39,6 @@ export function MealRowsSection(props) {
     fontWeight: 800,
     whiteSpace: "nowrap",
   });
-
-  const [showMealAnalysis, setShowMealAnalysis] = useState(false);
 
   const dashboardInputStyle = {
     ...inputStyle,
@@ -57,12 +55,8 @@ export function MealRowsSection(props) {
 
   const quickSearchInputStyle = {
     ...dashboardInputStyle,
-    ...(isMobile
-      ? {
-          background: "#f0fdf4",
-          border: "1px solid #86efac",
-        }
-      : {}),
+    background: "#ffffff",
+    border: "1px solid #86efac",
   };
 
   const dashboardButtonStyle = {
@@ -93,128 +87,31 @@ export function MealRowsSection(props) {
 
   return (
     <>
-      {/* Knoppen voor huidige maaltijd */}
       <div
         style={{
           ...cardStyle,
-          padding: isMobile ? 5 : cardStyle?.padding,
+          padding: isMobile ? 7 : cardStyle?.padding,
+          border: "1px solid #bbf7d0",
+          background: "#f0fdf4",
         }}
       >
         <div
           style={{
-            display: "flex",
-            gap: isMobile ? 4 : 8,
-            flexWrap: "wrap",
-            justifyContent: "flex-start",
+            marginBottom: isMobile ? 5 : 8,
+            fontSize: isMobile ? 13 : 15,
+            fontWeight: 900,
+            color: "#166534",
           }}
         >
-          <button onClick={addRow} style={dashboardButtonStyle}>
-            Rij toevoegen
-          </button>
-
-          <button
-            onClick={clearMeal}
-            style={{
-              ...dashboardButtonStyle,
-              background: "#dbeafe",
-              color: "#1d4ed8",
-              border: "1px solid #93c5fd",
-              fontWeight: 700,
-            }}
-          >
-            Leeg maken
-          </button>
+          Snel product kiezen
         </div>
-      </div>
 
-      <button
-        onClick={() => setShowMealAnalysis((v) => !v)}
-        style={{
-          ...buttonStyle,
-          width: "100%",
-          marginTop: isMobile ? 4 : 8,
-          marginBottom: isMobile ? 5 : 10,
-          ...(isMobile
-            ? {
-                padding: "4px 8px",
-                minHeight: 32,
-                fontSize: 12,
-                lineHeight: 1.05,
-                borderRadius: 6,
-              }
-            : {}),
-          background: showMealAnalysis ? "#dbeafe" : "#f8fafc",
-          border: "1px solid #93c5fd",
-          color: "#1d4ed8",
-          fontWeight: 800,
-          textAlign: "center",
-        }}
-      >
-        {showMealAnalysis
-          ? "🍽 Maaltijdanalyse verbergen"
-          : "🍽 Maaltijdanalyse"}
-      </button>
-
-      {showMealAnalysis && (
-        <ResultCard
-          totals={totals}
-          rowsWithCalc={rowsWithCalc}
-          buttonStyle={buttonStyle}
-          forceDetailOpen={true}
-          onForceClose={() => setShowMealAnalysis(false)}
-        />
-      )}
-
-      {/* Snel product toevoegen + dagtotaal */}
-      <div
-        style={{
-          ...cardStyle,
-          padding: isMobile ? 5 : cardStyle?.padding,
-        }}
-      >
         <input
           value={quickSearch}
           onChange={(e) => setQuickSearch(e.target.value)}
-          placeholder="Snel product toevoegen..."
+          placeholder="Zoek product..."
           style={quickSearchInputStyle}
         />
-
-        <div
-          style={{
-            display: "flex",
-            gap: isMobile ? 4 : 6,
-            flexWrap: "wrap",
-            alignItems: "center",
-            marginTop: isMobile ? 5 : 8,
-          }}
-        >
-          <span
-            style={{
-              fontSize: 11,
-              fontWeight: 800,
-              color: "#64748b",
-              marginRight: 2,
-            }}
-          >
-            Dagtotaal
-          </span>
-
-          <span style={totalsChip("#dbeafe", "#1d4ed8")}>
-            KH {previewTotals.kh}g
-          </span>
-
-          <span style={totalsChip("#ede9fe", "#6d28d9")}>
-            Eiwit {previewTotals.protein}g van {proteinGoal}g
-          </span>
-
-          <span style={totalsChip("#ffedd5", "#c2410c")}>
-            Vet {previewTotals.fat}g
-          </span>
-
-          <span style={totalsChip("#dcfce7", "#166534")}>
-            {previewTotals.kcal} van {targetKcal} kcal
-          </span>
-        </div>
 
         {quickSearch && (
           <div
@@ -250,7 +147,6 @@ export function MealRowsSection(props) {
         )}
       </div>
 
-      {/* Productregels van de huidige maaltijd */}
       {rowsWithCalc.map((r, idx) => (
         <MealRowCard
           key={r.id}
@@ -268,6 +164,87 @@ export function MealRowsSection(props) {
           getCategoryColor={getCategoryColor}
         />
       ))}
+
+      {children}
+
+      <div
+        style={{
+          ...cardStyle,
+          padding: isMobile ? 7 : cardStyle?.padding,
+        }}
+      >
+        <div
+          style={{
+            fontSize: isMobile ? 13 : 15,
+            fontWeight: 900,
+            color: "#0f172a",
+            marginBottom: isMobile ? 5 : 8,
+          }}
+        >
+          Dagtotaal
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: isMobile ? 4 : 6,
+            flexWrap: "wrap",
+            alignItems: "center",
+          }}
+        >
+          <span style={totalsChip("#dbeafe", "#1d4ed8")}>
+            KH {previewTotals.kh}g
+          </span>
+
+          <span style={totalsChip("#ede9fe", "#6d28d9")}>
+            Eiwit {previewTotals.protein}g van {proteinGoal}g
+          </span>
+
+          <span style={totalsChip("#ffedd5", "#c2410c")}>
+            Vet {previewTotals.fat}g
+          </span>
+
+          <span style={totalsChip("#dcfce7", "#166534")}>
+            {previewTotals.kcal} van {targetKcal} kcal
+          </span>
+        </div>
+      </div>
+
+      <button
+        onClick={() => setShowMealAnalysis((v) => !v)}
+        style={{
+          ...buttonStyle,
+          width: "100%",
+          marginTop: isMobile ? 4 : 8,
+          marginBottom: isMobile ? 5 : 10,
+          ...(isMobile
+            ? {
+                padding: "4px 8px",
+                minHeight: 32,
+                fontSize: 12,
+                lineHeight: 1.05,
+                borderRadius: 6,
+              }
+            : {}),
+          background: showMealAnalysis ? "#dbeafe" : "#f8fafc",
+          border: "1px solid #93c5fd",
+          color: "#1d4ed8",
+          fontWeight: 800,
+          textAlign: "center",
+        }}
+      >
+        {showMealAnalysis ? "Maaltijdanalyse verbergen" : "Maaltijdanalyse"}
+      </button>
+
+      {showMealAnalysis && (
+        <ResultCard
+          totals={totals}
+          rowsWithCalc={rowsWithCalc}
+          buttonStyle={buttonStyle}
+          forceDetailOpen={true}
+          onForceClose={() => setShowMealAnalysis(false)}
+        />
+      )}
     </>
   );
 }
