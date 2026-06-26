@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createId } from "../services/idService";
 import {
   loadDailyLog,
@@ -77,42 +77,78 @@ function sortDaysNewestFirst(days) {
   );
 }
 
+function countDailyLogEvents(days = []) {
+  return days.reduce(
+    (total, day) =>
+      total +
+      (day.meals || []).length +
+      (day.insulinEvents || []).length +
+      (day.glucoseEvents || []).length +
+      (day.glucoseBoostEvents || []).length +
+      (day.movementEvents || []).length +
+      (day.supplementEvents || []).length +
+      (day.bowelEvents || []).length +
+      (day.noteEvents || []).length +
+      (day.trainingPlanEvents || []).length +
+      (day.sportSupplementPlanEvents || []).length,
+    0,
+  );
+}
+
 export function useDailyLog(selectedDate) {
-  const [dailyLog, setDailyLog] = useState(() =>
+  const [dailyLog, setDailyLogState] = useState(() =>
     sortDaysNewestFirst((loadDailyLog() || []).map(normalizeDay)),
   );
   const [cloudLoaded, setCloudLoaded] = useState(false);
+  const hasHydratedCloudData = useRef(false);
+  const hasLocalUserChange = useRef(false);
+  const cloudHydratedDayCount = useRef(0);
+  const cloudHydratedEventCount = useRef(0);
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadCloud() {
-      const cloudDailyLog = await loadDailyLogFromCloud();
+      try {
+        const cloudDailyLog = await loadDailyLogFromCloud();
 
-      console.log("CLOUD RAW:", cloudDailyLog);
-      console.log(
-        "CLOUD DATES:",
-        cloudDailyLog?.map((day) => ({
-          date: day.date,
-          meals: day.meals?.length || 0,
-          insulin: day.insulinEvents?.length || 0,
-          glucose: day.glucoseEvents?.length || 0,
-          movement: day.movementEvents?.length || 0,
-        })),
-      );
-      console.log("SELECTED DATE:", selectedDate);
-      console.log(
-        "CLOUD SELECTED DAY:",
-        cloudDailyLog?.find((day) => day.date === selectedDate),
-      );
+        if (cancelled) return;
 
-      if (cancelled) return;
+        if (!Array.isArray(cloudDailyLog)) {
+          console.warn(
+            "dailyLog cloud load failure: no usable cloud dailyLog returned",
+          );
+          setCloudLoaded(true);
+          return;
+        }
 
-      if (cloudDailyLog) {
-        setDailyLog(sortDaysNewestFirst(cloudDailyLog.map(normalizeDay)));
+        const normalizedCloudLog = sortDaysNewestFirst(
+          cloudDailyLog.map(normalizeDay),
+        );
+        const cloudEventCount = countDailyLogEvents(normalizedCloudLog);
+
+        hasHydratedCloudData.current = true;
+        cloudHydratedDayCount.current = normalizedCloudLog.length;
+        cloudHydratedEventCount.current = cloudEventCount;
+
+        console.log("dailyLog cloud load success:", {
+          days: normalizedCloudLog.length,
+          events: cloudEventCount,
+          selectedDate,
+          selectedDay: normalizedCloudLog.find(
+            (day) => day.date === selectedDate,
+          ),
+        });
+
+        setDailyLogState(normalizedCloudLog);
+        saveDailyLog(normalizedCloudLog);
+        setCloudLoaded(true);
+      } catch (error) {
+        if (cancelled) return;
+
+        console.error("dailyLog cloud load failure:", error);
+        setCloudLoaded(true);
       }
-
-      setCloudLoaded(true);
     }
 
     loadCloud();
@@ -125,17 +161,81 @@ export function useDailyLog(selectedDate) {
   useEffect(() => {
     saveDailyLog(dailyLog);
 
-    if (!cloudLoaded) return;
-    if (!dailyLog || dailyLog.length === 0) return;
+    if (!cloudLoaded) {
+      console.log("dailyLog cloud save skipped: cloud load not finished");
+      return;
+    }
+
+    if (!hasHydratedCloudData.current) {
+      console.warn("dailyLog cloud save skipped: cloud data not hydrated");
+      return;
+    }
+
+    if (!hasLocalUserChange.current) {
+      console.log(
+        "dailyLog cloud save skipped: no local user change after hydration",
+      );
+      return;
+    }
+
+    if (!dailyLog || dailyLog.length === 0) {
+      console.warn("dailyLog cloud save skipped: empty dailyLog");
+      return;
+    }
+
+    const localDayCount = dailyLog.length;
+    const localEventCount = countDailyLogEvents(dailyLog);
+
+    if (localDayCount < cloudHydratedDayCount.current) {
+      console.warn("dailyLog cloud save skipped: local day count is smaller", {
+        localDays: localDayCount,
+        cloudDays: cloudHydratedDayCount.current,
+      });
+      return;
+    }
+
+    if (localEventCount < cloudHydratedEventCount.current) {
+      console.warn(
+        "dailyLog cloud save skipped: local event count is smaller",
+        {
+          localEvents: localEventCount,
+          cloudEvents: cloudHydratedEventCount.current,
+        },
+      );
+      return;
+    }
 
     const timeoutId = setTimeout(() => {
+      console.log("dailyLog cloud save executing:", {
+        days: localDayCount,
+        events: localEventCount,
+      });
+
       saveDailyLogToCloud(dailyLog).then((ok) => {
-        console.log("cloud save result:", ok);
+        console.log("dailyLog cloud save result:", ok);
+
+        if (ok) {
+          hasLocalUserChange.current = false;
+          cloudHydratedDayCount.current = localDayCount;
+          cloudHydratedEventCount.current = localEventCount;
+        }
       });
     }, 1500);
 
     return () => clearTimeout(timeoutId);
   }, [dailyLog, cloudLoaded]);
+
+  function setDailyLog(nextDailyLog) {
+    if (hasHydratedCloudData.current) {
+      hasLocalUserChange.current = true;
+    } else {
+      console.log(
+        "dailyLog local change before cloud hydration; cloud save remains blocked",
+      );
+    }
+
+    setDailyLogState(nextDailyLog);
+  }
 
   const selectedDay = useMemo(() => {
     const foundDay = dailyLog.find((d) => d?.date === selectedDate);
