@@ -12,6 +12,7 @@ export function DailyMealCard({
   onUpdateMedicalLog,
   buttonStyle,
   compact = false,
+  expanded = false,
 }) {
   const [showDetails, setShowDetails] = useState(false);
   const [showTimeEditor, setShowTimeEditor] = useState(false);
@@ -91,6 +92,10 @@ export function DailyMealCard({
       return amount === 1 ? productName : `${amount}x ${productName}`;
     });
 
+  const visibleMealProductLines = expanded
+    ? mealProductLines
+    : mealProductLines.slice(0, 1);
+
   const mealTitle = (
     <span
       style={{
@@ -99,8 +104,8 @@ export function DailyMealCard({
         verticalAlign: "top",
       }}
     >
-      {mealProductLines.length > 0 ? (
-        mealProductLines.map((line, lineIndex) => (
+      {visibleMealProductLines.length > 0 ? (
+        visibleMealProductLines.map((line, lineIndex) => (
           <span key={`${line}-${lineIndex}`}>{line}</span>
         ))
       ) : (

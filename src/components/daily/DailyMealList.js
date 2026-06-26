@@ -668,13 +668,17 @@ export function DailyMealList({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr",
+          gridTemplateColumns: isMobile
+            ? "34px 34px minmax(70px, 1fr) minmax(48px, 0.8fr) 44px"
+            : "1fr 1fr 1fr 1fr 1fr",
           gap: 4,
-          marginTop: isMobile ? 4 : 6,
-          marginBottom: isMobile ? 6 : 8,
-          padding: isMobile ? "5px 0" : "7px 0",
-          borderTop: "1px solid #cbd5e1",
-          borderBottom: "1px solid #cbd5e1",
+          marginTop: isMobile ? 6 : 8,
+          marginBottom: isMobile ? 8 : 10,
+          padding: isMobile ? "6px 5px" : "8px 7px",
+          background: "#eef7f0",
+          border: "1px solid #b7d3c0",
+          borderRadius: 6,
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.78)",
         }}
       >
         <button
@@ -731,7 +735,7 @@ export function DailyMealList({
             whiteSpace: "nowrap",
           }}
         >
-          {allExpanded ? "⤡" : "⤢"}
+          {allExpanded ? "▲▲" : "▼▼"}
         </button>
 
         <button
@@ -836,6 +840,7 @@ export function DailyMealList({
                 onUpdateMedicalLog={updateMealMedicalLog}
                 buttonStyle={buttonStyle}
                 compact={compactTimeline}
+                expanded={expandedIds.includes(item.id)}
               />
             );
           }
