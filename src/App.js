@@ -104,7 +104,6 @@ import {
   createPackFilterOptions,
 } from "./services/productPackService";
 
-import { saveAppDataToCloud } from "./services/localStorageService";
 import { MobileHeader } from "./components/mobile/MobileHeader";
 
 // ======================================================
@@ -881,24 +880,6 @@ export default function App() {
   // backup
   // fallback
   // ======================================================
-  useEffect(() => {
-    async function pushLocalAppDataToCloud() {
-      console.log("Pushing app data to cloud...");
-
-      await saveAppDataToCloud("products", products);
-
-      await saveAppDataToCloud("categories", categories);
-
-      await saveAppDataToCloud("settings", settings);
-
-      await saveAppDataToCloud("savedMeals", savedMeals);
-
-      console.log("App data push complete");
-    }
-
-    pushLocalAppDataToCloud();
-  }, [products, categories, settings, savedMeals]);
-
   const [showSavedMeals, setShowSavedMeals] = useState(() => !isMobile);
   const [showFavorites, setShowFavorites] = useState(() => !isMobile);
   const [categoryFilter, setCategoryFilter] = useState("all");

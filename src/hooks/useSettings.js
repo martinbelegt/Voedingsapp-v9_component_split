@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { defaultSettings } from "../data/defaults";
 
@@ -11,8 +11,10 @@ import {
 
 export function useSettings() {
   const [cloudLoaded, setCloudLoaded] = useState(false);
+  const hasHydratedCloudData = useRef(false);
+  const hasLocalUserChange = useRef(false);
 
-  const [settings, setSettings] = useState(() => {
+  const [settings, setSettingsState] = useState(() => {
     const savedSettings = loadSettings();
 
     return {
@@ -37,7 +39,8 @@ export function useSettings() {
       if (cancelled) return;
 
       if (cloudSettings) {
-        setSettings({
+        hasHydratedCloudData.current = true;
+        setSettingsState({
           ...defaultSettings,
           ...cloudSettings,
 
@@ -63,12 +66,22 @@ export function useSettings() {
   useEffect(() => {
     saveSettings(settings);
 
-    if (cloudLoaded) {
-      saveAppDataToCloud("settings", settings).then((ok) => {
-        console.log("settings cloud save:", ok);
-      });
+    if (!cloudLoaded) return;
+
+    if (!hasHydratedCloudData.current && !hasLocalUserChange.current) {
+      console.log("settings cloud save skipped: app data not hydrated");
+      return;
     }
+
+    saveAppDataToCloud("settings", settings).then((ok) => {
+      console.log("settings cloud save:", ok);
+    });
   }, [settings, cloudLoaded]);
+
+  function setSettings(nextSettings) {
+    hasLocalUserChange.current = true;
+    setSettingsState(nextSettings);
+  }
 
   return {
     settings,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { createId } from "../services/idService";
 
@@ -10,8 +10,10 @@ import {
 } from "../services/localStorageService";
 
 export function useSavedMeals() {
-  const [savedMeals, setSavedMeals] = useState(() => loadSavedMeals());
+  const [savedMeals, setSavedMealsState] = useState(() => loadSavedMeals());
   const [cloudLoaded, setCloudLoaded] = useState(false);
+  const hasHydratedCloudData = useRef(false);
+  const hasLocalUserChange = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -24,7 +26,8 @@ export function useSavedMeals() {
       if (cancelled) return;
 
       if (cloudSavedMeals?.length) {
-        setSavedMeals(cloudSavedMeals);
+        hasHydratedCloudData.current = true;
+        setSavedMealsState(cloudSavedMeals);
         saveSavedMeals(cloudSavedMeals);
       }
 
@@ -41,12 +44,24 @@ export function useSavedMeals() {
   useEffect(() => {
     saveSavedMeals(savedMeals);
 
-    if (cloudLoaded && savedMeals?.length > 0) {
+    if (!cloudLoaded) return;
+
+    if (!hasHydratedCloudData.current && !hasLocalUserChange.current) {
+      console.log("savedMeals cloud save skipped: app data not hydrated");
+      return;
+    }
+
+    if (savedMeals?.length > 0) {
       saveAppDataToCloud("savedMeals", savedMeals).then((ok) => {
         console.log("savedMeals cloud save:", ok);
       });
     }
   }, [savedMeals, cloudLoaded]);
+
+  function setSavedMeals(nextSavedMeals) {
+    hasLocalUserChange.current = true;
+    setSavedMealsState(nextSavedMeals);
+  }
 
   function addSavedMeal(name, rows, options = {}) {
     const newMeal = {

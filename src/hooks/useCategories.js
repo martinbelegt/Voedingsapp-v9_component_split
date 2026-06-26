@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   loadCategories,
   saveCategories,
@@ -7,8 +7,10 @@ import {
 } from "../services/localStorageService";
 
 export function useCategories() {
-  const [categories, setCategories] = useState(() => loadCategories());
+  const [categories, setCategoriesState] = useState(() => loadCategories());
   const [cloudLoaded, setCloudLoaded] = useState(false);
+  const hasHydratedCloudData = useRef(false);
+  const hasLocalUserChange = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -21,7 +23,8 @@ export function useCategories() {
       if (cancelled) return;
 
       if (cloudCategories?.length) {
-        setCategories(cloudCategories);
+        hasHydratedCloudData.current = true;
+        setCategoriesState(cloudCategories);
         saveCategories(cloudCategories);
       }
 
@@ -38,12 +41,24 @@ export function useCategories() {
   useEffect(() => {
     saveCategories(categories);
 
-    if (cloudLoaded && categories?.length > 0) {
+    if (!cloudLoaded) return;
+
+    if (!hasHydratedCloudData.current && !hasLocalUserChange.current) {
+      console.log("categories cloud save skipped: app data not hydrated");
+      return;
+    }
+
+    if (categories?.length > 0) {
       saveAppDataToCloud("categories", categories).then((ok) => {
         console.log("categories cloud save:", ok);
       });
     }
   }, [categories, cloudLoaded]);
+
+  function setCategories(nextCategories) {
+    hasLocalUserChange.current = true;
+    setCategoriesState(nextCategories);
+  }
 
   function addCategory(category) {
     setCategories((prev) => [...prev, category]);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   loadProducts,
   saveProducts,
@@ -7,8 +7,10 @@ import {
 } from "../services/localStorageService";
 
 export function useProducts() {
-  const [products, setProducts] = useState(() => loadProducts());
+  const [products, setProductsState] = useState(() => loadProducts());
   const [cloudLoaded, setCloudLoaded] = useState(false);
+  const hasHydratedCloudData = useRef(false);
+  const hasLocalUserChange = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -21,7 +23,8 @@ export function useProducts() {
       if (cancelled) return;
 
       if (cloudProducts?.length) {
-        setProducts(cloudProducts);
+        hasHydratedCloudData.current = true;
+        setProductsState(cloudProducts);
         saveProducts(cloudProducts);
       }
 
@@ -38,12 +41,24 @@ export function useProducts() {
   useEffect(() => {
     saveProducts(products);
 
-    if (cloudLoaded && products?.length > 0) {
+    if (!cloudLoaded) return;
+
+    if (!hasHydratedCloudData.current && !hasLocalUserChange.current) {
+      console.log("products cloud save skipped: app data not hydrated");
+      return;
+    }
+
+    if (products?.length > 0) {
       saveAppDataToCloud("products", products).then((ok) => {
         console.log("products cloud save:", ok);
       });
     }
   }, [products, cloudLoaded]);
+
+  function setProducts(nextProducts) {
+    hasLocalUserChange.current = true;
+    setProductsState(nextProducts);
+  }
 
   function addProduct(product) {
     setProducts((prev) => [...prev, product]);
