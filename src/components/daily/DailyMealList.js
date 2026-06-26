@@ -676,7 +676,7 @@ export function DailyMealList({
           marginBottom: isMobile ? 8 : 10,
           padding: isMobile ? "6px 5px" : "8px 7px",
           background: "#eef7f0",
-          border: "2px solid #2f2a24",
+          border: "2px solid #2f4a38",
           borderRadius: 6,
           boxShadow: "inset 0 1px 0 rgba(255,255,255,0.78)",
           width: "fit-content",
@@ -708,13 +708,13 @@ export function DailyMealList({
             minHeight: 28,
             padding: "1px 4px",
             borderRadius: 3,
-            fontSize: 14,
+            fontSize: 17,
             fontWeight: 900,
             lineHeight: 1,
             whiteSpace: "nowrap",
           }}
         >
-          {timelineOrder === "newest" ? "↓↑" : "↑↓"}
+          ⇅
         </button>
 
         <button
@@ -755,13 +755,13 @@ export function DailyMealList({
             minHeight: 28,
             padding: "1px 4px",
             borderRadius: 3,
-            fontSize: 16,
+            fontSize: 17,
             fontWeight: 900,
             lineHeight: 1,
             whiteSpace: "nowrap",
           }}
         >
-          ↻
+          ⟳
         </button>
 
         <button
