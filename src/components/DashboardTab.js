@@ -53,6 +53,17 @@ export function DashboardTab(props) {
           paddingBottom: isMobile ? 4 : 8,
         }}
       >
+        <h2
+          style={{
+            margin: 0,
+            color: "#1d4ed8",
+            fontSize: isMobile ? 18 : 22,
+            fontWeight: 900,
+          }}
+        >
+          Maaltijdkiezer
+        </h2>
+
         <ResultCard
           totals={totals}
           rowsWithCalc={mealRowsProps.rowsWithCalc}

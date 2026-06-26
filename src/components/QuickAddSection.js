@@ -132,7 +132,7 @@ export function QuickAddSection(props) {
             flash("add");
           }}
         >
-          Voeg toe
+          Zet op tijdlijn
         </CompanionButton>
 
         {!isMobile && (
