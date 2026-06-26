@@ -761,7 +761,26 @@ export function DailyMealList({
             whiteSpace: "nowrap",
           }}
         >
-          ⟳
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            focusable="false"
+            style={{
+              display: "block",
+              color: "currentColor",
+            }}
+          >
+            <path
+              d="M7 5H18C19.1 5 20 5.9 20 7V12H17V8H8.9L11.1 10.2L9 12.3L3.2 6.5L9 0.7L11.1 2.8L8.9 5H7Z"
+              fill="currentColor"
+            />
+            <path
+              d="M17 19H6C4.9 19 4 18.1 4 17V12H7V16H15.1L12.9 13.8L15 11.7L20.8 17.5L15 23.3L12.9 21.2L15.1 19H17Z"
+              fill="currentColor"
+            />
+          </svg>
         </button>
 
         <button
