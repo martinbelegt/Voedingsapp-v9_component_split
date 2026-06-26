@@ -7,53 +7,40 @@ const BOWEL_COLOR_OPTIONS = [
   {
     value: "",
     label: "Kleur niet ingevuld",
-    info: "",
   },
   {
     value: "dark_brown",
     label: "🟤 Donkerbruin - meestal normaal",
-    info: "",
   },
   {
     value: "brown",
     label: "🟫 Bruin - normale kleur",
-    info: "",
   },
   {
     value: "light_brown",
     label: "🟨 Lichtbruin - meestal normaal, let op veranderingen",
-    info: "",
   },
   {
     value: "yellow",
     label: "🟡 Geel - kan wijzen op vetmalabsorptie of snelle passage",
-    info: "",
   },
   {
     value: "green",
     label: "🟢 Groen - voeding, supplementen of snelle passage",
-    info: "",
   },
   {
     value: "grey",
     label: "⚪ Grijs - kan wijzen op galproblemen",
-    info: "",
   },
   {
     value: "black",
     label: "⚫ Zwart - kan bloedverlies betekenen",
-    info: "",
   },
   {
     value: "red",
     label: "🔴 Rood - kan bloedverlies betekenen",
-    info: "",
   },
 ];
-
-function getBowelColorInfo(value) {
-  return BOWEL_COLOR_OPTIONS.find((opt) => opt.value === value)?.info || "";
-}
 
 export function DailyEventAddModal({
   eventType,
@@ -142,8 +129,6 @@ export function DailyEventAddModal({
   }[eventType];
 
   if (!config) return null;
-
-  console.log("DailyEventAddModal eventType:", eventType);
 
   function save() {
     onSave({
