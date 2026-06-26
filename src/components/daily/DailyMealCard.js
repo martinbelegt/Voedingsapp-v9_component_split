@@ -91,8 +91,14 @@ export function DailyMealCard({
       return amount === 1 ? productName : `${amount}x ${productName}`;
     });
 
-  const mealSubtitle = (
-    <div style={{ display: "grid", gap: 2 }}>
+  const mealTitle = (
+    <span
+      style={{
+        display: "inline-grid",
+        gap: 2,
+        verticalAlign: "top",
+      }}
+    >
       {mealProductLines.length > 0 ? (
         mealProductLines.map((line, lineIndex) => (
           <React.Fragment key={`${line}-${lineIndex}`}>
@@ -103,21 +109,22 @@ export function DailyMealCard({
       ) : (
         <span>Geen producten vastgelegd</span>
       )}
-
-      {meal.alarmEnabled || meal.mealNote ? (
-        <span style={{ marginTop: 2, color: "#166534", fontWeight: 700 }}>
-          {meal.alarmEnabled ? "Alarm actief" : ""}
-          {meal.alarmEnabled && meal.mealNote ? " - " : ""}
-          {meal.mealNote || ""}
-        </span>
-      ) : null}
-    </div>
+    </span>
   );
+
+  const mealSubtitle =
+    meal.alarmEnabled || meal.mealNote ? (
+      <span style={{ color: "#166534", fontWeight: 700 }}>
+        {meal.alarmEnabled ? "Alarm actief" : ""}
+        {meal.alarmEnabled && meal.mealNote ? " - " : ""}
+        {meal.mealNote || ""}
+      </span>
+    ) : null;
 
   return (
     <>
       <DailyTimelineItem
-        icon={meal.mealMoment === "sport" ? "Training" : "Maaltijd"}
+        icon={null}
         timeLabel={
           meal.eatenAt
             ? new Date(meal.eatenAt).toLocaleString("nl-NL", {
@@ -126,7 +133,7 @@ export function DailyMealCard({
               })
             : "--:--"
         }
-        title={mealMomentLabel}
+        title={<span style={{ color: "#0f172a" }}>{mealTitle}</span>}
         subtitle={mealSubtitle}
         accentColor="#166534"
         backgroundColor="#f0fdf4"
