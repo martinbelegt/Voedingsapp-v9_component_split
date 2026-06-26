@@ -142,12 +142,14 @@ function quickChoices(mode) {
     );
   }
 
-  choices.push({
-    key: "now",
-    label: "Nu",
-    date: todayDate(),
-    time: currentTime(),
-  });
+  if (mode === "time" || mode === "datetime") {
+    choices.push({
+      key: "now",
+      label: "Nu",
+      date: todayDate(),
+      time: currentTime(),
+    });
+  }
 
   return choices;
 }
@@ -530,17 +532,17 @@ export function CompanionDateTimePicker({
     const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
     const viewportHeight =
       window.innerHeight || document.documentElement.clientHeight;
-    const viewportMargin = 12;
-    const popoverGap = 6;
-    const width = Math.min(rect.width, viewportWidth - viewportMargin * 2);
-    const left = Math.min(
-      Math.max(rect.left, viewportMargin),
-      Math.max(viewportMargin, viewportWidth - width - viewportMargin),
+    const viewportMargin = 8;
+    const popoverGap = 0;
+    const width = Math.max(
+      0,
+      Math.min(rect.width, viewportWidth - viewportMargin * 2),
     );
+    const left = rect.left;
     const top = rect.bottom + popoverGap;
     const maxHeight = Math.max(
-      160,
-      Math.min(viewportHeight * 0.85, viewportHeight - top - viewportMargin),
+      150,
+      Math.min(viewportHeight * 0.7, viewportHeight - top - viewportMargin),
     );
 
     setPopoverRect({ left, top, width, maxHeight });
@@ -579,7 +581,7 @@ export function CompanionDateTimePicker({
         gap: compact ? 6 : 12,
         alignItems: "center",
         padding: compact ? "4px 8px 4px 10px" : "11px 14px",
-        borderRadius: compact ? 7 : 18,
+        borderRadius: compact ? (isOpen ? "7px 7px 0 0" : 7) : 18,
         border: `1px solid ${COLORS.borderStrong}`,
         background: COLORS.value,
         color: COLORS.text,
@@ -671,12 +673,12 @@ export function CompanionDateTimePicker({
         overflowY: compact ? "auto" : "visible",
         boxSizing: "border-box",
         border: `1px solid ${COLORS.border}`,
-        borderRadius: compact ? 12 : 28,
+        borderRadius: compact ? "0 0 12px 12px" : 28,
         background: COLORS.card,
         boxShadow: compact
-          ? "0 8px 20px rgba(15, 23, 42, 0.07)"
+          ? "0 10px 22px rgba(15, 23, 42, 0.09)"
           : "0 18px 44px rgba(15, 23, 42, 0.08)",
-        padding: compact ? 8 : 22,
+        padding: compact ? "7px 8px 8px" : 22,
         display: "grid",
         gap: compact ? 5 : 18,
         color: COLORS.text,
@@ -1039,23 +1041,9 @@ export function CompanionDateTimePicker({
               width: popoverRect ? popoverRect.width : "calc(100vw - 24px)",
               maxHeight: popoverRect ? popoverRect.maxHeight : "85vh",
               visibility: popoverRect ? "visible" : "hidden",
+              boxSizing: "border-box",
             }}
           >
-            <div
-              aria-hidden="true"
-              style={{
-                position: "absolute",
-                top: -5,
-                left: "50%",
-                width: 10,
-                height: 10,
-                transform: "translateX(-50%) rotate(45deg)",
-                background: COLORS.card,
-                borderLeft: `1px solid ${COLORS.border}`,
-                borderTop: `1px solid ${COLORS.border}`,
-                zIndex: 1,
-              }}
-            />
             {pickerPanel}
           </div>
         </div>
