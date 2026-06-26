@@ -659,47 +659,47 @@ export function useDailyLog(selectedDate) {
 
     const sourceDay = dailyLog.find((day) => day.date === previousDateString);
 
-    if (!sourceDay) return;
+    if (!sourceDay) return false;
+
+    const repeatedMeals = (sourceDay.meals || [])
+      .filter((meal) => meal.repeat === "daily")
+      .map((meal) => ({
+        ...meal,
+        id: createId("daily-meal"),
+        eatenAt: `${selectedDate}T${String(meal.eatenAt || "").slice(11, 16) || "12:00"}`,
+        createdAt: new Date().toLocaleString("nl-NL"),
+      }));
+
+    const repeatedSupplements = (sourceDay.supplementEvents || [])
+      .filter((item) => item.repeat === "daily")
+      .map((item) => ({
+        ...item,
+        id: createId("supplement-event"),
+        eventTime: `${selectedDate}T${String(item.eventTime || "").slice(11, 16) || "08:00"}`,
+        createdAt: new Date().toLocaleString("nl-NL"),
+      }));
+
+    const repeatedMovements = (sourceDay.movementEvents || [])
+      .filter((item) => item.repeat === "daily")
+      .map((item) => ({
+        ...item,
+        id: createId("movement-event"),
+        eventTime: `${selectedDate}T${String(item.eventTime || "").slice(11, 16) || "10:00"}`,
+        createdAt: new Date().toLocaleString("nl-NL"),
+      }));
+
+    if (
+      repeatedMeals.length === 0 &&
+      repeatedSupplements.length === 0 &&
+      repeatedMovements.length === 0
+    ) {
+      return false;
+    }
 
     setDailyLog((prev) => {
       const existingTargetDay =
         prev.find((day) => day.date === selectedDate) ||
         createEmptyDay(selectedDate);
-
-      const repeatedMeals = (sourceDay.meals || [])
-        .filter((meal) => meal.repeat === "daily")
-        .map((meal) => ({
-          ...meal,
-          id: createId("daily-meal"),
-          eatenAt: `${selectedDate}T${String(meal.eatenAt || "").slice(11, 16) || "12:00"}`,
-          createdAt: new Date().toLocaleString("nl-NL"),
-        }));
-
-      const repeatedSupplements = (sourceDay.supplementEvents || [])
-        .filter((item) => item.repeat === "daily")
-        .map((item) => ({
-          ...item,
-          id: createId("supplement-event"),
-          eventTime: `${selectedDate}T${String(item.eventTime || "").slice(11, 16) || "08:00"}`,
-          createdAt: new Date().toLocaleString("nl-NL"),
-        }));
-
-      const repeatedMovements = (sourceDay.movementEvents || [])
-        .filter((item) => item.repeat === "daily")
-        .map((item) => ({
-          ...item,
-          id: createId("movement-event"),
-          eventTime: `${selectedDate}T${String(item.eventTime || "").slice(11, 16) || "10:00"}`,
-          createdAt: new Date().toLocaleString("nl-NL"),
-        }));
-
-      if (
-        repeatedMeals.length === 0 &&
-        repeatedSupplements.length === 0 &&
-        repeatedMovements.length === 0
-      ) {
-        return prev;
-      }
 
       const nextTargetDay = {
         ...normalizeDay(existingTargetDay),
@@ -724,6 +724,8 @@ export function useDailyLog(selectedDate) {
         nextTargetDay,
       ]);
     });
+
+    return true;
   }
 
   function clearDailyLog() {

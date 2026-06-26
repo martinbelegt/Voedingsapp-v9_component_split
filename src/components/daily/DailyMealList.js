@@ -742,7 +742,14 @@ export function DailyMealList({
 
         <button
           type="button"
-          onClick={fillDailyRepeats}
+          onClick={() => {
+            const didAddRepeats = fillDailyRepeats();
+            window.alert(
+              didAddRepeats
+                ? "Dagelijkse routine toegevoegd."
+                : "Geen dagelijkse routine gevonden voor gisteren.",
+            );
+          }}
           style={{
             ...buttonStyle,
             display: "flex",

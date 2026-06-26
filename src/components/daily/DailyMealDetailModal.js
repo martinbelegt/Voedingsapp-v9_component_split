@@ -8,10 +8,11 @@ export function DailyMealDetailModal({
   buttonStyle,
   onClose,
   onChangeTime,
-  onUpdateAlarm,
+  onUpdateMeal,
   onDelete,
 }) {
   const [alarmEnabled, setAlarmEnabled] = useState(Boolean(meal?.alarmEnabled));
+  const [repeat, setRepeat] = useState(meal?.repeat || "none");
 
   const [alarmAt, setAlarmAt] = useState(
     meal?.alarmAt
@@ -110,7 +111,7 @@ export function DailyMealDetailModal({
 
           <button
             onClick={() =>
-              onUpdateAlarm({
+              onUpdateMeal({
                 alarmEnabled,
                 alarmAt: alarmEnabled ? alarmAt : null,
               })
@@ -126,6 +127,52 @@ export function DailyMealDetailModal({
           >
             Alarm opslaan
           </button>
+        </div>
+
+        <div
+          style={{
+            marginBottom: 14,
+            padding: 10,
+            borderRadius: 12,
+            background: "#f0fdf4",
+            border: "1px solid #bbf7d0",
+          }}
+        >
+          <label
+            htmlFor="daily-meal-repeat"
+            style={{
+              display: "block",
+              fontSize: 13,
+              fontWeight: 900,
+              color: "#14532d",
+              marginBottom: 6,
+            }}
+          >
+            Dagelijkse routine
+          </label>
+
+          <select
+            id="daily-meal-repeat"
+            value={repeat}
+            onChange={(e) => {
+              const nextRepeat = e.target.value;
+              setRepeat(nextRepeat);
+              onUpdateMeal({ repeat: nextRepeat });
+            }}
+            style={{
+              width: "100%",
+              boxSizing: "border-box",
+              padding: 8,
+              border: "1px solid #86efac",
+              borderRadius: 8,
+              fontSize: 16,
+              background: "white",
+              color: "#0f172a",
+            }}
+          >
+            <option value="none">Niet herhalen</option>
+            <option value="daily">Dagelijks</option>
+          </select>
         </div>
 
         {/* Modalheader */}

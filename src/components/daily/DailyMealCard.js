@@ -166,7 +166,7 @@ export function DailyMealCard({
           buttonStyle={buttonStyle}
           onClose={() => setShowDetails(false)}
           onChangeTime={() => setShowTimeEditor(true)}
-          onUpdateAlarm={(updates) => {
+          onUpdateMeal={(updates) => {
             onUpdateMedicalLog(meal.id, updates);
           }}
           onDelete={() => {
