@@ -3,6 +3,7 @@ import { DailyMealList } from "./DailyMealList";
 import { DailyEventAddModal } from "./DailyEventAddModal";
 import { requestNotificationPermission } from "../../services/notificationService";
 import { CompanionDateTimePicker } from "../../ui/pickers/CompanionDateTimePicker";
+import { CompanionToolbarButton } from "../../ui/buttons/CompanionToolbarButton";
 
 import {
   scheduleLocalAlarm,
@@ -396,63 +397,27 @@ export function DailyTab({
               gap: isMobile ? 4 : 6,
             }}
           >
-            <button
+            <CompanionToolbarButton
+              active={showTimelineAnalysis}
+              fullWidth
+              icon="chart"
+              label="Daganalyse"
               onClick={() => setShowTimelineAnalysis((v) => !v)}
-              style={{
-                ...buttonStyle,
-                background: showTimelineAnalysis ? "#dbeafe" : "#f8fafc",
-                border: showTimelineAnalysis
-                  ? "1px solid #93c5fd"
-                  : "1px solid #cbd5e1",
-                color: showTimelineAnalysis ? "#1d4ed8" : "#334155",
-                fontWeight: 700,
-                fontSize: isMobile ? 12 : 13,
-                padding: isMobile ? "4px 6px" : "5px 6px",
-                minHeight: isMobile ? 30 : 34,
-                borderRadius: 4,
-                lineHeight: 1.05,
-              }}
-            >
-              📈 Daganalyse
-            </button>
-            <button
+            />
+            <CompanionToolbarButton
+              active={showAddButtons}
+              fullWidth
+              icon="plus"
+              label="Nieuw"
               onClick={() => setShowAddButtons((v) => !v)}
-              style={{
-                ...buttonStyle,
-                background: showAddButtons ? "#dcfce7" : "#f8fafc",
-                border: showAddButtons
-                  ? "1px solid #86efac"
-                  : "1px solid #cbd5e1",
-                color: showAddButtons ? "#166534" : "#334155",
-                fontWeight: 700,
-                fontSize: isMobile ? 12 : 13,
-                padding: isMobile ? "4px 6px" : "5px 6px",
-                minHeight: isMobile ? 30 : 34,
-                borderRadius: 4,
-                lineHeight: 1.05,
-              }}
-            >
-              ➕ Nieuw
-            </button>
-            <button
+            />
+            <CompanionToolbarButton
+              active={showTimelineControls}
+              fullWidth
+              icon="gear"
+              label="Filters"
               onClick={() => setShowTimelineControls((v) => !v)}
-              style={{
-                ...buttonStyle,
-                background: showTimelineControls ? "#fef3c7" : "#f8fafc",
-                border: showTimelineControls
-                  ? "1px solid #fcd34d"
-                  : "1px solid #cbd5e1",
-                color: showTimelineControls ? "#92400e" : "#334155",
-                fontWeight: 700,
-                fontSize: isMobile ? 12 : 13,
-                padding: isMobile ? "4px 6px" : "5px 6px",
-                minHeight: isMobile ? 30 : 34,
-                borderRadius: 4,
-                lineHeight: 1.05,
-              }}
-            >
-              ⚙️ Filters
-            </button>
+            />
           </div>
 
           {showTimelineAnalysis && (
