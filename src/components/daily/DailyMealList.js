@@ -669,16 +669,18 @@ export function DailyMealList({
         style={{
           display: "grid",
           gridTemplateColumns: isMobile
-            ? "34px 34px minmax(70px, 1fr) minmax(48px, 0.8fr) 44px"
-            : "1fr 1fr 1fr 1fr 1fr",
+            ? "36px 36px 36px 36px"
+            : "44px 44px 44px 44px",
           gap: 4,
           marginTop: isMobile ? 6 : 8,
           marginBottom: isMobile ? 8 : 10,
           padding: isMobile ? "6px 5px" : "8px 7px",
           background: "#eef7f0",
-          border: "1px solid #b7d3c0",
+          border: "2px solid #2f2a24",
           borderRadius: 6,
           boxShadow: "inset 0 1px 0 rgba(255,255,255,0.78)",
+          width: "fit-content",
+          maxWidth: "100%",
         }}
       >
         <button
@@ -701,13 +703,13 @@ export function DailyMealList({
               timelineOrder === "newest"
                 ? "1px solid #bfdbfe"
                 : "1px solid #cbd5e1",
-            color: timelineOrder === "newest" ? "#1d4ed8" : "#334155",
+            color: timelineOrder === "newest" ? "#0f172a" : "#1f2937",
             height: 28,
             minHeight: 28,
             padding: "1px 4px",
             borderRadius: 3,
-            fontSize: 12,
-            fontWeight: 700,
+            fontSize: 14,
+            fontWeight: 900,
             lineHeight: 1,
             whiteSpace: "nowrap",
           }}
@@ -730,7 +732,7 @@ export function DailyMealList({
             padding: "1px 4px",
             borderRadius: 3,
             fontSize: 14,
-            fontWeight: 800,
+            fontWeight: 900,
             lineHeight: 1,
             whiteSpace: "nowrap",
           }}
@@ -753,36 +755,14 @@ export function DailyMealList({
             minHeight: 28,
             padding: "1px 4px",
             borderRadius: 3,
-            fontSize: 12,
-            fontWeight: 700,
+            fontSize: 16,
+            fontWeight: 900,
             lineHeight: 1,
             whiteSpace: "nowrap",
           }}
         >
-          🔁 Herhaal
+          ↻
         </button>
-
-        <span
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            textAlign: "center",
-            color: "#166534",
-            background: "#ecfdf5",
-            border: "1px solid #86efac",
-            borderRadius: 3,
-            height: 28,
-            minHeight: 28,
-            padding: "1px 4px",
-            fontSize: 12,
-            fontWeight: 700,
-            lineHeight: 1,
-            whiteSpace: "nowrap",
-          }}
-        >
-          {totalTimelineItems} items
-        </span>
 
         <button
           type="button"
@@ -806,13 +786,13 @@ export function DailyMealList({
             minHeight: 28,
             padding: "1px 4px",
             borderRadius: 3,
-            fontSize: 12,
+            fontSize: 15,
             fontWeight: 700,
             lineHeight: 1,
             whiteSpace: "nowrap",
           }}
         >
-          🗑 Wis
+          🗑
         </button>
       </div>
 
