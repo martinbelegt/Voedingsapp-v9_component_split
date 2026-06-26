@@ -394,18 +394,10 @@ export function DailyTab({
               borderRadius: 6,
               padding: isMobile ? 3 : 5,
               display: "grid",
-              gridTemplateColumns: isMobile
-                ? "1fr 1fr"
-                : "1fr 1fr 1fr 1fr",
+              gridTemplateColumns: "1fr 1fr 1fr",
               gap: isMobile ? 4 : 6,
             }}
           >
-            <CompanionToolbarButton
-              fullWidth
-              icon="plus"
-              label="Maaltijd"
-              onClick={onAddMeal}
-            />
             <CompanionToolbarButton
               active={showTimelineAnalysis}
               fullWidth
@@ -697,6 +689,7 @@ export function DailyTab({
           selectedDay={selectedDay}
           clearDailyLog={clearDailyLog}
           fillDailyRepeats={fillDailyRepeats}
+          onAddMeal={onAddMeal}
         />
       </div>
 

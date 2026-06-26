@@ -101,10 +101,7 @@ export function DailyMealCard({
     >
       {mealProductLines.length > 0 ? (
         mealProductLines.map((line, lineIndex) => (
-          <React.Fragment key={`${line}-${lineIndex}`}>
-            {lineIndex > 0 ? <span>+</span> : null}
-            <span>{line}</span>
-          </React.Fragment>
+          <span key={`${line}-${lineIndex}`}>{line}</span>
         ))
       ) : (
         <span>Geen producten vastgelegd</span>

@@ -45,6 +45,7 @@ export function DailyMealList({
   selectedDate,
   clearDailyLog,
   fillDailyRepeats,
+  onAddMeal,
 }) {
   const isMobile = window.innerWidth < 900;
   const [expandedIds, setExpandedIds] = useState([]);
@@ -450,6 +451,24 @@ export function DailyMealList({
         }}
       >
         <button
+          onClick={onAddMeal}
+          style={{
+            ...buttonStyle,
+            background: "#ecfdf5",
+            border: "1px solid #86efac",
+            color: "#166534",
+            minHeight: isMobile ? 30 : 34,
+            padding: isMobile ? "4px 6px" : "5px 6px",
+            borderRadius: 4,
+            fontSize: isMobile ? 12 : 13,
+            fontWeight: 700,
+            lineHeight: 1.05,
+          }}
+        >
+          + Maaltijd
+        </button>
+
+        <button
           onClick={() => setAddEventType("insulin")}
           style={{
             ...buttonStyle,
@@ -464,7 +483,7 @@ export function DailyMealList({
             lineHeight: 1.05,
           }}
         >
-          💉 + Insuline
+          + Insuline
         </button>
 
         <button
@@ -482,23 +501,9 @@ export function DailyMealList({
             lineHeight: 1.05,
           }}
         >
-          📈 + Glucose
+          + Glucose
         </button>
 
-        <button
-          onClick={handleToggleExpandAll}
-          style={{
-            ...toggleButtonStyle(allExpanded),
-            minHeight: isMobile ? 30 : 34,
-            padding: isMobile ? "4px 6px" : "5px 6px",
-            borderRadius: 4,
-            fontSize: isMobile ? 12 : 13,
-            fontWeight: 700,
-            lineHeight: 1.05,
-          }}
-        >
-          ▾ {allExpanded ? "Alles inklappen" : "Alles uitklappen"}
-        </button>
       </div>
 
       {showTimelineControls && (
@@ -663,10 +668,13 @@ export function DailyMealList({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr 1fr",
+          gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr",
           gap: 4,
-          marginTop: 2,
-          marginBottom: 4,
+          marginTop: isMobile ? 4 : 6,
+          marginBottom: isMobile ? 6 : 8,
+          padding: isMobile ? "5px 0" : "7px 0",
+          borderTop: "1px solid #cbd5e1",
+          borderBottom: "1px solid #cbd5e1",
         }}
       >
         <button
@@ -701,6 +709,29 @@ export function DailyMealList({
           }}
         >
           {timelineOrder === "newest" ? "↓↑" : "↑↓"}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleToggleExpandAll}
+          aria-label={allExpanded ? "Alles inklappen" : "Alles uitklappen"}
+          title={allExpanded ? "Alles inklappen" : "Alles uitklappen"}
+          style={{
+            ...toggleButtonStyle(allExpanded),
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: 28,
+            minHeight: 28,
+            padding: "1px 4px",
+            borderRadius: 3,
+            fontSize: 14,
+            fontWeight: 800,
+            lineHeight: 1,
+            whiteSpace: "nowrap",
+          }}
+        >
+          {allExpanded ? "⤡" : "⤢"}
         </button>
 
         <button
