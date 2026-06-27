@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import VoedingslijstTab from "./components/VoedingslijstTab";
-import { DashboardTab } from "./components/DashboardTab";
+import { LibrariesTab } from "./components/LibrariesTab";
 import { GiTimingTab } from "./components/GiTimingTab";
 import { SettingsTab } from "./components/SettingsTab";
 import { useDailyLog } from "./hooks/useDailyLog";
@@ -23,8 +23,6 @@ import { scrollRefIntoView } from "./services/scrollService";
 import { useTestLog } from "./hooks/useTestLog";
 import { useMealTimers } from "./hooks/useMealTimers";
 import { calculateMealRows } from "./services/mealRowCalculationService";
-import IntakeLibrary from "./components/planner/intake/IntakeLibrary";
-import MovementLibrary from "./components/planner/movement/MovementLibrary";
 import { CompanionDesignLab } from "./dev/CompanionDesignLab";
 import { FoundationPlayground } from "./dev/FoundationPlayground";
 
@@ -64,6 +62,7 @@ import {
 } from "./services/productFormService";
 
 import { buildMealSnapshot } from "./services/mealSnapshotService";
+import { STORAGE_KEYS as DATA_STORAGE_KEYS } from "./services/localStorageService";
 
 import {
   createProductPayload,
@@ -123,7 +122,6 @@ const STORAGE_KEYS = {
   products: "dc_products_v2",
   categories: "dc_categories_v2",
   savedMeals: "dc_saved_meals_v2",
-  dailyLog: "dc_daily_log_v2",
   foodListsBackup: "dc_food_lists_backup_v1",
 };
 
@@ -692,7 +690,7 @@ export default function App() {
 
       localStorage.removeItem(STORAGE_KEYS.settings);
       localStorage.removeItem(STORAGE_KEYS.savedMeals);
-      localStorage.removeItem(STORAGE_KEYS.dailyLog);
+      localStorage.removeItem(DATA_STORAGE_KEYS.dailyLog);
 
       alert(
         "Instellingen, maaltijden en daglog zijn gewist. Voedingslijsten blijven bewaard.",
@@ -714,6 +712,7 @@ export default function App() {
   // home screen
   // ======================================================
   const [activeTab, setActiveTab] = useState("daily");
+  const [activeLibraryTab, setActiveLibraryTab] = useState("meals");
   const [activeDevTab, setActiveDevTab] = useState("playground");
   const isMobile =
     window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
@@ -1238,13 +1237,13 @@ export default function App() {
   function addCurrentMealToSelectedDay() {
     if (!logCurrentMealToDay) {
       alert("Deze maaltijd is niet opgeslagen in Tijdlijn.");
-      return;
+      return false;
     }
 
     const snapshot = createMealSnapshot(getDayMealMomentLabel(dayMealMoment));
     if (!snapshot) {
       alert("Er is nog geen maaltijd ingevuld.");
-      return;
+      return false;
     }
 
     addMealToDay({
@@ -1257,18 +1256,21 @@ export default function App() {
       createdAt: snapshot.createdAt,
       repeat: dayMealRepeat,
     });
+    setSelectedDate(dayMealDate);
+    setActiveTab("daily");
+    return true;
   }
 
   function addCurrentMealToSelectedDayAndClear() {
     if (!logCurrentMealToDay) {
       alert("Deze maaltijd is niet opgeslagen in Tijdlijn.");
-      return;
+      return false;
     }
 
     const snapshot = createMealSnapshot(getDayMealMomentLabel(dayMealMoment));
     if (!snapshot) {
       alert("Er is nog geen maaltijd ingevuld.");
-      return;
+      return false;
     }
 
     addMealToDay({
@@ -1283,6 +1285,17 @@ export default function App() {
     });
 
     clearMeal();
+    setSelectedDate(dayMealDate);
+    setActiveTab("daily");
+    return true;
+  }
+
+  function openMealInputFromTimeline() {
+    setDayMealDate(selectedDate);
+    setLogCurrentMealToDay(true);
+    setActiveLibraryTab("meals");
+    setActiveTab("libraries");
+    scrollRefIntoView(newRowRef, 160);
   }
   function saveCurrentMeal() {
     const cleanedRows = rows.filter((r) => r.productId && r.amount !== "");
@@ -1786,24 +1799,99 @@ Producten uit deze categorie gaan naar "Overig".`);
       alert("De lokale noodkopie kon niet worden gelezen.");
     }
   }
-  function getTabButtonStyle(tabKey, color) {
-    const isActive = activeTab === tabKey;
+  const mainNavigationItems = [
+    { id: "daily", label: "Tijdlijn", color: "#0891b2" },
+    { id: "libraries", label: "Bibliotheken", color: "#7c3aed" },
+    { id: "voedingslijst", label: "Voeding", color: "#16a34a" },
+    { id: "gi", label: "GI / Timing", color: "#9333ea" },
+    { id: "settings", label: "Mijn Profiel", color: "#475569" },
+    {
+      id: "foundation-playground",
+      tab: "foundation",
+      devTab: "playground",
+      label: "Foundation Playground",
+      color: "#0f766e",
+    },
+    {
+      id: "companion-design-lab",
+      tab: "foundation",
+      devTab: "designLab",
+      label: "Companion Design Lab",
+      color: "#0f766e",
+    },
+    { id: "testlog", label: "Testlog", color: "#64748b" },
+  ];
+
+  function isMainNavigationItemActive(item) {
+    if (item.devTab) {
+      return activeTab === item.tab && activeDevTab === item.devTab;
+    }
+
+    return activeTab === item.id;
+  }
+
+  function activateMainNavigationItem(item) {
+    if (item.devTab) {
+      setActiveDevTab(item.devTab);
+      setActiveTab(item.tab);
+      return;
+    }
+
+    setActiveTab(item.id);
+  }
+
+  function getMainNavigationButtonStyle(item) {
+    const isActive = isMainNavigationItemActive(item);
 
     return {
       ...(isActive ? primaryButtonStyle : buttonStyle),
-      padding: window.innerWidth < 700 ? "8px 10px" : "10px 16px",
-
-      fontSize: window.innerWidth < 700 ? 12 : 14,
-      fontWeight: 800,
+      flex: "0 0 auto",
+      padding: isMobile ? "8px 12px" : "10px 16px",
+      fontSize: isMobile ? 12 : 14,
+      fontWeight: 850,
       borderRadius: 999,
-      background: isActive ? color : "#ffffff",
-      border: `1px solid ${color}`,
-      color: isActive ? "#ffffff" : color,
+      background: isActive ? item.color : "#ffffff",
+      border: `1px solid ${item.color}`,
+      color: isActive ? "#ffffff" : item.color,
       boxShadow: isActive ? "0 2px 8px rgba(15, 23, 42, 0.16)" : "none",
+      whiteSpace: "nowrap",
+      minHeight: isMobile ? 34 : 38,
+      scrollSnapAlign: "start",
     };
   }
 
-  // UI-stijlen die door dashboardonderdelen worden hergebruikt
+  function renderMainNavigation() {
+    return (
+      <nav
+        aria-label="Hoofdnavigatie"
+        style={{
+          display: "flex",
+          gap: isMobile ? 6 : 8,
+          marginBottom: isMobile ? 0 : 16,
+          overflowX: "auto",
+          overflowY: "hidden",
+          WebkitOverflowScrolling: "touch",
+          scrollbarWidth: "none",
+          scrollSnapType: "x proximity",
+          padding: isMobile ? "2px 0 4px" : "0 0 4px",
+          flexWrap: "nowrap",
+        }}
+      >
+        {mainNavigationItems.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => activateMainNavigationItem(item)}
+            style={getMainNavigationButtonStyle(item)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </nav>
+    );
+  }
+
+  // UI-stijlen die door Maaltijdkiezer-onderdelen worden hergebruikt
   const uiStyles = {
     cardStyle,
     buttonStyle,
@@ -1812,14 +1900,14 @@ Producten uit deze categorie gaan naar "Overig".`);
     labelStyle,
   };
   // ======================================================
-  // ZOEKANKER: DASHBOARD PROPS BLOKKEN
+  // ZOEKANKER: MAALTIJDKIEZER PROPS BLOKKEN
   //
-  // Dashboard krijgt veel data via props-blokken.
+  // Maaltijdkiezer krijgt veel data via props-blokken.
   //
   // Zoek hierop als:
   //
   // props ontbreken
-  // dashboard stuk is
+  // Maaltijdkiezer stuk is
   // component koppelingen wijzigen
   // ======================================================
   // Maaltijd-timers: verzadiging, eetpauze, glucose en vertering
@@ -1830,7 +1918,7 @@ Producten uit deze categorie gaan naar "Overig".`);
     clearTimers,
   };
 
-  // Daglogboek-acties vanuit het dashboard
+  // Daglogboek-acties vanuit de Maaltijdkiezer
   const dailyMealProps = {
     dayMealMoment,
     setDayMealMoment,
@@ -1850,7 +1938,7 @@ Producten uit deze categorie gaan naar "Overig".`);
   // ======================================================
   // ZOEKANKER: SAVED MEALS UI CONNECTIE
   //
-  // Dashboard ↔ saved meals props
+  // Maaltijdkiezer ↔ saved meals props
   // ======================================================
   // Opgeslagen standaardmaaltijden
   const savedMealProps = {
@@ -1904,6 +1992,24 @@ Producten uit deze categorie gaan naar "Overig".`);
     categoryFilterOptions,
   };
 
+  const mealWorkspaceProps = {
+    categories,
+    products,
+    savedMealProps,
+    favoritesProps,
+    quickAddProps,
+    categoryFilterProps,
+    mealRowsProps,
+    totals,
+    dailyMealProps,
+    timerProps,
+    uiStyles,
+    dayMealTime,
+    setDayMealTime,
+    dayTotals,
+    settings,
+  };
+
   // ======================================================
   // ZOEKANKER: TAB NAVIGATIE / HOOFDLAYOUT
   //
@@ -1946,65 +2052,7 @@ Producten uit deze categorie gaan naar "Overig".`);
           >
             <MobileHeader />
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr 1fr auto",
-                gap: 4,
-                alignItems: "center",
-              }}
-            >
-              <button
-                onClick={() => setActiveTab("daily")}
-                style={getTabButtonStyle("daily", "#0891b2")}
-              >
-                Tijdlijn
-              </button>
-
-              <button
-                onClick={() => setActiveTab("dashboard")}
-                style={getTabButtonStyle("dashboard", "#2563eb")}
-              >
-                Dashboard
-              </button>
-
-              <button
-                onClick={() => setActiveTab("voedingslijst")}
-                style={getTabButtonStyle("voedingslijst", "#16a34a")}
-              >
-                Voeding
-              </button>
-
-              <select
-                value={
-                  activeTab === "gi" ||
-                  activeTab === "settings" ||
-                  activeTab === "foundation"
-                    ? activeTab
-                    : ""
-                }
-                onChange={(e) => {
-                  if (e.target.value) {
-                    setActiveTab(e.target.value);
-                  }
-                }}
-                style={{
-                  padding: "6px",
-                  borderRadius: 4,
-                  border: "1px solid #cbd5e1",
-                  background: "white",
-                  fontSize: 12,
-                  fontWeight: 700,
-                  color: "#0f172a",
-                }}
-              >
-                <option value="">Meer</option>
-                <option value="libraries">Bibliotheken</option>
-                <option value="gi">GI / Timing</option>
-                <option value="settings">Mijn Profiel</option>
-                <option value="foundation">Foundation Playground</option>
-              </select>
-            </div>
+            {renderMainNavigation()}
           </div>
         ) : (
           <>
@@ -2039,63 +2087,8 @@ Producten uit deze categorie gaan naar "Overig".`);
               </p>
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                gap: 8,
-                marginBottom: 16,
-                flexWrap: "wrap",
-              }}
-            >
-              <button
-                onClick={() => setActiveTab("daily")}
-                style={getTabButtonStyle("daily", "#0891b2")}
-              >
-                Tijdlijn
-              </button>
+            {renderMainNavigation()}
 
-              <button
-                onClick={() => setActiveTab("dashboard")}
-                style={getTabButtonStyle("dashboard", "#2563eb")}
-              >
-                Dashboard
-              </button>
-
-              <button
-                onClick={() => setActiveTab("voedingslijst")}
-                style={getTabButtonStyle("voedingslijst", "#16a34a")}
-              >
-                Voedingslijst
-              </button>
-
-              <button
-                onClick={() => setActiveTab("libraries")}
-                style={getTabButtonStyle("libraries", "#7c3aed")}
-              >
-                Bibliotheken
-              </button>
-
-              <button
-                onClick={() => setActiveTab("gi")}
-                style={getTabButtonStyle("gi", "#9333ea")}
-              >
-                GI / Timing
-              </button>
-
-              <button
-                onClick={() => setActiveTab("settings")}
-                style={getTabButtonStyle("settings", "#475569")}
-              >
-                👤 Mijn Profiel
-              </button>
-
-              <button
-                onClick={() => setActiveTab("foundation")}
-                style={getTabButtonStyle("foundation", "#0f766e")}
-              >
-                Foundation Playground
-              </button>
-            </div>
           </>
         )}
         {activeTab === "foundation" && (
@@ -2152,35 +2145,15 @@ Producten uit deze categorie gaan naar "Overig".`);
             )}
           </div>
         )}
-        {activeTab === "dashboard" && (
-          <DashboardTab
-            categories={categories}
-            products={products}
-            savedMealProps={savedMealProps}
-            favoritesProps={favoritesProps}
-            quickAddProps={quickAddProps}
-            categoryFilterProps={categoryFilterProps}
-            mealRowsProps={mealRowsProps}
-            totals={totals}
-            dailyMealProps={dailyMealProps}
-            timerProps={timerProps}
-            uiStyles={uiStyles}
-            dayMealTime={dayMealTime}
-            setDayMealTime={setDayMealTime}
-            dayTotals={dayTotals}
-            settings={settings}
-          />
-        )}
         {activeTab === "libraries" && (
-          <div
-            style={{
-              display: "grid",
-              gap: 12,
-            }}
-          >
-            <IntakeLibrary />
-            <MovementLibrary />
-          </div>
+          <LibrariesTab
+            activeLibraryTab={activeLibraryTab}
+            setActiveLibraryTab={setActiveLibraryTab}
+            dashboardProps={mealWorkspaceProps}
+            cardStyle={cardStyle}
+            buttonStyle={buttonStyle}
+            primaryButtonStyle={primaryButtonStyle}
+          />
         )}
         {activeTab === "voedingslijst" && (
           <VoedingslijstTab
@@ -2335,6 +2308,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             addTrainingPlanEventToDay={addTrainingPlanEventToDay}
             updateTrainingPlanEvent={updateTrainingPlanEvent}
             deleteTrainingPlanEvent={deleteTrainingPlanEvent}
+            onAddMeal={openMealInputFromTimeline}
           />
         )}
       </div>
