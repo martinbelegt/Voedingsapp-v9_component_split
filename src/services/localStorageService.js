@@ -124,35 +124,58 @@ export async function loadDailyLogFromCloud() {
     return null;
   }
 
-  return data?.data || null;
+  if (!data) return null;
+
+  return {
+    dailyLog: data.data || null,
+    revision: Number(data.revision) || 0,
+    updatedAt: data.updated_at || null,
+  };
 }
 
-export async function saveDailyLogToCloud(dailyLog) {
-  if (!supabase) return false;
+export async function saveDailyLogToCloud(dailyLog, expectedRevision) {
+  if (!supabase) return { ok: false, conflict: false };
 
-  const { data, error } = await supabase
-    .from("daily_logs")
-    .upsert(
-      {
-        date: "main",
-        data: dailyLog,
-        updated_at: new Date().toISOString(),
-      },
-      {
-        onConflict: "date",
-      },
-    )
-    .select();
+  if (!Number.isInteger(expectedRevision)) {
+    console.warn("saveDailyLogToCloud skipped: missing expected revision", {
+      expectedRevision,
+    });
+    return { ok: false, conflict: false };
+  }
+
+  const { data, error } = await supabase.rpc(
+    "save_daily_log_if_revision_matches",
+    {
+      expected_revision: expectedRevision,
+      next_data: dailyLog,
+    },
+  );
 
   console.log("saveDailyLogToCloud data:", data);
   console.log("saveDailyLogToCloud error:", error);
 
   if (error) {
     console.error("saveDailyLogToCloud error:", error);
-    return false;
+    return { ok: false, conflict: false, error };
   }
 
-  return true;
+  const result = Array.isArray(data) ? data[0] : data;
+  const ok = !!result?.success;
+  const nextRevision = Number(result?.next_revision);
+
+  if (!ok) {
+    console.warn("saveDailyLogToCloud blocked: revision mismatch", {
+      expectedRevision,
+      result,
+    });
+    return { ok: false, conflict: true, revision: nextRevision };
+  }
+
+  return {
+    ok: true,
+    conflict: false,
+    revision: Number.isInteger(nextRevision) ? nextRevision : expectedRevision + 1,
+  };
 }
 
 export async function loadAppDataFromCloud(key) {

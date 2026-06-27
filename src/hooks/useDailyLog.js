@@ -104,15 +104,19 @@ export function useDailyLog(selectedDate) {
   const hasLocalUserChange = useRef(false);
   const cloudHydratedDayCount = useRef(0);
   const cloudHydratedEventCount = useRef(0);
+  const loadedRevision = useRef(null);
+  const localChangeVersion = useRef(0);
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadCloud() {
       try {
-        const cloudDailyLog = await loadDailyLogFromCloud();
+        const cloudResult = await loadDailyLogFromCloud();
 
         if (cancelled) return;
+
+        const cloudDailyLog = cloudResult?.dailyLog;
 
         if (!Array.isArray(cloudDailyLog)) {
           console.warn(
@@ -130,10 +134,15 @@ export function useDailyLog(selectedDate) {
         hasHydratedCloudData.current = true;
         cloudHydratedDayCount.current = normalizedCloudLog.length;
         cloudHydratedEventCount.current = cloudEventCount;
+        loadedRevision.current = Number.isInteger(cloudResult.revision)
+          ? cloudResult.revision
+          : 0;
 
         console.log("dailyLog cloud load success:", {
           days: normalizedCloudLog.length,
           events: cloudEventCount,
+          revision: loadedRevision.current,
+          updatedAt: cloudResult.updatedAt,
           selectedDate,
           selectedDay: normalizedCloudLog.find(
             (day) => day.date === selectedDate,
@@ -178,6 +187,11 @@ export function useDailyLog(selectedDate) {
       return;
     }
 
+    if (!Number.isInteger(loadedRevision.current)) {
+      console.warn("dailyLog cloud save skipped: revision not loaded");
+      return;
+    }
+
     if (!dailyLog || dailyLog.length === 0) {
       console.warn("dailyLog cloud save skipped: empty dailyLog");
       return;
@@ -205,19 +219,47 @@ export function useDailyLog(selectedDate) {
       return;
     }
 
+    const expectedRevision = loadedRevision.current;
+    const saveChangeVersion = localChangeVersion.current;
+
     const timeoutId = setTimeout(() => {
       console.log("dailyLog cloud save executing:", {
         days: localDayCount,
         events: localEventCount,
+        expectedRevision,
+        changeVersion: saveChangeVersion,
       });
 
-      saveDailyLogToCloud(dailyLog).then((ok) => {
-        console.log("dailyLog cloud save result:", ok);
+      saveDailyLogToCloud(dailyLog, expectedRevision).then((result) => {
+        console.log("dailyLog cloud save result:", result);
 
-        if (ok) {
+        if (result.ok) {
+          loadedRevision.current = result.revision;
           hasLocalUserChange.current = false;
           cloudHydratedDayCount.current = localDayCount;
           cloudHydratedEventCount.current = localEventCount;
+
+          if (saveChangeVersion !== localChangeVersion.current) {
+            hasLocalUserChange.current = true;
+            console.warn(
+              "dailyLog cloud save succeeded for an older local change; newer local changes remain unsaved",
+              {
+                savedChangeVersion: saveChangeVersion,
+                currentChangeVersion: localChangeVersion.current,
+                revision: loadedRevision.current,
+              },
+            );
+          }
+        } else if (result.conflict) {
+          console.warn(
+            "dailyLog cloud save blocked: Supabase has a newer revision; localStorage keeps the local changes",
+            {
+              expectedRevision,
+              serverRevision: result.revision,
+              days: localDayCount,
+              events: localEventCount,
+            },
+          );
         }
       });
     }, 1500);
@@ -228,6 +270,7 @@ export function useDailyLog(selectedDate) {
   function setDailyLog(nextDailyLog) {
     if (hasHydratedCloudData.current) {
       hasLocalUserChange.current = true;
+      localChangeVersion.current += 1;
     } else {
       console.log(
         "dailyLog local change before cloud hydration; cloud save remains blocked",
