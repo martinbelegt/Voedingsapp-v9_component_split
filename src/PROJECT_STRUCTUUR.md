@@ -34,7 +34,7 @@ Componenten zijn vooral verantwoordelijk voor wat de gebruiker ziet en aanklikt.
 
 ### `MealTimersCard.js`
 
-Kaart op het dashboard voor maaltijd-timers.
+Kaart in de Maaltijdkiezer voor maaltijd-timers.
 
 Hier kun je timers starten en actieve timers bekijken voor bijvoorbeeld:
 
@@ -45,7 +45,7 @@ Hier kun je timers starten en actieve timers bekijken voor bijvoorbeeld:
 
 ### `DashboardTab.js`
 
-Hoofdscherm voor dagelijks gebruik.
+Maaltijdkiezer voor dagelijks gebruik.
 
 Hier komen onder andere samen:
 

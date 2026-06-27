@@ -53,7 +53,7 @@ TimelineFilterBar
 
 ---
 
-## Dashboard
+## Maaltijdkiezer
 
 QuickAddBar
 MetricChip

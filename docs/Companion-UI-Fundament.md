@@ -2,7 +2,7 @@
 
 ## Doel
 
-Alle herbruikbare visuele en interactiepatronen van Companion centraal vastleggen, zodat Dashboard, Tijdlijn, Voedingsbibliotheek en toekomstige modules dezelfde basis gebruiken.
+Alle herbruikbare visuele en interactiepatronen van Companion centraal vastleggen, zodat Maaltijdkiezer, Tijdlijn, Voedingsbibliotheek en toekomstige modules dezelfde basis gebruiken.
 
 ## Waarom
 

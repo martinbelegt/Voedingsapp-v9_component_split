@@ -68,7 +68,7 @@ export function FoundationPlayground() {
           Foundation Playground
         </h2>
         <div style={{ color: "#64748b", fontSize: 14 }}>
-          Actuele CompanionDateTimePicker v1 zoals gebruikt in Dashboard en
+          Actuele CompanionDateTimePicker v1 zoals gebruikt in Maaltijdkiezer en
           Tijdlijn: compacte trigger met popover.
         </div>
       </div>

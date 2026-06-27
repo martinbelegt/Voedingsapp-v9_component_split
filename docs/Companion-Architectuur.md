@@ -23,7 +23,7 @@ Persoonlijke doelen
 
 Hoofdmodules:
 │
-├── Dashboard
+├── Maaltijdkiezer
 ├── Tijdlijn
 ├── Voedingsbibliotheek
 ├── Analyse
@@ -33,7 +33,7 @@ Hoofdmodules:
 
 Beschrijving per module
 
-├── Dashboard
+├── Maaltijdkiezer
 
 Doel:
 Snel registreren en werken gedurende de dag.

@@ -95,6 +95,59 @@ function countDailyLogEvents(days = []) {
   );
 }
 
+function getTimePart(value, fallback) {
+  return String(value || "").slice(11, 16) || fallback;
+}
+
+function normalizeRowsForRepeat(rows = []) {
+  return rows.map((row) => ({
+    productId: row.productId || "",
+    mode: row.mode || "portion",
+    amount: String(row.amount ?? ""),
+  }));
+}
+
+function createRepeatSignature(item = {}, type) {
+  if (type === "meal") {
+    return JSON.stringify({
+      type,
+      name: item.name || "",
+      mealMoment: item.mealMoment || "neutral",
+      mealNote: item.mealNote || "",
+      time: getTimePart(item.eatenAt, "12:00"),
+      rows: normalizeRowsForRepeat(item.rows || []),
+      totals: normalizeTotals(item.totals),
+    });
+  }
+
+  if (type === "supplement") {
+    return JSON.stringify({
+      type,
+      name: item.name || "",
+      dosage: item.dosage || "",
+      note: item.note || "",
+      time: getTimePart(item.eventTime, "08:00"),
+    });
+  }
+
+  return JSON.stringify({
+    type,
+    activityType: item.activityType || "Krachttraining",
+    intensityType: item.intensityType || "Gemengd",
+    durationMinutes: String(item.durationMinutes ?? ""),
+    note: item.note || "",
+    time: getTimePart(item.eventTime, "10:00"),
+  });
+}
+
+function createRepeatSignatureSet(items = [], type) {
+  return new Set(items.map((item) => createRepeatSignature(item, type)));
+}
+
+function shouldCopyRepeat(existingSignatures, item, type) {
+  return !existingSignatures.has(createRepeatSignature(item, type));
+}
+
 export function useDailyLog(selectedDate) {
   const [dailyLog, setDailyLogState] = useState(() =>
     sortDaysNewestFirst((loadDailyLog() || []).map(normalizeDay)),
@@ -701,34 +754,60 @@ export function useDailyLog(selectedDate) {
     const previousDateString = previousDate.toISOString().slice(0, 10);
 
     const sourceDay = dailyLog.find((day) => day.date === previousDateString);
+    const targetDay =
+      dailyLog.find((day) => day.date === selectedDate) ||
+      createEmptyDay(selectedDate);
 
     if (!sourceDay) return false;
 
+    const existingMealSignatures = createRepeatSignatureSet(
+      targetDay.meals || [],
+      "meal",
+    );
+    const existingSupplementSignatures = createRepeatSignatureSet(
+      targetDay.supplementEvents || [],
+      "supplement",
+    );
+    const existingMovementSignatures = createRepeatSignatureSet(
+      targetDay.movementEvents || [],
+      "movement",
+    );
+
     const repeatedMeals = (sourceDay.meals || [])
       .filter((meal) => meal.repeat === "daily")
+      .filter((meal) => shouldCopyRepeat(existingMealSignatures, meal, "meal"))
       .map((meal) => ({
         ...meal,
         id: createId("daily-meal"),
-        eatenAt: `${selectedDate}T${String(meal.eatenAt || "").slice(11, 16) || "12:00"}`,
+        eatenAt: `${selectedDate}T${getTimePart(meal.eatenAt, "12:00")}`,
         createdAt: new Date().toLocaleString("nl-NL"),
+        repeat: "none",
       }));
 
     const repeatedSupplements = (sourceDay.supplementEvents || [])
       .filter((item) => item.repeat === "daily")
+      .filter((item) =>
+        shouldCopyRepeat(existingSupplementSignatures, item, "supplement"),
+      )
       .map((item) => ({
         ...item,
         id: createId("supplement-event"),
-        eventTime: `${selectedDate}T${String(item.eventTime || "").slice(11, 16) || "08:00"}`,
+        eventTime: `${selectedDate}T${getTimePart(item.eventTime, "08:00")}`,
         createdAt: new Date().toLocaleString("nl-NL"),
+        repeat: "none",
       }));
 
     const repeatedMovements = (sourceDay.movementEvents || [])
       .filter((item) => item.repeat === "daily")
+      .filter((item) =>
+        shouldCopyRepeat(existingMovementSignatures, item, "movement"),
+      )
       .map((item) => ({
         ...item,
         id: createId("movement-event"),
-        eventTime: `${selectedDate}T${String(item.eventTime || "").slice(11, 16) || "10:00"}`,
+        eventTime: `${selectedDate}T${getTimePart(item.eventTime, "10:00")}`,
         createdAt: new Date().toLocaleString("nl-NL"),
+        repeat: "none",
       }));
 
     if (
