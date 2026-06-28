@@ -3,7 +3,6 @@ import { DailyMealList } from "./DailyMealList";
 import { DailyEventAddModal } from "./DailyEventAddModal";
 import { requestNotificationPermission } from "../../services/notificationService";
 import { CompanionDateTimePicker } from "../../ui/pickers/CompanionDateTimePicker";
-import { CompanionToolbarButton } from "../../ui/buttons/CompanionToolbarButton";
 
 import {
   scheduleLocalAlarm,
@@ -19,6 +18,10 @@ export function DailyTab({
   sortedDates,
   dayTotals,
   selectedDay,
+  showTimelineAnalysis,
+  showAddButtons,
+  showTimelineControls,
+  setShowTimelineControls,
   clearDailyLog,
   fillDailyRepeats,
   products,
@@ -58,8 +61,6 @@ export function DailyTab({
 }) {
   const isMobile = window.innerWidth < 900;
   const [addEventType, setAddEventType] = useState(null);
-  const [showAddButtons, setShowAddButtons] = useState(false);
-  const [showTimelineControls, setShowTimelineControls] = useState(false);
   const [activeAlarm, setActiveAlarm] = useState(null);
 
   const mealsForDay = selectedDay?.meals || [];
@@ -68,8 +69,6 @@ export function DailyTab({
   const glucoseBoostEventsForDay = selectedDay?.glucoseBoostEvents || [];
   const movementEventsForDay = selectedDay?.movementEvents || [];
   const bowelEventsForDay = selectedDay?.bowelEvents || [];
-  const [showTimelineAnalysis, setShowTimelineAnalysis] = useState(false);
-
   const totalTimelineItems =
     mealsForDay.length +
     insulinEventsForDay.length +
@@ -262,7 +261,7 @@ export function DailyTab({
   }, []);
 
   return (
-    <div style={{ display: "grid", gap: 14, marginTop: 16 }}>
+    <div style={{ display: "grid", gap: 14 }}>
       {/* Dagkeuze */}
       <div
         style={{
@@ -367,59 +366,19 @@ export function DailyTab({
           padding: isMobile ? "6px 8px" : cardStyle?.padding,
         }}
       >
-        {/* Tijdlijnkop + eventknoppen */}
+        {/* Tijdlijnpanelen */}
         <div
           style={{
             display: "grid",
             gap: isMobile ? 4 : 12,
-            marginBottom: isMobile ? 4 : 10,
+            marginBottom:
+              showTimelineAnalysis || showAddButtons
+                ? isMobile
+                  ? 4
+                  : 10
+                : 0,
           }}
         >
-          {/* Titel */}
-          <div
-            style={{
-              display: isMobile ? "none" : "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 8,
-              flexWrap: "wrap",
-            }}
-          />
-
-          {/* Hoofdknoppen */}
-          <div
-            style={{
-              background: "#f8fafc",
-              border: "1px solid #e2e8f0",
-              borderRadius: 6,
-              padding: isMobile ? 3 : 5,
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
-              gap: isMobile ? 4 : 6,
-            }}
-          >
-            <CompanionToolbarButton
-              active={showTimelineAnalysis}
-              fullWidth
-              label="Daganalyse"
-              onClick={() => setShowTimelineAnalysis((v) => !v)}
-            />
-            <CompanionToolbarButton
-              active={showAddButtons}
-              fullWidth
-              icon="plus"
-              label="Nieuw"
-              onClick={() => setShowAddButtons((v) => !v)}
-            />
-            <CompanionToolbarButton
-              active={showTimelineControls}
-              fullWidth
-              icon="gear"
-              label="Filters"
-              onClick={() => setShowTimelineControls((v) => !v)}
-            />
-          </div>
-
           {showTimelineAnalysis && (
             <div
               style={{

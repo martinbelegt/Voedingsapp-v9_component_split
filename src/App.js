@@ -804,6 +804,9 @@ export default function App() {
     new Date().toTimeString().slice(0, 5),
   );
   const [logCurrentMealToDay, setLogCurrentMealToDay] = useState(true);
+  const [showTimelineAnalysis, setShowTimelineAnalysis] = useState(false);
+  const [showAddButtons, setShowAddButtons] = useState(false);
+  const [showTimelineControls, setShowTimelineControls] = useState(false);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().slice(0, 10),
   );
@@ -1913,6 +1916,80 @@ Producten uit deze categorie gaan naar "Overig".`);
     );
   }
 
+  function renderTimelineSubnavigation() {
+    if (activeTab !== "daily") return null;
+
+    const timelineControls = [
+      {
+        id: "analysis",
+        label: "Daganalyse",
+        active: showTimelineAnalysis,
+        color: "#2563eb",
+        onClick: () => setShowTimelineAnalysis((value) => !value),
+      },
+      {
+        id: "new",
+        label: "+ Nieuw",
+        active: showAddButtons,
+        color: "#0891b2",
+        onClick: () => setShowAddButtons((value) => !value),
+      },
+      {
+        id: "filters",
+        label: "Filters",
+        active: showTimelineControls,
+        color: "#475569",
+        onClick: () => setShowTimelineControls((value) => !value),
+      },
+    ];
+
+    return (
+      <div
+        style={{
+          display: "flex",
+          gap: 4,
+          overflowX: "auto",
+          WebkitOverflowScrolling: "touch",
+          scrollbarWidth: "none",
+          padding: "0 4px",
+          paddingTop: 0,
+          paddingBottom: 0,
+          marginTop: 0,
+          marginBottom: 0,
+          border: "1px solid #e2e8f0",
+          borderRadius: 8,
+          background: "#f8fafc",
+          boxShadow: "0 6px 14px rgba(15, 23, 42, 0.08)",
+        }}
+      >
+        {timelineControls.map((control) => (
+          <button
+            key={control.id}
+            type="button"
+            onClick={control.onClick}
+            style={{
+              ...(control.active ? primaryButtonStyle : buttonStyle),
+              flex: "0 0 auto",
+              minHeight: isMobile ? 28 : 26,
+              padding: isMobile ? "4px 8px" : "3px 9px",
+              borderRadius: 6,
+              border: `1px solid ${control.active ? control.color : "#cbd5e1"}`,
+              background: control.active ? control.color : "#ffffff",
+              color: control.active ? "#ffffff" : "#334155",
+              fontSize: 11,
+              lineHeight: 1.15,
+              fontWeight: 850,
+              whiteSpace: "nowrap",
+              boxShadow: "none",
+            }}
+          >
+            {control.label}
+          </button>
+        ))}
+      </div>
+    );
+  }
+
   useLayoutEffect(() => {
     if (!isMobile) {
       setHeaderNavStackHeight(0);
@@ -2003,9 +2080,10 @@ Producten uit deze categorie gaan naar "Overig".`);
           </div>
         )}
 
-        {renderMainNavigation()}
-        {renderComposeSubnavigation()}
-      </div>
+          {renderMainNavigation()}
+          {renderTimelineSubnavigation()}
+          {renderComposeSubnavigation()}
+        </div>
       <div
         aria-hidden="true"
         style={{
@@ -2358,6 +2436,10 @@ Producten uit deze categorie gaan naar "Overig".`);
             sortedDates={sortedDates}
             dayTotals={dayTotals}
             selectedDay={selectedDay}
+            showTimelineAnalysis={showTimelineAnalysis}
+            showAddButtons={showAddButtons}
+            showTimelineControls={showTimelineControls}
+            setShowTimelineControls={setShowTimelineControls}
             clearDailyLog={clearDailyLog}
             fillDailyRepeats={fillDailyRepeats}
             products={products}

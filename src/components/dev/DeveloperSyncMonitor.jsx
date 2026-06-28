@@ -17,6 +17,13 @@ function formatValue(value) {
   return value === null || value === undefined ? "-" : value;
 }
 
+function isLocalDevelopment() {
+  if (process.env.NODE_ENV !== "development") return false;
+  if (typeof window === "undefined") return false;
+
+  return ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+}
+
 function getStatus(syncDebug) {
   if (!syncDebug) return { label: "Status onbekend", tone: "#64748b" };
 
@@ -43,7 +50,7 @@ function getStatus(syncDebug) {
 }
 
 export function DeveloperSyncMonitor({ syncDebug }) {
-  if (process.env.NODE_ENV !== "development" || !syncDebug) return null;
+  if (!isLocalDevelopment() || !syncDebug) return null;
 
   const status = getStatus(syncDebug);
 
