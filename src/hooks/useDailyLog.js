@@ -321,32 +321,8 @@ export function useDailyLog(selectedDate) {
       return;
     }
 
-    if (!dailyLog || dailyLog.length === 0) {
-      console.warn("dailyLog cloud save skipped: empty dailyLog");
-      return;
-    }
-
     const localDayCount = dailyLog.length;
     const localEventCount = countDailyLogEvents(dailyLog);
-
-    if (localDayCount < cloudHydratedDayCount.current) {
-      console.warn("dailyLog cloud save skipped: local day count is smaller", {
-        localDays: localDayCount,
-        cloudDays: cloudHydratedDayCount.current,
-      });
-      return;
-    }
-
-    if (localEventCount < cloudHydratedEventCount.current) {
-      console.warn(
-        "dailyLog cloud save skipped: local event count is smaller",
-        {
-          localEvents: localEventCount,
-          cloudEvents: cloudHydratedEventCount.current,
-        },
-      );
-      return;
-    }
 
     const expectedRevision = loadedRevision.current;
     const saveChangeVersion = localChangeVersion.current;
