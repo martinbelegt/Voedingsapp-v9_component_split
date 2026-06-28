@@ -4,13 +4,21 @@ import { defaultSettings } from "../data/defaults";
 
 import {
   loadSettings,
+  loadStoredSettings,
   saveSettings,
   loadAppDataFromCloud,
   saveAppDataToCloud,
 } from "../services/localStorageService";
 
 export function useSettings() {
+  const storedSettings = useRef(loadStoredSettings());
   const [cloudLoaded, setCloudLoaded] = useState(false);
+  const [settingsSource, setSettingsSource] = useState(
+    storedSettings.current ? "Local cache" : "Defaults",
+  );
+  const [settingsCloudDebug, setSettingsCloudDebug] = useState({
+    ok: false,
+  });
   const hasHydratedCloudData = useRef(false);
   const hasLocalUserChange = useRef(false);
 
@@ -40,6 +48,8 @@ export function useSettings() {
 
       if (cloudSettings) {
         hasHydratedCloudData.current = true;
+        setSettingsSource("Cloud");
+        setSettingsCloudDebug({ ok: true });
         setSettingsState({
           ...defaultSettings,
           ...cloudSettings,
@@ -51,6 +61,28 @@ export function useSettings() {
         });
 
         saveSettings(cloudSettings);
+      } else if (storedSettings.current) {
+        const ok = await saveAppDataToCloud("settings", storedSettings.current);
+        console.log("settings one-time local migration:", {
+          ok,
+          present: true,
+        });
+
+        if (ok) {
+          hasHydratedCloudData.current = true;
+          setSettingsSource("Cloud");
+          setSettingsCloudDebug({ ok: true });
+          setSettingsState({
+            ...defaultSettings,
+            ...storedSettings.current,
+
+            dailyTargets: {
+              ...defaultSettings.dailyTargets,
+              ...(storedSettings.current.dailyTargets || {}),
+            },
+          });
+          saveSettings(storedSettings.current);
+        }
       }
 
       setCloudLoaded(true);
@@ -75,6 +107,10 @@ export function useSettings() {
 
     saveAppDataToCloud("settings", settings).then((ok) => {
       console.log("settings cloud save:", ok);
+      if (ok) {
+        setSettingsSource("Cloud");
+        setSettingsCloudDebug({ ok: true });
+      }
     });
   }, [settings, cloudLoaded]);
 
@@ -86,5 +122,7 @@ export function useSettings() {
   return {
     settings,
     setSettings,
+    settingsSource,
+    settingsCloudDebug,
   };
 }

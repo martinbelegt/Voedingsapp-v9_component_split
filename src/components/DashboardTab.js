@@ -12,7 +12,6 @@ export function DashboardTab(props) {
     setDayMealTime,
     savedMealProps,
     favoritesProps,
-    quickAddProps,
     mealRowsProps,
     dailyMealProps,
     totals,
@@ -57,7 +56,7 @@ export function DashboardTab(props) {
       <div style={{ display: "grid", gap: dashboardGap }}>
         <MealRowsSection
           {...mealRowsProps}
-          {...quickAddProps}
+          products={products}
           categories={categories}
           cardStyle={cardStyle}
           buttonStyle={buttonStyle}
@@ -70,7 +69,6 @@ export function DashboardTab(props) {
         >
           <QuickAddSection
             {...dailyMealProps}
-            {...quickAddProps}
             categories={categories}
             cardStyle={cardStyle}
             inputStyle={inputStyle}

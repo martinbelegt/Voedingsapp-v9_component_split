@@ -69,6 +69,10 @@ import {
 
 import { buildMealSnapshot } from "./services/mealSnapshotService";
 import { STORAGE_KEYS as DATA_STORAGE_KEYS } from "./services/localStorageService";
+import {
+  getAppDataCounts,
+  logAppDataState,
+} from "./services/appDataSyncService";
 
 import {
   createProductPayload,
@@ -111,6 +115,7 @@ import {
 
 import { MobileHeader } from "./components/mobile/MobileHeader";
 import { DeveloperSyncMonitor } from "./components/dev/DeveloperSyncMonitor";
+import { AppDataSyncMonitor } from "./components/dev/AppDataSyncMonitor";
 
 // ======================================================
 // ZOEKANKER: LOCAL STORAGE / BACKUP KEYS
@@ -733,6 +738,8 @@ export default function App() {
 
   const {
     categories,
+    categoriesSource,
+    categoriesCloudDebug,
     setCategories,
     addCategory: addCategoryToStore,
     updateCategory,
@@ -742,6 +749,8 @@ export default function App() {
 
   const {
     products,
+    productsSource,
+    productsCloudDebug,
     setProducts,
     addProduct: addProductToStore,
     updateProduct,
@@ -751,8 +760,14 @@ export default function App() {
 
   const { rows, setRows, setRowsSafe, resetRows } = useMealRows();
 
-  const { settings, setSettings, updateSettings, resetSettings } =
-    useSettings();
+  const {
+    settings,
+    settingsSource,
+    settingsCloudDebug,
+    setSettings,
+    updateSettings,
+    resetSettings,
+  } = useSettings();
 
   useEffect(() => {
     const backup = loadFoodListsBackup();
@@ -875,12 +890,87 @@ export default function App() {
   // ======================================================
   const {
     savedMeals,
+    savedMealsSource,
+    savedMealsCloudDebug,
     setSavedMeals,
     addSavedMeal,
     deleteSavedMeal,
     getSavedMeal,
     overwriteSavedMeal,
   } = useSavedMeals();
+
+  useEffect(() => {
+    const sources = [
+      productsSource,
+      savedMealsSource,
+      categoriesSource,
+      settingsSource,
+    ];
+    const source = sources.every((item) => item === "Cloud")
+      ? "Cloud"
+      : "Local";
+
+    logAppDataState({
+      products,
+      savedMeals,
+      categories,
+      source,
+    });
+  }, [
+    products,
+    savedMeals,
+    categories,
+    productsSource,
+    savedMealsSource,
+    categoriesSource,
+    settingsSource,
+  ]);
+
+  const appDataSyncDebug = useMemo(() => {
+    const local = getAppDataCounts({ products, savedMeals, categories });
+    const sources = [
+      productsSource,
+      savedMealsSource,
+      categoriesSource,
+      settingsSource,
+    ];
+    const source = sources.every((item) => item === "Cloud")
+      ? "Cloud"
+      : sources.some((item) => item === "Local cache")
+        ? "Local cache"
+        : "Defaults";
+
+    return {
+      source,
+      cloud: {
+        products: productsCloudDebug?.count ?? null,
+        favorites: productsCloudDebug?.favorites ?? null,
+        savedMeals: savedMealsCloudDebug?.count ?? null,
+        categories: categoriesCloudDebug?.count ?? null,
+        settingsOk: !!settingsCloudDebug?.ok,
+      },
+      local: {
+        products: local.products,
+        favorites: local.favorites,
+        savedMeals: local.savedMeals,
+        categories: local.categories,
+        settingsOk: !!settings,
+      },
+    };
+  }, [
+    products,
+    savedMeals,
+    categories,
+    settings,
+    productsSource,
+    savedMealsSource,
+    categoriesSource,
+    settingsSource,
+    productsCloudDebug,
+    savedMealsCloudDebug,
+    categoriesCloudDebug,
+    settingsCloudDebug,
+  ]);
   // ======================================================
   // ZOEKANKER: CLOUD IS LEIDEND
   //
@@ -897,7 +987,6 @@ export default function App() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [productSearch, setProductSearch] = useState("");
   const [categoryDraftName, setCategoryDraftName] = useState("");
-  const [quickSearch, setQuickSearch] = useState("");
   const [giSearch, setGiSearch] = useState("");
   const [activePackFilter, setActivePackFilter] = useState(() => {
     try {
@@ -1127,21 +1216,6 @@ export default function App() {
     return baseList.filter((p) => p.packName === activePackFilter);
   }, [sortedProducts, activePackFilter, productSearch, categories]);
 
-  const quickSearchResults = useMemo(() => {
-    const q = quickSearch.trim().toLowerCase();
-    if (!q) return [];
-    return products
-      .filter((p) => {
-        const categoryName = getCategoryName(
-          categories,
-          p.categoryId,
-        ).toLowerCase();
-        return p.name.toLowerCase().includes(q) || categoryName.includes(q);
-      })
-      .sort((a, b) => a.name.localeCompare(b.name, "nl"))
-      .slice(0, 8);
-  }, [quickSearch, products, categories]);
-
   const giFilteredProducts = useMemo(() => {
     const q = giSearch.trim().toLowerCase();
     const base = !q
@@ -1308,7 +1382,6 @@ export default function App() {
     setLogCurrentMealToDay(true);
     setActiveLibraryTab("meals");
     setActiveTab("libraries");
-    scrollRefIntoView(newRowRef, 160);
   }
   function saveCurrentMeal() {
     const cleanedRows = rows.filter((r) => r.productId && r.amount !== "");
@@ -2194,18 +2267,9 @@ Producten uit deze categorie gaan naar "Overig".`);
     quickAddProduct,
   };
 
-  // Snel zoeken en snel toevoegen
-  const quickAddProps = {
-    quickSearch,
-    setQuickSearch,
-    quickSearchResults,
-    quickAddProduct,
-  };
-
   // Huidige maaltijdregels
   const mealRowsProps = {
     rowsWithCalc,
-    filteredProducts,
     updateRow,
     removeRow,
     addRow,
@@ -2225,7 +2289,6 @@ Producten uit deze categorie gaan naar "Overig".`);
     products,
     savedMealProps,
     favoritesProps,
-    quickAddProps,
     categoryFilterProps,
     mealRowsProps,
     totals,
@@ -2502,6 +2565,7 @@ Producten uit deze categorie gaan naar "Overig".`);
           />
         )}
       </div>
+      <AppDataSyncMonitor debug={appDataSyncDebug} />
       <DeveloperSyncMonitor syncDebug={syncDebug} />
     </div>
   );

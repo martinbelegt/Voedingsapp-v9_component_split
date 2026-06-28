@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { getCategoryName } from "../services/productHelpers";
 
 export function MealRowCard({
   row,
@@ -14,6 +15,37 @@ export function MealRowCard({
 }) {
   const isMobile =
     window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
+  const [productQuery, setProductQuery] = useState(row.product?.name || "");
+  const [showProductResults, setShowProductResults] = useState(false);
+
+  useEffect(() => {
+    setProductQuery(row.product?.name || "");
+  }, [row.product?.name]);
+
+  const productResults = useMemo(() => {
+    const query = productQuery.trim().toLowerCase();
+
+    if (!query || row.product?.name === productQuery) return [];
+
+    return products
+      .filter((product) => {
+        const productName = String(product.name || "").toLowerCase();
+        const categoryName = getCategoryName(
+          categories,
+          product.categoryId,
+        ).toLowerCase();
+
+        return productName.includes(query) || categoryName.includes(query);
+      })
+      .sort((a, b) => a.name.localeCompare(b.name, "nl"))
+      .slice(0, 8);
+  }, [categories, productQuery, products, row.product?.name]);
+
+  function selectProduct(product) {
+    onChange(row.id, { productId: product.id });
+    setProductQuery(product.name);
+    setShowProductResults(false);
+  }
 
   const backgroundColor =
     row.product && getCategoryColor
@@ -47,7 +79,7 @@ export function MealRowCard({
         padding: isMobile ? 5 : 8,
         marginBottom: isMobile ? 4 : 6,
         background: backgroundColor,
-        overflow: "hidden",
+        overflow: "visible",
       }}
     >
       <div
@@ -60,11 +92,94 @@ export function MealRowCard({
           alignItems: "center",
         }}
       >
-        <select
+        <div
+          style={{
+            position: "relative",
+            gridColumn: isMobile ? "1 / -1" : "auto",
+          }}
+        >
+          <input
+            value={productQuery}
+            onChange={(e) => {
+              setProductQuery(e.target.value);
+              setShowProductResults(true);
+
+              if (row.productId && e.target.value.trim() === "") {
+                onChange(row.id, { productId: "" });
+              }
+            }}
+            onFocus={() => setShowProductResults(true)}
+            placeholder="Kies product"
+            style={{
+              ...compactInputStyle,
+              width: "100%",
+              background: "#ffffff",
+              border: "1px solid #86efac",
+            }}
+          />
+
+          {showProductResults && productQuery.trim() && (
+            <div
+              style={{
+                position: "absolute",
+                top: "calc(100% + 4px)",
+                left: 0,
+                right: 0,
+                zIndex: 30,
+                display: "grid",
+                gap: 3,
+                padding: 4,
+                border: "1px solid #bbf7d0",
+                borderRadius: isMobile ? 6 : 10,
+                background: "#ffffff",
+                boxShadow: "0 10px 24px rgba(15, 23, 42, 0.16)",
+              }}
+            >
+              {productResults.length === 0 && (
+                <div
+                  style={{
+                    padding: isMobile ? "5px 8px" : "7px 9px",
+                    fontSize: isMobile ? 12 : 13,
+                    color: "#64748b",
+                  }}
+                >
+                  Geen resultaten
+                </div>
+              )}
+
+              {productResults.map((product) => (
+                <button
+                  key={product.id}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => selectProduct(product)}
+                  style={{
+                    ...buttonStyle,
+                    padding: isMobile ? "5px 8px" : "7px 9px",
+                    minHeight: isMobile ? 30 : 34,
+                    borderRadius: isMobile ? 6 : 10,
+                    fontSize: isMobile ? 12 : 13,
+                    lineHeight: 1.1,
+                    textAlign: "left",
+                    background: getCategoryColor(categories, product.categoryId),
+                  }}
+                >
+                  {getCategoryName(categories, product.categoryId)} |{" "}
+                  {product.favorite ? "★ " : ""}
+                  {product.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {false && (
+          <select
           value={row.productId}
           onChange={(e) => onChange(row.id, { productId: e.target.value })}
           style={{
             ...compactInputStyle,
+            display: "none",
             gridColumn: isMobile ? "1 / -1" : "auto",
           }}
         >
@@ -75,7 +190,8 @@ export function MealRowCard({
               {p.name}
             </option>
           ))}
-        </select>
+          </select>
+        )}
 
         <select
           value={row.mode}

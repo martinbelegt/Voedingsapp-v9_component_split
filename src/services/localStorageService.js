@@ -22,6 +22,57 @@ function safeJsonParse(value, fallback) {
   }
 }
 
+function getSupabaseErrorDetails(error) {
+  if (!error) return null;
+
+  return {
+    message: error.message || "",
+    code: error.code || "",
+    details: error.details || "",
+    hint: error.hint || "",
+  };
+}
+
+function toJsonCompatibleValue(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function getAppDataPayloadSummary(value) {
+  return {
+    type: Array.isArray(value) ? "array" : typeof value,
+    count: Array.isArray(value) ? value.length : undefined,
+    jsonCompatible: (() => {
+      try {
+        toJsonCompatibleValue(value);
+        return true;
+      } catch {
+        return false;
+      }
+    })(),
+  };
+}
+
+function loadStoredValue(key, fallback = null) {
+  const saved = localStorage.getItem(key);
+  return safeJsonParse(saved, fallback);
+}
+
+export function loadStoredProducts() {
+  return loadStoredValue(STORAGE_KEYS.products, null);
+}
+
+export function loadStoredCategories() {
+  return loadStoredValue(STORAGE_KEYS.categories, null);
+}
+
+export function loadStoredSavedMeals() {
+  return loadStoredValue(STORAGE_KEYS.savedMeals, null);
+}
+
+export function loadStoredSettings() {
+  return loadStoredValue(STORAGE_KEYS.settings, null);
+}
+
 export function loadProducts() {
   const saved = localStorage.getItem(STORAGE_KEYS.products);
   const savedProducts = safeJsonParse(saved, null);
@@ -188,7 +239,11 @@ export async function loadAppDataFromCloud(key) {
     .maybeSingle();
 
   if (error) {
-    console.error("loadAppDataFromCloud error:", key, error);
+    console.error(
+      "loadAppDataFromCloud error:",
+      key,
+      getSupabaseErrorDetails(error),
+    );
     return null;
   }
 
@@ -198,10 +253,23 @@ export async function loadAppDataFromCloud(key) {
 export async function saveAppDataToCloud(key, value) {
   if (!supabase) return false;
 
+  let jsonValue;
+
+  try {
+    jsonValue = toJsonCompatibleValue(value);
+  } catch (error) {
+    console.error("saveAppDataToCloud payload is not valid JSON:", {
+      key,
+      summary: getAppDataPayloadSummary(value),
+      error: error?.message || String(error),
+    });
+    return false;
+  }
+
   const { error } = await supabase.from("app_data").upsert(
     {
       key,
-      data: value,
+      data: jsonValue,
       updated_at: new Date().toISOString(),
     },
     {
@@ -210,7 +278,11 @@ export async function saveAppDataToCloud(key, value) {
   );
 
   if (error) {
-    console.error("saveAppDataToCloud error:", key, error);
+    console.error("saveAppDataToCloud error:", {
+      key,
+      payload: getAppDataPayloadSummary(jsonValue),
+      supabase: getSupabaseErrorDetails(error),
+    });
     return false;
   }
 
