@@ -1,6 +1,6 @@
 import React from "react";
 
-export function MobileHeader() {
+export function MobileHeader({ onHomeClick }) {
   return (
     <div
       style={{
@@ -11,17 +11,27 @@ export function MobileHeader() {
         marginBottom: 10,
       }}
     >
-      <div
+      <button
+        type="button"
+        onClick={onHomeClick}
         style={{
+          appearance: "none",
+          border: 0,
+          background: "transparent",
+          padding: 0,
+          margin: 0,
           fontSize: 20,
           fontWeight: 900,
           color: "#0f766e",
           lineHeight: 1.1,
           letterSpacing: "-0.3px",
+          cursor: "pointer",
+          fontFamily: "inherit",
+          textAlign: "left",
         }}
       >
         Companion
-      </div>
+      </button>
 
       <div
         style={{

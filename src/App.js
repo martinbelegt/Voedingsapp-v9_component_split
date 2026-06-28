@@ -1853,6 +1853,13 @@ Producten uit deze categorie gaan naar "Overig".`);
     setActiveTab(item.id);
   }
 
+  function activateTimelineHome() {
+    setShowTimelineAnalysis(false);
+    setShowAddButtons(false);
+    setShowTimelineControls(false);
+    setActiveTab("daily");
+  }
+
   function getMainNavigationButtonStyle(item) {
     const isActive = isMainNavigationItemActive(item);
 
@@ -2047,7 +2054,7 @@ Producten uit deze categorie gaan naar "Overig".`);
       <>
       <div ref={headerNavStackRef} style={headerSurfaceStyle}>
         {isMobile ? (
-          <MobileHeader />
+          <MobileHeader onHomeClick={activateTimelineHome} />
         ) : (
           <div style={{ ...cardStyle, marginBottom: 16 }}>
             <h1
@@ -2058,7 +2065,24 @@ Producten uit deze categorie gaan naar "Overig".`);
                 color: "#0f766e",
               }}
             >
-              Companion
+              <button
+                type="button"
+                onClick={activateTimelineHome}
+                style={{
+                  appearance: "none",
+                  border: 0,
+                  background: "transparent",
+                  padding: 0,
+                  margin: 0,
+                  color: "inherit",
+                  font: "inherit",
+                  fontWeight: "inherit",
+                  cursor: "pointer",
+                  textAlign: "left",
+                }}
+              >
+                Companion
+              </button>
             </h1>
 
             <div
