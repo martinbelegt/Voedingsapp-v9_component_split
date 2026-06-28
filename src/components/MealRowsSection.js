@@ -284,15 +284,18 @@ export function MealRowsSection(props) {
     dayTotals,
     settings,
     children,
+    afterComposition,
   } = props;
 
   return (
     <>
       <MealQuickProductSection {...props} />
 
+      {children}
+
       <MealCompositionSection {...props} />
 
-      {children}
+      {afterComposition}
 
       <MealControlTotalSection
         cardStyle={cardStyle}
