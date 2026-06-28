@@ -1,5 +1,6 @@
 import React from "react";
 import { DashboardTab } from "./DashboardTab";
+import { QuickAddSection } from "./QuickAddSection";
 import {
   getIsMobileViewport,
   WorkspaceSection,
@@ -61,7 +62,6 @@ const workspaceSections = [
   { key: "quick", accent: "#16a34a" },
   { key: "workspace", accent: "#2563eb" },
   { key: "control", accent: "#0f766e" },
-  { key: "timeline", accent: "#4f46e5" },
   { key: "analysis", accent: "#0284c7" },
 ];
 
@@ -232,6 +232,13 @@ function PlaceholderWorkspace({ activeTab, cardStyle, buttonStyle }) {
         gap: isMobile ? 10 : 14,
       }}
     >
+      <QuickAddSection
+        addCurrentMealToSelectedDay={() =>
+          window.alert(`${config.timeline} volgt later.`)
+        }
+        cardStyle={cardStyle}
+      />
+
       <div
         style={{
           display: "grid",

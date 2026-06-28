@@ -5,6 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 import VoedingslijstTab from "./components/VoedingslijstTab";
 import { ComposeSubnavigation, LibrariesTab } from "./components/LibrariesTab";
 import { GiTimingTab } from "./components/GiTimingTab";
@@ -2076,9 +2077,28 @@ Producten uit deze categorie gaan naar "Overig".`);
       return undefined;
     }
 
-    const measureHeaderNavStack = () => {
+    const isTextInputFocused = () => {
+      if (typeof document === "undefined") return false;
+
+      const activeElement = document.activeElement;
+      if (!activeElement) return false;
+
+      const tagName = activeElement.tagName;
+
+      return (
+        tagName === "INPUT" ||
+        tagName === "TEXTAREA" ||
+        activeElement.isContentEditable
+      );
+    };
+
+    const measureHeaderNavStack = ({ ignoreFocusedInput = false } = {}) => {
+      if (ignoreFocusedInput && isTextInputFocused()) return;
+
       const nextHeight = headerNavStackRef.current?.offsetHeight || 0;
-      setHeaderNavStackHeight(nextHeight);
+      setHeaderNavStackHeight((currentHeight) =>
+        currentHeight === nextHeight ? currentHeight : nextHeight,
+      );
     };
 
     measureHeaderNavStack();
@@ -2091,13 +2111,38 @@ Producten uit deze categorie gaan naar "Overig".`);
       resizeObserver.observe(headerNavStackRef.current);
     }
 
-    window.addEventListener("resize", measureHeaderNavStack);
+    const handleWindowResize = () => {
+      measureHeaderNavStack({ ignoreFocusedInput: true });
+    };
+
+    window.addEventListener("resize", handleWindowResize);
 
     return () => {
       resizeObserver?.disconnect();
-      window.removeEventListener("resize", measureHeaderNavStack);
+      window.removeEventListener("resize", handleWindowResize);
     };
   }, [isMobile, activeTab, activeLibraryTab]);
+
+  useLayoutEffect(() => {
+    if (!isMobile || typeof document === "undefined") return undefined;
+
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalBodyHeight = document.body.style.height;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+    const originalHtmlHeight = document.documentElement.style.height;
+
+    document.body.style.overflow = "hidden";
+    document.body.style.height = "100%";
+    document.documentElement.style.overflow = "hidden";
+    document.documentElement.style.height = "100%";
+
+    return () => {
+      document.body.style.overflow = originalBodyOverflow;
+      document.body.style.height = originalBodyHeight;
+      document.documentElement.style.overflow = originalHtmlOverflow;
+      document.documentElement.style.height = originalHtmlHeight;
+    };
+  }, [isMobile]);
 
   function HeaderNavStack() {
     const contentGap = isMobile ? 12 : 16;
@@ -2114,6 +2159,7 @@ Producten uit deze categorie gaan naar "Overig".`);
           paddingLeft: 16,
           paddingRight: 16,
           boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
+          overflowAnchor: "none",
         }
       : {
           display: "grid",
@@ -2123,8 +2169,7 @@ Producten uit deze categorie gaan naar "Overig".`);
       ? headerNavStackHeight + contentGap
       : contentGap;
 
-    return (
-      <>
+    const headerNavStackContent = (
       <div ref={headerNavStackRef} style={headerSurfaceStyle}>
         {isMobile ? (
           <MobileHeader onHomeClick={activateTimelineHome} />
@@ -2181,6 +2226,13 @@ Producten uit deze categorie gaan naar "Overig".`);
           {renderTimelineSubnavigation()}
           {renderComposeSubnavigation()}
         </div>
+    );
+
+    return (
+      <>
+        {isMobile && typeof document !== "undefined"
+          ? createPortal(headerNavStackContent, document.body)
+          : headerNavStackContent}
       <div
         aria-hidden="true"
         style={{
@@ -2312,6 +2364,16 @@ Producten uit deze categorie gaan naar "Overig".`);
     <div
       style={{
         minHeight: "100vh",
+        ...(isMobile
+          ? {
+              position: "fixed",
+              inset: 0,
+              height: "100dvh",
+              width: "100%",
+              overflow: "hidden",
+              overscrollBehavior: "none",
+            }
+          : {}),
         background: "#f8fafc",
         padding: isMobile ? "0 16px 16px" : 16,
         fontFamily: "Arial, sans-serif",
@@ -2323,6 +2385,15 @@ Producten uit deze categorie gaan naar "Overig".`);
           width: "100%",
           margin: "0 auto",
           overflowX: "hidden",
+          ...(isMobile
+            ? {
+                height: "100%",
+                overflowY: "auto",
+                WebkitOverflowScrolling: "touch",
+                overscrollBehaviorY: "contain",
+                paddingBottom: 16,
+              }
+            : {}),
         }}
       >
         <HeaderNavStack />

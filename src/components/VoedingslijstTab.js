@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import SortableHeader from "./SortableHeader";
+import { CompanionSearchInput } from "../ui/inputs/CompanionInput";
 
 export default VoedingslijstTab;
 
@@ -722,7 +723,7 @@ function VoedingslijstTab({
               Nieuw product
             </button>
 
-            <input
+            <CompanionSearchInput
               placeholder="Zoek product of categorie"
               value={productSearch}
               onChange={(e) => setProductSearch(e.target.value)}

@@ -1,5 +1,6 @@
 import React from "react";
 import { CreonSettingsCard } from "../CreonSettingsCard";
+import { CompanionNumberInput } from "../ui/inputs/CompanionInput";
 
 export function SettingsTab({
   settings,
@@ -200,7 +201,7 @@ export function SettingsTab({
                   Je berekent hoeveel insuline je nodig hebt voor de maaltijd
                   die voor je staat, zodat je bloedsuiker netjes stabiel blijft.
                 </div>
-                <input
+                <CompanionNumberInput
                   value={settings.gramsKhPerUnit}
                   onChange={(e) =>
                     setSettings({ ...settings, gramsKhPerUnit: e.target.value })
@@ -240,7 +241,7 @@ export function SettingsTab({
                     Dan helpt dit getal bepalen hoeveel extra insuline nodig is
                     om weer richting je gewenste waarde te gaan.
                   </div>
-                  <input
+                  <CompanionNumberInput
                     value={settings.correctionFactor}
                     onChange={(e) =>
                       setSettings({
@@ -265,7 +266,7 @@ export function SettingsTab({
                   >
                     Naar welke glucosewaarde probeer je meestal terug te keren?
                   </div>
-                  <input
+                  <CompanionNumberInput
                     value={settings.targetGlucose}
                     onChange={(e) =>
                       setSettings({
@@ -390,7 +391,7 @@ export function SettingsTab({
                 <div>
                   <label style={labelStyle}>Onderhoud kcal</label>
 
-                  <input
+                  <CompanionNumberInput
                     value={settings.dailyTargets?.maintenanceKcal || ""}
                     onChange={(e) =>
                       setSettings({
@@ -412,7 +413,7 @@ export function SettingsTab({
                 <div>
                   <label style={labelStyle}>Dagdoel kcal</label>
 
-                  <input
+                  <CompanionNumberInput
                     value={settings.dailyTargets?.targetKcal || ""}
                     onChange={(e) =>
                       setSettings({
@@ -434,7 +435,7 @@ export function SettingsTab({
                 <div>
                   <label style={labelStyle}>Eiwitdoel per dag</label>
 
-                  <input
+                  <CompanionNumberInput
                     value={settings.dailyTargets?.proteinGoal || ""}
                     onChange={(e) =>
                       setSettings({
@@ -456,7 +457,7 @@ export function SettingsTab({
                 <div>
                   <label style={labelStyle}>Min eiwit per maaltijd</label>
 
-                  <input
+                  <CompanionNumberInput
                     value={settings.dailyTargets?.proteinMealGoal || ""}
                     onChange={(e) =>
                       setSettings({

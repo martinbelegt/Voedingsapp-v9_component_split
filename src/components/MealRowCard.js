@@ -1,5 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { getCategoryName } from "../services/productHelpers";
+import {
+  CompanionNumberInput,
+  CompanionSearchInput,
+} from "../ui/inputs/CompanionInput";
 
 export function MealRowCard({
   row,
@@ -98,7 +102,7 @@ export function MealRowCard({
             gridColumn: isMobile ? "1 / -1" : "auto",
           }}
         >
-          <input
+          <CompanionSearchInput
             value={productQuery}
             onChange={(e) => {
               setProductQuery(e.target.value);
@@ -202,7 +206,7 @@ export function MealRowCard({
           <option value="gram">Gram</option>
         </select>
 
-        <input
+        <CompanionNumberInput
           value={row.amount}
           onChange={(e) => onChange(row.id, { amount: e.target.value })}
           style={{
