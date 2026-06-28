@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import VoedingslijstTab from "./components/VoedingslijstTab";
-import { LibrariesTab } from "./components/LibrariesTab";
+import { ComposeSubnavigation, LibrariesTab } from "./components/LibrariesTab";
 import { GiTimingTab } from "./components/GiTimingTab";
 import { SettingsTab } from "./components/SettingsTab";
 import { useDailyLog } from "./hooks/useDailyLog";
@@ -104,6 +104,7 @@ import {
 } from "./services/productPackService";
 
 import { MobileHeader } from "./components/mobile/MobileHeader";
+import { DeveloperSyncMonitor } from "./components/dev/DeveloperSyncMonitor";
 
 // ======================================================
 // ZOEKANKER: LOCAL STORAGE / BACKUP KEYS
@@ -716,6 +717,8 @@ export default function App() {
   const [activeDevTab, setActiveDevTab] = useState("playground");
   const isMobile =
     window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
+  const headerNavStackRef = useRef(null);
+  const [headerNavStackHeight, setHeaderNavStackHeight] = useState(0);
   const [editingProductId, setEditingProductId] = useState(null);
   const [sortConfig, setSortConfig] = useState({
     key: "category",
@@ -817,6 +820,7 @@ export default function App() {
     selectedDay,
     dayTotals,
     sortedDates,
+    syncDebug,
     addMealToDay,
     deleteMealFromDay,
     updateMealTime,
@@ -1801,7 +1805,7 @@ Producten uit deze categorie gaan naar "Overig".`);
   }
   const mainNavigationItems = [
     { id: "daily", label: "Tijdlijn", color: "#0891b2" },
-    { id: "libraries", label: "Bibliotheken", color: "#7c3aed" },
+    { id: "libraries", label: "Compose", color: "#7c3aed" },
     { id: "voedingslijst", label: "Voeding", color: "#16a34a" },
     { id: "gi", label: "GI / Timing", color: "#9333ea" },
     { id: "settings", label: "Mijn Profiel", color: "#475569" },
@@ -1846,16 +1850,16 @@ Producten uit deze categorie gaan naar "Overig".`);
     return {
       ...(isActive ? primaryButtonStyle : buttonStyle),
       flex: "0 0 auto",
-      padding: isMobile ? "8px 12px" : "10px 16px",
-      fontSize: isMobile ? 12 : 14,
+      padding: isMobile ? "6px 10px" : "8px 13px",
+      fontSize: isMobile ? 11 : 13,
       fontWeight: 850,
-      borderRadius: 999,
+      borderRadius: 8,
       background: isActive ? item.color : "#ffffff",
       border: `1px solid ${item.color}`,
       color: isActive ? "#ffffff" : item.color,
       boxShadow: isActive ? "0 2px 8px rgba(15, 23, 42, 0.16)" : "none",
       whiteSpace: "nowrap",
-      minHeight: isMobile ? 34 : 38,
+      minHeight: isMobile ? 30 : 34,
       scrollSnapAlign: "start",
     };
   }
@@ -1867,13 +1871,15 @@ Producten uit deze categorie gaan naar "Overig".`);
         style={{
           display: "flex",
           gap: isMobile ? 6 : 8,
-          marginBottom: isMobile ? 0 : 16,
+          marginTop: isMobile ? 6 : 0,
+          marginBottom:
+            activeTab === "libraries" ? (isMobile ? 2 : 4) : isMobile ? 10 : 20,
           overflowX: "auto",
           overflowY: "hidden",
           WebkitOverflowScrolling: "touch",
           scrollbarWidth: "none",
           scrollSnapType: "x proximity",
-          padding: isMobile ? "2px 0 4px" : "0 0 4px",
+          padding: isMobile ? "2px 0 5px" : "0 0 6px",
           flexWrap: "nowrap",
         }}
       >
@@ -1888,6 +1894,101 @@ Producten uit deze categorie gaan naar "Overig".`);
           </button>
         ))}
       </nav>
+    );
+  }
+
+  function renderComposeSubnavigation() {
+    if (activeTab !== "libraries") return null;
+
+    return (
+      <ComposeSubnavigation
+        activeLibraryTab={activeLibraryTab}
+        setActiveLibraryTab={setActiveLibraryTab}
+        buttonStyle={buttonStyle}
+        primaryButtonStyle={primaryButtonStyle}
+      />
+    );
+  }
+
+  useEffect(() => {
+    if (!isMobile) {
+      setHeaderNavStackHeight(0);
+      return undefined;
+    }
+
+    const measureHeaderNavStack = () => {
+      const nextHeight = headerNavStackRef.current?.offsetHeight || 0;
+      setHeaderNavStackHeight(nextHeight);
+    };
+
+    measureHeaderNavStack();
+    window.addEventListener("resize", measureHeaderNavStack);
+
+    return () => {
+      window.removeEventListener("resize", measureHeaderNavStack);
+    };
+  }, [isMobile, activeTab, activeLibraryTab]);
+
+  function HeaderNavStack() {
+    const stackStyle = isMobile
+      ? {
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 2000,
+          background: "#f8fafc",
+          paddingTop: 8,
+          paddingBottom: 6,
+          paddingLeft: 16,
+          paddingRight: 16,
+          boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
+        }
+      : {
+          display: "grid",
+          gap: 0,
+          marginBottom: activeTab === "libraries" ? 10 : 0,
+        };
+
+    return (
+      <div ref={headerNavStackRef} style={stackStyle}>
+        {isMobile ? (
+          <MobileHeader />
+        ) : (
+          <div style={{ ...cardStyle, marginBottom: 16 }}>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 28,
+                fontWeight: 900,
+                color: "#0f766e",
+              }}
+            >
+              Companion
+            </h1>
+
+            <div
+              style={{
+                color: "#64748b",
+                marginTop: 4,
+                fontSize: 14,
+              }}
+            >
+              Jouw persoonlijke gezondheidsmaatje
+            </div>
+
+            <p style={{ marginTop: 8, color: "#475569" }}>
+              Nu met standaardmaaltijden, categorieÃ«n met ids, porties of gram,
+              favorieten, opslag in je browser, sticky kopregel, categoriebeheer,
+              snelle productzoeker, uitgebreider Creon-model, GI / Timing-tabblad,
+              testlogboek en backup/herstel via Instellingen.
+            </p>
+          </div>
+        )}
+
+        {renderMainNavigation()}
+        {renderComposeSubnavigation()}
+      </div>
     );
   }
 
@@ -2022,7 +2123,9 @@ Producten uit deze categorie gaan naar "Overig".`);
       style={{
         minHeight: "100vh",
         background: "#f8fafc",
-        padding: isMobile ? "112px 16px 16px" : 16,
+        padding: isMobile
+          ? `${headerNavStackHeight + 12}px 16px 16px`
+          : 16,
         fontFamily: "Arial, sans-serif",
       }}
     >
@@ -2034,50 +2137,8 @@ Producten uit deze categorie gaan naar "Overig".`);
           overflowX: "hidden",
         }}
       >
-        {isMobile ? (
-          <div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              right: 0,
-              zIndex: 2000,
-              background: "#f8fafc",
-              paddingTop: 8,
-              paddingBottom: 6,
-              paddingLeft: 16,
-              paddingRight: 16,
-              boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
-            }}
-          >
-            <MobileHeader />
-
-            {renderMainNavigation()}
-          </div>
-        ) : (
-          <>
-            <div style={{ ...cardStyle, marginBottom: 16 }}>
-              <h1
-                style={{
-                  margin: 0,
-                  fontSize: 28,
-                  fontWeight: 900,
-                  color: "#0f766e",
-                }}
-              >
-                Companion
-              </h1>
-
-              <div
-                style={{
-                  color: "#64748b",
-                  marginTop: 4,
-                  fontSize: 14,
-                }}
-              >
-                Jouw persoonlijke gezondheidsmaatje
-              </div>
-
+        <HeaderNavStack />
+        {/*
               <p style={{ marginTop: 8, color: "#475569" }}>
                 Nu met standaardmaaltijden, categorieën met ids, porties of
                 gram, favorieten, opslag in je browser, sticky kopregel,
@@ -2088,9 +2149,11 @@ Producten uit deze categorie gaan naar "Overig".`);
             </div>
 
             {renderMainNavigation()}
+            {renderComposeSubnavigation()}
 
           </>
         )}
+        */}
         {activeTab === "foundation" && (
           <div style={{ display: "grid", gap: 12 }}>
             <div
@@ -2148,11 +2211,9 @@ Producten uit deze categorie gaan naar "Overig".`);
         {activeTab === "libraries" && (
           <LibrariesTab
             activeLibraryTab={activeLibraryTab}
-            setActiveLibraryTab={setActiveLibraryTab}
             dashboardProps={mealWorkspaceProps}
             cardStyle={cardStyle}
             buttonStyle={buttonStyle}
-            primaryButtonStyle={primaryButtonStyle}
           />
         )}
         {activeTab === "voedingslijst" && (
@@ -2312,6 +2373,7 @@ Producten uit deze categorie gaan naar "Overig".`);
           />
         )}
       </div>
+      <DeveloperSyncMonitor syncDebug={syncDebug} />
     </div>
   );
 }

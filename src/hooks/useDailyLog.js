@@ -95,6 +95,37 @@ function countDailyLogEvents(days = []) {
   );
 }
 
+const isDevelopment = process.env.NODE_ENV === "development";
+
+function createSyncDebugState(localDailyLog = []) {
+  const localDays = Array.isArray(localDailyLog) ? localDailyLog.length : 0;
+
+  return {
+    source: "Local",
+    conflict: false,
+    cloud: {
+      revision: null,
+      days: null,
+      events: null,
+      updatedAt: null,
+      lastSuccessfulSaveAt: null,
+    },
+    local: {
+      revision: null,
+      days: localDays,
+      events: Array.isArray(localDailyLog)
+        ? countDailyLogEvents(localDailyLog)
+        : 0,
+      lastSaveAt: null,
+    },
+  };
+}
+
+function logSyncBlock(lines) {
+  if (!isDevelopment) return;
+  console.log(["[SYNC]", ...lines].join("\n"));
+}
+
 function getTimePart(value, fallback) {
   return String(value || "").slice(11, 16) || fallback;
 }
@@ -152,6 +183,9 @@ export function useDailyLog(selectedDate) {
   const [dailyLog, setDailyLogState] = useState(() =>
     sortDaysNewestFirst((loadDailyLog() || []).map(normalizeDay)),
   );
+  const [syncDebug, setSyncDebug] = useState(() =>
+    createSyncDebugState(dailyLog),
+  );
   const [cloudLoaded, setCloudLoaded] = useState(false);
   const hasHydratedCloudData = useRef(false);
   const hasLocalUserChange = useRef(false);
@@ -204,6 +238,35 @@ export function useDailyLog(selectedDate) {
 
         setDailyLogState(normalizedCloudLog);
         saveDailyLog(normalizedCloudLog);
+        const localSaveAt = new Date().toISOString();
+        setSyncDebug((prev) => ({
+          ...prev,
+          source: "Cloud",
+          conflict: false,
+          cloud: {
+            ...prev.cloud,
+            revision: loadedRevision.current,
+            days: normalizedCloudLog.length,
+            events: cloudEventCount,
+            updatedAt: cloudResult.updatedAt,
+          },
+          local: {
+            ...prev.local,
+            revision: loadedRevision.current,
+            days: normalizedCloudLog.length,
+            events: cloudEventCount,
+            lastSaveAt: localSaveAt,
+          },
+        }));
+        logSyncBlock([
+          "Loaded from cloud",
+          "",
+          `Revision: ${loadedRevision.current}`,
+          "",
+          `Days: ${normalizedCloudLog.length}`,
+          "",
+          `Events: ${cloudEventCount}`,
+        ]);
         setCloudLoaded(true);
       } catch (error) {
         if (cancelled) return;
@@ -222,6 +285,19 @@ export function useDailyLog(selectedDate) {
 
   useEffect(() => {
     saveDailyLog(dailyLog);
+    const localSaveAt = new Date().toISOString();
+    const currentLocalDayCount = Array.isArray(dailyLog) ? dailyLog.length : 0;
+    const currentLocalEventCount = countDailyLogEvents(dailyLog);
+
+    setSyncDebug((prev) => ({
+      ...prev,
+      local: {
+        ...prev.local,
+        days: currentLocalDayCount,
+        events: currentLocalEventCount,
+        lastSaveAt: localSaveAt,
+      },
+    }));
 
     if (!cloudLoaded) {
       console.log("dailyLog cloud save skipped: cloud load not finished");
@@ -287,10 +363,41 @@ export function useDailyLog(selectedDate) {
         console.log("dailyLog cloud save result:", result);
 
         if (result.ok) {
+          const cloudSaveAt = new Date().toISOString();
           loadedRevision.current = result.revision;
           hasLocalUserChange.current = false;
           cloudHydratedDayCount.current = localDayCount;
           cloudHydratedEventCount.current = localEventCount;
+          setSyncDebug((prev) => ({
+            ...prev,
+            source: "Cloud",
+            conflict: false,
+            cloud: {
+              ...prev.cloud,
+              revision: result.revision,
+              days: localDayCount,
+              events: localEventCount,
+              updatedAt: result.updatedAt || cloudSaveAt,
+              lastSuccessfulSaveAt: cloudSaveAt,
+            },
+            local: {
+              ...prev.local,
+              revision: result.revision,
+              days: localDayCount,
+              events: localEventCount,
+            },
+          }));
+          logSyncBlock([
+            "Cloud save success: true",
+            "",
+            `Old revision: ${expectedRevision}`,
+            `New revision: ${result.revision}`,
+            "",
+            `Local days: ${localDayCount}`,
+            `Cloud days: ${localDayCount}`,
+            "",
+            "Status: OK",
+          ]);
 
           if (saveChangeVersion !== localChangeVersion.current) {
             hasLocalUserChange.current = true;
@@ -313,6 +420,30 @@ export function useDailyLog(selectedDate) {
               events: localEventCount,
             },
           );
+          setSyncDebug((prev) => ({
+            ...prev,
+            conflict: true,
+            cloud: {
+              ...prev.cloud,
+              revision: Number.isInteger(result.revision)
+                ? result.revision
+                : prev.cloud.revision,
+            },
+            local: {
+              ...prev.local,
+              revision: expectedRevision,
+              days: localDayCount,
+              events: localEventCount,
+            },
+          }));
+          logSyncBlock([
+            "Cloud save success: false",
+            "",
+            `Expected revision: ${expectedRevision}`,
+            `Actual revision: ${result.revision}`,
+            "",
+            "Reload required",
+          ]);
         }
       });
     }, 1500);
@@ -856,6 +987,7 @@ export function useDailyLog(selectedDate) {
 
   return {
     dailyLog,
+    syncDebug,
     setDailyLog,
     selectedDay,
     dayTotals,
