@@ -32,54 +32,33 @@ export function DashboardTab(props) {
         style={{
           display: "grid",
           gap: dashboardGap,
-          marginTop: isMobile ? 8 : 12,
           marginBottom: dashboardGap,
         }}
       >
-        {isMobile ? (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1.35fr 0.85fr",
-              gap: 4,
-              alignItems: "start",
-            }}
-          >
-            <SavedMealsSection
-              categories={categories}
-              {...savedMealProps}
-              products={products}
-              cardStyle={cardStyle}
-              buttonStyle={buttonStyle}
-              inputStyle={inputStyle}
-            />
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1.35fr 0.85fr",
+            gap: isMobile ? 4 : dashboardGap,
+            alignItems: "start",
+          }}
+        >
+          <SavedMealsSection
+            categories={categories}
+            {...savedMealProps}
+            products={products}
+            cardStyle={cardStyle}
+            buttonStyle={buttonStyle}
+            inputStyle={inputStyle}
+          />
 
-            <FavoritesSection
-              categories={categories}
-              {...favoritesProps}
-              cardStyle={cardStyle}
-              buttonStyle={buttonStyle}
-            />
-          </div>
-        ) : (
-          <>
-            <SavedMealsSection
-              categories={categories}
-              {...savedMealProps}
-              products={products}
-              cardStyle={cardStyle}
-              buttonStyle={buttonStyle}
-              inputStyle={inputStyle}
-            />
-
-            <FavoritesSection
-              categories={categories}
-              {...favoritesProps}
-              cardStyle={cardStyle}
-              buttonStyle={buttonStyle}
-            />
-          </>
-        )}
+          <FavoritesSection
+            categories={categories}
+            {...favoritesProps}
+            cardStyle={cardStyle}
+            buttonStyle={buttonStyle}
+          />
+        </div>
       </div>
 
       <div style={{ display: "grid", gap: dashboardGap }}>

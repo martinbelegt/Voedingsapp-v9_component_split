@@ -1,5 +1,9 @@
 import React from "react";
 import { DashboardTab } from "./DashboardTab";
+import {
+  getIsMobileViewport,
+  WorkspaceSection,
+} from "./WorkspaceFoundation";
 
 const libraryTabs = [
   { id: "meals", label: "Maaltijden", color: "#2563eb" },
@@ -15,8 +19,8 @@ const workspaceConfigs = {
     routines: "Favorieten / routines",
     quick: "Snel product kiezen",
     workspace: "Maaltijd samenstellen",
-    timeline: "Zet op tijdlijn",
     control: "Controle / totaal",
+    timeline: "Zet op tijdlijn",
     analysis: "Analyse / notities",
   },
   supplements: {
@@ -25,8 +29,8 @@ const workspaceConfigs = {
     routines: "Favorieten / routines",
     quick: "Snel supplement kiezen",
     workspace: "Supplementen voor dit moment",
-    timeline: "Zet op tijdlijn",
     control: "Controle / totaal",
+    timeline: "Zet op tijdlijn",
     analysis: "Analyse / notities",
   },
   strength: {
@@ -35,8 +39,8 @@ const workspaceConfigs = {
     routines: "Favorieten / routines",
     quick: "Snel oefening kiezen",
     workspace: "Training samenstellen",
-    timeline: "Zet op tijdlijn",
     control: "Controle / totaal",
+    timeline: "Zet op tijdlijn",
     analysis: "Analyse / notities",
   },
   medicine: {
@@ -45,35 +49,45 @@ const workspaceConfigs = {
     routines: "Favorieten / routines",
     quick: "Snel medicijn kiezen",
     workspace: "Medicatie voor dit moment",
-    timeline: "Zet op tijdlijn",
     control: "Controle / totaal",
+    timeline: "Zet op tijdlijn",
     analysis: "Analyse / notities",
   },
 };
 
-const foundationOrder = [
-  "existing",
-  "routines",
-  "quick",
-  "workspace",
-  "timeline",
-  "control",
-  "analysis",
+const workspaceSections = [
+  { key: "existing", accent: "#7c3aed", compact: true },
+  { key: "routines", accent: "#ea580c", compact: true },
+  { key: "quick", accent: "#16a34a" },
+  { key: "workspace", accent: "#2563eb" },
+  { key: "control", accent: "#0f766e" },
+  { key: "timeline", accent: "#4f46e5" },
+  { key: "analysis", accent: "#0284c7" },
 ];
 
+const placeholderRows = {
+  existing: ["Eigen lijst", "Later te vullen"],
+  routines: ["Veelgebruikte keuzes", "Routinebasis"],
+  quick: ["Zoeken", "Snel toevoegen"],
+  workspace: ["Werkruimte", "Voor dit moment"],
+  control: ["Samenvatting", "Nog geen totaal"],
+  timeline: ["Nog geen actie"],
+  analysis: ["Notities", "Analyse volgt later"],
+};
+
 function getIsMobile() {
-  return (
-    window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent)
-  );
+  return getIsMobileViewport();
 }
 
-function LibraryTabStrip({
-  activeTab,
+export function ComposeSubnavigation({
+  activeLibraryTab,
   setActiveLibraryTab,
   buttonStyle,
   primaryButtonStyle,
 }) {
   const isMobile = getIsMobile();
+  const activeTab =
+    libraryTabs.find((tab) => tab.id === activeLibraryTab) || libraryTabs[0];
 
   return (
     <div
@@ -83,10 +97,15 @@ function LibraryTabStrip({
         overflowX: "auto",
         WebkitOverflowScrolling: "touch",
         scrollbarWidth: "none",
-        padding: 4,
+        padding: "0 4px",
+        paddingTop: 0,
+        paddingBottom: 0,
+        marginTop: 0,
+        marginBottom: 0,
         border: "1px solid #e2e8f0",
         borderRadius: 8,
         background: "#f8fafc",
+        boxShadow: "0 6px 14px rgba(15, 23, 42, 0.08)",
       }}
     >
       {libraryTabs.map((tab) => {
@@ -100,13 +119,13 @@ function LibraryTabStrip({
             style={{
               ...(isActive ? primaryButtonStyle : buttonStyle),
               flex: "0 0 auto",
-              minHeight: isMobile ? 30 : 28,
-              padding: isMobile ? "5px 9px" : "4px 10px",
+              minHeight: isMobile ? 28 : 26,
+              padding: isMobile ? "4px 8px" : "3px 9px",
               borderRadius: 6,
               border: `1px solid ${isActive ? tab.color : "#cbd5e1"}`,
               background: isActive ? tab.color : "#ffffff",
               color: isActive ? "#ffffff" : "#334155",
-              fontSize: 12,
+              fontSize: 11,
               lineHeight: 1.15,
               fontWeight: 850,
               whiteSpace: "nowrap",
@@ -121,224 +140,125 @@ function LibraryTabStrip({
   );
 }
 
-function FoundationRail({ config, color }) {
-  const isMobile = getIsMobile();
-
-  return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: isMobile
-          ? "repeat(2, minmax(0, 1fr))"
-          : "repeat(7, minmax(0, 1fr))",
-        gap: 6,
-      }}
-    >
-      {foundationOrder.map((key) => (
-        <div
-          key={key}
-          style={{
-            minHeight: isMobile ? 42 : 48,
-            padding: "8px 9px",
-            border: "1px solid #e2e8f0",
-            borderTop: `2px solid ${color}`,
-            borderRadius: 8,
-            background: "#ffffff",
-            color: "#1e293b",
-            display: "flex",
-            alignItems: "center",
-            fontSize: 12,
-            fontWeight: 850,
-            lineHeight: 1.2,
-          }}
-        >
-          {config[key]}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function FoundationWorkspace({
-  activeTab,
-  children,
+function PlaceholderSection({
+  section,
+  config,
   cardStyle,
   buttonStyle,
 }) {
   const isMobile = getIsMobile();
-  const config = workspaceConfigs[activeTab.id] || workspaceConfigs.meals;
+  const rows =
+    section.key === "timeline"
+      ? [...placeholderRows.timeline, config.timeline]
+      : placeholderRows[section.key];
 
   return (
-    <div style={{ display: "grid", gap: isMobile ? 8 : 10 }}>
+    <WorkspaceSection
+      title={config[section.key]}
+      accent={section.accent}
+      compact={section.compact}
+    >
       <div
         style={{
           ...cardStyle,
+          minHeight: section.compact ? 72 : 92,
           padding: isMobile ? 10 : 12,
-          borderLeft: `3px solid ${activeTab.color}`,
+          borderTop: `3px solid ${section.accent}`,
           display: "grid",
-          gap: 10,
+          alignContent: "start",
+          gap: 9,
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 10,
-            flexWrap: "wrap",
-          }}
-        >
-          <h2
+        {rows.map((row) => (
+          <div
+            key={row}
             style={{
-              margin: 0,
-              fontSize: isMobile ? 18 : 20,
-              color: "#0f172a",
-              fontWeight: 950,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              color: "#64748b",
+              fontSize: 12,
+              fontWeight: 750,
             }}
           >
-            {config.title}
-          </h2>
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: 6,
+                background: section.accent,
+                opacity: 0.45,
+                flex: "0 0 auto",
+              }}
+            />
+            {row}
+          </div>
+        ))}
+
+        {section.key === "timeline" && (
           <button
             type="button"
             disabled
             style={{
               ...buttonStyle,
+              justifySelf: "start",
+              marginTop: 2,
               minHeight: 30,
               padding: "5px 10px",
               borderRadius: 6,
-              background: "#f8fafc",
-              border: "1px solid #cbd5e1",
-              color: "#64748b",
+              background: "#ffffff",
+              border: `1px solid ${section.accent}`,
+              color: section.accent,
               fontSize: 12,
               cursor: "not-allowed",
             }}
           >
             {config.timeline}
           </button>
-        </div>
-
-        <FoundationRail config={config} color={activeTab.color} />
+        )}
       </div>
-
-      {children}
-    </div>
+    </WorkspaceSection>
   );
 }
 
-function WorkspaceFoundationPlaceholder({ activeTab, cardStyle, buttonStyle }) {
+function PlaceholderWorkspace({ activeTab, cardStyle, buttonStyle }) {
   const isMobile = getIsMobile();
   const config = workspaceConfigs[activeTab.id] || workspaceConfigs.meals;
-
-  const panels = [
-    {
-      key: "existing",
-      title: config.existing,
-      rows: ["Eigen lijst", "Later te vullen"],
-    },
-    {
-      key: "routines",
-      title: config.routines,
-      rows: ["Veelgebruikte keuzes", "Routinebasis"],
-    },
-    {
-      key: "quick",
-      title: config.quick,
-      rows: ["Zoeken", "Snel toevoegen"],
-    },
-    {
-      key: "workspace",
-      title: config.workspace,
-      rows: ["Werkruimte", "Voor dit moment"],
-    },
-    {
-      key: "control",
-      title: config.control,
-      rows: ["Samenvatting", "Nog geen totaal"],
-    },
-    {
-      key: "analysis",
-      title: config.analysis,
-      rows: ["Notities", "Analyse volgt later"],
-    },
-  ];
 
   return (
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: isMobile ? "1fr" : "repeat(3, minmax(0, 1fr))",
-        gap: isMobile ? 8 : 10,
+        gap: isMobile ? 10 : 14,
       }}
     >
-      {panels.map((panel) => (
-        <div
-          key={panel.key}
-          style={{
-            ...cardStyle,
-            minHeight: 118,
-            padding: isMobile ? 10 : 12,
-            borderTop: `3px solid ${activeTab.color}`,
-            display: "grid",
-            alignContent: "start",
-            gap: 9,
-          }}
-        >
-          <div
-            style={{
-              fontSize: 13,
-              fontWeight: 950,
-              color: "#0f172a",
-            }}
-          >
-            {panel.title}
-          </div>
-          {panel.rows.map((row) => (
-            <div
-              key={row}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                color: "#64748b",
-                fontSize: 12,
-                fontWeight: 750,
-              }}
-            >
-              <span
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: 6,
-                  background: activeTab.color,
-                  opacity: 0.45,
-                  flex: "0 0 auto",
-                }}
-              />
-              {row}
-            </div>
-          ))}
-          {panel.key === "workspace" && (
-            <button
-              type="button"
-              disabled
-              style={{
-                ...buttonStyle,
-                justifySelf: "start",
-                marginTop: 2,
-                minHeight: 30,
-                padding: "5px 10px",
-                borderRadius: 6,
-                background: "#ffffff",
-                border: `1px solid ${activeTab.color}`,
-                color: activeTab.color,
-                fontSize: 12,
-                cursor: "not-allowed",
-              }}
-            >
-              {config.timeline}
-            </button>
-          )}
-        </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1.35fr 0.85fr" : "1fr",
+          gap: isMobile ? 4 : 14,
+          alignItems: "start",
+        }}
+      >
+        {workspaceSections.slice(0, 2).map((section) => (
+          <PlaceholderSection
+            key={section.key}
+            section={section}
+            config={config}
+            cardStyle={cardStyle}
+            buttonStyle={buttonStyle}
+          />
+        ))}
+      </div>
+
+      {workspaceSections.slice(2).map((section) => (
+        <PlaceholderSection
+          key={section.key}
+          section={section}
+          config={config}
+          cardStyle={cardStyle}
+          buttonStyle={buttonStyle}
+        />
       ))}
     </div>
   );
@@ -346,40 +266,37 @@ function WorkspaceFoundationPlaceholder({ activeTab, cardStyle, buttonStyle }) {
 
 export function LibrariesTab({
   activeLibraryTab,
-  setActiveLibraryTab,
   dashboardProps,
   cardStyle,
   buttonStyle,
-  primaryButtonStyle,
 }) {
   const isMobile = getIsMobile();
   const activeTab =
     libraryTabs.find((tab) => tab.id === activeLibraryTab) || libraryTabs[0];
 
   return (
-    <div style={{ display: "grid", gap: isMobile ? 8 : 10 }}>
-      <LibraryTabStrip
-        activeTab={activeTab}
-        setActiveLibraryTab={setActiveLibraryTab}
-        buttonStyle={buttonStyle}
-        primaryButtonStyle={primaryButtonStyle}
-      />
-
-      <FoundationWorkspace
-        activeTab={activeTab}
-        cardStyle={cardStyle}
-        buttonStyle={buttonStyle}
+    <div
+      style={{
+        display: "grid",
+        gap: isMobile ? 6 : 8,
+      }}
+    >
+      <div
+        style={{
+          display: "grid",
+          gap: isMobile ? 8 : 10,
+        }}
       >
         {activeTab.id === "meals" ? (
           <DashboardTab {...dashboardProps} />
         ) : (
-          <WorkspaceFoundationPlaceholder
+          <PlaceholderWorkspace
             activeTab={activeTab}
             cardStyle={cardStyle}
             buttonStyle={buttonStyle}
           />
         )}
-      </FoundationWorkspace>
+      </div>
     </div>
   );
 }

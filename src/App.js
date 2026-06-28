@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import VoedingslijstTab from "./components/VoedingslijstTab";
 import { ComposeSubnavigation, LibrariesTab } from "./components/LibrariesTab";
 import { GiTimingTab } from "./components/GiTimingTab";
@@ -1871,9 +1877,6 @@ Producten uit deze categorie gaan naar "Overig".`);
         style={{
           display: "flex",
           gap: isMobile ? 6 : 8,
-          marginTop: isMobile ? 6 : 0,
-          marginBottom:
-            activeTab === "libraries" ? (isMobile ? 2 : 4) : isMobile ? 10 : 20,
           overflowX: "auto",
           overflowY: "hidden",
           WebkitOverflowScrolling: "touch",
@@ -1910,7 +1913,7 @@ Producten uit deze categorie gaan naar "Overig".`);
     );
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isMobile) {
       setHeaderNavStackHeight(0);
       return undefined;
@@ -1922,15 +1925,26 @@ Producten uit deze categorie gaan naar "Overig".`);
     };
 
     measureHeaderNavStack();
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(measureHeaderNavStack)
+        : null;
+
+    if (resizeObserver && headerNavStackRef.current) {
+      resizeObserver.observe(headerNavStackRef.current);
+    }
+
     window.addEventListener("resize", measureHeaderNavStack);
 
     return () => {
+      resizeObserver?.disconnect();
       window.removeEventListener("resize", measureHeaderNavStack);
     };
   }, [isMobile, activeTab, activeLibraryTab]);
 
   function HeaderNavStack() {
-    const stackStyle = isMobile
+    const contentGap = isMobile ? 12 : 16;
+    const headerSurfaceStyle = isMobile
       ? {
           position: "fixed",
           top: 0,
@@ -1947,11 +1961,14 @@ Producten uit deze categorie gaan naar "Overig".`);
       : {
           display: "grid",
           gap: 0,
-          marginBottom: activeTab === "libraries" ? 10 : 0,
         };
+    const contentSpacerHeight = isMobile
+      ? headerNavStackHeight + contentGap
+      : contentGap;
 
     return (
-      <div ref={headerNavStackRef} style={stackStyle}>
+      <>
+      <div ref={headerNavStackRef} style={headerSurfaceStyle}>
         {isMobile ? (
           <MobileHeader />
         ) : (
@@ -1989,6 +2006,14 @@ Producten uit deze categorie gaan naar "Overig".`);
         {renderMainNavigation()}
         {renderComposeSubnavigation()}
       </div>
+      <div
+        aria-hidden="true"
+        style={{
+          height: contentSpacerHeight,
+          flex: "0 0 auto",
+        }}
+      />
+      </>
     );
   }
 
@@ -2123,9 +2148,7 @@ Producten uit deze categorie gaan naar "Overig".`);
       style={{
         minHeight: "100vh",
         background: "#f8fafc",
-        padding: isMobile
-          ? `${headerNavStackHeight + 12}px 16px 16px`
-          : 16,
+        padding: isMobile ? "0 16px 16px" : 16,
         fontFamily: "Arial, sans-serif",
       }}
     >
