@@ -18,6 +18,9 @@ export const cardStyle = {
   border: "1px solid #e5e7eb",
   borderRadius: 16,
   padding: 16,
+  boxSizing: "border-box",
+  minWidth: 0,
+  maxWidth: "100%",
   boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
 };
 

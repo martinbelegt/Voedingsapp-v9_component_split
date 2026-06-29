@@ -2370,6 +2370,8 @@ Producten uit deze categorie gaan naar "Overig".`);
               inset: 0,
               height: "100dvh",
               width: "100%",
+              maxWidth: "100%",
+              boxSizing: "border-box",
               overflow: "hidden",
               overscrollBehavior: "none",
             }
@@ -2383,10 +2385,12 @@ Producten uit deze categorie gaan naar "Overig".`);
         style={{
           maxWidth: 1240,
           width: "100%",
+          boxSizing: "border-box",
           margin: "0 auto",
           overflowX: "hidden",
           ...(isMobile
             ? {
+                maxWidth: "100%",
                 height: "100%",
                 overflowY: "auto",
                 WebkitOverflowScrolling: "touch",
