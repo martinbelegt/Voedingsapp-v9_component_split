@@ -16,12 +16,29 @@ function focusWithoutScroll(event) {
 
   if (!input || typeof input.focus !== "function") return;
 
+  const scrollElement = document.scrollingElement || document.documentElement;
+  const scrollLeft = window.scrollX || scrollElement.scrollLeft || 0;
+  const scrollTop = window.scrollY || scrollElement.scrollTop || 0;
+
+  function restoreScrollPosition() {
+    scrollElement.scrollLeft = scrollLeft;
+    scrollElement.scrollTop = scrollTop;
+    document.documentElement.scrollLeft = scrollLeft;
+    document.documentElement.scrollTop = scrollTop;
+    document.body.scrollLeft = scrollLeft;
+    document.body.scrollTop = scrollTop;
+    window.scrollTo(scrollLeft, scrollTop);
+  }
+
   try {
     input.focus({ preventScroll: true });
     event.preventDefault();
   } catch {
     input.focus();
   }
+
+  restoreScrollPosition();
+  window.requestAnimationFrame?.(restoreScrollPosition);
 }
 
 export const CompanionInput = forwardRef(function CompanionInput(
@@ -72,7 +89,7 @@ export const CompanionInput = forwardRef(function CompanionInput(
 });
 
 export const CompanionNumberInput = forwardRef(function CompanionNumberInput(
-  { decimal = true, inputMode, ...props },
+  { decimal = true, inputMode, pattern, ...props },
   ref,
 ) {
   return (
@@ -80,6 +97,7 @@ export const CompanionNumberInput = forwardRef(function CompanionNumberInput(
       ref={ref}
       type="text"
       inputMode={inputMode || (decimal ? "decimal" : "numeric")}
+      pattern={pattern ?? (decimal ? "[0-9]*[.,]?[0-9]*" : "[0-9]*")}
       {...props}
     />
   );

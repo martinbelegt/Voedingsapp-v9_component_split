@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import SortableHeader from "./SortableHeader";
-import { CompanionSearchInput } from "../ui/inputs/CompanionInput";
+import {
+  CompanionNumberInput,
+  CompanionSearchInput,
+} from "../ui/inputs/CompanionInput";
+
+function normalizeDecimalInput(value) {
+  if (!/^\d*(?:[.,]\d*)?$/.test(value)) return null;
+  return value.replace(",", ".");
+}
 
 export default VoedingslijstTab;
 
@@ -1510,14 +1518,16 @@ function VoedingslijstTab({
 
                   <div style={modalFieldStyle}>
                     <label style={modalLabelStyle}>Portie gram</label>
-                    <input
+                    <CompanionNumberInput
                       value={newProduct.portionGram}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const value = normalizeDecimalInput(e.target.value);
+                        if (value === null) return;
                         setNewProduct({
                           ...newProduct,
-                          portionGram: e.target.value,
-                        })
-                      }
+                          portionGram: value,
+                        });
+                      }}
                       style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                     />
                   </div>
@@ -1822,14 +1832,16 @@ function VoedingslijstTab({
                           ? "KH / 100 g"
                           : "KH / portie"}
                       </label>
-                      <input
+                      <CompanionNumberInput
                         value={newProduct.khInput}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const value = normalizeDecimalInput(e.target.value);
+                          if (value === null) return;
                           setNewProduct({
                             ...newProduct,
-                            khInput: e.target.value,
-                          })
-                        }
+                            khInput: value,
+                          });
+                        }}
                         style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                       />
                     </div>
@@ -1840,14 +1852,16 @@ function VoedingslijstTab({
                           ? "Eiwit / 100 g"
                           : "Eiwit / portie"}
                       </label>
-                      <input
+                      <CompanionNumberInput
                         value={newProduct.proteinInput}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const value = normalizeDecimalInput(e.target.value);
+                          if (value === null) return;
                           setNewProduct({
                             ...newProduct,
-                            proteinInput: e.target.value,
-                          })
-                        }
+                            proteinInput: value,
+                          });
+                        }}
                         style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                       />
                     </div>
@@ -1858,14 +1872,16 @@ function VoedingslijstTab({
                           ? "Vet / 100 g"
                           : "Vet / portie"}
                       </label>
-                      <input
+                      <CompanionNumberInput
                         value={newProduct.fatInput}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const value = normalizeDecimalInput(e.target.value);
+                          if (value === null) return;
                           setNewProduct({
                             ...newProduct,
-                            fatInput: e.target.value,
-                          })
-                        }
+                            fatInput: value,
+                          });
+                        }}
                         style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                       />
                     </div>
@@ -1876,14 +1892,16 @@ function VoedingslijstTab({
                           ? "Kcal / 100 g"
                           : "Kcal / portie"}
                       </label>
-                      <input
+                      <CompanionNumberInput
                         value={newProduct.kcalInput}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const value = normalizeDecimalInput(e.target.value);
+                          if (value === null) return;
                           setNewProduct({
                             ...newProduct,
-                            kcalInput: e.target.value,
-                          })
-                        }
+                            kcalInput: value,
+                          });
+                        }}
                         style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                       />
                     </div>
@@ -1905,14 +1923,16 @@ function VoedingslijstTab({
                           ? "Vezels / 100 g"
                           : "Vezels / portie"}
                       </label>
-                      <input
+                      <CompanionNumberInput
                         value={newProduct.fiberInput || ""}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const value = normalizeDecimalInput(e.target.value);
+                          if (value === null) return;
                           setNewProduct({
                             ...newProduct,
-                            fiberInput: e.target.value,
-                          })
-                        }
+                            fiberInput: value,
+                          });
+                        }}
                         style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                       />
                     </div>
@@ -1923,14 +1943,16 @@ function VoedingslijstTab({
                           ? "Zout / 100 g"
                           : "Zout / portie"}
                       </label>
-                      <input
+                      <CompanionNumberInput
                         value={newProduct.saltInput || ""}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const value = normalizeDecimalInput(e.target.value);
+                          if (value === null) return;
                           setNewProduct({
                             ...newProduct,
-                            saltInput: e.target.value,
-                          })
-                        }
+                            saltInput: value,
+                          });
+                        }}
                         style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                       />
                     </div>
@@ -1989,14 +2011,16 @@ function VoedingslijstTab({
 
                       <div style={modalFieldStyle}>
                         <label style={modalLabelStyle}>GI-waarde</label>
-                        <input
+                        <CompanionNumberInput
+                          decimal={false}
                           value={newProduct.giValue}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            if (!/^\d*$/.test(e.target.value)) return;
                             setNewProduct({
                               ...newProduct,
                               giValue: e.target.value,
-                            })
-                          }
+                            });
+                          }}
                           style={{ ...modalInputStyle, fontSize: isMobile ? 16 : modalInputStyle.fontSize }}
                         />
                       </div>

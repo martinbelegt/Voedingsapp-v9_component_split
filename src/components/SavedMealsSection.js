@@ -1,6 +1,7 @@
 import React from "react";
 import { SavedMealCard } from "./SavedMealCard";
 import { getCategoryColor } from "../services/productHelpers";
+import { CompanionNumberInput } from "../ui/inputs/CompanionInput";
 
 export function SavedMealsSection(props) {
   const {
@@ -51,6 +52,10 @@ export function SavedMealsSection(props) {
         }
       : {}),
   };
+
+  const servingsNumber = Number(mealServings);
+  const hasValidServings =
+    Number.isInteger(servingsNumber) && servingsNumber >= 1;
 
   function editSavedMeal(id) {
     const meal = savedMeals.find((m) => m.id === id);
@@ -121,18 +126,29 @@ export function SavedMealsSection(props) {
                 placeholder="Naam van maaltijd"
               />
 
-              <input
-                type="number"
+              <CompanionNumberInput
+                decimal={false}
                 min="1"
                 value={mealServings}
-                onChange={(e) => setMealServings(Number(e.target.value) || 1)}
+                onChange={(e) => {
+                  const nextValue = e.target.value;
+                  if (/^\d*$/.test(nextValue)) {
+                    setMealServings(
+                      nextValue === "" ? "" : Number(nextValue),
+                    );
+                  }
+                }}
                 style={dashboardInputStyle}
                 placeholder="Porties"
               />
             </div>
 
             <button
-              onClick={saveCurrentMeal}
+              onClick={() => {
+                if (!hasValidServings) return;
+                saveCurrentMeal();
+              }}
+              disabled={!hasValidServings}
               style={{
                 ...dashboardButtonStyle,
                 background: "#dcfce7",

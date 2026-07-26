@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { CompanionNumberInput } from "../../../ui/inputs/CompanionInput";
 
 export default function MovementLibraryModal({
   open,
@@ -113,10 +114,15 @@ export default function MovementLibraryModal({
             onChange={(e) => setMuscleGroup(e.target.value)}
           />
 
-          <input
+          <CompanionNumberInput
+            decimal={false}
             placeholder="Standaardduur in minuten"
             value={defaultDurationMinutes}
-            onChange={(e) => setDefaultDurationMinutes(e.target.value)}
+            onChange={(e) => {
+              if (/^\d*$/.test(e.target.value)) {
+                setDefaultDurationMinutes(e.target.value);
+              }
+            }}
           />
 
           <input
