@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { CompanionButton } from "../../ui/buttons/CompanionButton";
+import { CompanionNumberInput } from "../../ui/inputs/CompanionInput";
 import { CompanionModalShell } from "../../ui/modals/CompanionModalShell";
 import { CompanionDateTimePicker } from "../../ui/pickers/CompanionDateTimePicker";
 
@@ -130,6 +131,10 @@ export function DailyEventAddModal({
 
   if (!config) return null;
 
+  const primaryValueIsNumeric = ["insulin", "glucose", "glucoseBoost"].includes(
+    eventType,
+  );
+
   function save() {
     onSave({
       eventType,
@@ -198,16 +203,30 @@ export function DailyEventAddModal({
             <option value="7">7 - waterdun</option>
           </select>
         ) : (
-          <input
-            value={value1}
-            onChange={(e) => setValue1(e.target.value)}
-            placeholder={config.placeholder1}
-            style={{
-              ...mobileInputStyle,
-              marginTop: 4,
-              marginBottom: 12,
-            }}
-          />
+          primaryValueIsNumeric ? (
+            <CompanionNumberInput
+              decimal={eventType !== "glucoseBoost"}
+              value={value1}
+              onChange={(e) => setValue1(e.target.value)}
+              placeholder={config.placeholder1}
+              style={{
+                ...mobileInputStyle,
+                marginTop: 4,
+                marginBottom: 12,
+              }}
+            />
+          ) : (
+            <input
+              value={value1}
+              onChange={(e) => setValue1(e.target.value)}
+              placeholder={config.placeholder1}
+              style={{
+                ...mobileInputStyle,
+                marginTop: 4,
+                marginBottom: 12,
+              }}
+            />
+          )
         )}
 
         {eventType === "bowel" && (
@@ -258,16 +277,30 @@ export function DailyEventAddModal({
                   {config.label3}
                 </label>
 
-                <input
-                  value={value3}
-                  onChange={(e) => setValue3(e.target.value)}
-                  placeholder={config.placeholder3}
-                  style={{
-                    ...mobileInputStyle,
-                    marginTop: 4,
-                    marginBottom: 14,
-                  }}
-                />
+                {eventType === "movement" ? (
+                  <CompanionNumberInput
+                    decimal={false}
+                    value={value3}
+                    onChange={(e) => setValue3(e.target.value)}
+                    placeholder={config.placeholder3}
+                    style={{
+                      ...mobileInputStyle,
+                      marginTop: 4,
+                      marginBottom: 14,
+                    }}
+                  />
+                ) : (
+                  <input
+                    value={value3}
+                    onChange={(e) => setValue3(e.target.value)}
+                    placeholder={config.placeholder3}
+                    style={{
+                      ...mobileInputStyle,
+                      marginTop: 4,
+                      marginBottom: 14,
+                    }}
+                  />
+                )}
               </>
             )}
           </>

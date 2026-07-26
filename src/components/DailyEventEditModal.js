@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { CompanionButton } from "../ui/buttons/CompanionButton";
+import { CompanionNumberInput } from "../ui/inputs/CompanionInput";
 import { CompanionModalShell } from "../ui/modals/CompanionModalShell";
 import { CompanionDateTimePicker } from "../ui/pickers/CompanionDateTimePicker";
 
@@ -82,7 +83,11 @@ export function DailyEventEditModal({
         : eventType === "note"
           ? event?.note || ""
           : eventType === "bowel"
-            ? event?.bristolScore || ""
+            ? ["1", "2", "3", "4", "5", "6", "7"].includes(
+                String(event?.bristolScore),
+              )
+              ? String(event.bristolScore)
+              : "4"
             : "",
   );
 
@@ -176,20 +181,60 @@ export function DailyEventEditModal({
                   : "Waarde"}
         </label>
 
-        <input
-          value={value1}
-          onChange={(e) => setValue1(e.target.value)}
-          style={{
-            width: "100%",
-            boxSizing: "border-box",
-            fontSize: 16,
-            padding: "10px 11px",
-            marginTop: 4,
-            marginBottom: 10,
-            borderRadius: 8,
-            border: "1px solid #cbd5e1",
-          }}
-        />
+        {isBowel ? (
+          <select
+            value={value1}
+            onChange={(e) => setValue1(e.target.value)}
+            style={{
+              width: "100%",
+              boxSizing: "border-box",
+              fontSize: 16,
+              padding: "10px 11px",
+              marginTop: 4,
+              marginBottom: 10,
+              borderRadius: 8,
+              border: "1px solid #cbd5e1",
+            }}
+          >
+            <option value="1">1 - keutels / zeer hard</option>
+            <option value="2">2 - klonterig / hard</option>
+            <option value="3">3 - worstvormig met scheurtjes</option>
+            <option value="4">4 - glad / ideaal</option>
+            <option value="5">5 - zacht</option>
+            <option value="6">6 - brijig</option>
+            <option value="7">7 - waterdun</option>
+          </select>
+        ) : isInsulin || isGlucose ? (
+          <CompanionNumberInput
+            value={value1}
+            onChange={(e) => setValue1(e.target.value)}
+            style={{
+              width: "100%",
+              boxSizing: "border-box",
+              fontSize: 16,
+              padding: "10px 11px",
+              marginTop: 4,
+              marginBottom: 10,
+              borderRadius: 8,
+              border: "1px solid #cbd5e1",
+            }}
+          />
+        ) : (
+          <input
+            value={value1}
+            onChange={(e) => setValue1(e.target.value)}
+            style={{
+              width: "100%",
+              boxSizing: "border-box",
+              fontSize: 16,
+              padding: "10px 11px",
+              marginTop: 4,
+              marginBottom: 10,
+              borderRadius: 8,
+              border: "1px solid #cbd5e1",
+            }}
+          />
+        )}
 
         {isBowel && (
           <>
