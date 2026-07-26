@@ -1,4 +1,5 @@
 import React from "react";
+import { CompanionNumberInput } from "../ui/inputs/CompanionInput";
 
 export function TestLogSection(props) {
   const {
@@ -43,7 +44,7 @@ export function TestLogSection(props) {
               style={inputStyle}
               placeholder="Maaltijd / testnaam"
             />
-            <input
+            <CompanionNumberInput
               value={testLogForm.insulin}
               onChange={(e) =>
                 setTestLogForm({ ...testLogForm, insulin: e.target.value })
@@ -51,7 +52,7 @@ export function TestLogSection(props) {
               style={inputStyle}
               placeholder="Insuline"
             />
-            <input
+            <CompanionNumberInput
               value={testLogForm.creon}
               onChange={(e) =>
                 setTestLogForm({ ...testLogForm, creon: e.target.value })

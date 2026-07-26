@@ -1,3 +1,5 @@
+import { CompanionNumberInput } from "./ui/inputs/CompanionInput";
+
 export function CreonSettingsCard({
   settings,
   setSettings,
@@ -87,7 +89,7 @@ export function CreonSettingsCard({
           <label style={labelStyle}>
             Creon 35.000 EH: gram vet per capsule
           </label>
-          <input
+          <CompanionNumberInput
             value={settings.fatPerCap35 || ""}
             onChange={(e) =>
               setSettings({ ...settings, fatPerCap35: e.target.value })
@@ -124,7 +126,7 @@ export function CreonSettingsCard({
           <label style={labelStyle}>
             Creon 25.000 EH: gram vet per capsule
           </label>
-          <input
+          <CompanionNumberInput
             value={settings.fatPerCap25}
             onChange={(e) =>
               setSettings({ ...settings, fatPerCap25: e.target.value })
@@ -161,7 +163,7 @@ export function CreonSettingsCard({
           <label style={labelStyle}>
             Creon 10.000 EH: gram vet per capsule
           </label>
-          <input
+          <CompanionNumberInput
             value={settings.fatPerCap10}
             onChange={(e) =>
               setSettings({ ...settings, fatPerCap10: e.target.value })
@@ -198,7 +200,7 @@ export function CreonSettingsCard({
           <label style={labelStyle}>
             Creon 5.000 EH: gram vet per zakje / dosis
           </label>
-          <input
+          <CompanionNumberInput
             value={settings.fatPerCap5 || ""}
             onChange={(e) =>
               setSettings({ ...settings, fatPerCap5: e.target.value })
@@ -263,7 +265,7 @@ export function CreonSettingsCard({
 
         <div>
           <label style={labelStyle}>Eiwitcorrectie glucose</label>
-          <input
+          <CompanionNumberInput
             value={settings.proteinCorrection}
             onChange={(e) =>
               setSettings({
@@ -300,7 +302,7 @@ export function CreonSettingsCard({
 
         <div>
           <label style={labelStyle}>KH → Creon factor</label>
-          <input
+          <CompanionNumberInput
             value={settings.khCreonFactor}
             onChange={(e) =>
               setSettings({ ...settings, khCreonFactor: e.target.value })
@@ -314,7 +316,7 @@ export function CreonSettingsCard({
 
         <div>
           <label style={labelStyle}>Eiwit → Creon factor</label>
-          <input
+          <CompanionNumberInput
             value={settings.proteinCreonFactor}
             onChange={(e) =>
               setSettings({
@@ -333,7 +335,7 @@ export function CreonSettingsCard({
 
         <div>
           <label style={labelStyle}>Min. KH voor lichte maaltijd-Creon</label>
-          <input
+          <CompanionNumberInput
             value={settings.minKhForLightMealCreon || ""}
             onChange={(e) =>
               setSettings({
@@ -349,7 +351,7 @@ export function CreonSettingsCard({
           <label style={labelStyle}>
             Min. eiwit voor lichte maaltijd-Creon
           </label>
-          <input
+          <CompanionNumberInput
             value={settings.minProteinForLightMealCreon || ""}
             onChange={(e) =>
               setSettings({
@@ -365,7 +367,7 @@ export function CreonSettingsCard({
           <label style={labelStyle}>
             Minimale enzymbelasting voor lichte maaltijd
           </label>
-          <input
+          <CompanionNumberInput
             value={settings.lightMealMinEnzymeLoad || ""}
             onChange={(e) =>
               setSettings({
@@ -415,7 +417,7 @@ export function CreonSettingsCard({
           <label style={labelStyle}>
             Min. KH-trigger voor enzymen (gram KH)
           </label>
-          <input
+          <CompanionNumberInput
             value={settings.minKhTriggerThreshold || ""}
             onChange={(e) =>
               setSettings({
@@ -432,7 +434,7 @@ export function CreonSettingsCard({
           <label style={labelStyle}>
             Min. eiwit-trigger voor enzymen (gram eiwit)
           </label>
-          <input
+          <CompanionNumberInput
             value={settings.minProteinTriggerThreshold || ""}
             onChange={(e) =>
               setSettings({
@@ -449,7 +451,7 @@ export function CreonSettingsCard({
           <label style={labelStyle}>
             Minimale enzym-trigger waarde (vet-equivalent)
           </label>
-          <input
+          <CompanionNumberInput
             value={settings.minEnzymeLoadValue || ""}
             onChange={(e) =>
               setSettings({

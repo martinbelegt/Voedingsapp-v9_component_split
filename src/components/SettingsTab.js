@@ -392,6 +392,7 @@ export function SettingsTab({
                   <label style={labelStyle}>Onderhoud kcal</label>
 
                   <CompanionNumberInput
+                    decimal={false}
                     value={settings.dailyTargets?.maintenanceKcal || ""}
                     onChange={(e) =>
                       setSettings({
@@ -414,6 +415,7 @@ export function SettingsTab({
                   <label style={labelStyle}>Dagdoel kcal</label>
 
                   <CompanionNumberInput
+                    decimal={false}
                     value={settings.dailyTargets?.targetKcal || ""}
                     onChange={(e) =>
                       setSettings({

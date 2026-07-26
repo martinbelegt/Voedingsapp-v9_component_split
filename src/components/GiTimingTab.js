@@ -1,4 +1,5 @@
 import React from "react";
+import { CompanionNumberInput } from "../ui/inputs/CompanionInput";
 
 export function GiTimingTab({
   categories,
@@ -272,7 +273,8 @@ export function GiTimingTab({
                   </div>
                   <div>
                     <label style={labelStyle}>GI-waarde</label>
-                    <input
+                    <CompanionNumberInput
+                      decimal={false}
                       value={p.giValue ?? ""}
                       onChange={(e) =>
                         updateProductGi(p.id, { giValue: e.target.value })
