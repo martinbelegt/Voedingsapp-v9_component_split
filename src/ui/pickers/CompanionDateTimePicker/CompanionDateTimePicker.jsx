@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   combineDateAndTime,
   formatDateForDisplay,
@@ -532,20 +533,44 @@ export function CompanionDateTimePicker({
     const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
     const viewportHeight =
       window.innerHeight || document.documentElement.clientHeight;
-    const viewportMargin = 8;
+    const viewportMargin = 6;
     const popoverGap = 0;
     const width = Math.max(
       0,
       Math.min(rect.width, viewportWidth - viewportMargin * 2),
     );
-    const left = rect.left;
-    const top = rect.bottom + popoverGap;
+    const left = Math.min(
+      Math.max(rect.left, viewportMargin),
+      Math.max(viewportMargin, viewportWidth - width - viewportMargin),
+    );
+    const availableBelow =
+      viewportHeight - rect.bottom - popoverGap - viewportMargin;
+    const availableAbove = rect.top - popoverGap - viewportMargin;
+    const preferredHeight = Math.min(390, viewportHeight * 0.58);
+    const placement =
+      availableBelow < Math.min(150, preferredHeight) &&
+      availableAbove > availableBelow
+        ? "above"
+        : "below";
     const maxHeight = Math.max(
-      150,
-      Math.min(viewportHeight * 0.7, viewportHeight - top - viewportMargin),
+      0,
+      Math.min(
+        preferredHeight,
+        placement === "above" ? availableAbove : availableBelow,
+      ),
     );
 
-    setPopoverRect({ left, top, width, maxHeight });
+    setPopoverRect({
+      left,
+      top: placement === "below" ? rect.bottom + popoverGap : undefined,
+      bottom:
+        placement === "above"
+          ? viewportHeight - rect.top + popoverGap
+          : undefined,
+      width,
+      maxHeight,
+      placement,
+    });
   }
 
   useEffect(() => {
@@ -567,6 +592,7 @@ export function CompanionDateTimePicker({
       type="button"
       disabled={disabled}
       onClick={() => {
+        if (!isOpen) setPopoverRect(null);
         setIsOpen((open) => !open);
         window.requestAnimationFrame?.(updatePopoverPosition);
       }}
@@ -581,8 +607,22 @@ export function CompanionDateTimePicker({
         gap: compact ? 6 : 12,
         alignItems: "center",
         padding: compact ? "4px 8px 4px 10px" : "11px 14px",
-        borderRadius: compact ? (isOpen ? "7px 7px 0 0" : 7) : 18,
+        borderRadius: compact
+          ? isOpen
+            ? popoverRect?.placement === "above"
+              ? "0 0 7px 7px"
+              : "7px 7px 0 0"
+            : 7
+          : 18,
         border: `1px solid ${COLORS.borderStrong}`,
+        borderTopColor:
+          compact && isOpen && popoverRect?.placement === "above"
+            ? COLORS.border
+            : COLORS.borderStrong,
+        borderBottomColor:
+          compact && isOpen && popoverRect?.placement !== "above"
+            ? COLORS.border
+            : COLORS.borderStrong,
         background: COLORS.value,
         color: COLORS.text,
         cursor: disabled ? "not-allowed" : "pointer",
@@ -673,14 +713,26 @@ export function CompanionDateTimePicker({
         overflowY: compact ? "auto" : "visible",
         boxSizing: "border-box",
         border: `1px solid ${COLORS.border}`,
-        borderRadius: compact ? "0 0 12px 12px" : 28,
+        borderTop:
+          compact && popoverRect?.placement !== "above"
+            ? 0
+            : `1px solid ${COLORS.border}`,
+        borderBottom:
+          compact && popoverRect?.placement === "above"
+            ? 0
+            : `1px solid ${COLORS.border}`,
+        borderRadius: compact
+          ? popoverRect?.placement === "above"
+            ? "12px 12px 0 0"
+            : "0 0 12px 12px"
+          : 28,
         background: COLORS.card,
         boxShadow: compact
-          ? "0 10px 22px rgba(15, 23, 42, 0.09)"
+          ? "0 12px 22px rgba(15, 23, 42, 0.10)"
           : "0 18px 44px rgba(15, 23, 42, 0.08)",
-        padding: compact ? "7px 8px 8px" : 22,
+        padding: compact ? "6px 7px 7px" : 22,
         display: "grid",
-        gap: compact ? 5 : 18,
+        gap: compact ? 6 : 18,
         color: COLORS.text,
         fontFamily: FONT_STACK,
       }}
@@ -759,7 +811,7 @@ export function CompanionDateTimePicker({
               display: "grid",
               alignContent: "center",
               gap: compact ? 1 : 4,
-              padding: compact ? "4px 7px" : "14px 16px",
+              padding: compact ? "4px 6px" : "14px 16px",
               borderRadius: compact ? 9 : 18,
               background: COLORS.value,
               border: `1px solid ${COLORS.borderStrong}`,
@@ -779,9 +831,12 @@ export function CompanionDateTimePicker({
             <div
               style={{
                 color: COLORS.text,
-                fontSize: compact ? 13 : 20,
+                fontSize: compact ? 12 : 20,
                 fontWeight: 800,
                 lineHeight: compact ? 1.15 : 1.2,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
               }}
             >
               {block.value}
@@ -795,7 +850,7 @@ export function CompanionDateTimePicker({
           display: compact ? "grid" : "flex",
           gap: compact ? 4 : 8,
           gridTemplateColumns: compact
-            ? `repeat(${quickChoices(safeMode).length}, minmax(0, 1fr))`
+            ? `repeat(${Math.min(quickChoices(safeMode).length, 3)}, minmax(0, 1fr))`
             : undefined,
           flexWrap: "wrap",
         }}
@@ -811,7 +866,7 @@ export function CompanionDateTimePicker({
             style={{
               minHeight: compact ? 28 : 44,
               minWidth: 0,
-              padding: compact ? "4px 4px" : "10px 14px",
+              padding: compact ? "4px 3px" : "10px 14px",
               borderRadius: compact ? 8 : 14,
               border: `1px solid ${COLORS.border}`,
               background:
@@ -822,7 +877,7 @@ export function CompanionDateTimePicker({
                     : COLORS.card,
               color: disabled ? "#9CA3AF" : COLORS.text,
               cursor: disabled ? "not-allowed" : "pointer",
-              fontSize: compact ? 11 : 14,
+              fontSize: compact ? 10 : 14,
               fontWeight: 750,
               whiteSpace: "nowrap",
               boxShadow: "0 1px 2px rgba(15, 23, 42, 0.05)",
@@ -839,8 +894,10 @@ export function CompanionDateTimePicker({
           display: "grid",
           gap: compact ? 5 : 12,
           gridTemplateColumns:
-            showDate && showTime && !compact
-              ? "repeat(auto-fit, minmax(220px, 1fr))"
+            showDate && showTime
+              ? compact
+                ? "1fr"
+                : "repeat(auto-fit, minmax(220px, 1fr))"
               : "1fr",
         }}
       >
@@ -867,7 +924,7 @@ export function CompanionDateTimePicker({
             <div
               style={{
                 display: "grid",
-                gap: compact ? 4 : 8,
+                gap: compact ? 3 : 8,
                 gridTemplateColumns: compact
                   ? "repeat(3, minmax(0, 1fr))"
                   : "repeat(auto-fit, minmax(112px, 1fr))",
@@ -927,7 +984,7 @@ export function CompanionDateTimePicker({
             <div
               style={{
                 display: "grid",
-                gap: compact ? 4 : 8,
+                gap: compact ? 3 : 8,
                 gridTemplateColumns: "1fr 1fr",
               }}
             >
@@ -998,7 +1055,7 @@ export function CompanionDateTimePicker({
           type="button"
           onClick={() => setIsOpen(false)}
           style={{
-            minHeight: 34,
+            minHeight: 32,
             borderRadius: 9,
             border: `1px solid ${COLORS.border}`,
             background: COLORS.veryLight,
@@ -1015,38 +1072,46 @@ export function CompanionDateTimePicker({
   );
 
   if (isCompactPresentation) {
-    return (
-      <>
-        {compactSummary}
+    const popover = (
+      <div
+        role="presentation"
+        onClick={() => setIsOpen(false)}
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 12000,
+          background: "transparent",
+          boxSizing: "border-box",
+        }}
+      >
         <div
-          role="presentation"
-          onClick={() => setIsOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={title}
+          onClick={(event) => event.stopPropagation()}
           style={{
             position: "fixed",
-            inset: 0,
-            zIndex: 1000,
-            background: "transparent",
+            top: popoverRect ? popoverRect.top : 0,
+            bottom: popoverRect ? popoverRect.bottom : undefined,
+            left: popoverRect ? popoverRect.left : 12,
+            width: popoverRect ? popoverRect.width : "calc(100vw - 24px)",
+            maxWidth: "calc(100vw - 12px)",
+            maxHeight: popoverRect ? popoverRect.maxHeight : "85vh",
+            visibility: popoverRect ? "visible" : "hidden",
             boxSizing: "border-box",
           }}
         >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label={title}
-            onClick={(event) => event.stopPropagation()}
-            style={{
-              position: "fixed",
-              top: popoverRect ? popoverRect.top : 0,
-              left: popoverRect ? popoverRect.left : 12,
-              width: popoverRect ? popoverRect.width : "calc(100vw - 24px)",
-              maxHeight: popoverRect ? popoverRect.maxHeight : "85vh",
-              visibility: popoverRect ? "visible" : "hidden",
-              boxSizing: "border-box",
-            }}
-          >
-            {pickerPanel}
-          </div>
+          {pickerPanel}
         </div>
+      </div>
+    );
+
+    return (
+      <>
+        {compactSummary}
+        {typeof document !== "undefined"
+          ? createPortal(popover, document.body)
+          : popover}
       </>
     );
   }

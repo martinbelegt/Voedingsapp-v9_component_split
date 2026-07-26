@@ -730,6 +730,7 @@ export default function App() {
   const isMobile =
     window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
   const headerNavStackRef = useRef(null);
+  const [mobileHeaderLayer, setMobileHeaderLayer] = useState(null);
   const [headerNavStackHeight, setHeaderNavStackHeight] = useState(0);
   const [editingProductId, setEditingProductId] = useState(null);
   const [sortConfig, setSortConfig] = useState({
@@ -2148,11 +2149,9 @@ Producten uit deze categorie gaan naar "Overig".`);
     const contentGap = isMobile ? 12 : 16;
     const headerSurfaceStyle = isMobile
       ? {
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 2000,
+          position: "relative",
+          width: "100%",
+          boxSizing: "border-box",
           background: "#f8fafc",
           paddingTop: 8,
           paddingBottom: 6,
@@ -2160,6 +2159,7 @@ Producten uit deze categorie gaan naar "Overig".`);
           paddingRight: 16,
           boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
           overflowAnchor: "none",
+          pointerEvents: "auto",
         }
       : {
           display: "grid",
@@ -2231,7 +2231,10 @@ Producten uit deze categorie gaan naar "Overig".`);
     return (
       <>
         {isMobile && typeof document !== "undefined"
-          ? createPortal(headerNavStackContent, document.body)
+          ? createPortal(
+              headerNavStackContent,
+              mobileHeaderLayer || document.body,
+            )
           : headerNavStackContent}
       <div
         aria-hidden="true"
@@ -2381,6 +2384,19 @@ Producten uit deze categorie gaan naar "Overig".`);
         fontFamily: "Arial, sans-serif",
       }}
     >
+      {isMobile ? (
+        <div
+          ref={setMobileHeaderLayer}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 2000,
+            pointerEvents: "none",
+          }}
+        />
+      ) : null}
       <div
         style={{
           maxWidth: 1240,
