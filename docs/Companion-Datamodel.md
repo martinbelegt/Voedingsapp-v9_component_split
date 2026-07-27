@@ -235,6 +235,12 @@ Companion is geen sportapp.
 
 Companion is een modulair gezondheidssysteem dat mensen helpt hun gezondheid, behandeling en herstel beter te begrijpen door alle relevante gebeurtenissen in samenhang vast te leggen, te analyseren en om te zetten in bruikbare inzichten.
 
+### Training plannen en uitvoeren
+
+`trainingPlanEvents` zijn uitsluitend geplande trainingen. `movementEvents` zijn
+werkelijk uitgevoerde en geregistreerde beweegmomenten. Een trainingsplan wordt
+niet automatisch omgezet in beweging en telt niet mee als uitgevoerde activiteit.
+
 De gebruiker bepaalt zijn of haar gezondheidsdoelen.
 
 Companion ondersteunt de weg daar naartoe.

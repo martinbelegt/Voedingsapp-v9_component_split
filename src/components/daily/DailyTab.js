@@ -3,6 +3,7 @@ import { DailyMealList } from "./DailyMealList";
 import { DailyEventAddModal } from "./DailyEventAddModal";
 import { requestNotificationPermission } from "../../services/notificationService";
 import { CompanionDateTimePicker } from "../../ui/pickers/CompanionDateTimePicker";
+import { TrainingPlanSection } from "./TrainingPlanSection";
 
 import {
   scheduleLocalAlarm,
@@ -619,6 +620,15 @@ export function DailyTab({
             </div>
           )}
         </div>
+
+        <TrainingPlanSection
+          selectedDate={selectedDate}
+          trainingPlans={selectedDay?.trainingPlanEvents || []}
+          isMobile={isMobile}
+          onAdd={addTrainingPlanEventToDay}
+          onUpdate={updateTrainingPlanEvent}
+          onDelete={deleteTrainingPlanEvent}
+        />
 
         {/* Chronologische lijst */}
         <DailyMealList

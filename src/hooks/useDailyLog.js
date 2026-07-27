@@ -14,6 +14,11 @@ import {
 import { moveDailyLogEvent } from "../services/dailyLogEventMoveService";
 import { getAdministeredInsulinTotal } from "../services/insulinService";
 import { getDailyCreonSummary } from "../services/creonSemanticsService";
+import {
+  addTrainingPlanEvent,
+  createTrainingPlanEvent,
+  removeTrainingPlanEvent,
+} from "../services/trainingPlanService";
 
 function round2(n) {
   return Math.round((n + Number.EPSILON) * 100) / 100;
@@ -954,18 +959,9 @@ export function useDailyLog(selectedDate) {
   }
 
   function addTrainingPlanEventToDay(input) {
-    const eventEntry = {
-      id: createId("training-plan-event"),
-      type: "trainingPlan",
-      eventTime: input.eventTime || new Date().toISOString(),
-      title: input.title || "",
-      trainingType: input.trainingType || "Krachttraining",
-      durationMinutes: input.durationMinutes || "",
-      note: input.note || "",
-      createdAt: new Date().toLocaleString("nl-NL"),
-    };
-
-    return addEntryToDay(input, "trainingPlanEvents", eventEntry);
+    const { date, event } = createTrainingPlanEvent(input, { createId });
+    setDailyLog((prev) => addTrainingPlanEvent(prev, date, event));
+    return event;
   }
 
   function updateTrainingPlanEvent(eventId, updates) {
@@ -973,7 +969,7 @@ export function useDailyLog(selectedDate) {
   }
 
   function deleteTrainingPlanEvent(eventId) {
-    deleteEntryFromSelectedDay("trainingPlanEvents", eventId);
+    setDailyLog((prev) => removeTrainingPlanEvent(prev, eventId));
   }
 
   function fillDailyRepeats() {
