@@ -10,6 +10,7 @@ const STORAGE_KEYS = {
   settings: "dc_settings_v4",
   testLog: "dc_test_log_v1",
   dailyLog: "dc_daily_log_v1",
+  dailyLogSync: "dc_daily_log_sync_v1",
 };
 
 function safeJsonParse(value, fallback) {
@@ -159,6 +160,31 @@ export function loadDailyLog() {
 
 export function saveDailyLog(dailyLog) {
   localStorage.setItem(STORAGE_KEYS.dailyLog, JSON.stringify(dailyLog));
+}
+
+export function loadDailyLogSyncMetadata() {
+  const metadata = loadStoredValue(STORAGE_KEYS.dailyLogSync, null);
+
+  if (
+    !metadata ||
+    metadata.version !== 1 ||
+    !Number.isInteger(metadata.revision) ||
+    typeof metadata.dirty !== "boolean"
+  ) {
+    return null;
+  }
+
+  return metadata;
+}
+
+export function saveDailyLogSyncMetadata(revision, dirty) {
+  if (!Number.isInteger(revision)) return false;
+
+  localStorage.setItem(
+    STORAGE_KEYS.dailyLogSync,
+    JSON.stringify({ version: 1, revision, dirty: !!dirty }),
+  );
+  return true;
 }
 
 export async function loadDailyLogFromCloud() {

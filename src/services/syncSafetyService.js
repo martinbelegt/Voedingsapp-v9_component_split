@@ -6,6 +6,8 @@ export function decideInitialArrayAuthority({
   localValue,
   cloudResult,
   localChangedDuringLoad = false,
+  localKnownRevision = null,
+  localDirty = false,
 }) {
   if (localChangedDuringLoad) {
     const cloudValue = cloudResult.dailyLog ?? cloudResult.value;
@@ -60,6 +62,22 @@ export function decideInitialArrayAuthority({
       action: "use-cloud",
       status: "synced",
       reason: "both-empty",
+    };
+  }
+
+  const cloudRevision = cloudResult.revision;
+  const hasReliableRevisions =
+    Number.isInteger(localKnownRevision) && Number.isInteger(cloudRevision);
+
+  if (
+    hasReliableRevisions &&
+    cloudRevision > localKnownRevision &&
+    !localDirty
+  ) {
+    return {
+      action: "use-cloud",
+      status: "synced",
+      reason: "newer-cloud-revision-clean-local",
     };
   }
 

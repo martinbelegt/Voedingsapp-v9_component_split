@@ -78,3 +78,109 @@ test("revisionconflict behoudt lokaal en blokkeert verdere writes", () => {
     blockWrites: true,
   });
 });
+
+describe("revision-aware dailyLog hydration", () => {
+  const trainingAt = (time) => [
+    {
+      date: "2026-07-27",
+      trainingPlanEvents: [
+        {
+          id: "training-1",
+          type: "trainingPlan",
+          eventTime: `2026-07-27T${time}`,
+          title: "Borst + triceps",
+        },
+      ],
+    },
+  ];
+
+  test("mobiel accepteert een aantoonbaar nieuwere cloudrevision", () => {
+    const mobileLocal = trainingAt("10:00");
+    const desktopCloud = trainingAt("11:00");
+    const decision = decideInitialArrayAuthority({
+      localValue: mobileLocal,
+      localKnownRevision: 10,
+      localDirty: false,
+      cloudResult: {
+        status: "success",
+        dailyLog: desktopCloud,
+        revision: 11,
+      },
+    });
+
+    expect(decision).toEqual({
+      action: "use-cloud",
+      status: "synced",
+      reason: "newer-cloud-revision-clean-local",
+    });
+    expect(desktopCloud[0].trainingPlanEvents[0].eventTime).toBe(
+      "2026-07-27T11:00",
+    );
+  });
+
+  test("lokale dirty mutation wordt niet door een nieuwere cloud overschreven", () => {
+    expect(
+      decideInitialArrayAuthority({
+        localValue: trainingAt("10:30"),
+        localKnownRevision: 10,
+        localDirty: true,
+        cloudResult: {
+          status: "success",
+          dailyLog: trainingAt("11:00"),
+          revision: 11,
+        },
+      }),
+    ).toMatchObject({
+      action: "compare-non-empty",
+      status: "conflict",
+    });
+  });
+
+  test("ontbrekende lokale revisionmetadata blijft conservatief", () => {
+    expect(
+      decideInitialArrayAuthority({
+        localValue: trainingAt("10:00"),
+        cloudResult: {
+          status: "success",
+          dailyLog: trainingAt("11:00"),
+          revision: 11,
+        },
+      }),
+    ).toMatchObject({
+      action: "compare-non-empty",
+      status: "conflict",
+    });
+  });
+
+  test("dezelfde revision met verschillende inhoud is conflictverdacht", () => {
+    expect(
+      decideInitialArrayAuthority({
+        localValue: trainingAt("10:00"),
+        localKnownRevision: 11,
+        localDirty: false,
+        cloudResult: {
+          status: "success",
+          dailyLog: trainingAt("11:00"),
+          revision: 11,
+        },
+      }),
+    ).toMatchObject({
+      action: "compare-non-empty",
+      status: "conflict",
+    });
+  });
+
+  test("cloudfout behoudt lokale training", () => {
+    expect(
+      decideInitialArrayAuthority({
+        localValue: trainingAt("10:00"),
+        localKnownRevision: 10,
+        localDirty: false,
+        cloudResult: { status: "error", error: new Error("offline") },
+      }),
+    ).toMatchObject({
+      action: "keep-local",
+      status: "error",
+    });
+  });
+});

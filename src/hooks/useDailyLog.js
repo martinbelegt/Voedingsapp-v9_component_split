@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createId } from "../services/idService";
 import {
   loadDailyLog,
+  loadDailyLogSyncMetadata,
   saveDailyLog,
+  saveDailyLogSyncMetadata,
   loadDailyLogFromCloud,
   saveDailyLogToCloud,
 } from "../services/localStorageService";
@@ -194,6 +196,7 @@ function shouldCopyRepeat(existingSignatures, item, type) {
 }
 
 export function useDailyLog(selectedDate) {
+  const initialSyncMetadata = useRef(loadDailyLogSyncMetadata());
   const [dailyLog, setDailyLogState] = useState(() =>
     sortDaysNewestFirst((loadDailyLog() || []).map(normalizeDay)),
   );
@@ -202,10 +205,16 @@ export function useDailyLog(selectedDate) {
   );
   const [cloudLoaded, setCloudLoaded] = useState(false);
   const hasHydratedCloudData = useRef(false);
-  const hasLocalUserChange = useRef(false);
+  const hasLocalUserChange = useRef(
+    initialSyncMetadata.current?.dirty === true,
+  );
   const cloudHydratedDayCount = useRef(0);
   const cloudHydratedEventCount = useRef(0);
-  const loadedRevision = useRef(null);
+  const loadedRevision = useRef(
+    Number.isInteger(initialSyncMetadata.current?.revision)
+      ? initialSyncMetadata.current.revision
+      : null,
+  );
   const localChangeVersion = useRef(0);
   const cloudWriteBlockedByConflict = useRef(false);
 
@@ -227,6 +236,8 @@ export function useDailyLog(selectedDate) {
           localValue: currentLocalLog,
           cloudResult,
           localChangedDuringLoad,
+          localKnownRevision: loadedRevision.current,
+          localDirty: hasLocalUserChange.current,
         });
 
         if (
@@ -329,6 +340,8 @@ export function useDailyLog(selectedDate) {
 
         setDailyLogState(normalizedCloudLog);
         saveDailyLog(normalizedCloudLog);
+        saveDailyLogSyncMetadata(loadedRevision.current, false);
+        hasLocalUserChange.current = false;
         const localSaveAt = new Date().toISOString();
         setSyncDebug((prev) => ({
           ...prev,
@@ -445,8 +458,14 @@ export function useDailyLog(selectedDate) {
 
         if (saveOutcome.status === "synced") {
           const cloudSaveAt = new Date().toISOString();
+          const hasNewerLocalChange =
+            saveChangeVersion !== localChangeVersion.current;
           loadedRevision.current = result.revision;
-          hasLocalUserChange.current = false;
+          hasLocalUserChange.current = hasNewerLocalChange;
+          saveDailyLogSyncMetadata(
+            result.revision,
+            hasNewerLocalChange,
+          );
           cloudWriteBlockedByConflict.current = false;
           cloudHydratedDayCount.current = localDayCount;
           cloudHydratedEventCount.current = localEventCount;
@@ -482,8 +501,7 @@ export function useDailyLog(selectedDate) {
             "Status: OK",
           ]);
 
-          if (saveChangeVersion !== localChangeVersion.current) {
-            hasLocalUserChange.current = true;
+          if (hasNewerLocalChange) {
             console.warn(
               "dailyLog cloud save succeeded for an older local change; newer local changes remain unsaved",
               {
@@ -545,6 +563,7 @@ export function useDailyLog(selectedDate) {
   function setDailyLog(nextDailyLog) {
     hasLocalUserChange.current = true;
     localChangeVersion.current += 1;
+    saveDailyLogSyncMetadata(loadedRevision.current, true);
 
     if (!hasHydratedCloudData.current) {
       console.log(
@@ -1105,6 +1124,7 @@ export function useDailyLog(selectedDate) {
 
     setDailyLogState(normalizedCloudLog);
     saveDailyLog(normalizedCloudLog);
+    saveDailyLogSyncMetadata(loadedRevision.current, false);
     setSyncDebug((prev) => ({
       ...prev,
       status: "synced",
