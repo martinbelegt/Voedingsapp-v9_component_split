@@ -95,15 +95,7 @@ import {
   createBackupFileName,
   createPackExportObject,
   createPackExportFileName,
-  isFullBackupObject,
   isProductImportObject,
-  createProductImportResultMessage,
-  getBackupCategories,
-  getBackupProducts,
-  getBackupRows,
-  getBackupSettings,
-  getBackupSavedMeals,
-  getBackupTestLog,
   getNewProductsFromImport,
   prepareRestoredBackupData,
 } from "./services/backupService";
@@ -807,7 +799,8 @@ export default function App() {
     deleteTestLogEntry,
   } = useTestLog();
 
-  const { timers, startTimer, deleteTimer, clearTimers } = useMealTimers();
+  const { timers, setTimers, startTimer, deleteTimer, clearTimers } =
+    useMealTimers();
 
   const [mealName, setMealName] = useState("");
   const [mealServings, setMealServings] = useState(1);
@@ -843,6 +836,8 @@ export default function App() {
   // sport
   // ======================================================
   const {
+    dailyLog,
+    setDailyLog,
     selectedDay,
     dayTotals,
     sortedDates,
@@ -1025,10 +1020,21 @@ export default function App() {
       settings,
       savedMeals,
       testLog,
+      dailyLog,
+      timers,
     });
 
     localStorage.setItem("dc_emergency_backup_v1", JSON.stringify(snapshot));
-  }, [categories, products, rows, settings, savedMeals, testLog]);
+  }, [
+    categories,
+    products,
+    rows,
+    settings,
+    savedMeals,
+    testLog,
+    dailyLog,
+    timers,
+  ]);
 
   const categoryFilterOptions = useMemo(
     () => [{ id: "all", name: "Alle", color: "#f8fafc" }, ...categories],
@@ -1730,6 +1736,8 @@ Producten uit deze categorie gaan naar "Overig".`);
       settings,
       savedMeals,
       testLog,
+      dailyLog,
+      timers,
     });
 
     downloadJsonFile(snapshot, createBackupFileName());
@@ -1797,44 +1805,35 @@ Producten uit deze categorie gaan naar "Overig".`);
         }
 
         // 2. Volledige backup-import
-        if (!isFullBackupObject(raw)) {
-          alert("Dit lijkt geen geldige backup van deze app.");
-          return;
-        }
+        const restored = prepareRestoredBackupData(raw, {
+          normalizeProduct,
+          normalizeMealRows,
+          ensureLastEmptyRow,
+          migrateSettings,
+        });
 
         const confirmImport = window.confirm(
           "Backup importeren? De huidige producten, maaltijden en instellingen worden vervangen.",
         );
         if (!confirmImport) return;
 
-        setCategories(getBackupCategories(raw, starterCategories));
-
-        setProducts(
-          getBackupProducts(raw, {
-            starterProducts,
-            normalizeProduct,
-            applyGiToProducts,
-          }),
-        );
-
-        setRows(
-          getBackupRows(raw, {
-            normalizeMealRows,
-            ensureLastEmptyRow,
-            makeRow,
-          }),
-        );
-
-        setSettings(getBackupSettings(raw, migrateSettings));
-
-        setSavedMeals(getBackupSavedMeals(raw));
-        setTestLog(getBackupTestLog(raw));
+        if ("categories" in restored) setCategories(restored.categories);
+        if ("products" in restored) setProducts(restored.products);
+        if ("rows" in restored) setRows(restored.rows);
+        if ("settings" in restored) setSettings(restored.settings);
+        if ("savedMeals" in restored) setSavedMeals(restored.savedMeals);
+        if ("testLog" in restored) setTestLog(restored.testLog);
+        if ("dailyLog" in restored) setDailyLog(restored.dailyLog);
+        if ("timers" in restored) setTimers(restored.timers);
         setMealName("");
         setEditingProductId(null);
 
         alert("Backup succesvol geïmporteerd.");
-      } catch {
-        alert("Import mislukt. Kies een geldig backupbestand van deze app.");
+      } catch (error) {
+        alert(
+          error?.message ||
+            "Import mislukt. Kies een geldig backupbestand van deze app.",
+        );
       } finally {
         event.target.value = "";
       }
@@ -1852,39 +1851,33 @@ Producten uit deze categorie gaan naar "Overig".`);
 
     try {
       const backup = JSON.parse(raw);
+      const restored = prepareRestoredBackupData(backup, {
+        normalizeProduct,
+        normalizeMealRows,
+        ensureLastEmptyRow,
+        migrateSettings,
+      });
       const confirmRestore = window.confirm(
         "Laatste lokale noodkopie herstellen? De huidige gegevens worden vervangen.",
       );
       if (!confirmRestore) return;
 
-      setCategories(getBackupCategories(backup, starterCategories));
-
-      setProducts(
-        getBackupProducts(backup, {
-          starterProducts,
-          normalizeProduct,
-          applyGiToProducts,
-        }),
-      );
-
-      setRows(
-        getBackupRows(backup, {
-          normalizeMealRows,
-          ensureLastEmptyRow,
-          makeRow,
-        }),
-      );
-
-      setSettings(getBackupSettings(backup, migrateSettings));
-
-      setSavedMeals(getBackupSavedMeals(backup));
-      setTestLog(getBackupTestLog(backup));
+      if ("categories" in restored) setCategories(restored.categories);
+      if ("products" in restored) setProducts(restored.products);
+      if ("rows" in restored) setRows(restored.rows);
+      if ("settings" in restored) setSettings(restored.settings);
+      if ("savedMeals" in restored) setSavedMeals(restored.savedMeals);
+      if ("testLog" in restored) setTestLog(restored.testLog);
+      if ("dailyLog" in restored) setDailyLog(restored.dailyLog);
+      if ("timers" in restored) setTimers(restored.timers);
       setMealName("");
       setEditingProductId(null);
 
       alert("Lokale noodkopie hersteld.");
-    } catch {
-      alert("De lokale noodkopie kon niet worden gelezen.");
+    } catch (error) {
+      alert(
+        error?.message || "De lokale noodkopie kon niet worden gelezen.",
+      );
     }
   }
   const mainNavigationItems = [

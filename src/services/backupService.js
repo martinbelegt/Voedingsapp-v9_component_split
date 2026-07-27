@@ -1,3 +1,37 @@
+export const CURRENT_BACKUP_VERSION = 3;
+export const LEGACY_BACKUP_MAX_VERSION = 2;
+
+const ARRAY_DATASETS = [
+  "categories",
+  "products",
+  "rows",
+  "savedMeals",
+  "testLog",
+  "dailyLog",
+  "timers",
+];
+
+const DAILY_LOG_COLLECTIONS = [
+  "meals",
+  "insulinEvents",
+  "glucoseEvents",
+  "glucoseBoostEvents",
+  "movementEvents",
+  "supplementEvents",
+  "bowelEvents",
+  "noteEvents",
+  "trainingPlanEvents",
+  "sportSupplementPlanEvents",
+];
+
+function hasOwn(object, key) {
+  return Object.prototype.hasOwnProperty.call(object, key);
+}
+
+function isPlainObject(value) {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
 export function createFullBackupSnapshot({
   categories,
   products,
@@ -5,18 +39,140 @@ export function createFullBackupSnapshot({
   settings,
   savedMeals,
   testLog,
+  dailyLog,
+  timers,
 }) {
   return {
     exportedAt: new Date().toISOString(),
     app: "diabetes-creon-webapp",
-    version: 2,
+    version: CURRENT_BACKUP_VERSION,
     categories,
     products,
     rows,
     settings,
     savedMeals,
     testLog,
+    dailyLog,
+    timers,
   };
+}
+
+export function validateFullBackupObject(raw) {
+  if (!isPlainObject(raw) || raw.app !== "diabetes-creon-webapp") {
+    return { ok: false, error: "Dit is geen geldige Companion-backup." };
+  }
+
+  const version = Number(raw.version);
+  if (!Number.isInteger(version) || version < 1) {
+    return { ok: false, error: "De backupversie ontbreekt of is ongeldig." };
+  }
+
+  if (version > CURRENT_BACKUP_VERSION) {
+    return {
+      ok: false,
+      error: `Backupversie ${version} wordt door deze app nog niet ondersteund.`,
+    };
+  }
+
+  // Versie 1 en 2 zijn legacyformaten zonder dailyLog en timers.
+  // Alleen aanwezige datasets worden bij legacyherstel toegepast.
+  const isLegacy = version <= LEGACY_BACKUP_MAX_VERSION;
+
+  for (const key of ARRAY_DATASETS) {
+    if (hasOwn(raw, key) && !Array.isArray(raw[key])) {
+      return { ok: false, error: `Backupveld "${key}" moet een lijst zijn.` };
+    }
+  }
+
+  if (hasOwn(raw, "settings") && !isPlainObject(raw.settings)) {
+    return { ok: false, error: 'Backupveld "settings" moet een object zijn.' };
+  }
+
+  if (!isLegacy) {
+    const requiredFields = [...ARRAY_DATASETS, "settings"];
+    const missingField = requiredFields.find((key) => !hasOwn(raw, key));
+
+    if (missingField) {
+      return {
+        ok: false,
+        error: `Volledige backup mist verplicht veld "${missingField}".`,
+      };
+    }
+  }
+
+  if (Array.isArray(raw.dailyLog)) {
+    for (const day of raw.dailyLog) {
+      if (!isPlainObject(day) || typeof day.date !== "string" || !day.date) {
+        return {
+          ok: false,
+          error: "dailyLog bevat een dag zonder geldige datum.",
+        };
+      }
+
+      for (const collection of DAILY_LOG_COLLECTIONS) {
+        if (hasOwn(day, collection) && !Array.isArray(day[collection])) {
+          return {
+            ok: false,
+            error: `dailyLog-collectie "${collection}" moet een lijst zijn.`,
+          };
+        }
+      }
+    }
+  }
+
+  if (Array.isArray(raw.timers)) {
+    const hasInvalidTimer = raw.timers.some(
+      (timer) =>
+        !isPlainObject(timer) ||
+        typeof timer.id !== "string" ||
+        !timer.id ||
+        typeof timer.startedAt !== "string" ||
+        typeof timer.endsAt !== "string",
+    );
+
+    if (hasInvalidTimer) {
+      return {
+        ok: false,
+        error: "De backup bevat een ongeldige maaltijdtimer.",
+      };
+    }
+  }
+
+  return { ok: true, version, isLegacy };
+}
+
+export function prepareRestoredBackupData(raw, adapters) {
+  const validation = validateFullBackupObject(raw);
+  if (!validation.ok) {
+    throw new Error(validation.error);
+  }
+
+  const restored = {
+    version: validation.version,
+    isLegacy: validation.isLegacy,
+  };
+
+  if (hasOwn(raw, "categories")) restored.categories = raw.categories;
+  if (hasOwn(raw, "products")) {
+    restored.products = raw.products.map(adapters.normalizeProduct);
+  }
+  if (hasOwn(raw, "rows")) {
+    restored.rows = adapters.ensureLastEmptyRow(
+      adapters.normalizeMealRows(raw.rows),
+    );
+  }
+  if (hasOwn(raw, "settings")) {
+    restored.settings = adapters.migrateSettings(raw.settings);
+  }
+  if (hasOwn(raw, "savedMeals")) restored.savedMeals = raw.savedMeals;
+  if (hasOwn(raw, "testLog")) restored.testLog = raw.testLog;
+
+  // Geen veldmapping: alle huidige en toekomstige dailyLog-/timervelden
+  // blijven exact behouden.
+  if (hasOwn(raw, "dailyLog")) restored.dailyLog = raw.dailyLog;
+  if (hasOwn(raw, "timers")) restored.timers = raw.timers;
+
+  return restored;
 }
 
 export function downloadJsonFile(data, fileName) {
@@ -88,7 +244,7 @@ export function createPackExportFileName(activePackFilter) {
   return `export_${String(activePackFilter).toLowerCase()}.json`;
 }
 export function isFullBackupObject(raw) {
-  return !!raw && raw.app === "diabetes-creon-webapp";
+  return validateFullBackupObject(raw).ok;
 }
 export function isProductImportObject(raw) {
   return raw?.type === "product_import" && Array.isArray(raw.products);
