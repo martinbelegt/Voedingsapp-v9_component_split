@@ -151,7 +151,9 @@ export function ResultCard({
                   border: "1px solid #bbf7d0",
                 }}
               >
-                <div style={{ ...labelStyleMini, color: "#166534" }}>Creon</div>
+                <div style={{ ...labelStyleMini, color: "#166534" }}>
+                  Creonadvies
+                </div>
                 <div style={valueStyleMini}>
                   <div>
                     <strong>Advies:</strong> {totals.best?.c25 || 0} x 25k +{" "}
@@ -319,7 +321,7 @@ export function ResultCard({
                     fontSize: isMobile ? 14 : undefined,
                   }}
                 >
-                  Creon-analyse
+                  Creonadvies-analyse
                 </div>
 
                 {isMobile ? (

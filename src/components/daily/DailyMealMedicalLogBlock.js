@@ -34,8 +34,8 @@ export function DailyMealMedicalLogBlock({ meal }) {
 
       {(meal.actualCreon25 || meal.actualCreon10) && (
         <div>
-          <strong>Werkelijk Creon:</strong> {meal.actualCreon25 || 0}x25k +{" "}
-          {meal.actualCreon10 || 0}x10k
+          <strong>Werkelijk ingenomen Creon:</strong>{" "}
+          {meal.actualCreon25 || 0}x25k + {meal.actualCreon10 || 0}x10k
           {meal.creonTime ? ` om ${meal.creonTime}` : ""}
         </div>
       )}

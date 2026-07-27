@@ -288,7 +288,7 @@ export function DailyMealDetailModal({
             ["Kcal", meal.totals.kcal],
             ["Insulineadvies", `${meal.totals.insulin || 0} E`],
             [
-              "Creon",
+              "Creonadvies",
               `${meal.totals.creon25 || 0}x25k + ${
                 meal.totals.creon10 || 0
               }x10k`,

@@ -13,6 +13,7 @@ import {
 } from "../services/syncSafetyService";
 import { moveDailyLogEvent } from "../services/dailyLogEventMoveService";
 import { getAdministeredInsulinTotal } from "../services/insulinService";
+import { getDailyCreonSummary } from "../services/creonSemanticsService";
 
 function round2(n) {
   return Math.round((n + Number.EPSILON) * 100) / 100;
@@ -564,6 +565,9 @@ export function useDailyLog(selectedDate) {
         insulin: 0,
         creon25: 0,
         creon10: 0,
+        actualCreon25: 0,
+        actualCreon10: 0,
+        hasActualCreon: false,
       };
     }
 
@@ -574,8 +578,6 @@ export function useDailyLog(selectedDate) {
           acc.protein += Number(meal.totals?.protein) || 0;
           acc.fat += Number(meal.totals?.fat) || 0;
           acc.kcal += Number(meal.totals?.kcal) || 0;
-          acc.creon25 += Number(meal.totals?.creon25) || 0;
-          acc.creon10 += Number(meal.totals?.creon10) || 0;
           return acc;
         },
         {
@@ -589,9 +591,16 @@ export function useDailyLog(selectedDate) {
         },
       ),
     );
+    const creonSummary = getDailyCreonSummary(selectedDay);
 
     return {
       ...mealTotals,
+      // Bestaande creon25/creon10 keys blijven de adviessnapshot-totalen.
+      creon25: creonSummary.adviceCreon25,
+      creon10: creonSummary.adviceCreon10,
+      actualCreon25: creonSummary.actualCreon25,
+      actualCreon10: creonSummary.actualCreon10,
+      hasActualCreon: creonSummary.hasActualCreon,
       // insulinEvents is de enige primaire bron voor werkelijk toegediend.
       // meal.totals.insulin blijft advies; meal.actualInsulin blijft legacy.
       insulin: getAdministeredInsulinTotal(selectedDay),
@@ -687,6 +696,8 @@ export function useDailyLog(selectedDate) {
       actualInsulin: input.actualInsulin || "",
       insulinType: input.insulinType || "Novorapid",
       insulinTime: input.insulinTime || "",
+      // Historische expliciete registratie binnen een maaltijd. Niet afleiden
+      // uit totals.creon*: die waarden zijn uitsluitend Creonadvies.
       actualCreon25: input.actualCreon25 || "",
       actualCreon10: input.actualCreon10 || "",
       creonTime: input.creonTime || "",

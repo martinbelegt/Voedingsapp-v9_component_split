@@ -59,6 +59,17 @@ Voor insuline geldt expliciet:
 - `meal.actualInsulin` blijft uitsluitend bestaan als legacy compatibility data
   en telt niet mee in het werkelijke dagtotaal.
 
+Voor Creon blijven advies en werkelijke inname eveneens strikt gescheiden:
+
+- `meal.totals.creon25` en `meal.totals.creon10` zijn berekende
+  Creonadviessnapshots;
+- `meal.actualCreon25`, `meal.actualCreon10` en `meal.creonTime` zijn de
+  historische expliciete registratie van werkelijk ingenomen Creon binnen een
+  maaltijd;
+- generieke supplementevents worden niet automatisch als Creoninname geteld;
+- een toekomstig expliciet Creon-intake/eventmodel valt buiten het huidige
+  datamodel en buiten Sprint 1A.5.
+
 Voorbeelden:
 
 - maaltijd

@@ -424,9 +424,16 @@ export function DailyTab({
                       {(Number(administeredInsulin) || 0).toFixed(1)}E
                     </span>
                     <span style={totalsChip("#fef3c7", "#a16207")}>
-                      💊 Creon {dayTotals?.creon25 || 0}x25k +{" "}
+                      💊 Creonadvies {dayTotals?.creon25 || 0}x25k +{" "}
                       {dayTotals?.creon10 || 0}x10k
                     </span>
+                    {dayTotals?.hasActualCreon && (
+                      <span style={totalsChip("#ecfccb", "#3f6212")}>
+                        💊 Werkelijk ingenomen{" "}
+                        {dayTotals?.actualCreon25 || 0}x25k +{" "}
+                        {dayTotals?.actualCreon10 || 0}x10k
+                      </span>
+                    )}
                   </div>
                 </div>
 

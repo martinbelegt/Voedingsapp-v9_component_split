@@ -136,9 +136,19 @@ export function DailyTotalsCard({
               ["Kcal", dayTotals.kcal],
               ["Toegediende insuline", `${dayTotals.insulin || 0} E`],
               [
-                "Creon",
+                "Creonadvies",
                 `${dayTotals.creon25 || 0}x25k + ${dayTotals.creon10 || 0}x10k`,
               ],
+              ...(dayTotals.hasActualCreon
+                ? [
+                    [
+                      "Werkelijk ingenomen Creon",
+                      `${dayTotals.actualCreon25 || 0}x25k + ${
+                        dayTotals.actualCreon10 || 0
+                      }x10k`,
+                    ],
+                  ]
+                : []),
             ].map(([label, value]) => (
               <div
                 key={label}
