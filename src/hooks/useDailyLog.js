@@ -11,6 +11,7 @@ import {
   decideInitialArrayAuthority,
   interpretRevisionSaveResult,
 } from "../services/syncSafetyService";
+import { moveDailyLogEvent } from "../services/dailyLogEventMoveService";
 
 function round2(n) {
   return Math.round((n + Number.EPSILON) * 100) / 100;
@@ -640,19 +641,25 @@ export function useDailyLog(selectedDate) {
     return entry;
   }
 
-  function updateEntryInSelectedDay(key, eventId, updates) {
-    setDailyLog((prev) =>
-      prev.map((day) =>
-        day.date === selectedDate
-          ? {
-              ...normalizeDay(day),
-              [key]: (day[key] || []).map((event) =>
-                event.id === eventId ? { ...event, ...updates } : event,
-              ),
-            }
-          : normalizeDay(day),
-      ),
-    );
+  function updateOrMoveEntry(key, eventId, updates) {
+    setDailyLog((prev) => {
+      const result = moveDailyLogEvent({
+        dailyLog: prev,
+        collection: key,
+        eventId,
+        updates,
+      });
+
+      if (!result.moved) {
+        console.warn("dailyLog event update/move refused:", {
+          collection: key,
+          eventId,
+          reason: result.reason,
+        });
+      }
+
+      return result.dailyLog;
+    });
   }
 
   function deleteEntryFromSelectedDay(key, eventId) {
@@ -795,7 +802,7 @@ export function useDailyLog(selectedDate) {
   }
 
   function updateInsulinEvent(eventId, updates) {
-    updateEntryInSelectedDay("insulinEvents", eventId, updates);
+    updateOrMoveEntry("insulinEvents", eventId, updates);
   }
 
   function deleteInsulinEvent(eventId) {
@@ -816,7 +823,7 @@ export function useDailyLog(selectedDate) {
   }
 
   function updateGlucoseEvent(eventId, updates) {
-    updateEntryInSelectedDay("glucoseEvents", eventId, updates);
+    updateOrMoveEntry("glucoseEvents", eventId, updates);
   }
 
   function deleteGlucoseEvent(eventId) {
@@ -838,7 +845,7 @@ export function useDailyLog(selectedDate) {
   }
 
   function updateGlucoseBoostEvent(eventId, updates) {
-    updateEntryInSelectedDay("glucoseBoostEvents", eventId, updates);
+    updateOrMoveEntry("glucoseBoostEvents", eventId, updates);
   }
 
   function deleteGlucoseBoostEvent(eventId) {
@@ -862,7 +869,7 @@ export function useDailyLog(selectedDate) {
   }
 
   function updateMovementEvent(eventId, updates) {
-    updateEntryInSelectedDay("movementEvents", eventId, updates);
+    updateOrMoveEntry("movementEvents", eventId, updates);
   }
 
   function deleteMovementEvent(eventId) {
@@ -885,7 +892,7 @@ export function useDailyLog(selectedDate) {
   }
 
   function updateSupplementEvent(eventId, updates) {
-    updateEntryInSelectedDay("supplementEvents", eventId, updates);
+    updateOrMoveEntry("supplementEvents", eventId, updates);
   }
 
   function deleteSupplementEvent(eventId) {
@@ -908,7 +915,7 @@ export function useDailyLog(selectedDate) {
   }
 
   function updateBowelEvent(eventId, updates) {
-    updateEntryInSelectedDay("bowelEvents", eventId, updates);
+    updateOrMoveEntry("bowelEvents", eventId, updates);
   }
 
   function deleteBowelEvent(eventId) {
@@ -931,7 +938,7 @@ export function useDailyLog(selectedDate) {
   }
 
   function updateNoteEvent(eventId, updates) {
-    updateEntryInSelectedDay("noteEvents", eventId, updates);
+    updateOrMoveEntry("noteEvents", eventId, updates);
   }
 
   function deleteNoteEvent(eventId) {
@@ -954,7 +961,7 @@ export function useDailyLog(selectedDate) {
   }
 
   function updateTrainingPlanEvent(eventId, updates) {
-    updateEntryInSelectedDay("trainingPlanEvents", eventId, updates);
+    updateOrMoveEntry("trainingPlanEvents", eventId, updates);
   }
 
   function deleteTrainingPlanEvent(eventId) {
