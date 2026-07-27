@@ -7,11 +7,17 @@ import {
   saveAppDataToCloud,
 } from "../services/localStorageService";
 import { isMigrationCategories } from "../services/appDataSyncService";
+import {
+  canSaveAppData,
+  decideInitialArrayAuthority,
+  shouldAttemptMigration,
+} from "../services/syncSafetyService";
 
 export function useCategories() {
   const storedCategories = useRef(loadStoredCategories());
   const [categories, setCategoriesState] = useState(() => loadCategories());
   const [cloudLoaded, setCloudLoaded] = useState(false);
+  const [syncStatus, setSyncStatus] = useState("loading");
   const [categoriesSource, setCategoriesSource] = useState(
     storedCategories.current ? "Local cache" : "Defaults",
   );
@@ -21,19 +27,35 @@ export function useCategories() {
   });
   const hasHydratedCloudData = useRef(false);
   const hasLocalUserChange = useRef(false);
+  const localChangeVersion = useRef(0);
+  const cloudWriteBlockedByConflict = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadCloudCategories() {
-      const cloudCategories = await loadAppDataFromCloud("categories");
+      const mutationVersionAtLoadStart = localChangeVersion.current;
+      const cloudResult = await loadAppDataFromCloud("categories");
+      const cloudCategories = cloudResult.value;
 
       console.log("cloudCategories loaded:", cloudCategories?.length);
 
       if (cancelled) return;
 
-      if (Array.isArray(cloudCategories)) {
+      const decision = decideInitialArrayAuthority({
+        localValue: categories,
+        cloudResult,
+        localChangedDuringLoad:
+          localChangeVersion.current !== mutationVersionAtLoadStart,
+      });
+
+      if (
+        (cloudResult.status === "success" ||
+          cloudResult.status === "empty") &&
+        decision.action !== "keep-local"
+      ) {
         hasHydratedCloudData.current = true;
+        setSyncStatus("synced");
         setCategoriesSource("Cloud");
         setCategoriesCloudDebug({
           count: cloudCategories.length,
@@ -41,7 +63,12 @@ export function useCategories() {
         });
         setCategoriesState(cloudCategories);
         saveCategories(cloudCategories);
-      } else if (isMigrationCategories(storedCategories.current)) {
+      } else if (
+        shouldAttemptMigration(
+          cloudResult.status,
+          isMigrationCategories(storedCategories.current),
+        )
+      ) {
         const ok = await saveAppDataToCloud(
           "categories",
           storedCategories.current,
@@ -53,6 +80,7 @@ export function useCategories() {
 
         if (ok) {
           hasHydratedCloudData.current = true;
+          setSyncStatus("synced");
           setCategoriesSource("Cloud");
           setCategoriesCloudDebug({
             count: storedCategories.current.length,
@@ -60,7 +88,16 @@ export function useCategories() {
           });
           setCategoriesState(storedCategories.current);
           saveCategories(storedCategories.current);
+        } else {
+          setSyncStatus("error");
         }
+      } else {
+        cloudWriteBlockedByConflict.current = decision.status === "conflict";
+        setSyncStatus(
+          cloudResult.status === "error" || cloudResult.status === "invalid"
+            ? "error"
+            : decision.status,
+        );
       }
 
       setCloudLoaded(true);
@@ -76,29 +113,35 @@ export function useCategories() {
   useEffect(() => {
     saveCategories(categories);
 
-    if (!cloudLoaded) return;
-
-    if (!hasHydratedCloudData.current && !hasLocalUserChange.current) {
+    if (
+      cloudWriteBlockedByConflict.current ||
+      !canSaveAppData({
+        cloudLoaded,
+        hasHydratedCloudData: hasHydratedCloudData.current,
+        hasLocalUserChange: hasLocalUserChange.current,
+      })
+    ) {
       console.log("categories cloud save skipped: app data not hydrated");
       return;
     }
 
-    if (categories?.length > 0) {
-      saveAppDataToCloud("categories", categories).then((ok) => {
-        console.log("categories cloud save:", ok);
-        if (ok) {
-          setCategoriesSource("Cloud");
-          setCategoriesCloudDebug({
-            count: categories.length,
-            ok: true,
-          });
-        }
-      });
-    }
+    saveAppDataToCloud("categories", categories).then((ok) => {
+      console.log("categories cloud save:", ok);
+      setSyncStatus(ok ? "synced" : "error");
+      if (ok) {
+        hasLocalUserChange.current = false;
+        setCategoriesSource("Cloud");
+        setCategoriesCloudDebug({
+          count: categories.length,
+          ok: true,
+        });
+      }
+    });
   }, [categories, cloudLoaded]);
 
   function setCategories(nextCategories) {
     hasLocalUserChange.current = true;
+    localChangeVersion.current += 1;
     setCategoriesState(nextCategories);
   }
 
@@ -127,6 +170,7 @@ export function useCategories() {
     setCategories,
     categoriesSource,
     categoriesCloudDebug,
+    syncStatus,
     addCategory,
     updateCategory,
     deleteCategory,

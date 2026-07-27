@@ -162,7 +162,9 @@ export function saveDailyLog(dailyLog) {
 }
 
 export async function loadDailyLogFromCloud() {
-  if (!supabase) return null;
+  if (!supabase) {
+    return { status: "error", error: new Error("Supabase is niet beschikbaar") };
+  }
 
   const { data, error } = await supabase
     .from("daily_logs")
@@ -172,13 +174,21 @@ export async function loadDailyLogFromCloud() {
 
   if (error) {
     console.error("loadDailyLogFromCloud error:", error);
-    return null;
+    return { status: "error", error };
   }
 
-  if (!data) return null;
+  if (!data) return { status: "missing" };
+
+  if (!Array.isArray(data.data)) {
+    return {
+      status: "invalid",
+      error: new Error("daily_logs.data is geen array"),
+    };
+  }
 
   return {
-    dailyLog: data.data || null,
+    status: data.data.length === 0 ? "empty" : "success",
+    dailyLog: data.data,
     revision: Number(data.revision) || 0,
     updatedAt: data.updated_at || null,
   };
@@ -230,7 +240,9 @@ export async function saveDailyLogToCloud(dailyLog, expectedRevision) {
 }
 
 export async function loadAppDataFromCloud(key) {
-  if (!supabase) return null;
+  if (!supabase) {
+    return { status: "error", error: new Error("Supabase is niet beschikbaar") };
+  }
 
   const { data, error } = await supabase
     .from("app_data")
@@ -244,10 +256,43 @@ export async function loadAppDataFromCloud(key) {
       key,
       getSupabaseErrorDetails(error),
     );
-    return null;
+    return { status: "error", error };
   }
 
-  return data?.data || null;
+  if (!data) return { status: "missing" };
+  if (data.data === null || data.data === undefined) {
+    return {
+      status: "invalid",
+      error: new Error(`app_data.${key} bevat geen bruikbare data`),
+    };
+  }
+
+  const arrayKeys = ["products", "categories", "savedMeals"];
+  if (arrayKeys.includes(key) && !Array.isArray(data.data)) {
+    return {
+      status: "invalid",
+      error: new Error(`app_data.${key} is geen array`),
+    };
+  }
+
+  if (
+    key === "settings" &&
+    (typeof data.data !== "object" ||
+      Array.isArray(data.data) ||
+      data.data === null)
+  ) {
+    return {
+      status: "invalid",
+      error: new Error("app_data.settings is geen object"),
+    };
+  }
+
+  return {
+    status:
+      Array.isArray(data.data) && data.data.length === 0 ? "empty" : "success",
+    value: data.data,
+    updatedAt: data.updated_at || null,
+  };
 }
 
 export async function saveAppDataToCloud(key, value) {

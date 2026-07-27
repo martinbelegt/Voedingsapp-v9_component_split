@@ -9,10 +9,15 @@ import {
   loadAppDataFromCloud,
   saveAppDataToCloud,
 } from "../services/localStorageService";
+import {
+  canSaveAppData,
+  shouldAttemptMigration,
+} from "../services/syncSafetyService";
 
 export function useSettings() {
   const storedSettings = useRef(loadStoredSettings());
   const [cloudLoaded, setCloudLoaded] = useState(false);
+  const [syncStatus, setSyncStatus] = useState("loading");
   const [settingsSource, setSettingsSource] = useState(
     storedSettings.current ? "Local cache" : "Defaults",
   );
@@ -21,6 +26,8 @@ export function useSettings() {
   });
   const hasHydratedCloudData = useRef(false);
   const hasLocalUserChange = useRef(false);
+  const localChangeVersion = useRef(0);
+  const cloudWriteBlockedByConflict = useRef(false);
 
   const [settings, setSettingsState] = useState(() => {
     const savedSettings = loadSettings();
@@ -40,14 +47,25 @@ export function useSettings() {
     let cancelled = false;
 
     async function loadCloudSettings() {
-      const cloudSettings = await loadAppDataFromCloud("settings");
+      const mutationVersionAtLoadStart = localChangeVersion.current;
+      const cloudResult = await loadAppDataFromCloud("settings");
+      const cloudSettings = cloudResult.value;
 
       console.log("cloudSettings loaded:", cloudSettings);
 
       if (cancelled) return;
 
-      if (cloudSettings) {
+      const localChangedDuringLoad =
+        localChangeVersion.current !== mutationVersionAtLoadStart;
+      const hasValidCloudSettings =
+        cloudResult.status === "success" &&
+        !!cloudSettings &&
+        typeof cloudSettings === "object" &&
+        !Array.isArray(cloudSettings);
+
+      if (hasValidCloudSettings && !localChangedDuringLoad) {
         hasHydratedCloudData.current = true;
+        setSyncStatus("synced");
         setSettingsSource("Cloud");
         setSettingsCloudDebug({ ok: true });
         setSettingsState({
@@ -61,7 +79,12 @@ export function useSettings() {
         });
 
         saveSettings(cloudSettings);
-      } else if (storedSettings.current) {
+      } else if (
+        shouldAttemptMigration(
+          cloudResult.status,
+          storedSettings.current && !localChangedDuringLoad,
+        )
+      ) {
         const ok = await saveAppDataToCloud("settings", storedSettings.current);
         console.log("settings one-time local migration:", {
           ok,
@@ -70,6 +93,7 @@ export function useSettings() {
 
         if (ok) {
           hasHydratedCloudData.current = true;
+          setSyncStatus("synced");
           setSettingsSource("Cloud");
           setSettingsCloudDebug({ ok: true });
           setSettingsState({
@@ -82,7 +106,22 @@ export function useSettings() {
             },
           });
           saveSettings(storedSettings.current);
+        } else {
+          setSyncStatus("error");
         }
+      } else {
+        const hasHydrationConflict =
+          hasValidCloudSettings && localChangedDuringLoad;
+        cloudWriteBlockedByConflict.current = hasHydrationConflict;
+        setSyncStatus(
+          cloudResult.status === "error" ||
+            cloudResult.status === "invalid" ||
+            (cloudResult.status === "success" && !hasValidCloudSettings)
+            ? "error"
+            : hasHydrationConflict
+              ? "conflict"
+              : "local-only",
+        );
       }
 
       setCloudLoaded(true);
@@ -98,16 +137,23 @@ export function useSettings() {
   useEffect(() => {
     saveSettings(settings);
 
-    if (!cloudLoaded) return;
-
-    if (!hasHydratedCloudData.current && !hasLocalUserChange.current) {
+    if (
+      cloudWriteBlockedByConflict.current ||
+      !canSaveAppData({
+        cloudLoaded,
+        hasHydratedCloudData: hasHydratedCloudData.current,
+        hasLocalUserChange: hasLocalUserChange.current,
+      })
+    ) {
       console.log("settings cloud save skipped: app data not hydrated");
       return;
     }
 
     saveAppDataToCloud("settings", settings).then((ok) => {
       console.log("settings cloud save:", ok);
+      setSyncStatus(ok ? "synced" : "error");
       if (ok) {
+        hasLocalUserChange.current = false;
         setSettingsSource("Cloud");
         setSettingsCloudDebug({ ok: true });
       }
@@ -116,6 +162,7 @@ export function useSettings() {
 
   function setSettings(nextSettings) {
     hasLocalUserChange.current = true;
+    localChangeVersion.current += 1;
     setSettingsState(nextSettings);
   }
 
@@ -124,5 +171,6 @@ export function useSettings() {
     setSettings,
     settingsSource,
     settingsCloudDebug,
+    syncStatus,
   };
 }

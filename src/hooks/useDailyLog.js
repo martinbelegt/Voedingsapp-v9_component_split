@@ -6,6 +6,11 @@ import {
   loadDailyLogFromCloud,
   saveDailyLogToCloud,
 } from "../services/localStorageService";
+import {
+  areJsonValuesEqual,
+  decideInitialArrayAuthority,
+  interpretRevisionSaveResult,
+} from "../services/syncSafetyService";
 
 function round2(n) {
   return Math.round((n + Number.EPSILON) * 100) / 100;
@@ -102,6 +107,7 @@ function createSyncDebugState(localDailyLog = []) {
 
   return {
     source: "Local",
+    status: "loading",
     conflict: false,
     cloud: {
       revision: null,
@@ -193,32 +199,109 @@ export function useDailyLog(selectedDate) {
   const cloudHydratedEventCount = useRef(0);
   const loadedRevision = useRef(null);
   const localChangeVersion = useRef(0);
+  const cloudWriteBlockedByConflict = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadCloud() {
+      const mutationVersionAtLoadStart = localChangeVersion.current;
+
       try {
         const cloudResult = await loadDailyLogFromCloud();
 
         if (cancelled) return;
 
-        const cloudDailyLog = cloudResult?.dailyLog;
+        const localChangedDuringLoad =
+          localChangeVersion.current !== mutationVersionAtLoadStart;
+        const currentLocalLog = dailyLog;
+        const decision = decideInitialArrayAuthority({
+          localValue: currentLocalLog,
+          cloudResult,
+          localChangedDuringLoad,
+        });
 
-        if (!Array.isArray(cloudDailyLog)) {
+        if (
+          cloudResult.status === "error" ||
+          cloudResult.status === "invalid"
+        ) {
           console.warn(
-            "dailyLog cloud load failure: no usable cloud dailyLog returned",
+            "dailyLog cloud load kept local data:",
+            cloudResult.status,
+            cloudResult.error,
           );
+          setSyncDebug((prev) => ({
+            ...prev,
+            status: "error",
+            source: "Local",
+          }));
           setCloudLoaded(true);
           return;
         }
 
+        if (decision.action === "keep-local") {
+          cloudWriteBlockedByConflict.current =
+            decision.status === "conflict";
+          console.warn("dailyLog cloud load kept local data:", decision.reason);
+          setSyncDebug((prev) => ({
+            ...prev,
+            status: decision.status,
+            source: "Local",
+            conflict: decision.status === "conflict",
+            cloud: {
+              ...prev.cloud,
+              revision: Number.isInteger(cloudResult.revision)
+                ? cloudResult.revision
+                : null,
+              days: Array.isArray(cloudResult.dailyLog)
+                ? cloudResult.dailyLog.length
+                : null,
+              events: Array.isArray(cloudResult.dailyLog)
+                ? countDailyLogEvents(cloudResult.dailyLog)
+                : null,
+              updatedAt: cloudResult.updatedAt || null,
+            },
+          }));
+          setCloudLoaded(true);
+          return;
+        }
+
+        const cloudDailyLog = cloudResult.dailyLog;
         const normalizedCloudLog = sortDaysNewestFirst(
           cloudDailyLog.map(normalizeDay),
         );
         const cloudEventCount = countDailyLogEvents(normalizedCloudLog);
 
+        if (
+          decision.action === "compare-non-empty" &&
+          !areJsonValuesEqual(currentLocalLog, normalizedCloudLog)
+        ) {
+          loadedRevision.current = Number.isInteger(cloudResult.revision)
+            ? cloudResult.revision
+            : null;
+          cloudWriteBlockedByConflict.current = true;
+          setSyncDebug((prev) => ({
+            ...prev,
+            status: "conflict",
+            source: "Local",
+            conflict: true,
+            cloud: {
+              ...prev.cloud,
+              revision: loadedRevision.current,
+              days: normalizedCloudLog.length,
+              events: cloudEventCount,
+              updatedAt: cloudResult.updatedAt,
+            },
+          }));
+          console.warn(
+            "dailyLog initial sync conflict: local and cloud are both non-empty; local data retained",
+          );
+          setCloudLoaded(true);
+          return;
+        }
+
         hasHydratedCloudData.current = true;
+        cloudWriteBlockedByConflict.current = false;
         cloudHydratedDayCount.current = normalizedCloudLog.length;
         cloudHydratedEventCount.current = cloudEventCount;
         loadedRevision.current = Number.isInteger(cloudResult.revision)
@@ -241,6 +324,7 @@ export function useDailyLog(selectedDate) {
         const localSaveAt = new Date().toISOString();
         setSyncDebug((prev) => ({
           ...prev,
+          status: "synced",
           source: "Cloud",
           conflict: false,
           cloud: {
@@ -272,6 +356,11 @@ export function useDailyLog(selectedDate) {
         if (cancelled) return;
 
         console.error("dailyLog cloud load failure:", error);
+        setSyncDebug((prev) => ({
+          ...prev,
+          status: "error",
+          source: "Local",
+        }));
         setCloudLoaded(true);
       }
     }
@@ -309,6 +398,13 @@ export function useDailyLog(selectedDate) {
       return;
     }
 
+    if (cloudWriteBlockedByConflict.current) {
+      console.warn(
+        "dailyLog cloud save skipped: reconciliation required after conflict",
+      );
+      return;
+    }
+
     if (!hasLocalUserChange.current) {
       console.log(
         "dailyLog cloud save skipped: no local user change after hydration",
@@ -337,15 +433,18 @@ export function useDailyLog(selectedDate) {
 
       saveDailyLogToCloud(dailyLog, expectedRevision).then((result) => {
         console.log("dailyLog cloud save result:", result);
+        const saveOutcome = interpretRevisionSaveResult(result);
 
-        if (result.ok) {
+        if (saveOutcome.status === "synced") {
           const cloudSaveAt = new Date().toISOString();
           loadedRevision.current = result.revision;
           hasLocalUserChange.current = false;
+          cloudWriteBlockedByConflict.current = false;
           cloudHydratedDayCount.current = localDayCount;
           cloudHydratedEventCount.current = localEventCount;
           setSyncDebug((prev) => ({
             ...prev,
+            status: "synced",
             source: "Cloud",
             conflict: false,
             cloud: {
@@ -386,7 +485,8 @@ export function useDailyLog(selectedDate) {
               },
             );
           }
-        } else if (result.conflict) {
+        } else if (saveOutcome.status === "conflict") {
+          cloudWriteBlockedByConflict.current = saveOutcome.blockWrites;
           console.warn(
             "dailyLog cloud save blocked: Supabase has a newer revision; localStorage keeps the local changes",
             {
@@ -398,6 +498,7 @@ export function useDailyLog(selectedDate) {
           );
           setSyncDebug((prev) => ({
             ...prev,
+            status: "conflict",
             conflict: true,
             cloud: {
               ...prev.cloud,
@@ -420,6 +521,12 @@ export function useDailyLog(selectedDate) {
             "",
             "Reload required",
           ]);
+        } else {
+          setSyncDebug((prev) => ({
+            ...prev,
+            status: "error",
+            source: "Local",
+          }));
         }
       });
     }, 1500);
@@ -428,10 +535,10 @@ export function useDailyLog(selectedDate) {
   }, [dailyLog, cloudLoaded]);
 
   function setDailyLog(nextDailyLog) {
-    if (hasHydratedCloudData.current) {
-      hasLocalUserChange.current = true;
-      localChangeVersion.current += 1;
-    } else {
+    hasLocalUserChange.current = true;
+    localChangeVersion.current += 1;
+
+    if (!hasHydratedCloudData.current) {
       console.log(
         "dailyLog local change before cloud hydration; cloud save remains blocked",
       );
@@ -961,6 +1068,55 @@ export function useDailyLog(selectedDate) {
     setDailyLog((prev) => prev.filter((day) => day.date !== selectedDate));
   }
 
+  async function acceptLatestCloudDailyLog() {
+    const cloudResult = await loadDailyLogFromCloud();
+    if (
+      cloudResult.status !== "success" &&
+      cloudResult.status !== "empty"
+    ) {
+      setSyncDebug((prev) => ({ ...prev, status: "error" }));
+      return false;
+    }
+
+    const normalizedCloudLog = sortDaysNewestFirst(
+      cloudResult.dailyLog.map(normalizeDay),
+    );
+    const cloudEventCount = countDailyLogEvents(normalizedCloudLog);
+
+    loadedRevision.current = Number.isInteger(cloudResult.revision)
+      ? cloudResult.revision
+      : 0;
+    hasHydratedCloudData.current = true;
+    hasLocalUserChange.current = false;
+    cloudWriteBlockedByConflict.current = false;
+    cloudHydratedDayCount.current = normalizedCloudLog.length;
+    cloudHydratedEventCount.current = cloudEventCount;
+
+    setDailyLogState(normalizedCloudLog);
+    saveDailyLog(normalizedCloudLog);
+    setSyncDebug((prev) => ({
+      ...prev,
+      status: "synced",
+      source: "Cloud",
+      conflict: false,
+      cloud: {
+        ...prev.cloud,
+        revision: loadedRevision.current,
+        days: normalizedCloudLog.length,
+        events: cloudEventCount,
+        updatedAt: cloudResult.updatedAt,
+      },
+      local: {
+        ...prev.local,
+        revision: loadedRevision.current,
+        days: normalizedCloudLog.length,
+        events: cloudEventCount,
+        lastSaveAt: new Date().toISOString(),
+      },
+    }));
+    return true;
+  }
+
   return {
     dailyLog,
     syncDebug,
@@ -977,6 +1133,7 @@ export function useDailyLog(selectedDate) {
 
     fillDailyRepeats,
     clearDailyLog,
+    acceptLatestCloudDailyLog,
 
     addInsulinEventToDay,
     updateInsulinEvent,

@@ -10,11 +10,17 @@ import {
   saveAppDataToCloud,
 } from "../services/localStorageService";
 import { isMigrationSavedMeals } from "../services/appDataSyncService";
+import {
+  canSaveAppData,
+  decideInitialArrayAuthority,
+  shouldAttemptMigration,
+} from "../services/syncSafetyService";
 
 export function useSavedMeals() {
   const storedSavedMeals = useRef(loadStoredSavedMeals());
   const [savedMeals, setSavedMealsState] = useState(() => loadSavedMeals());
   const [cloudLoaded, setCloudLoaded] = useState(false);
+  const [syncStatus, setSyncStatus] = useState("loading");
   const [savedMealsSource, setSavedMealsSource] = useState(
     storedSavedMeals.current ? "Local cache" : "Defaults",
   );
@@ -24,19 +30,35 @@ export function useSavedMeals() {
   });
   const hasHydratedCloudData = useRef(false);
   const hasLocalUserChange = useRef(false);
+  const localChangeVersion = useRef(0);
+  const cloudWriteBlockedByConflict = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadCloudSavedMeals() {
-      const cloudSavedMeals = await loadAppDataFromCloud("savedMeals");
+      const mutationVersionAtLoadStart = localChangeVersion.current;
+      const cloudResult = await loadAppDataFromCloud("savedMeals");
+      const cloudSavedMeals = cloudResult.value;
 
       console.log("cloudSavedMeals loaded:", cloudSavedMeals?.length);
 
       if (cancelled) return;
 
-      if (Array.isArray(cloudSavedMeals)) {
+      const decision = decideInitialArrayAuthority({
+        localValue: savedMeals,
+        cloudResult,
+        localChangedDuringLoad:
+          localChangeVersion.current !== mutationVersionAtLoadStart,
+      });
+
+      if (
+        (cloudResult.status === "success" ||
+          cloudResult.status === "empty") &&
+        decision.action !== "keep-local"
+      ) {
         hasHydratedCloudData.current = true;
+        setSyncStatus("synced");
         setSavedMealsSource("Cloud");
         setSavedMealsCloudDebug({
           count: cloudSavedMeals.length,
@@ -44,7 +66,12 @@ export function useSavedMeals() {
         });
         setSavedMealsState(cloudSavedMeals);
         saveSavedMeals(cloudSavedMeals);
-      } else if (isMigrationSavedMeals(storedSavedMeals.current)) {
+      } else if (
+        shouldAttemptMigration(
+          cloudResult.status,
+          isMigrationSavedMeals(storedSavedMeals.current),
+        )
+      ) {
         const ok = await saveAppDataToCloud(
           "savedMeals",
           storedSavedMeals.current,
@@ -56,6 +83,7 @@ export function useSavedMeals() {
 
         if (ok) {
           hasHydratedCloudData.current = true;
+          setSyncStatus("synced");
           setSavedMealsSource("Cloud");
           setSavedMealsCloudDebug({
             count: storedSavedMeals.current.length,
@@ -63,7 +91,16 @@ export function useSavedMeals() {
           });
           setSavedMealsState(storedSavedMeals.current);
           saveSavedMeals(storedSavedMeals.current);
+        } else {
+          setSyncStatus("error");
         }
+      } else {
+        cloudWriteBlockedByConflict.current = decision.status === "conflict";
+        setSyncStatus(
+          cloudResult.status === "error" || cloudResult.status === "invalid"
+            ? "error"
+            : decision.status,
+        );
       }
 
       setCloudLoaded(true);
@@ -79,29 +116,35 @@ export function useSavedMeals() {
   useEffect(() => {
     saveSavedMeals(savedMeals);
 
-    if (!cloudLoaded) return;
-
-    if (!hasHydratedCloudData.current && !hasLocalUserChange.current) {
+    if (
+      cloudWriteBlockedByConflict.current ||
+      !canSaveAppData({
+        cloudLoaded,
+        hasHydratedCloudData: hasHydratedCloudData.current,
+        hasLocalUserChange: hasLocalUserChange.current,
+      })
+    ) {
       console.log("savedMeals cloud save skipped: app data not hydrated");
       return;
     }
 
-    if (savedMeals?.length > 0) {
-      saveAppDataToCloud("savedMeals", savedMeals).then((ok) => {
-        console.log("savedMeals cloud save:", ok);
-        if (ok) {
-          setSavedMealsSource("Cloud");
-          setSavedMealsCloudDebug({
-            count: savedMeals.length,
-            ok: true,
-          });
-        }
-      });
-    }
+    saveAppDataToCloud("savedMeals", savedMeals).then((ok) => {
+      console.log("savedMeals cloud save:", ok);
+      setSyncStatus(ok ? "synced" : "error");
+      if (ok) {
+        hasLocalUserChange.current = false;
+        setSavedMealsSource("Cloud");
+        setSavedMealsCloudDebug({
+          count: savedMeals.length,
+          ok: true,
+        });
+      }
+    });
   }, [savedMeals, cloudLoaded]);
 
   function setSavedMeals(nextSavedMeals) {
     hasLocalUserChange.current = true;
+    localChangeVersion.current += 1;
     setSavedMealsState(nextSavedMeals);
   }
 
@@ -146,6 +189,7 @@ export function useSavedMeals() {
     setSavedMeals,
     savedMealsSource,
     savedMealsCloudDebug,
+    syncStatus,
     addSavedMeal,
     deleteSavedMeal,
     getSavedMeal,

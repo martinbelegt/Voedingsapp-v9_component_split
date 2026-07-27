@@ -7,11 +7,17 @@ import {
   saveAppDataToCloud,
 } from "../services/localStorageService";
 import { isMigrationProducts } from "../services/appDataSyncService";
+import {
+  canSaveAppData,
+  decideInitialArrayAuthority,
+  shouldAttemptMigration,
+} from "../services/syncSafetyService";
 
 export function useProducts() {
   const storedProducts = useRef(loadStoredProducts());
   const [products, setProductsState] = useState(() => loadProducts());
   const [cloudLoaded, setCloudLoaded] = useState(false);
+  const [syncStatus, setSyncStatus] = useState("loading");
   const [productsSource, setProductsSource] = useState(
     storedProducts.current ? "Local cache" : "Defaults",
   );
@@ -22,19 +28,35 @@ export function useProducts() {
   });
   const hasHydratedCloudData = useRef(false);
   const hasLocalUserChange = useRef(false);
+  const localChangeVersion = useRef(0);
+  const cloudWriteBlockedByConflict = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadCloudProducts() {
-      const cloudProducts = await loadAppDataFromCloud("products");
+      const mutationVersionAtLoadStart = localChangeVersion.current;
+      const cloudResult = await loadAppDataFromCloud("products");
+      const cloudProducts = cloudResult.value;
 
       console.log("cloudProducts loaded:", cloudProducts?.length);
 
       if (cancelled) return;
 
-      if (Array.isArray(cloudProducts)) {
+      const decision = decideInitialArrayAuthority({
+        localValue: products,
+        cloudResult,
+        localChangedDuringLoad:
+          localChangeVersion.current !== mutationVersionAtLoadStart,
+      });
+
+      if (
+        (cloudResult.status === "success" ||
+          cloudResult.status === "empty") &&
+        decision.action !== "keep-local"
+      ) {
         hasHydratedCloudData.current = true;
+        setSyncStatus("synced");
         setProductsSource("Cloud");
         setProductsCloudDebug({
           count: cloudProducts.length,
@@ -44,7 +66,12 @@ export function useProducts() {
         });
         setProductsState(cloudProducts);
         saveProducts(cloudProducts);
-      } else if (isMigrationProducts(storedProducts.current)) {
+      } else if (
+        shouldAttemptMigration(
+          cloudResult.status,
+          isMigrationProducts(storedProducts.current),
+        )
+      ) {
         const ok = await saveAppDataToCloud("products", storedProducts.current);
         console.log("products one-time local migration:", {
           ok,
@@ -53,6 +80,7 @@ export function useProducts() {
 
         if (ok) {
           hasHydratedCloudData.current = true;
+          setSyncStatus("synced");
           setProductsSource("Cloud");
           setProductsCloudDebug({
             count: storedProducts.current.length,
@@ -63,7 +91,16 @@ export function useProducts() {
           });
           setProductsState(storedProducts.current);
           saveProducts(storedProducts.current);
+        } else {
+          setSyncStatus("error");
         }
+      } else {
+        cloudWriteBlockedByConflict.current = decision.status === "conflict";
+        setSyncStatus(
+          cloudResult.status === "error" || cloudResult.status === "invalid"
+            ? "error"
+            : decision.status,
+        );
       }
 
       setCloudLoaded(true);
@@ -79,31 +116,36 @@ export function useProducts() {
   useEffect(() => {
     saveProducts(products);
 
-    if (!cloudLoaded) return;
-
-    if (!hasHydratedCloudData.current && !hasLocalUserChange.current) {
+    if (
+      cloudWriteBlockedByConflict.current ||
+      !canSaveAppData({
+        cloudLoaded,
+        hasHydratedCloudData: hasHydratedCloudData.current,
+        hasLocalUserChange: hasLocalUserChange.current,
+      })
+    ) {
       console.log("products cloud save skipped: app data not hydrated");
       return;
     }
 
-    if (products?.length > 0) {
-      saveAppDataToCloud("products", products).then((ok) => {
-        console.log("products cloud save:", ok);
-        if (ok) {
-          setProductsSource("Cloud");
-          setProductsCloudDebug({
-            count: products.length,
-            favorites: products.filter((product) => !!product?.favorite)
-              .length,
-            ok: true,
-          });
-        }
-      });
-    }
+    saveAppDataToCloud("products", products).then((ok) => {
+      console.log("products cloud save:", ok);
+      setSyncStatus(ok ? "synced" : "error");
+      if (ok) {
+        hasLocalUserChange.current = false;
+        setProductsSource("Cloud");
+        setProductsCloudDebug({
+          count: products.length,
+          favorites: products.filter((product) => !!product?.favorite).length,
+          ok: true,
+        });
+      }
+    });
   }, [products, cloudLoaded]);
 
   function setProducts(nextProducts) {
     hasLocalUserChange.current = true;
+    localChangeVersion.current += 1;
     setProductsState(nextProducts);
   }
 
@@ -132,6 +174,7 @@ export function useProducts() {
     setProducts,
     productsSource,
     productsCloudDebug,
+    syncStatus,
     addProduct,
     updateProduct,
     deleteProduct,
