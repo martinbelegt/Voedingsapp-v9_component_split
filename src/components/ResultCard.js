@@ -120,7 +120,7 @@ export function ResultCard({
 
               <div style={{ ...compactBox, borderTop: "3px solid #7c3aed" }}>
                 <div style={{ ...labelStyleMini, color: "#7c3aed" }}>
-                  Insuline
+                  Insulineadvies
                 </div>
                 <div
                   style={{ ...valueStyleMini, fontSize: 16, fontWeight: 800 }}
@@ -293,7 +293,7 @@ export function ResultCard({
                     <strong>Kcal:</strong> {totals.kcal}
                   </div>
                   <div>
-                    <strong>Insuline:</strong> {totals.insulin} E
+                    <strong>Insulineadvies:</strong> {totals.insulin} E
                   </div>
                   <div>
                     <strong>Timing:</strong> {totals.personalTimingAdvice}

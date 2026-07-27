@@ -75,7 +75,7 @@ export function DailyEventAddModal({
 
   const config = {
     insulin: {
-      title: "Insuline toevoegen",
+      title: "Toegediende insuline toevoegen",
       label1: "Aantal eenheden",
       placeholder1: "bijv. 4",
       label2: "Notitie",

@@ -26,8 +26,8 @@ export function DailyMealMedicalLogBlock({ meal }) {
     >
       {meal.actualInsulin && (
         <div>
-          <strong>Werkelijk insuline:</strong> {meal.insulinType || "Insuline"}{" "}
-          {meal.actualInsulin} E
+          <strong>Historische maaltijdinsuline (legacy):</strong>{" "}
+          {meal.insulinType || "Insuline"} {meal.actualInsulin} E
           {meal.insulinTime ? ` om ${meal.insulinTime}` : ""}
         </div>
       )}

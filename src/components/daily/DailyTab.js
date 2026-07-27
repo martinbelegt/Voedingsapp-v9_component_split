@@ -110,7 +110,7 @@ export function DailyTab({
 
   const dayTotalHint =
     dayMode === "Geplande dag"
-      ? "Je plant vooruit. Gebruik dit totaal om eerder op de dag bij te sturen op eiwit, kcal, KH, insuline en Creon."
+      ? "Je plant vooruit. Gebruik dit totaal om eerder op de dag bij te sturen op eiwit, kcal, KH, insulineadvies en toegediende insuline."
       : dayMode === "Vandaag"
         ? "Gebruik dit totaal om gedurende de dag bij te sturen."
         : "Terugblik op deze dag.";
@@ -228,9 +228,10 @@ export function DailyTab({
     0,
   );
 
-  const actualInsulin = Number(dayTotals?.insulin || 0);
+  const administeredInsulin = Number(dayTotals?.insulin || 0);
 
-  const insulinDiff = Math.round((actualInsulin - advisedInsulin) * 100) / 100;
+  const insulinDiff =
+    Math.round((administeredInsulin - advisedInsulin) * 100) / 100;
   const proteinRemaining = Math.max(
     0,
     Math.round((proteinGoal - (dayTotals?.protein || 0)) * 100) / 100,
@@ -419,7 +420,8 @@ export function DailyTab({
                       {dayTotals?.kcal || 0} kcal
                     </span>
                     <span style={totalsChip("#eff6ff", "#2563eb")}>
-                      💉 {(Number(actualInsulin) || 0).toFixed(1)}E
+                      💉 Toegediend{" "}
+                      {(Number(administeredInsulin) || 0).toFixed(1)}E
                     </span>
                     <span style={totalsChip("#fef3c7", "#a16207")}>
                       💊 Creon {dayTotals?.creon25 || 0}x25k +{" "}
@@ -448,8 +450,10 @@ export function DailyTab({
                       paddingLeft: 10,
                     }}
                   >
-                    <strong>Insuline:</strong> {actualInsulin}E werkelijk /{" "}
-                    {advisedInsulin}E advies · {insulinDiffLabel}
+                    <strong>Toegediende insuline:</strong>{" "}
+                    {administeredInsulin}E /{" "}
+                    <strong>insulineadvies:</strong> {advisedInsulin}E ·{" "}
+                    {insulinDiffLabel}
                   </div>
 
                   <div>

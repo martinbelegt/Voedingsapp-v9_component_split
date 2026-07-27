@@ -12,6 +12,7 @@ import {
   interpretRevisionSaveResult,
 } from "../services/syncSafetyService";
 import { moveDailyLogEvent } from "../services/dailyLogEventMoveService";
+import { getAdministeredInsulinTotal } from "../services/insulinService";
 
 function round2(n) {
   return Math.round((n + Number.EPSILON) * 100) / 100;
@@ -589,21 +590,15 @@ export function useDailyLog(selectedDate) {
       ),
     );
 
-    const insulinTotal = (selectedDay.insulinEvents || []).reduce(
-      (sum, event) => sum + (Number(event.units) || 0),
-      0,
-    );
-
     return {
       ...mealTotals,
-      insulin: round2(insulinTotal),
+      // insulinEvents is de enige primaire bron voor werkelijk toegediend.
+      // meal.totals.insulin blijft advies; meal.actualInsulin blijft legacy.
+      insulin: getAdministeredInsulinTotal(selectedDay),
     };
   }, [selectedDay]);
 
-  const insulinTotal = (selectedDay?.insulinEvents || []).reduce(
-    (sum, event) => sum + (Number(event.units) || 0),
-    0,
-  );
+  const insulinTotal = getAdministeredInsulinTotal(selectedDay);
 
   const sortedDates = useMemo(() => {
     return [...dailyLog]
@@ -687,6 +682,8 @@ export function useDailyLog(selectedDate) {
       eatenAt: input.eatenAt || new Date().toISOString(),
       alarmEnabled: input.alarmEnabled || false,
       alarmAt: input.alarmAt || null,
+      // Alleen voor backwards compatibility met bestaande maaltijddata.
+      // Nieuwe werkelijke doses worden als insulinEvents geregistreerd.
       actualInsulin: input.actualInsulin || "",
       insulinType: input.insulinType || "Novorapid",
       insulinTime: input.insulinTime || "",

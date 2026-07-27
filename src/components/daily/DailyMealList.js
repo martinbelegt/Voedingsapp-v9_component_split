@@ -860,7 +860,7 @@ export function DailyMealList({
                 indentLevel={0}
                 compact={true}
                 icon="💡"
-                title={`💡 Advies NovoRapid ${
+                title={`💡 Insulineadvies NovoRapid ${
                   meal.totals?.insulin != null
                     ? Math.round(Number(meal.totals.insulin) * 100) / 100
                     : "?"
@@ -886,7 +886,9 @@ export function DailyMealList({
                 expanded={expandedIds.includes(event.id)}
                 onToggle={() => toggleExpanded(event.id)}
                 icon="💉"
-                title={`💉 ${event.insulinType || "Insuline"} ${event.units}E`}
+                title={`💉 Toegediend: ${
+                  event.insulinType || "Insuline"
+                } ${event.units}E`}
                 timeLabel={formatTime(event.eventTime)}
                 subtitle={null}
                 compact={true}

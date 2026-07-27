@@ -115,7 +115,7 @@ export function DailyTotalsCard({
                 }}
               >
                 Insulinecheck: KH {dayTotals.kh} g ÷ {gramsKhPerUnit} ={" "}
-                {calculatedInsulinFromKh.toFixed(2)} E · werkelijk{" "}
+                {calculatedInsulinFromKh.toFixed(2)} E advies · toegediend{" "}
                 {Number(dayTotals.insulin || 0).toFixed(2)} E · verschil{" "}
                 {insulinDifference.toFixed(2)} E
               </div>
@@ -134,7 +134,7 @@ export function DailyTotalsCard({
               ["Eiwit", `${dayTotals.protein} g`],
               ["Vet", `${dayTotals.fat} g`],
               ["Kcal", dayTotals.kcal],
-              ["Insuline", `${dayTotals.insulin || 0} E`],
+              ["Toegediende insuline", `${dayTotals.insulin || 0} E`],
               [
                 "Creon",
                 `${dayTotals.creon25 || 0}x25k + ${dayTotals.creon10 || 0}x10k`,

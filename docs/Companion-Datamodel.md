@@ -52,6 +52,13 @@ De gebeurtenis is het belangrijkste object binnen Companion.
 
 Vrijwel alles wat de gebruiker registreert is een gebeurtenis.
 
+Voor insuline geldt expliciet:
+
+- `insulinEvents` is de primaire bron voor werkelijk toegediende insuline;
+- `meal.totals.insulin` is een berekende insulineadviessnapshot;
+- `meal.actualInsulin` blijft uitsluitend bestaan als legacy compatibility data
+  en telt niet mee in het werkelijke dagtotaal.
+
 Voorbeelden:
 
 - maaltijd
