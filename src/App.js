@@ -842,6 +842,7 @@ export default function App() {
     dayTotals,
     sortedDates,
     syncDebug,
+    acceptLatestCloudDailyLog,
     addMealToDay,
     deleteMealFromDay,
     updateMealTime,
@@ -2650,7 +2651,10 @@ Producten uit deze categorie gaan naar "Overig".`);
         )}
       </div>
       <AppDataSyncMonitor debug={appDataSyncDebug} />
-      <DeveloperSyncMonitor syncDebug={syncDebug} />
+      <DeveloperSyncMonitor
+        syncDebug={syncDebug}
+        onAcceptLatestCloud={acceptLatestCloudDailyLog}
+      />
     </div>
   );
 }

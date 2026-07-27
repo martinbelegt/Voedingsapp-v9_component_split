@@ -2,6 +2,42 @@ export function hasArrayData(value) {
   return Array.isArray(value) && value.length > 0;
 }
 
+export function isJsonSubset(localValue, cloudValue) {
+  if (Object.is(localValue, cloudValue)) return true;
+
+  if (Array.isArray(localValue)) {
+    if (!Array.isArray(cloudValue)) return false;
+
+    const unmatchedCloudIndexes = new Set(cloudValue.map((_, index) => index));
+
+    return localValue.every((localItem) => {
+      for (const index of unmatchedCloudIndexes) {
+        if (isJsonSubset(localItem, cloudValue[index])) {
+          unmatchedCloudIndexes.delete(index);
+          return true;
+        }
+      }
+
+      return false;
+    });
+  }
+
+  if (
+    localValue &&
+    cloudValue &&
+    typeof localValue === "object" &&
+    typeof cloudValue === "object"
+  ) {
+    return Object.keys(localValue).every(
+      (key) =>
+        Object.prototype.hasOwnProperty.call(cloudValue, key) &&
+        isJsonSubset(localValue[key], cloudValue[key]),
+    );
+  }
+
+  return false;
+}
+
 export function decideInitialArrayAuthority({
   localValue,
   cloudResult,
@@ -78,6 +114,18 @@ export function decideInitialArrayAuthority({
       action: "use-cloud",
       status: "synced",
       reason: "newer-cloud-revision-clean-local",
+    };
+  }
+
+  if (
+    !Number.isInteger(localKnownRevision) &&
+    Number.isInteger(cloudRevision) &&
+    isJsonSubset(localValue, cloudValue)
+  ) {
+    return {
+      action: "use-cloud",
+      status: "synced",
+      reason: "cloud-superset-safe-revision-bootstrap",
     };
   }
 

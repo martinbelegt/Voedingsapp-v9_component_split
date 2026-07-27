@@ -49,8 +49,13 @@ function getStatus(syncDebug) {
   return { label: "✅ In sync", tone: "#15803d" };
 }
 
-export function DeveloperSyncMonitor({ syncDebug }) {
-  if (!isLocalDevelopment() || !syncDebug) return null;
+export function DeveloperSyncMonitor({
+  syncDebug,
+  onAcceptLatestCloud,
+}) {
+  if (!syncDebug) return null;
+  const localDevelopment = isLocalDevelopment();
+  if (!localDevelopment && !syncDebug.conflict) return null;
 
   const status = getStatus(syncDebug);
 
@@ -113,6 +118,42 @@ export function DeveloperSyncMonitor({ syncDebug }) {
           Status: {status.label}
         </span>
       </div>
+
+      {syncDebug.conflict && onAcceptLatestCloud ? (
+        <div
+          style={{
+            display: "grid",
+            gap: 8,
+            marginTop: 10,
+            paddingTop: 10,
+            borderTop: "1px solid #e2e8f0",
+          }}
+        >
+          <span>
+            Synchronisatie is geblokkeerd om lokale wijzigingen te beschermen.
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              const accepted = window.confirm(
+                "Nieuwste clouddata laden? De huidige lokale versie wordt eerst veilig lokaal geback-upt en daarna vervangen.",
+              );
+              if (accepted) onAcceptLatestCloud();
+            }}
+            style={{
+              minHeight: 36,
+              border: "1px solid #b45309",
+              borderRadius: 8,
+              background: "#fff7ed",
+              color: "#9a3412",
+              fontWeight: 800,
+              cursor: "pointer",
+            }}
+          >
+            Nieuwste cloudversie laden
+          </button>
+        </div>
+      ) : null}
     </aside>
   );
 }

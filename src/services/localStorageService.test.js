@@ -1,5 +1,6 @@
 import {
   loadDailyLogSyncMetadata,
+  saveDailyLogConflictBackup,
   saveDailyLogSyncMetadata,
   STORAGE_KEYS,
 } from "./localStorageService";
@@ -36,4 +37,21 @@ test("ongeldige of oude revisionmetadata wordt niet vertrouwd", () => {
 
   localStorage.setItem(STORAGE_KEYS.dailyLogSync, "{ongeldig");
   expect(loadDailyLogSyncMetadata()).toBeNull();
+});
+
+test("expliciete conflictoplossing bewaart eerst de lokale dailyLog", () => {
+  const dailyLog = [{ date: "2026-07-27", trainingPlanEvents: [] }];
+  saveDailyLogConflictBackup(dailyLog, {
+    localRevision: null,
+    cloudRevision: 56,
+  });
+
+  expect(
+    JSON.parse(localStorage.getItem(STORAGE_KEYS.dailyLogConflictBackup)),
+  ).toMatchObject({
+    version: 1,
+    dailyLog,
+    localRevision: null,
+    cloudRevision: 56,
+  });
 });

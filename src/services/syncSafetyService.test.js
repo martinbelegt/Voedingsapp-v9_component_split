@@ -2,6 +2,7 @@ import {
   canSaveAppData,
   decideInitialArrayAuthority,
   interpretRevisionSaveResult,
+  isJsonSubset,
   shouldAttemptMigration,
 } from "./syncSafetyService";
 
@@ -182,5 +183,38 @@ describe("revision-aware dailyLog hydration", () => {
       action: "keep-local",
       status: "error",
     });
+  });
+
+  test("client zonder metadata kan veilig starten wanneer cloud lokaal volledig bevat", () => {
+    const local = trainingAt("10:00");
+    const cloud = [
+      ...local,
+      {
+        date: "2026-07-28",
+        trainingPlanEvents: [
+          {
+            id: "training-2",
+            eventTime: "2026-07-28T09:00",
+            title: "Cardio",
+          },
+        ],
+      },
+    ];
+
+    expect(isJsonSubset(local, cloud)).toBe(true);
+    expect(
+      decideInitialArrayAuthority({
+        localValue: local,
+        cloudResult: { status: "success", dailyLog: cloud, revision: 11 },
+      }),
+    ).toEqual({
+      action: "use-cloud",
+      status: "synced",
+      reason: "cloud-superset-safe-revision-bootstrap",
+    });
+  });
+
+  test("gewijzigde eventtijd zonder metadata is geen veilige subset", () => {
+    expect(isJsonSubset(trainingAt("11:00"), trainingAt("10:00"))).toBe(false);
   });
 });

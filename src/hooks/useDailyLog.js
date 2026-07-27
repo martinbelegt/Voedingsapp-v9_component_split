@@ -4,6 +4,7 @@ import {
   loadDailyLog,
   loadDailyLogSyncMetadata,
   saveDailyLog,
+  saveDailyLogConflictBackup,
   saveDailyLogSyncMetadata,
   loadDailyLogFromCloud,
   saveDailyLogToCloud,
@@ -142,6 +143,11 @@ function logSyncBlock(lines) {
   console.log(["[SYNC]", ...lines].join("\n"));
 }
 
+function logSyncRuntime(message, details = {}) {
+  if (!isDevelopment) return;
+  console.log(`[Companion Sync] ${message}`, details);
+}
+
 function getTimePart(value, fallback) {
   return String(value || "").slice(11, 16) || fallback;
 }
@@ -238,6 +244,15 @@ export function useDailyLog(selectedDate) {
           localChangedDuringLoad,
           localKnownRevision: loadedRevision.current,
           localDirty: hasLocalUserChange.current,
+        });
+        logSyncRuntime("cloud load decision", {
+          cloudRevision: cloudResult.revision,
+          localKnownRevision: loadedRevision.current,
+          localDirty: hasLocalUserChange.current,
+          localChangedDuringLoad,
+          action: decision.action,
+          status: decision.status,
+          reason: decision.reason,
         });
 
         if (
@@ -453,6 +468,13 @@ export function useDailyLog(selectedDate) {
       });
 
       saveDailyLogToCloud(dailyLog, expectedRevision).then((result) => {
+        logSyncRuntime("cloud save result", {
+          expectedRevision,
+          resultRevision: result?.revision,
+          ok: result?.ok,
+          conflict: result?.conflict,
+          changeVersion: saveChangeVersion,
+        });
         console.log("dailyLog cloud save result:", result);
         const saveOutcome = interpretRevisionSaveResult(result);
 
@@ -564,6 +586,12 @@ export function useDailyLog(selectedDate) {
     hasLocalUserChange.current = true;
     localChangeVersion.current += 1;
     saveDailyLogSyncMetadata(loadedRevision.current, true);
+    logSyncRuntime("local mutation marked dirty", {
+      knownRevision: loadedRevision.current,
+      changeVersion: localChangeVersion.current,
+      cloudHydrated: hasHydratedCloudData.current,
+      writeBlockedByConflict: cloudWriteBlockedByConflict.current,
+    });
 
     if (!hasHydratedCloudData.current) {
       console.log(
@@ -1113,6 +1141,10 @@ export function useDailyLog(selectedDate) {
     );
     const cloudEventCount = countDailyLogEvents(normalizedCloudLog);
 
+    saveDailyLogConflictBackup(dailyLog, {
+      localRevision: loadedRevision.current,
+      cloudRevision: cloudResult.revision,
+    });
     loadedRevision.current = Number.isInteger(cloudResult.revision)
       ? cloudResult.revision
       : 0;
