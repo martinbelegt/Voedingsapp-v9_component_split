@@ -58,6 +58,9 @@ export function DailyTab({
   addTrainingPlanEventToDay,
   updateTrainingPlanEvent,
   deleteTrainingPlanEvent,
+  addSportSupplementPlanEventToDay,
+  updateSportSupplementPlanEvent,
+  deleteSportSupplementPlanEvent,
   onAddMeal,
 }) {
   const isMobile = window.innerWidth < 900;
@@ -628,6 +631,10 @@ export function DailyTab({
           onAdd={addTrainingPlanEventToDay}
           onUpdate={updateTrainingPlanEvent}
           onDelete={deleteTrainingPlanEvent}
+          supplementPlans={selectedDay?.sportSupplementPlanEvents || []}
+          onAddSupplementPlan={addSportSupplementPlanEventToDay}
+          onUpdateSupplementPlan={updateSportSupplementPlanEvent}
+          onDeleteSupplementPlan={deleteSportSupplementPlanEvent}
         />
 
         {/* Chronologische lijst */}

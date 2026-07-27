@@ -22,6 +22,11 @@ import {
   createTrainingPlanEvent,
   removeTrainingPlanEvent,
 } from "../services/trainingPlanService";
+import {
+  addSportSupplementPlanEvent,
+  createSportSupplementPlanEvent,
+  removeSportSupplementPlanEvent,
+} from "../services/sportSupplementPlanService";
 
 function round2(n) {
   return Math.round((n + Number.EPSILON) * 100) / 100;
@@ -1019,6 +1024,20 @@ export function useDailyLog(selectedDate) {
     setDailyLog((prev) => removeTrainingPlanEvent(prev, eventId));
   }
 
+  function addSportSupplementPlanEventToDay(input) {
+    const { date, event } = createSportSupplementPlanEvent(input, { createId });
+    setDailyLog((prev) => addSportSupplementPlanEvent(prev, date, event));
+    return event;
+  }
+
+  function updateSportSupplementPlanEvent(eventId, updates) {
+    updateOrMoveEntry("sportSupplementPlanEvents", eventId, updates);
+  }
+
+  function deleteSportSupplementPlanEvent(eventId) {
+    setDailyLog((prev) => removeSportSupplementPlanEvent(prev, eventId));
+  }
+
   function fillDailyRepeats() {
     const previousDate = new Date(selectedDate);
     previousDate.setDate(previousDate.getDate() - 1);
@@ -1229,5 +1248,9 @@ export function useDailyLog(selectedDate) {
     addTrainingPlanEventToDay,
     updateTrainingPlanEvent,
     deleteTrainingPlanEvent,
+
+    addSportSupplementPlanEventToDay,
+    updateSportSupplementPlanEvent,
+    deleteSportSupplementPlanEvent,
   };
 }

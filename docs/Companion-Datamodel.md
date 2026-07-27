@@ -241,6 +241,11 @@ Companion is een modulair gezondheidssysteem dat mensen helpt hun gezondheid, be
 werkelijk uitgevoerde en geregistreerde beweegmomenten. Een trainingsplan wordt
 niet automatisch omgezet in beweging en telt niet mee als uitgevoerde activiteit.
 
+`sportSupplementPlanEvents` zijn geplande supplementinnames rond sport of
+training. Ze kunnen met `trainingPlanId` aan een training gekoppeld zijn, maar
+blijven zelfstandige planning. `supplementEvents` zijn werkelijk geregistreerde
+innames. Een supplementplanning wordt nooit automatisch als inname geregistreerd.
+
 De gebruiker bepaalt zijn of haar gezondheidsdoelen.
 
 Companion ondersteunt de weg daar naartoe.

@@ -873,6 +873,9 @@ export default function App() {
     addTrainingPlanEventToDay,
     updateTrainingPlanEvent,
     deleteTrainingPlanEvent,
+    addSportSupplementPlanEventToDay,
+    updateSportSupplementPlanEvent,
+    deleteSportSupplementPlanEvent,
   } = useDailyLog(selectedDate);
   // ======================================================
   // ZOEKANKER: SAVED MEALS / STANDAARDMAALTIJDEN
@@ -2646,6 +2649,15 @@ Producten uit deze categorie gaan naar "Overig".`);
             addTrainingPlanEventToDay={addTrainingPlanEventToDay}
             updateTrainingPlanEvent={updateTrainingPlanEvent}
             deleteTrainingPlanEvent={deleteTrainingPlanEvent}
+            addSportSupplementPlanEventToDay={
+              addSportSupplementPlanEventToDay
+            }
+            updateSportSupplementPlanEvent={
+              updateSportSupplementPlanEvent
+            }
+            deleteSportSupplementPlanEvent={
+              deleteSportSupplementPlanEvent
+            }
             onAddMeal={openMealInputFromTimeline}
           />
         )}
