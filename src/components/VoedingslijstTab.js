@@ -4,6 +4,8 @@ import {
   CompanionNumberInput,
   CompanionSearchInput,
 } from "../ui/inputs/CompanionInput";
+import CatalogListHeader from "./catalog/CatalogListHeader";
+import CatalogCategoryManager from "./catalog/CatalogCategoryManager";
 
 function normalizeDecimalInput(value) {
   if (!/^\d*(?:[.,]\d*)?$/.test(value)) return null;
@@ -416,6 +418,7 @@ function VoedingslijstTab({
         )}
 
         <button
+          className="catalog-category-toggle"
           onClick={() => setShowCategoryManager((v) => !v)}
           style={{
             ...buttonStyle,
@@ -435,9 +438,18 @@ function VoedingslijstTab({
 
         {showCategoryManager && (
           <div style={{ marginBottom: 16 }}>
+            <CatalogCategoryManager
+              categories={categories}
+              value={categoryDraftName}
+              onValueChange={setCategoryDraftName}
+              onAdd={addCategory}
+              onRename={(category) => renameCategory(category.id)}
+              onDelete={(category) => deleteCategory(category.id)}
+              isProtected={(category) => category.id === "cat-overig"}
+            />
             <div
               style={{
-                display: "grid",
+                display: "none",
                 gridTemplateColumns: "2fr auto",
                 gap: 8,
                 marginBottom: 12,
@@ -449,17 +461,20 @@ function VoedingslijstTab({
                 style={inputStyle}
                 placeholder="Nieuwe categorienaam"
               />
-              <button onClick={addCategory} style={primaryButtonStyle}>
+              <button
+                onClick={addCategory}
+                style={{
+                  ...primaryButtonStyle,
+                  background: "#3f7f66",
+                  border: "1px solid #3f7f66",
+                }}
+              >
                 Categorie toevoegen
               </button>
             </div>
 
-            <div style={{ display: "grid", gap: 8 }}>
+            <div style={{ display: "none", gap: 8 }}>
               {categories.map((c) => {
-                const count = products.filter((p) => {
-                  const productCategoryId = p.categoryId || "cat-overig";
-                  return productCategoryId === c.id;
-                }).length;
                 const isProtected = c.id === "cat-overig";
 
                 return (
@@ -470,7 +485,9 @@ function VoedingslijstTab({
                       gridTemplateColumns: "1.6fr auto auto",
                       gap: 8,
                       alignItems: "center",
-                      padding: 10,
+                      boxSizing: "border-box",
+                      height: 40,
+                      padding: 3,
                       border: "1px solid #e5e7eb",
                       borderRadius: 12,
                       background: c.color,
@@ -478,9 +495,6 @@ function VoedingslijstTab({
                   >
                     <div>
                       <div style={{ fontWeight: 700 }}>{c.name}</div>
-                      <div style={{ fontSize: 12, color: "#475569" }}>
-                        {count} product(en)
-                      </div>
                     </div>
 
                     {!isProtected ? (
@@ -488,6 +502,8 @@ function VoedingslijstTab({
                         onClick={() => renameCategory(c.id)}
                         style={{
                           ...buttonStyle,
+                          height: 30,
+                          padding: "4px 10px",
                           background: "rgba(255,255,255,0.7)",
                         }}
                       >
@@ -502,6 +518,8 @@ function VoedingslijstTab({
                         onClick={() => deleteCategory(c.id)}
                         style={{
                           ...buttonStyle,
+                          height: 30,
+                          padding: "4px 10px",
                           background: "#fee2e2",
                           border: "1px solid #fecaca",
                         }}
@@ -509,15 +527,7 @@ function VoedingslijstTab({
                         Verwijder
                       </button>
                     ) : (
-                      <div
-                        style={{
-                          fontSize: 12,
-                          color: "#475569",
-                          textAlign: "right",
-                        }}
-                      >
-                        reserve
-                      </div>
+                      <div />
                     )}
                   </div>
                 );
@@ -543,7 +553,7 @@ function VoedingslijstTab({
             style={{
               ...buttonStyle,
               width: "100%",
-              display: isMobile ? "none" : "flex",
+              display: isMobile ? "flex" : "none",
               justifyContent: "space-between",
               alignItems: "center",
               background: "#f8fafc",
@@ -693,9 +703,23 @@ function VoedingslijstTab({
           )}
         </div>
 
+        <CatalogListHeader
+          actionLabel="Nieuw product"
+          onAction={openNewProductModal}
+          searchPlaceholder="Zoek product of categorie"
+          searchValue={productSearch}
+          onSearchChange={setProductSearch}
+          onClearSearch={() => setProductSearch("")}
+          itemLabel="product"
+          totalCount={products.length}
+          visibleCount={packFilteredProducts.length}
+          filterLabel={activePackFilter}
+        />
+
         <div
           style={{
             ...cardStyle,
+            display: "none",
             padding: isMobile ? 6 : 12,
             marginBottom: isMobile ? 8 : 12,
             background: "#f8fafc",
@@ -704,7 +728,7 @@ function VoedingslijstTab({
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: isMobile ? "1fr 1fr" : "auto 1fr auto",
+              gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr auto auto",
               gap: isMobile ? 5 : 8,
               alignItems: "center",
             }}
@@ -713,6 +737,9 @@ function VoedingslijstTab({
               onClick={openNewProductModal}
               style={{
                 ...primaryButtonStyle,
+                order: 2,
+                background: "#3f7f66",
+                border: "1px solid #3f7f66",
                 ...(isMobile
                   ? {
                       order: 1,
@@ -737,6 +764,7 @@ function VoedingslijstTab({
               onChange={(e) => setProductSearch(e.target.value)}
               style={{
                 ...inputStyle,
+                order: 1,
                 ...(isMobile
                   ? {
                       order: 3,
@@ -755,6 +783,7 @@ function VoedingslijstTab({
               onClick={() => setProductSearch("")}
               style={{
                 ...buttonStyle,
+                order: 3,
                 ...(isMobile
                   ? {
                       order: 2,
@@ -781,6 +810,7 @@ function VoedingslijstTab({
 
         <div
           style={{
+            display: "none",
             fontSize: 11,
             marginBottom: 6,
             color: "#64748b",
@@ -791,6 +821,7 @@ function VoedingslijstTab({
 
         <div
           style={{
+            display: "none",
             marginBottom: 10,
             padding: "8px 10px",
             borderRadius: 10,
@@ -1599,7 +1630,7 @@ function VoedingslijstTab({
                       marginTop: 12,
                       padding: "10px 12px",
                       border: "1px solid #cbd5e1",
-                      borderRadius: 12,
+                      borderRadius: 8,
                       background: "#f8fafc",
                       cursor: "pointer",
                       fontSize: 14,

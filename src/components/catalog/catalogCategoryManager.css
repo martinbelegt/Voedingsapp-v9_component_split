@@ -1,0 +1,111 @@
+.catalog-category-toggle {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  height: 50px !important;
+  box-sizing: border-box !important;
+  padding: 10px 14px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 12px !important;
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  font-family: inherit !important;
+  line-height: 1.2 !important;
+}
+
+.catalog-category-toggle > span:first-child {
+  display: inline !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: inherit !important;
+  font: inherit !important;
+  line-height: inherit !important;
+}
+
+.catalog-category-toggle > span:last-child {
+  font: inherit !important;
+  line-height: inherit !important;
+}
+
+.catalog-category-manager {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.catalog-category-manager__form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.catalog-category-manager__form input,
+.catalog-category-manager__form button {
+  height: 38px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 14px;
+}
+
+.catalog-category-manager__form input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+}
+
+.catalog-category-manager__form button {
+  padding: 0 14px;
+  border: 1px solid #3f7f66;
+  background: #3f7f66;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.catalog-category-manager__items {
+  display: grid;
+  gap: 5px;
+}
+
+.catalog-category-manager__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+  height: 40px;
+  box-sizing: border-box;
+  padding: 4px 7px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.catalog-category-manager__item button {
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.catalog-category-manager__item button.is-danger {
+  border-color: #fecaca;
+  background: #fee2e2;
+}
+
+.catalog-category-manager__error {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 12px;
+}

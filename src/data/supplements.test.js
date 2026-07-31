@@ -2,6 +2,8 @@ import {
   createIngredient,
   createSupplement,
   migrateSupplements,
+  migrateSupplementCatalog,
+  sanitizeSupplement,
   STARTER_SUPPLEMENTS,
   supplementMatchesQuery,
   validateSupplement,
@@ -48,5 +50,32 @@ describe("supplement model", () => {
 
     expect(second).toHaveLength(STARTER_SUPPLEMENTS.length);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  test("migreert enkelvoudige en benoemde categorieën idempotent", () => {
+    const legacy = [{
+      id: "legacy",
+      name: "R-alfaliponzuur",
+      category: "Glucoseondersteuning",
+      form: "capsule",
+    }];
+    const first = migrateSupplementCatalog({ items: legacy });
+    const second = migrateSupplementCatalog(first);
+    const migrated = second.items.find((item) => item.id === "legacy");
+
+    expect(migrated.product.categoryIds).toHaveLength(1);
+    expect(new Set(migrated.product.categoryIds).size).toBe(1);
+    expect(second.categories.filter((category) => category.name === "Glucoseondersteuning")).toHaveLength(1);
+  });
+
+  test("bewaart meerdere unieke categoriekoppelingen", () => {
+    const sanitized = sanitizeSupplement(createSupplement({
+      product: {
+        name: "Combinatie",
+        form: "capsule",
+        categoryIds: ["vitamins", "minerals", "vitamins"],
+      },
+    }));
+    expect(sanitized.product.categoryIds).toEqual(["vitamins", "minerals"]);
   });
 });

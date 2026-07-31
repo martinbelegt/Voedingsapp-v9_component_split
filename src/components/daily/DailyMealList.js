@@ -1091,6 +1091,7 @@ export function DailyMealList({
           if (item.itemType === "supplement") {
             const event = item.event;
             const isMedication = event.intakeType === "medication";
+            const dosage = [event.dosage, event.unit].filter(Boolean).join(" ");
 
             return (
               <DailyTimelineItem
@@ -1098,8 +1099,8 @@ export function DailyMealList({
                 indentLevel={1}
                 compact={compactTimeline}
                 icon="💊"
-                title={`${event.name || (isMedication ? "Medicatie / Creon" : "Supplement")}${
-                  event.dosage ? ` · ${event.dosage}` : ""
+                title={`${event.supplementName || event.name || (isMedication ? "Medicatie / Creon" : "Supplement")}${
+                  dosage ? ` · ${dosage}` : ""
                 }`}
                 timeLabel={formatTime(event.eventTime)}
                 subtitle={event.note || ""}

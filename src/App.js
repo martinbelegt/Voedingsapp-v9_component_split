@@ -110,6 +110,10 @@ import {
   getNewProductsFromImport,
   prepareRestoredBackupData,
 } from "./services/backupService";
+import {
+  loadSupplementCatalog,
+  saveSupplementCatalog,
+} from "./services/supplementStorageService";
 
 import {
   removeBaseProducts,
@@ -1048,6 +1052,7 @@ export default function App() {
       testLog,
       dailyLog,
       timers,
+      supplementCatalog: loadSupplementCatalog(),
     });
 
     localStorage.setItem("dc_emergency_backup_v1", JSON.stringify(snapshot));
@@ -1802,6 +1807,7 @@ Producten uit deze categorie gaan naar "Overig".`);
       testLog,
       dailyLog,
       timers,
+      supplementCatalog: loadSupplementCatalog(),
     });
 
     downloadJsonFile(snapshot, createBackupFileName());
@@ -1889,6 +1895,9 @@ Producten uit deze categorie gaan naar "Overig".`);
         if ("testLog" in restored) setTestLog(restored.testLog);
         if ("dailyLog" in restored) setDailyLog(restored.dailyLog);
         if ("timers" in restored) setTimers(restored.timers);
+        if ("supplementCatalog" in restored) {
+          saveSupplementCatalog(restored.supplementCatalog);
+        }
         setMealName("");
         setEditingProductId(null);
 
@@ -1934,6 +1943,9 @@ Producten uit deze categorie gaan naar "Overig".`);
       if ("testLog" in restored) setTestLog(restored.testLog);
       if ("dailyLog" in restored) setDailyLog(restored.dailyLog);
       if ("timers" in restored) setTimers(restored.timers);
+      if ("supplementCatalog" in restored) {
+        saveSupplementCatalog(restored.supplementCatalog);
+      }
       setMealName("");
       setEditingProductId(null);
 
@@ -2545,11 +2557,6 @@ Producten uit deze categorie gaan naar "Overig".`);
         )}
         {activeTab === "lists" && (
           <div className="companion-catalog-page-heading">
-            <h1>Mijn catalogi</h1>
-            <p>
-              Beheer hier je catalogi met voedingsmiddelen, supplementen,
-              medicatie en oefeningen.
-            </p>
             <ModuleWorkspace
               title="Mijn catalogi"
               description="Beheer hier je catalogi met voedingsmiddelen, supplementen, medicatie en oefeningen."
@@ -2744,7 +2751,14 @@ Producten uit deze categorie gaan naar "Overig".`);
           />
         )}
         {activeTab === "lists" && activeListModule === "supplements" && (
-          <SupplementsTab />
+          <SupplementsTab
+            selectedDate={selectedDate}
+            onAddToTimeline={(input) => {
+              addSupplementEventToDay(input);
+              setSelectedDate(input.date);
+              setActiveTab("daily");
+            }}
+          />
         )}
       </div>
       <AppDataSyncMonitor debug={appDataSyncDebug} />

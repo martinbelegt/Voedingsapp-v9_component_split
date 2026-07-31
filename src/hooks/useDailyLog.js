@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createId } from "../services/idService";
+import { createSupplementEvent } from "../services/supplementEventService";
 import {
   loadDailyLog,
   loadDailyLogSyncMetadata,
@@ -1029,17 +1030,7 @@ export function useDailyLog(selectedDate) {
   }
 
   function addSupplementEventToDay(input) {
-    const eventEntry = {
-      id: createId("supplement-event"),
-      type: "supplement",
-      eventTime: input.eventTime || new Date().toISOString(),
-      name: input.name || "",
-      dosage: input.dosage || "",
-      note: input.note || "",
-      intakeType: input.intakeType || "supplement",
-      createdAt: new Date().toLocaleString("nl-NL"),
-      repeat: input.repeat || "none",
-    };
+    const eventEntry = createSupplementEvent(input, { createId });
 
     return addEntryToDay(input, "supplementEvents", eventEntry);
   }

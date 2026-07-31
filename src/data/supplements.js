@@ -1,5 +1,5 @@
 export const SUPPLEMENT_STORAGE_KEY = "companion_supplements_v2";
-export const SUPPLEMENT_DATA_VERSION = 2;
+export const SUPPLEMENT_DATA_VERSION = 3;
 
 export const SUPPLEMENT_CATEGORIES = [
   { id: "vitamins", label: "Vitaminen" },
@@ -14,6 +14,14 @@ export const SUPPLEMENT_CATEGORIES = [
   { id: "other", label: "Overig" },
 ];
 
+export const DEFAULT_SUPPLEMENT_CATEGORIES = SUPPLEMENT_CATEGORIES.map(
+  (category) => ({
+    id: category.id,
+    name: category.label,
+    createdAt: "2026-01-01T00:00:00.000Z",
+  }),
+);
+
 export const SUPPLEMENT_FORMS = [
   "capsule",
   "tablet",
@@ -25,10 +33,15 @@ export const SUPPLEMENT_FORMS = [
 
 export const SUPPLEMENT_UNITS = ["mg", "g", "µg", "ml", "IE", "anders"];
 
-export function getSupplementCategoryLabel(categoryId) {
+export function getSupplementCategoryLabel(
+  categoryId,
+  categories = DEFAULT_SUPPLEMENT_CATEGORIES,
+) {
   return (
+    categories.find((category) => category.id === categoryId)?.name ||
     SUPPLEMENT_CATEGORIES.find((category) => category.id === categoryId)
-      ?.label || "Overig"
+      ?.label ||
+    "Overig"
   );
 }
 
@@ -46,6 +59,7 @@ export function createSupplement(overrides = {}) {
       brand: "",
       productName: "",
       categoryId: "other",
+      categoryIds: ["other"],
       alternativeName: "",
       form: "",
       amountPerUnit: "",
@@ -55,6 +69,7 @@ export function createSupplement(overrides = {}) {
       description: "",
       barcode: "",
       imageUrl: "",
+      images: [],
     },
     personal: {
       status: "active",
@@ -67,11 +82,22 @@ export function createSupplement(overrides = {}) {
     meta: { createdAt: now, updatedAt: now },
   };
 
+  const productOverrides = overrides.product || {};
+  const product = { ...base.product, ...productOverrides };
+  if (
+    Object.prototype.hasOwnProperty.call(productOverrides, "categoryId") &&
+    !Object.prototype.hasOwnProperty.call(productOverrides, "categoryIds")
+  ) {
+    product.categoryIds = productOverrides.categoryId
+      ? [productOverrides.categoryId]
+      : [];
+  }
+
   return {
     ...base,
     ...overrides,
     source: { ...base.source, ...(overrides.source || {}) },
-    product: { ...base.product, ...(overrides.product || {}) },
+    product,
     personal: { ...base.personal, ...(overrides.personal || {}) },
     meta: { ...base.meta, ...(overrides.meta || {}) },
   };
@@ -82,7 +108,6 @@ export function validateSupplement(supplement) {
   const product = supplement?.product || {};
 
   if (!product.name?.trim()) errors.name = "Naam is verplicht.";
-  if (!product.categoryId) errors.categoryId = "Categorie is verplicht.";
   if (!product.form) errors.form = "Vorm is verplicht.";
 
   [
@@ -112,6 +137,16 @@ export function sanitizeSupplement(supplement) {
     product: {
       ...supplement.product,
       name: supplement.product.name.trim(),
+      categoryIds: [
+        ...new Set(
+          (supplement.product.categoryIds || [])
+            .map(String)
+            .filter(Boolean),
+        ),
+      ],
+      images: Array.isArray(supplement.product.images)
+        ? supplement.product.images
+        : [],
       ingredients: (supplement.product.ingredients || []).filter(
         (ingredient) =>
           ingredient.name?.trim() ||
@@ -142,14 +177,45 @@ export function supplementMatchesQuery(supplement, query) {
   );
 }
 
-function migrateLegacySupplement(item) {
-  if (item?.product && item?.personal) return createSupplement(item);
+function migrateLegacySupplement(item, categories = DEFAULT_SUPPLEMENT_CATEGORIES) {
+  if (item?.product && item?.personal) {
+    const existingIds = Array.isArray(item.product.categoryIds)
+      ? item.product.categoryIds
+      : [];
+    const legacyId = item.product.categoryId;
+    return createSupplement({
+      ...item,
+      product: {
+        ...item.product,
+        categoryIds: [...new Set([...existingIds, legacyId].filter(Boolean))],
+        images: Array.isArray(item.product.images)
+          ? item.product.images
+          : item.product.imageUrl
+            ? [
+                {
+                  id: `legacy-image-${item.id || "supplement"}`,
+                  src: item.product.imageUrl,
+                  name: "Bestaande afbeelding",
+                  caption: "",
+                  createdAt: item.meta?.createdAt || new Date().toISOString(),
+                  isPrimary: true,
+                  storage: "url",
+                },
+              ]
+            : [],
+      },
+    });
+  }
   const categoryMap = { performance: "sport-performance" };
+  const categoryId = categoryMap[item.categoryId] || item.categoryId || "other";
   return createSupplement({
     id: item.id,
     product: {
       name: item.name || "",
-      categoryId: categoryMap[item.categoryId] || item.categoryId || "other",
+      categoryId,
+      categoryIds: categories.some((category) => category.id === categoryId)
+        ? [categoryId]
+        : [],
       form: String(item.form || "").toLocaleLowerCase("nl"),
       ingredients: item.activeIngredient
         ? [createIngredient({ name: item.activeIngredient })]
@@ -165,8 +231,13 @@ function migrateLegacySupplement(item) {
   });
 }
 
-export function migrateSupplements(items) {
-  const migrated = Array.isArray(items) ? items.map(migrateLegacySupplement) : [];
+export function migrateSupplements(
+  items,
+  categories = DEFAULT_SUPPLEMENT_CATEGORIES,
+) {
+  const migrated = Array.isArray(items)
+    ? items.map((item) => migrateLegacySupplement(item, categories))
+    : [];
   const unique = [];
   const seen = new Set();
   [...migrated, ...STARTER_SUPPLEMENTS].forEach((item) => {
@@ -176,6 +247,66 @@ export function migrateSupplements(items) {
     unique.push(item);
   });
   return unique;
+}
+
+export function migrateSupplementCatalog(raw) {
+  const sourceItems = Array.isArray(raw) ? raw : raw?.items;
+  const sourceCategories = Array.isArray(raw?.categories)
+    ? raw.categories
+    : DEFAULT_SUPPLEMENT_CATEGORIES;
+  const categories = [];
+  const seenNames = new Set();
+  const inferredCategories = (sourceItems || [])
+    .map((item) => item?.product?.category || item?.category)
+    .filter(Boolean)
+    .map((name) => ({
+      id: `supp-category-${String(name)
+        .trim()
+        .toLocaleLowerCase("nl")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")}`,
+      name: String(name).trim(),
+    }));
+
+  [...DEFAULT_SUPPLEMENT_CATEGORIES, ...sourceCategories, ...inferredCategories].forEach((category) => {
+    const name = String(category?.name || category?.label || "").trim();
+    const normalized = name.toLocaleLowerCase("nl");
+    if (!name || seenNames.has(normalized)) return;
+    seenNames.add(normalized);
+    categories.push({
+      id:
+        String(category?.id || "").trim() ||
+        `supp-category-${normalized.replace(/[^a-z0-9]+/g, "-")}`,
+      name,
+      createdAt: category?.createdAt || new Date().toISOString(),
+    });
+  });
+
+  const itemsWithResolvedCategoryNames = (sourceItems || []).map((item) => {
+    const legacyName = item?.product?.category || item?.category;
+    if (!legacyName) return item;
+    const categoryId = categories.find(
+      (category) =>
+        category.name.toLocaleLowerCase("nl") ===
+        String(legacyName).trim().toLocaleLowerCase("nl"),
+    )?.id;
+    return item?.product
+      ? { ...item, product: { ...item.product, categoryId } }
+      : { ...item, categoryId };
+  });
+
+  const items = migrateSupplements(itemsWithResolvedCategoryNames, categories).map((item) =>
+    createSupplement({
+      ...item,
+      product: {
+        ...item.product,
+        categoryIds: (item.product.categoryIds || []).filter((id) =>
+          categories.some((category) => category.id === id),
+        ),
+      },
+    }),
+  );
+  return { categories, items };
 }
 
 export const STARTER_SUPPLEMENTS = [

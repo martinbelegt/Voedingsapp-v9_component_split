@@ -1,4 +1,4 @@
-export const CURRENT_BACKUP_VERSION = 3;
+export const CURRENT_BACKUP_VERSION = 4;
 export const LEGACY_BACKUP_MAX_VERSION = 2;
 
 const ARRAY_DATASETS = [
@@ -42,6 +42,7 @@ export function createFullBackupSnapshot({
   testLog,
   dailyLog,
   timers,
+  supplementCatalog,
 }) {
   return {
     exportedAt: new Date().toISOString(),
@@ -55,6 +56,7 @@ export function createFullBackupSnapshot({
     testLog,
     dailyLog,
     timers,
+    supplementCatalog,
   };
 }
 
@@ -87,6 +89,19 @@ export function validateFullBackupObject(raw) {
 
   if (hasOwn(raw, "settings") && !isPlainObject(raw.settings)) {
     return { ok: false, error: 'Backupveld "settings" moet een object zijn.' };
+  }
+  if (hasOwn(raw, "supplementCatalog") && !isPlainObject(raw.supplementCatalog)) {
+    return { ok: false, error: 'Backupveld "supplementCatalog" moet een object zijn.' };
+  }
+  if (
+    hasOwn(raw, "supplementCatalog") &&
+    (!Array.isArray(raw.supplementCatalog.categories) ||
+      !Array.isArray(raw.supplementCatalog.items))
+  ) {
+    return {
+      ok: false,
+      error: 'Backupveld "supplementCatalog" mist categorieën of supplementen.',
+    };
   }
 
   if (!isLegacy) {
@@ -172,6 +187,9 @@ export function prepareRestoredBackupData(raw, adapters) {
   // blijven exact behouden.
   if (hasOwn(raw, "dailyLog")) restored.dailyLog = raw.dailyLog;
   if (hasOwn(raw, "timers")) restored.timers = raw.timers;
+  if (hasOwn(raw, "supplementCatalog")) {
+    restored.supplementCatalog = raw.supplementCatalog;
+  }
 
   return restored;
 }

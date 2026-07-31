@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import "./libraryWorkspace.css";
+import CatalogListHeader from "../catalog/CatalogListHeader";
 
 function matchesQuery(item, query, searchableFields) {
   const normalizedQuery = query.trim().toLocaleLowerCase("nl");
@@ -21,15 +22,27 @@ function LibrarySidebar({
   activeCategory,
   onCategoryChange,
   itemCount,
+  action,
+  compact,
+  children,
+  categorySectionOpen,
+  onToggleCategorySection,
+  visibleItemCount,
+  singularLabel,
+  activeCategoryLabel,
+  onAddItem,
 }) {
   return (
-    <aside className="companion-library__panel companion-library__sidebar">
-      <div className="companion-library__panel-heading">
-        <p className="companion-library__eyebrow">Bibliotheek</p>
-        <h2>{title}</h2>
-      </div>
+    <aside className={`companion-library__panel companion-library__sidebar${compact ? " is-compact" : ""}`}>
+      {!compact && <div className="companion-library__panel-heading">
+        <div>
+          <p className="companion-library__eyebrow">Bibliotheek</p>
+          <h2>{title}</h2>
+        </div>
+        {action}
+      </div>}
 
-      <label className="companion-library__search">
+      {!compact && <label className="companion-library__search">
         <span>Zoeken</span>
         <input
           type="search"
@@ -37,12 +50,24 @@ function LibrarySidebar({
           onChange={(event) => onQueryChange(event.target.value)}
           placeholder={searchPlaceholder}
         />
-      </label>
+      </label>}
 
-      <div className="companion-library__filter-group">
+      {compact && onToggleCategorySection && (
+        <button
+          type="button"
+          className="companion-library__category-toggle catalog-category-toggle"
+          onClick={onToggleCategorySection}
+          aria-expanded={categorySectionOpen}
+        >
+          <span>Categoriebeheer</span>
+          <span>{categorySectionOpen ? "▲" : "▼"}</span>
+        </button>
+      )}
+
+      {!compact && <div className="companion-library__filter-group">
         <div className="companion-library__filter-heading">
           <span>Categorieën</span>
-          <small>{itemCount}</small>
+          {!compact && <small>{itemCount}</small>}
         </div>
         <div className="companion-library__categories">
           <button
@@ -51,7 +76,7 @@ function LibrarySidebar({
             onClick={() => onCategoryChange("all")}
           >
             <span>Alle items</span>
-            <span>{itemCount}</span>
+            {!compact && <span>{itemCount}</span>}
           </button>
           {categories.map((category) => (
             <button
@@ -60,17 +85,33 @@ function LibrarySidebar({
               className={activeCategory === category.id ? "is-active" : ""}
               onClick={() => onCategoryChange(category.id)}
             >
-              <span>{category.label}</span>
-              <span>{category.count}</span>
+              <span>{category.name || category.label}</span>
+              {!compact && <span>{category.count}</span>}
             </button>
           ))}
         </div>
-      </div>
+      </div>}
 
-      <div className="companion-library__future-filters">
+      {!compact && <div className="companion-library__future-filters">
         <span>Filters</span>
         <p>Ruimte voor toekomstige filters</p>
-      </div>
+      </div>}
+      {(!compact || categorySectionOpen) && children}
+
+      {compact && (
+        <CatalogListHeader
+          actionLabel="Nieuw supplement"
+          onAction={onAddItem}
+          searchPlaceholder={searchPlaceholder}
+          searchValue={query}
+          onSearchChange={onQueryChange}
+          onClearSearch={() => onQueryChange("")}
+          itemLabel={singularLabel}
+          totalCount={itemCount}
+          visibleCount={visibleItemCount}
+          filterLabel={activeCategoryLabel}
+        />
+      )}
     </aside>
   );
 }
@@ -84,6 +125,7 @@ function LibraryList({
   getItemMeta,
   emptyMessage,
   headerAction,
+  renderItemContent,
 }) {
   return (
     <section className="companion-library__panel companion-library__list-panel">
@@ -115,8 +157,14 @@ function LibraryList({
                 }`}
                 onClick={() => onSelect(item.id)}
               >
-                <span>{getItemTitle(item)}</span>
-                <small>{getItemMeta(item)}</small>
+                {renderItemContent ? (
+                  renderItemContent(item)
+                ) : (
+                  <>
+                    <span>{getItemTitle(item)}</span>
+                    <small>{getItemMeta(item)}</small>
+                  </>
+                )}
               </button>
             );
           })
@@ -184,6 +232,12 @@ export default function LibraryWorkspace({
   onSelect,
   renderDetail,
   listHeaderAction,
+  categoryAction,
+  layout,
+  children,
+  categorySectionOpen,
+  onToggleCategorySection,
+  onAddItem,
 }) {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
@@ -194,12 +248,17 @@ export default function LibraryWorkspace({
         ...category,
         count: items.filter(
           (item) =>
-            (config.getCategoryId
-              ? config.getCategoryId(item)
-              : item[config.categoryIdField]) === category.id,
+            (config.getCategoryIds
+              ? config.getCategoryIds(item)
+              : [
+                  config.getCategoryId
+                    ? config.getCategoryId(item)
+                    : item[config.categoryIdField],
+                ]
+            ).includes(category.id),
         ).length,
       })),
-    [categories, config.categoryIdField, config.getCategoryId, items],
+    [categories, config.categoryIdField, config.getCategoryId, config.getCategoryIds, items],
   );
 
   const filteredItems = useMemo(
@@ -207,9 +266,14 @@ export default function LibraryWorkspace({
       items.filter(
         (item) =>
           (activeCategory === "all" ||
-            (config.getCategoryId
-              ? config.getCategoryId(item)
-              : item[config.categoryIdField]) === activeCategory) &&
+            (config.getCategoryIds
+              ? config.getCategoryIds(item)
+              : [
+                  config.getCategoryId
+                    ? config.getCategoryId(item)
+                    : item[config.categoryIdField],
+                ]
+            ).includes(activeCategory)) &&
           (config.matchesQuery
             ? config.matchesQuery(item, query)
             : matchesQuery(item, query, config.searchableFields)),
@@ -218,6 +282,7 @@ export default function LibraryWorkspace({
       activeCategory,
       config.categoryIdField,
       config.getCategoryId,
+      config.getCategoryIds,
       config.searchableFields,
       config.matchesQuery,
       items,
@@ -228,7 +293,7 @@ export default function LibraryWorkspace({
   const selectedItem = items.find((item) => item.id === selectedId) || null;
 
   return (
-    <main className="companion-library" aria-label={`${config.title}bibliotheek`}>
+    <main className={`companion-library${layout ? ` is-${layout}` : ""}`} aria-label={`${config.title}bibliotheek`}>
       <LibrarySidebar
         title={config.title}
         searchPlaceholder={config.searchPlaceholder}
@@ -238,7 +303,25 @@ export default function LibraryWorkspace({
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
         itemCount={items.length}
-      />
+        action={categoryAction}
+        compact={layout === "supplements"}
+        categorySectionOpen={categorySectionOpen}
+        onToggleCategorySection={onToggleCategorySection}
+        visibleItemCount={filteredItems.length}
+        singularLabel={config.singularLabel}
+        activeCategoryLabel={
+          activeCategory === "all"
+            ? "all"
+            : categoryOptions.find((category) => category.id === activeCategory)
+                ?.name ||
+              categoryOptions.find((category) => category.id === activeCategory)
+                ?.label ||
+              activeCategory
+        }
+        onAddItem={onAddItem}
+      >
+        {children}
+      </LibrarySidebar>
       <LibraryList
         title={config.listTitle}
         items={filteredItems}
@@ -248,6 +331,7 @@ export default function LibraryWorkspace({
         getItemMeta={config.getItemMeta}
         emptyMessage={config.emptyMessage}
         headerAction={listHeaderAction}
+        renderItemContent={config.renderItemContent}
       />
       <section className="companion-library__panel companion-library__detail-panel">
         {renderDetail ? (

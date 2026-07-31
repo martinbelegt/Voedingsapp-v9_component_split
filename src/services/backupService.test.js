@@ -91,6 +91,10 @@ function createDurableState() {
         note: "Ontbijt",
       },
     ],
+    supplementCatalog: {
+      categories: [{ id: "supp-category-1", name: "Antioxidanten" }],
+      items: [{ id: "supplement-1", product: { name: "R-alfaliponzuur" } }],
+    },
   };
 }
 
@@ -119,6 +123,7 @@ test("round trip behoudt dailyLog, medische velden, tijden, IDs en timers", () =
 
   expect(restored.dailyLog).toEqual(state.dailyLog);
   expect(restored.timers).toEqual(state.timers);
+  expect(restored.supplementCatalog).toEqual(state.supplementCatalog);
   expect(restored.dailyLog).toHaveLength(1);
   expect(restored.dailyLog[0].meals).toHaveLength(1);
   expect(restored.dailyLog[0].insulinEvents).toHaveLength(1);

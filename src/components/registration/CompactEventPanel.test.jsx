@@ -49,6 +49,7 @@ describe("CompactEventPanel", () => {
     "glucose",
     "insulin",
     "medicine",
+    "supplement",
     "weight",
     "movement",
     "bowel",
@@ -135,5 +136,27 @@ describe("CompactEventPanel", () => {
         activityType: "Wandelen",
       }),
     );
+  });
+
+  test("supplement neemt standaardwaarden over en wijzigt alleen de registratie", async () => {
+    const defaults = { name: "HMB", dosage: "3", unit: "capsules", note: "" };
+    const onSubmit = jest.fn();
+    await renderPanel("supplement", { initialValues: defaults, onSubmit });
+
+    const dosage = container.querySelector('input[type="number"]');
+    expect(dosage.value).toBe("3");
+    await act(async () => changeInput(dosage, "4"));
+    const submit = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent === "Zet op tijdlijn",
+    );
+    await act(async () => submit.click());
+
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
+      moduleId: "supplement",
+      name: "HMB",
+      dosage: "4",
+      unit: "capsules",
+    }));
+    expect(defaults.dosage).toBe("3");
   });
 });

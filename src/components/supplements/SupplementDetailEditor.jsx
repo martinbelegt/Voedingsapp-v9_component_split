@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   createIngredient,
-  SUPPLEMENT_CATEGORIES,
   SUPPLEMENT_FORMS,
   SUPPLEMENT_UNITS,
 } from "../../data/supplements";
+import SupplementImageManager, {
+  SupplementImage,
+} from "./SupplementImageManager";
+import { getPrimarySupplementImage } from "../../services/supplementImageService";
+import { CompactEventPanel } from "../registration/CompactEventPanel";
 
 function Field({ label, error, wide, children }) {
   return (
@@ -29,9 +33,15 @@ export default function SupplementDetailEditor({
   onSave,
   onCancel,
   onDelete,
+  onOpenTimelinePanel,
+  onTimelineSubmit,
+  timelineDefaults,
+  isDirty,
+  categories,
 }) {
   const product = draft.product;
   const personal = draft.personal;
+  const [timelinePanelOpen, setTimelinePanelOpen] = useState(false);
   const set = (path) => (event) =>
     onChange(updatePath(draft, path, event.target.value));
 
@@ -51,6 +61,16 @@ export default function SupplementDetailEditor({
     );
   }
 
+  function toggleCategory(id) {
+    const current = product.categoryIds || [];
+    const categoryIds = current.includes(id)
+      ? current.filter((categoryId) => categoryId !== id)
+      : [...current, id];
+    onChange(updatePath(draft, ["product", "categoryIds"], categoryIds));
+  }
+
+  const primaryImage = getPrimarySupplementImage(product.images);
+
   return (
     <form
       className="supplement-editor"
@@ -68,13 +88,45 @@ export default function SupplementDetailEditor({
           <span>Persoonlijke supplementenbibliotheek</span>
         </div>
         <div className="supplement-editor__image">
-          {product.imageUrl ? (
-            <img src={product.imageUrl} alt={product.name} />
+          {primaryImage ? (
+            <SupplementImage image={primaryImage} alt={product.name} />
           ) : (
             <><b>＋</b><small>Afbeelding</small></>
           )}
         </div>
       </header>
+
+      <div className="supplement-editor__actions" aria-label="Supplementacties">
+        {!isNew && (
+          <button className="is-danger" type="button" onClick={onDelete}>
+            Verwijderen
+          </button>
+        )}
+        <span />
+        <button type="button" onClick={onCancel}>Annuleren</button>
+        <button className="is-save" type="submit">Wijzigingen bewaren</button>
+        <button className="is-primary" type="button" onClick={() => {
+          if (onOpenTimelinePanel?.() !== false) setTimelinePanelOpen(true);
+        }}>
+          {isDirty ? "Wijzigingen bewaren en op tijdlijn zetten" : "Zet op tijdlijn"}
+        </button>
+      </div>
+
+      {timelinePanelOpen && (
+        <CompactEventPanel
+          moduleId="supplement"
+          selectedDate={timelineDefaults.date}
+          initialEventTime={timelineDefaults.eventTime}
+          initialValues={timelineDefaults.values}
+          onCancel={() => {
+            setTimelinePanelOpen(false);
+          }}
+          onSubmit={(values) => {
+            onTimelineSubmit?.(values);
+            setTimelinePanelOpen(false);
+          }}
+        />
+      )}
 
       <section className="supplement-editor__section">
         <h2>Identiteit</h2>
@@ -82,13 +134,21 @@ export default function SupplementDetailEditor({
           <Field label="Naam *" error={errors.name}>
             <input value={product.name} onChange={set(["product", "name"])} />
           </Field>
-          <Field label="Categorie *" error={errors.categoryId}>
-            <select value={product.categoryId} onChange={set(["product", "categoryId"])}>
-              {SUPPLEMENT_CATEGORIES.map((category) => (
-                <option key={category.id} value={category.id}>{category.label}</option>
+          <div className="supplement-field is-wide">
+            <span>Categorieën</span>
+            <div className="supplement-category-choices">
+              {categories.map((category) => (
+                <label key={category.id}>
+                  <input
+                    type="checkbox"
+                    checked={(product.categoryIds || []).includes(category.id)}
+                    onChange={() => toggleCategory(category.id)}
+                  />
+                  <span>{category.name}</span>
+                </label>
               ))}
-            </select>
-          </Field>
+            </div>
+          </div>
           <Field label="Merk">
             <input value={product.brand} onChange={set(["product", "brand"])} />
           </Field>
@@ -189,18 +249,15 @@ export default function SupplementDetailEditor({
           <Field label="Barcode">
             <input value={product.barcode} onChange={set(["product", "barcode"])} />
           </Field>
-          <Field label="Afbeelding-URL">
-            <input type="url" value={product.imageUrl} onChange={set(["product", "imageUrl"])} />
+          <Field label="Afbeeldingen" wide>
+            <SupplementImageManager
+              images={product.images}
+              onChange={(images) => onChange(updatePath(draft, ["product", "images"], images))}
+            />
           </Field>
         </div>
       </section>
 
-      <footer className="supplement-editor__footer">
-        {!isNew && <button className="is-danger" type="button" onClick={onDelete}>Verwijderen</button>}
-        <span />
-        <button type="button" onClick={onCancel}>Annuleren</button>
-        <button className="is-primary" type="submit">Opslaan</button>
-      </footer>
     </form>
   );
 }

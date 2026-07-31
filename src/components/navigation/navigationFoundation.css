@@ -5,9 +5,10 @@
 
 .companion-catalog-page-heading {
   display: grid;
-  gap: 3px;
-  margin: 0 0 10px;
-  padding: 0 4px;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  background: #fff;
 }
 
 .companion-catalog-page-heading h1 {

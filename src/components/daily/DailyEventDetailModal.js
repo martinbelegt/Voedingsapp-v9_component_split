@@ -43,8 +43,9 @@ function detailsFor(type, event) {
     ],
     supplement: [
       ["Categorie", event.intakeType === "medication" ? term("medication") : term("supplement")],
-      ["Naam", event.name],
-      ["Dosering", event.dosage || [event.amount, event.unit].filter(Boolean).join(" ")],
+      ["Naam", event.supplementName || event.name],
+      ["Dosering", [event.dosage || event.amount, event.unit].filter(Boolean).join(" ")],
+      ["Merk / product", [event.brand, event.productName].filter(Boolean).join(" · ")],
       ["Notitie", event.note],
     ],
     bowel: [
