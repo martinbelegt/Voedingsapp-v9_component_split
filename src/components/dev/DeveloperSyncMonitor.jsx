@@ -17,6 +17,24 @@ function formatValue(value) {
   return value === null || value === undefined ? "-" : value;
 }
 
+function formatBoolean(value) {
+  if (value === true) return "Ja";
+  if (value === false) return "Nee";
+  return "Onbekend";
+}
+
+function formatContentEquality(value) {
+  if (value === true) return "Gelijk";
+  if (value === false) return "Verschillend";
+  return "Niet beschikbaar";
+}
+
+function formatLocalRevision(local) {
+  return local?.baselineKnown === false
+    ? "Onbekende baseline"
+    : formatValue(local?.revision);
+}
+
 function isLocalDevelopment() {
   if (process.env.NODE_ENV !== "development") return false;
   if (typeof window === "undefined") return false;
@@ -24,11 +42,41 @@ function isLocalDevelopment() {
   return ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
 }
 
-function getStatus(syncDebug) {
+export function getSyncMonitorStatus(syncDebug) {
   if (!syncDebug) return { label: "Status onbekend", tone: "#64748b" };
 
   if (syncDebug.conflict) {
-    return { label: "⚠ Revision mismatch", tone: "#b45309" };
+    if (syncDebug.local.dirty === true) {
+      return {
+        label: "⚠ Lokale niet-gesynchroniseerde wijzigingen",
+        tone: "#b45309",
+      };
+    }
+
+    if (syncDebug.local.baselineKnown === false) {
+      return { label: "⚠ Onbekende lokale baseline", tone: "#b45309" };
+    }
+
+    if (
+      Number.isInteger(syncDebug.cloud.revision) &&
+      Number.isInteger(syncDebug.local.revision) &&
+      syncDebug.cloud.revision > syncDebug.local.revision
+    ) {
+      return {
+        label: "⚠ Cloud nieuwer dan lokale baseline",
+        tone: "#b45309",
+      };
+    }
+
+    if (
+      Number.isInteger(syncDebug.cloud.revision) &&
+      Number.isInteger(syncDebug.local.revision) &&
+      syncDebug.cloud.revision !== syncDebug.local.revision
+    ) {
+      return { label: "⚠ Revision mismatch", tone: "#b45309" };
+    }
+
+    return { label: "⚠ Inhoudsconflict", tone: "#b45309" };
   }
 
   if (
@@ -57,7 +105,7 @@ export function DeveloperSyncMonitor({
   const localDevelopment = isLocalDevelopment();
   if (!localDevelopment && !syncDebug.conflict) return null;
 
-  const status = getStatus(syncDebug);
+  const status = getSyncMonitorStatus(syncDebug);
 
   return (
     <aside
@@ -96,7 +144,11 @@ export function DeveloperSyncMonitor({
 
       <div style={{ display: "grid", gap: 2, marginTop: 8 }}>
         <strong>Local</strong>
-        <span>Revision: {formatValue(syncDebug.local.revision)}</span>
+        <span>
+          Revision:{" "}
+          {formatLocalRevision(syncDebug.local)}
+        </span>
+        <span>Dirty: {formatBoolean(syncDebug.local.dirty)}</span>
         <span>Dagen: {formatValue(syncDebug.local.days)}</span>
         <span>Laatste save: {formatTime(syncDebug.local.lastSaveAt)}</span>
       </div>
@@ -104,7 +156,7 @@ export function DeveloperSyncMonitor({
       <div style={{ display: "grid", gap: 2, marginTop: 8 }}>
         <strong>Status</strong>
         <span>Cloud revision: {formatValue(syncDebug.cloud.revision)}</span>
-        <span>Local revision: {formatValue(syncDebug.local.revision)}</span>
+        <span>Local revision: {formatLocalRevision(syncDebug.local)}</span>
         <span>Cloud days: {formatValue(syncDebug.cloud.days)}</span>
         <span>Local days: {formatValue(syncDebug.local.days)}</span>
         <span>
@@ -114,6 +166,15 @@ export function DeveloperSyncMonitor({
           )}
         </span>
         <span>Bron: {syncDebug.source || "-"}</span>
+        <span>
+          Beslissing: {syncDebug.decision?.action || "Niet beschikbaar"}
+        </span>
+        <span>
+          Reden: {syncDebug.decision?.reason || "Niet beschikbaar"}
+        </span>
+        <span>
+          Inhoud: {formatContentEquality(syncDebug.decision?.contentEqual)}
+        </span>
         <span style={{ color: status.tone, fontWeight: 900 }}>
           Status: {status.label}
         </span>

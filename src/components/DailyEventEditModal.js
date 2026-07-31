@@ -3,6 +3,10 @@ import { CompanionButton } from "../ui/buttons/CompanionButton";
 import { CompanionNumberInput } from "../ui/inputs/CompanionInput";
 import { CompanionModalShell } from "../ui/modals/CompanionModalShell";
 import { CompanionDateTimePicker } from "../ui/pickers/CompanionDateTimePicker";
+import {
+  parseWeightKg,
+  validateWeightKg,
+} from "../services/weightEventService";
 
 const BOWEL_COLOR_OPTIONS = [
   {
@@ -80,6 +84,14 @@ export function DailyEventEditModal({
       ? event?.units || ""
       : eventType === "glucose"
         ? event?.glucoseValue || ""
+        : eventType === "weight"
+          ? String(event?.valueKg ?? "").replace(".", ",")
+        : eventType === "glucoseBoost"
+          ? event?.kh || ""
+        : eventType === "movement"
+          ? event?.activityType || ""
+        : eventType === "supplement"
+          ? event?.name || ""
         : eventType === "note"
           ? event?.note || ""
           : eventType === "bowel"
@@ -104,6 +116,7 @@ export function DailyEventEditModal({
   const isGlucose = eventType === "glucose";
   const isInsulin = eventType === "insulin";
   const isBowel = eventType === "bowel";
+  const isWeight = eventType === "weight";
 
   const footerStart = (
     <CompanionButton
@@ -118,6 +131,18 @@ export function DailyEventEditModal({
       Verwijder
     </CompanionButton>
   );
+  const [value2, setValue2] = useState(
+    eventType === "glucoseBoost"
+      ? event?.source || ""
+      : eventType === "movement"
+        ? event?.intensityType || ""
+        : eventType === "supplement"
+          ? event?.dosage || ""
+          : "",
+  );
+  const [value3, setValue3] = useState(
+    eventType === "movement" ? event?.durationMinutes || "" : "",
+  );
 
   const footer = (
     <>
@@ -128,10 +153,31 @@ export function DailyEventEditModal({
       <CompanionButton
         variant="primary"
         onClick={() => {
+          if (isWeight) {
+            const error = validateWeightKg(value1);
+            if (error) {
+              window.alert(error);
+              return;
+            }
+          }
           onSave(event.id, {
             eventTime,
             ...(isInsulin ? { units: value1 } : {}),
             ...(isGlucose ? { glucoseValue: value1 } : {}),
+            ...(isWeight ? { valueKg: parseWeightKg(value1) } : {}),
+            ...(eventType === "glucoseBoost"
+              ? { kh: value1, source: value2 }
+              : {}),
+            ...(eventType === "movement"
+              ? {
+                  activityType: value1,
+                  intensityType: value2,
+                  durationMinutes: value3,
+                }
+              : {}),
+            ...(eventType === "supplement"
+              ? { name: value1, dosage: value2 }
+              : {}),
             ...(isBowel ? { bristolScore: value1, bowelColor } : {}),
             ...(eventType === "note" ? { note: value1 } : {}),
             ...(eventType === "note" ? { context: note } : { note }),
@@ -174,8 +220,16 @@ export function DailyEventEditModal({
             ? "Aantal eenheden"
             : isGlucose
               ? "Glucosewaarde"
+              : isWeight
+                ? "Gewicht (kg)"
               : isBowel
                 ? "Bristol-score"
+                : eventType === "movement"
+                  ? "Type beweging"
+                  : eventType === "supplement"
+                    ? "Naam"
+                    : eventType === "glucoseBoost"
+                      ? "Snelle koolhydraten (gram)"
                 : eventType === "note"
                   ? "Notitie"
                   : "Waarde"}
@@ -221,6 +275,7 @@ export function DailyEventEditModal({
           />
         ) : (
           <input
+            inputMode={isWeight ? "decimal" : undefined}
             value={value1}
             onChange={(e) => setValue1(e.target.value)}
             style={{
@@ -234,6 +289,57 @@ export function DailyEventEditModal({
               border: "1px solid #cbd5e1",
             }}
           />
+        )}
+
+        {(eventType === "glucoseBoost" ||
+          eventType === "movement" ||
+          eventType === "supplement") && (
+          <>
+            <label style={{ fontSize: 13, fontWeight: 800 }}>
+              {eventType === "glucoseBoost"
+                ? "Bron"
+                : eventType === "movement"
+                  ? "Belasting"
+                  : "Dosering"}
+            </label>
+            <input
+              value={value2}
+              onChange={(e) => setValue2(e.target.value)}
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                fontSize: 16,
+                padding: "10px 11px",
+                marginTop: 4,
+                marginBottom: 10,
+                borderRadius: 8,
+                border: "1px solid #cbd5e1",
+              }}
+            />
+          </>
+        )}
+
+        {eventType === "movement" && (
+          <>
+            <label style={{ fontSize: 13, fontWeight: 800 }}>
+              Duur (minuten)
+            </label>
+            <CompanionNumberInput
+              decimal={false}
+              value={value3}
+              onChange={(e) => setValue3(e.target.value)}
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                fontSize: 16,
+                padding: "10px 11px",
+                marginTop: 4,
+                marginBottom: 10,
+                borderRadius: 8,
+                border: "1px solid #cbd5e1",
+              }}
+            />
+          </>
         )}
 
         {isBowel && (

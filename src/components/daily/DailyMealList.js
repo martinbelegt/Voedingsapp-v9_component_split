@@ -4,6 +4,23 @@ import { DailyTimelineItem } from "./DailyTimelineItem";
 import { DailyEventTimeEditorModal } from "./DailyEventTimeEditorModal";
 import { DailyEventEditModal } from "../DailyEventEditModal";
 import { DailyTimerModal } from "../DailyTimerModal";
+import { DailyEventDetailModal } from "./DailyEventDetailModal";
+import { TrainingPlanDetailModal } from "./TrainingPlanDetailModal";
+import { TrainingPlanModal } from "./TrainingPlanModal";
+import { PlannedExecutionModal } from "./PlannedExecutionModal";
+import { SportSupplementPlanModal } from "./SportSupplementPlanModal";
+import { DailyDateNavigation } from "./DailyDateNavigation";
+import { CompanionButton } from "../../ui/buttons/CompanionButton";
+import {
+  getCompactExerciseSummary,
+  sortTrainingExercises,
+} from "../../services/trainingStructureService";
+import {
+  isSportSupplementPlanTaken,
+  isTrainingPlanExecuted,
+} from "../../services/plannedExecutionService";
+import { term } from "../../config/terminology";
+import { formatWeightKg } from "../../services/weightEventService";
 
 export function DailyMealList({
   mealsForDay = [],
@@ -25,11 +42,23 @@ export function DailyMealList({
   movementEventsForDay = [],
   updateMovementEvent,
   deleteMovementEvent,
+  weightEventsForDay = [],
+  updateWeightEvent,
+  deleteWeightEvent,
+  trainingPlansForDay = [],
+  updateTrainingPlanEvent,
+  deleteTrainingPlanEvent,
+  dailyLog = [],
+  executeTrainingPlan,
 
   supplementEventsForDay = [],
+  supplementPlansForDay = [],
   addSupplementEventToDay,
   updateSupplementEvent,
   deleteSupplementEvent,
+  updateSupplementPlanEvent,
+  deleteSupplementPlanEvent,
+  takeSupplementPlan,
 
   bowelEventsForDay = [],
   updateBowelEvent,
@@ -43,6 +72,8 @@ export function DailyMealList({
   setAddEventType,
   totalTimelineItems = 0,
   selectedDate,
+  setSelectedDate,
+  today,
   clearDailyLog,
   fillDailyRepeats,
   onAddMeal,
@@ -64,12 +95,22 @@ export function DailyMealList({
     glucose: true,
     glucoseBoost: true,
     movement: true,
+    weight: true,
     supplement: true,
+    supplementPlan: true,
     bowel: true,
     note: true,
+    trainingPlan: true,
   });
 
   const [timeEditorEvent, setTimeEditorEvent] = useState(null);
+  const [detailTraining, setDetailTraining] = useState(null);
+  const [editingTraining, setEditingTraining] = useState(null);
+  const [executingTraining, setExecutingTraining] = useState(null);
+  const [detailEvent, setDetailEvent] = useState(null);
+  const [detailSupplementPlan, setDetailSupplementPlan] = useState(null);
+  const [editingSupplementPlan, setEditingSupplementPlan] = useState(null);
+  const [executingSupplementPlan, setExecutingSupplementPlan] = useState(null);
 
   function toggleVisibleType(type) {
     setVisibleTypes((prev) => ({
@@ -140,10 +181,28 @@ export function DailyMealList({
       time: event.eventTime || "",
       event,
     })),
+    ...weightEventsForDay.map((event) => ({
+      id: event.id,
+      itemType: "weight",
+      time: event.eventTime || event.datetime || "",
+      event,
+    })),
+    ...trainingPlansForDay.map((event) => ({
+      id: event.id,
+      itemType: "trainingPlan",
+      time: event.eventTime || "",
+      event,
+    })),
 
     ...(supplementEventsForDay || []).map((event) => ({
       id: event.id,
       itemType: "supplement",
+      time: event.eventTime || "",
+      event,
+    })),
+    ...supplementPlansForDay.map((event) => ({
+      id: event.id,
+      itemType: "supplementPlan",
       time: event.eventTime || "",
       event,
     })),
@@ -310,6 +369,7 @@ export function DailyMealList({
     if (type === "glucoseBoost")
       updateGlucoseBoostEvent(id, { eventTime: nextValue });
     if (type === "movement") updateMovementEvent(id, { eventTime: nextValue });
+    if (type === "weight") updateWeightEvent(id, { eventTime: nextValue });
     if (type === "bowel") updateBowelEvent(id, { eventTime: nextValue });
 
     setTimeEditorEvent(null);
@@ -438,74 +498,6 @@ export function DailyMealList({
 
   return (
     <>
-      <div
-        style={{
-          background: "#f8fafc",
-          border: "1px solid #e2e8f0",
-          borderRadius: 6,
-          padding: isMobile ? 3 : 6,
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          gap: isMobile ? 4 : 8,
-          marginBottom: isMobile ? 4 : 8,
-        }}
-      >
-        <button
-          onClick={onAddMeal}
-          style={{
-            ...buttonStyle,
-            background: "#ecfdf5",
-            border: "1px solid #86efac",
-            color: "#166534",
-            minHeight: isMobile ? 30 : 34,
-            padding: isMobile ? "4px 6px" : "5px 6px",
-            borderRadius: 4,
-            fontSize: isMobile ? 12 : 13,
-            fontWeight: 700,
-            lineHeight: 1.05,
-          }}
-        >
-          + Maaltijd
-        </button>
-
-        <button
-          onClick={() => setAddEventType("insulin")}
-          style={{
-            ...buttonStyle,
-            background: "#eef2ff",
-            border: "1px solid #c7d2fe",
-            color: "#3730a3",
-            minHeight: isMobile ? 30 : 34,
-            padding: isMobile ? "4px 6px" : "5px 6px",
-            borderRadius: 4,
-            fontSize: isMobile ? 12 : 13,
-            fontWeight: 700,
-            lineHeight: 1.05,
-          }}
-        >
-          + Insuline
-        </button>
-
-        <button
-          onClick={() => setAddEventType("glucose")}
-          style={{
-            ...buttonStyle,
-            background: "#f0f9ff",
-            border: "1px solid #bae6fd",
-            color: "#0369a1",
-            minHeight: isMobile ? 30 : 34,
-            padding: isMobile ? "4px 6px" : "5px 6px",
-            borderRadius: 4,
-            fontSize: isMobile ? 12 : 13,
-            fontWeight: 700,
-            lineHeight: 1.05,
-          }}
-        >
-          + Glucose
-        </button>
-
-      </div>
-
       {showTimelineControls && (
         <>
           <div
@@ -632,11 +624,12 @@ export function DailyMealList({
             {[
               ["meal", "Maaltijden"],
               ["insulinAdvice", "Advies"],
-              ["insulin", "Insuline"],
-              ["glucose", "Glucose"],
+              ["insulin", term("insulin")],
+              ["glucose", term("glucose")],
               ["glucoseBoost", "Boosts"],
               ["supplement", "Supplementen"],
               ["movement", "Sport"],
+              ["trainingPlan", "Training"],
               ["bowel", "Stoelgang"],
             ].map(([type, label]) => (
               <button
@@ -667,11 +660,10 @@ export function DailyMealList({
 
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: isMobile
-            ? "36px 36px 36px 36px"
-            : "44px 44px 44px 44px",
+          display: "flex",
           gap: 4,
+          flexWrap: "nowrap",
+          alignItems: "center",
           marginTop: isMobile ? 6 : 8,
           marginBottom: isMobile ? 8 : 10,
           padding: isMobile ? "6px 5px" : "8px 7px",
@@ -681,6 +673,7 @@ export function DailyMealList({
           boxShadow: "inset 0 1px 0 rgba(255,255,255,0.78)",
           width: "fit-content",
           maxWidth: "100%",
+          boxSizing: "border-box",
         }}
       >
         <button
@@ -820,6 +813,13 @@ export function DailyMealList({
         >
           🗑
         </button>
+
+        <DailyDateNavigation
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          today={today}
+          buttonStyle={buttonStyle}
+        />
       </div>
 
       {!selectedDay || visibleTimelineItems.length === 0 ? (
@@ -884,7 +884,7 @@ export function DailyMealList({
                 key={event.id}
                 indentLevel={2}
                 expanded={expandedIds.includes(event.id)}
-                onToggle={() => toggleExpanded(event.id)}
+                onToggle={() => setDetailEvent({ type: "insulin", event })}
                 icon="💉"
                 title={`💉 Toegediend: ${
                   event.insulinType || "Insuline"
@@ -895,7 +895,7 @@ export function DailyMealList({
                 accentColor="#1d4ed8"
                 backgroundColor="#eff6ff"
                 borderColor="#93c5fd"
-                actions={deleteButton(event, "insulin")}
+                actions={null}
                 detailContent={
                   <div style={{ fontSize: 13, color: "#334155" }}>
                     Werkelijk toegediende insuline.
@@ -944,7 +944,7 @@ export function DailyMealList({
                 key={event.id}
                 indentLevel={3}
                 expanded={false}
-                onToggle={() => {}}
+                onToggle={() => setDetailEvent({ type: "glucose", event })}
                 icon="📈"
                 title={`${event.glucoseValue} mmol/L`}
                 timeLabel={formatTime(event.eventTime)}
@@ -953,7 +953,7 @@ export function DailyMealList({
                 accentColor={glucoseColors.accent}
                 backgroundColor={glucoseColors.background}
                 borderColor={glucoseColors.border}
-                actions={deleteButton(event, "glucose")}
+                actions={null}
                 detailContent={null}
               />
             );
@@ -967,7 +967,7 @@ export function DailyMealList({
                 key={event.id}
                 indentLevel={2}
                 expanded={expandedIds.includes(event.id)}
-                onToggle={() => toggleExpanded(event.id)}
+                onToggle={() => setDetailEvent({ type: "glucoseBoost", event })}
                 compact={true}
                 icon="⚡"
                 title={`⚡ +${event.kh || "?"}g snelle KH`}
@@ -978,7 +978,7 @@ export function DailyMealList({
                 accentColor="#c2410c"
                 backgroundColor="#fff7ed"
                 borderColor="#fdba74"
-                actions={deleteButton(event, "glucoseBoost")}
+                actions={null}
                 detailContent={
                   <div style={{ fontSize: 13, color: "#334155" }}>
                     Hypo-correctie / snelle glucoseboost.
@@ -995,7 +995,7 @@ export function DailyMealList({
               <DailyTimelineItem
                 key={event.id}
                 expanded={expandedIds.includes(event.id)}
-                onToggle={() => toggleExpanded(event.id)}
+                onToggle={() => setDetailEvent({ type: "movement", event })}
                 compact={compactTimeline}
                 icon={
                   event.activityType?.toLowerCase().includes("kracht")
@@ -1012,12 +1012,7 @@ export function DailyMealList({
                 accentColor="#4c1d95"
                 backgroundColor="#f5f3ff"
                 borderColor="#c4b5fd"
-                actions={
-                  <>
-                    {timerButton(event)}
-                    {editButton(event, "movement")}
-                  </>
-                }
+                actions={null}
                 detailContent={
                   <div style={{ fontSize: 13, color: "#334155" }}>
                     Beweging/sportmoment in metabole tijdlijn.
@@ -1027,8 +1022,75 @@ export function DailyMealList({
             );
           }
 
+          if (item.itemType === "weight") {
+            const event = item.event;
+
+            return (
+              <DailyTimelineItem
+                key={event.id}
+                expanded={false}
+                onToggle={() => setDetailEvent({ type: "weight", event })}
+                compact={false}
+                icon="⚖️"
+                title={`Gewicht · ${formatWeightKg(event.valueKg)} kg`}
+                timeLabel={formatTime(event.eventTime || event.datetime)}
+                subtitle={event.note || ""}
+                accentColor="#0f766e"
+                backgroundColor="#f0fdfa"
+                borderColor="#99f6e4"
+                actions={null}
+                detailContent={null}
+              />
+            );
+          }
+
+          if (item.itemType === "trainingPlan") {
+            const event = item.event;
+            const exercises = sortTrainingExercises(event.exercises || []);
+            const executed = isTrainingPlanExecuted(dailyLog, event.id);
+            const summary = exercises
+              .map(getCompactExerciseSummary)
+              .filter(Boolean)
+              .join("\n");
+
+            return (
+              <DailyTimelineItem
+                key={event.id}
+                itemType="training"
+                compact={false}
+                icon="🏋️"
+                title={event.title || "Training"}
+                timeLabel={formatTime(event.eventTime)}
+                subtitle={
+                  summary ||
+                  (event.durationMinutes ? `${event.durationMinutes} min` : "Gepland")
+                }
+                accentColor="#4f7d55"
+                backgroundColor="#f8fcf9"
+                borderColor="#a7c7ad"
+                onToggle={() => setDetailTraining(event)}
+                actions={
+                  <span
+                    style={{
+                      color: executed ? "#166534" : "#4f7d55",
+                      fontSize: 12,
+                      fontWeight: 850,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {executed ? "✅ Uitgevoerd" : "📅 Gepland"}
+                  </span>
+                }
+                detailContent={
+                  <div style={{ whiteSpace: "pre-line" }}>{summary}</div>
+                }
+              />
+            );
+          }
+
           if (item.itemType === "supplement") {
             const event = item.event;
+            const isMedication = event.intakeType === "medication";
 
             return (
               <DailyTimelineItem
@@ -1036,13 +1098,16 @@ export function DailyMealList({
                 indentLevel={1}
                 compact={compactTimeline}
                 icon="💊"
-                title={`${event.name} · ${event.dosage}`}
+                title={`${event.name || (isMedication ? "Medicatie / Creon" : "Supplement")}${
+                  event.dosage ? ` · ${event.dosage}` : ""
+                }`}
                 timeLabel={formatTime(event.eventTime)}
                 subtitle={event.note || ""}
                 accentColor="#6d28d9"
                 backgroundColor="#f5f3ff"
                 borderColor="#c4b5fd"
-                actions={deleteButton(event, "supplement")}
+                actions={null}
+                onToggle={() => setDetailEvent({ type: "supplement", event })}
               />
             );
           }
@@ -1055,7 +1120,7 @@ export function DailyMealList({
                 key={event.id}
                 indentLevel={1}
                 expanded={false}
-                onToggle={() => {}}
+                onToggle={() => setDetailEvent({ type: "bowel", event })}
                 compact={true}
                 icon="🚽"
                 title={`Bristol ${event.bristolScore}`}
@@ -1066,7 +1131,7 @@ export function DailyMealList({
                 accentColor="#92400e"
                 backgroundColor="#fffbeb"
                 borderColor="#fcd34d"
-                actions={<>{deleteButton(event, "bowel")}</>}
+                actions={null}
                 detailContent={null}
               />
             );
@@ -1079,7 +1144,7 @@ export function DailyMealList({
                 key={event.id}
                 indentLevel={1}
                 expanded={expandedIds.includes(event.id)}
-                onToggle={() => toggleExpanded(event.id)}
+                onToggle={() => setDetailEvent({ type: "note", event })}
                 compact={compactTimeline}
                 icon={event.alarmEnabled ? "🔔📝" : "📝"}
                 title={event.note || "Notitie"}
@@ -1092,12 +1157,7 @@ export function DailyMealList({
                 accentColor="#475569"
                 backgroundColor="#f8fafc"
                 borderColor="#cbd5e1"
-                actions={
-                  <>
-                    {timerButton(event)}
-                    {editButton(event, "note")}
-                  </>
-                }
+                actions={null}
                 detailContent={
                   <div style={{ fontSize: 13, color: "#334155" }}>
                     {event.note}
@@ -1128,6 +1188,155 @@ export function DailyMealList({
         />
       )}
 
+      <DailyEventDetailModal
+        open={Boolean(detailEvent)}
+        type={detailEvent?.type}
+        event={detailEvent?.event}
+        onClose={() => setDetailEvent(null)}
+        onEdit={() => {
+          setEditingEvent(detailEvent.event);
+          setEditingType(detailEvent.type);
+          setDetailEvent(null);
+        }}
+        onDelete={() => {
+          if (!window.confirm("Dit tijdlijnmoment verwijderen?")) return;
+          const { type, event } = detailEvent;
+          if (type === "insulin") deleteInsulinEvent(event.id);
+          if (type === "glucose") deleteGlucoseEvent(event.id);
+          if (type === "glucoseBoost") deleteGlucoseBoostEvent(event.id);
+          if (type === "movement") deleteMovementEvent(event.id);
+          if (type === "weight") deleteWeightEvent(event.id);
+          if (type === "supplement") deleteSupplementEvent(event.id);
+          if (type === "bowel") deleteBowelEvent(event.id);
+          if (type === "note") deleteNoteEvent(event.id);
+          setDetailEvent(null);
+        }}
+      />
+
+      <DailyEventDetailModal
+        open={Boolean(detailSupplementPlan)}
+        type="supplement"
+        event={detailSupplementPlan}
+        executed={
+          detailSupplementPlan
+            ? isSportSupplementPlanTaken(dailyLog, detailSupplementPlan.id)
+            : false
+        }
+        onClose={() => setDetailSupplementPlan(null)}
+        onEdit={() => {
+          setEditingSupplementPlan(detailSupplementPlan);
+          setDetailSupplementPlan(null);
+        }}
+        onDelete={() => {
+          if (!window.confirm("Deze supplementplanning verwijderen?")) return;
+          deleteSupplementPlanEvent(detailSupplementPlan.id);
+          setDetailSupplementPlan(null);
+        }}
+        onExecute={() => {
+          setExecutingSupplementPlan(detailSupplementPlan);
+          setDetailSupplementPlan(null);
+        }}
+      />
+
+      <TrainingPlanDetailModal
+        open={Boolean(detailTraining)}
+        training={detailTraining}
+        executed={
+          detailTraining
+            ? isTrainingPlanExecuted(dailyLog, detailTraining.id)
+            : false
+        }
+        onClose={() => setDetailTraining(null)}
+        onEdit={() => {
+          setEditingTraining(detailTraining);
+          setDetailTraining(null);
+        }}
+        onDelete={() => {
+          if (window.confirm("Deze geplande training verwijderen?")) {
+            deleteTrainingPlanEvent(detailTraining.id);
+            setDetailTraining(null);
+          }
+
+          if (item.itemType === "supplementPlan") {
+            const event = item.event;
+            const taken = isSportSupplementPlanTaken(dailyLog, event.id);
+
+            return (
+              <DailyTimelineItem
+                key={event.id}
+                compact={false}
+                icon="💊"
+                title={`${event.name || "Supplement"}${
+                  event.amount || event.unit
+                    ? ` · ${[event.amount, event.unit].filter(Boolean).join(" ")}`
+                    : ""
+                }`}
+                timeLabel={formatTime(event.eventTime)}
+                subtitle="Gepland rond training"
+                accentColor="#6d28d9"
+                backgroundColor="#faf7ff"
+                borderColor="#c4b5fd"
+                onToggle={() => setDetailSupplementPlan(event)}
+                actions={
+                  <span style={{ color: taken ? "#166534" : "#6d28d9", fontSize: 12, fontWeight: 850 }}>
+                    {taken ? "✅ Ingenomen" : "📅 Gepland"}
+                  </span>
+                }
+              />
+            );
+          }
+        }}
+        onExecute={() => {
+          setExecutingTraining(detailTraining);
+          setDetailTraining(null);
+        }}
+      />
+
+      <TrainingPlanModal
+        open={Boolean(editingTraining)}
+        selectedDate={selectedDate}
+        training={editingTraining}
+        onClose={() => setEditingTraining(null)}
+        onSave={(updates) => {
+          updateTrainingPlanEvent(editingTraining.id, updates);
+          setEditingTraining(null);
+        }}
+      />
+
+      <PlannedExecutionModal
+        open={Boolean(executingTraining)}
+        kind="training"
+        item={executingTraining}
+        onClose={() => setExecutingTraining(null)}
+        onSave={(values) => {
+          executeTrainingPlan(executingTraining, values);
+          setExecutingTraining(null);
+        }}
+      />
+
+      <SportSupplementPlanModal
+        open={Boolean(editingSupplementPlan)}
+        selectedDate={selectedDate}
+        training={null}
+        plan={editingSupplementPlan}
+        onClose={() => setEditingSupplementPlan(null)}
+        onSave={(updates) => {
+          updateSupplementPlanEvent(editingSupplementPlan.id, updates);
+          setEditingSupplementPlan(null);
+        }}
+      />
+
+      <PlannedExecutionModal
+        open={Boolean(executingSupplementPlan)}
+        kind="supplement"
+        item={executingSupplementPlan}
+        onClose={() => setExecutingSupplementPlan(null)}
+        onSave={(values) => {
+          takeSupplementPlan(executingSupplementPlan, values);
+          setExecutingSupplementPlan(null);
+        }}
+      />
+
       {editingEvent && (
         <DailyEventEditModal
           event={editingEvent}
@@ -1143,6 +1352,9 @@ export function DailyMealList({
             if (editingType === "glucoseBoost")
               updateGlucoseBoostEvent(id, updates);
             if (editingType === "movement") updateMovementEvent(id, updates);
+            if (editingType === "weight") updateWeightEvent(id, updates);
+            if (editingType === "supplement")
+              updateSupplementEvent(id, updates);
             if (editingType === "bowel") updateBowelEvent(id, updates);
             if (editingType === "note") updateNoteEvent(id, updates);
 
@@ -1154,6 +1366,8 @@ export function DailyMealList({
             if (editingType === "glucose") deleteGlucoseEvent(id);
             if (editingType === "glucoseBoost") deleteGlucoseBoostEvent(id);
             if (editingType === "movement") deleteMovementEvent(id);
+            if (editingType === "weight") deleteWeightEvent(id);
+            if (editingType === "supplement") deleteSupplementEvent(id);
             if (editingType === "bowel") deleteBowelEvent(id);
             if (editingType === "note") deleteNoteEvent(id);
 

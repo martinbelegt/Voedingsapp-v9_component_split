@@ -37,6 +37,21 @@ function makePlan(eventTime = "2026-07-27T10:00") {
   );
 }
 
+const exercise = {
+  id: "exercise-1",
+  name: "Incline Dumbbell Press",
+  order: 0,
+  sets: 3,
+  repsMin: 6,
+  repsMax: 10,
+  tempo: "3-1-1-0",
+  restSecondsMin: 180,
+  restSecondsMax: 240,
+  toFailure: true,
+  note: "Stop wanneer de concentrische fase onvrijwillig vertraagt.",
+  futureField: "preserved",
+};
+
 test("vandaag plannen levert een trainingPlanEvent voor vandaag op", () => {
   const result = makePlan();
   const dailyLog = addTrainingPlanEvent([], result.date, result.event);
@@ -87,7 +102,8 @@ test("alleen de tijd wijzigen houdt dezelfde dag en hetzelfde ID", () => {
 });
 
 test("de datum wijzigen verplaatst de planning atomair met hetzelfde ID", () => {
-  const { event } = makePlan();
+  const { event: baseEvent } = makePlan();
+  const event = { ...baseEvent, exercises: [exercise] };
   const day = { ...emptyDay("2026-07-27"), trainingPlanEvents: [event] };
   const result = moveDailyLogEvent({
     dailyLog: [day],
@@ -99,6 +115,7 @@ test("de datum wijzigen verplaatst de planning atomair met hetzelfde ID", () => 
   expect(result.dailyLog).toHaveLength(1);
   expect(result.dailyLog[0].date).toBe("2026-07-29");
   expect(result.dailyLog[0].trainingPlanEvents[0].id).toBe(event.id);
+  expect(result.dailyLog[0].trainingPlanEvents[0].exercises).toEqual([exercise]);
 });
 
 test("training plannen blijft gescheiden van werkelijk geregistreerde beweging", () => {

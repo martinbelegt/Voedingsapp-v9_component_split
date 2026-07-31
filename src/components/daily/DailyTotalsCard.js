@@ -100,7 +100,7 @@ export function DailyTotalsCard({
               }}
             >
               Onderhoud {maintenanceKcal} kcal · Dagdoel {targetKcal} kcal ·
-              Eiwitdoel {proteinGoal} g · Min maaltijd {proteinMealGoal} g
+              Eiwitdoel {proteinGoal} g · Min voeding {proteinMealGoal} g
             </div>
 
             {gramsKhPerUnit > 0 && (

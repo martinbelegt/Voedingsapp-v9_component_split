@@ -7,7 +7,18 @@ import React, {
 } from "react";
 import { createPortal } from "react-dom";
 import VoedingslijstTab from "./components/VoedingslijstTab";
-import { ComposeSubnavigation, LibrariesTab } from "./components/LibrariesTab";
+import SupplementsTab from "./components/SupplementsTab";
+import { RegistrationTab } from "./components/LibrariesTab";
+import {
+  ModuleNavigation,
+  ModuleWorkspace,
+} from "./components/navigation/ModuleNavigation";
+import {
+  libraryModules,
+  mainNavigation,
+  recordModules,
+  registrationModules,
+} from "./data/navigationConfig";
 import { GiTimingTab } from "./components/GiTimingTab";
 import { SettingsTab } from "./components/SettingsTab";
 import { useDailyLog } from "./hooks/useDailyLog";
@@ -717,7 +728,14 @@ export default function App() {
   // home screen
   // ======================================================
   const [activeTab, setActiveTab] = useState("daily");
-  const [activeLibraryTab, setActiveLibraryTab] = useState("meals");
+  const [activeRegistrationModule, setActiveRegistrationModule] =
+    useState("meal");
+  const [registrationPanelOpen, setRegistrationPanelOpen] = useState(true);
+  const [registrationDirty, setRegistrationDirty] = useState(false);
+  const [pendingRegistrationModule, setPendingRegistrationModule] =
+    useState(null);
+  const [activeListModule, setActiveListModule] = useState("food");
+  const [activeRecordModule, setActiveRecordModule] = useState("medication");
   const [activeDevTab, setActiveDevTab] = useState("playground");
   const isMobile =
     window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
@@ -815,7 +833,6 @@ export default function App() {
   );
   const [logCurrentMealToDay, setLogCurrentMealToDay] = useState(true);
   const [showTimelineAnalysis, setShowTimelineAnalysis] = useState(false);
-  const [showAddButtons, setShowAddButtons] = useState(false);
   const [showTimelineControls, setShowTimelineControls] = useState(false);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().slice(0, 10),
@@ -861,6 +878,9 @@ export default function App() {
     addMovementEventToDay,
     updateMovementEvent,
     deleteMovementEvent,
+    addWeightEventToDay,
+    updateWeightEvent,
+    deleteWeightEvent,
     addSupplementEventToDay,
     updateSupplementEvent,
     deleteSupplementEvent,
@@ -876,6 +896,8 @@ export default function App() {
     addSportSupplementPlanEventToDay,
     updateSportSupplementPlanEvent,
     deleteSportSupplementPlanEvent,
+    executeTrainingPlan,
+    takeSportSupplementPlan,
   } = useDailyLog(selectedDate);
   // ======================================================
   // ZOEKANKER: SAVED MEALS / STANDAARDMAALTIJDEN
@@ -1392,8 +1414,46 @@ export default function App() {
   function openMealInputFromTimeline() {
     setDayMealDate(selectedDate);
     setLogCurrentMealToDay(true);
-    setActiveLibraryTab("meals");
-    setActiveTab("libraries");
+    setActiveRegistrationModule("meal");
+    setRegistrationPanelOpen(true);
+    setActiveTab("registration");
+  }
+
+  function selectRegistrationModule(moduleId) {
+    if (registrationPanelOpen && registrationDirty) {
+      setPendingRegistrationModule(
+        activeRegistrationModule === moduleId ? "__close__" : moduleId,
+      );
+      return;
+    }
+
+    if (
+      activeTab === "registration" &&
+      activeRegistrationModule === moduleId &&
+      registrationPanelOpen
+    ) {
+      setRegistrationPanelOpen(false);
+      return;
+    }
+
+    setActiveRegistrationModule(moduleId);
+    setRegistrationPanelOpen(true);
+  }
+
+  function discardRegistrationChanges() {
+    const pending = pendingRegistrationModule;
+    setPendingRegistrationModule(null);
+    setRegistrationDirty(false);
+
+    if (pending === "__close__") {
+      setRegistrationPanelOpen(false);
+      return;
+    }
+
+    if (pending) {
+      setActiveRegistrationModule(pending);
+      setRegistrationPanelOpen(true);
+    }
   }
   function saveCurrentMeal() {
     const cleanedRows = rows.filter((r) => r.productId && r.amount !== "");
@@ -1884,29 +1944,6 @@ Producten uit deze categorie gaan naar "Overig".`);
       );
     }
   }
-  const mainNavigationItems = [
-    { id: "daily", label: "Tijdlijn", color: "#0891b2" },
-    { id: "libraries", label: "Compose", color: "#7c3aed" },
-    { id: "voedingslijst", label: "Voeding", color: "#16a34a" },
-    { id: "gi", label: "GI / Timing", color: "#9333ea" },
-    { id: "settings", label: "Mijn Profiel", color: "#475569" },
-    {
-      id: "foundation-playground",
-      tab: "foundation",
-      devTab: "playground",
-      label: "Foundation Playground",
-      color: "#0f766e",
-    },
-    {
-      id: "companion-design-lab",
-      tab: "foundation",
-      devTab: "designLab",
-      label: "Companion Design Lab",
-      color: "#0f766e",
-    },
-    { id: "testlog", label: "Testlog", color: "#64748b" },
-  ];
-
   function isMainNavigationItemActive(item) {
     if (item.devTab) {
       return activeTab === item.tab && activeDevTab === item.devTab;
@@ -1927,7 +1964,6 @@ Producten uit deze categorie gaan naar "Overig".`);
 
   function activateTimelineHome() {
     setShowTimelineAnalysis(false);
-    setShowAddButtons(false);
     setShowTimelineControls(false);
     setActiveTab("daily");
   }
@@ -1968,7 +2004,7 @@ Producten uit deze categorie gaan naar "Overig".`);
           flexWrap: "nowrap",
         }}
       >
-        {mainNavigationItems.map((item) => (
+        {mainNavigation.map((item) => (
           <button
             key={item.id}
             type="button"
@@ -1982,19 +2018,6 @@ Producten uit deze categorie gaan naar "Overig".`);
     );
   }
 
-  function renderComposeSubnavigation() {
-    if (activeTab !== "libraries") return null;
-
-    return (
-      <ComposeSubnavigation
-        activeLibraryTab={activeLibraryTab}
-        setActiveLibraryTab={setActiveLibraryTab}
-        buttonStyle={buttonStyle}
-        primaryButtonStyle={primaryButtonStyle}
-      />
-    );
-  }
-
   function renderTimelineSubnavigation() {
     if (activeTab !== "daily") return null;
 
@@ -2005,13 +2028,6 @@ Producten uit deze categorie gaan naar "Overig".`);
         active: showTimelineAnalysis,
         color: "#2563eb",
         onClick: () => setShowTimelineAnalysis((value) => !value),
-      },
-      {
-        id: "new",
-        label: "+ Nieuw",
-        active: showAddButtons,
-        color: "#0891b2",
-        onClick: () => setShowAddButtons((value) => !value),
       },
       {
         id: "filters",
@@ -2069,6 +2085,43 @@ Producten uit deze categorie gaan naar "Overig".`);
     );
   }
 
+  function renderModuleSubnavigation() {
+    if (activeTab === "registration") {
+      return (
+        <ModuleNavigation
+          title="Samenstellen"
+          modules={registrationModules}
+          activeModuleId={activeRegistrationModule}
+          onSelect={selectRegistrationModule}
+        />
+      );
+    }
+
+    if (activeTab === "lists") {
+      return (
+        <ModuleNavigation
+          title="Mijn catalogi"
+          modules={libraryModules}
+          activeModuleId={activeListModule}
+          onSelect={setActiveListModule}
+        />
+      );
+    }
+
+    if (activeTab === "record") {
+      return (
+        <ModuleNavigation
+          title="Mijn dossier"
+          modules={recordModules}
+          activeModuleId={activeRecordModule}
+          onSelect={setActiveRecordModule}
+        />
+      );
+    }
+
+    return null;
+  }
+
   useLayoutEffect(() => {
     if (!isMobile) {
       setHeaderNavStackHeight(0);
@@ -2119,7 +2172,7 @@ Producten uit deze categorie gaan naar "Overig".`);
       resizeObserver?.disconnect();
       window.removeEventListener("resize", handleWindowResize);
     };
-  }, [isMobile, activeTab, activeLibraryTab]);
+  }, [isMobile, activeTab, activeRegistrationModule, activeListModule]);
 
   useLayoutEffect(() => {
     if (!isMobile || typeof document === "undefined") return undefined;
@@ -2221,7 +2274,7 @@ Producten uit deze categorie gaan naar "Overig".`);
 
           {renderMainNavigation()}
           {renderTimelineSubnavigation()}
-          {renderComposeSubnavigation()}
+          {renderModuleSubnavigation()}
         </div>
     );
 
@@ -2425,7 +2478,6 @@ Producten uit deze categorie gaan naar "Overig".`);
             </div>
 
             {renderMainNavigation()}
-            {renderComposeSubnavigation()}
 
           </>
         )}
@@ -2484,15 +2536,40 @@ Producten uit deze categorie gaan naar "Overig".`);
             )}
           </div>
         )}
-        {activeTab === "libraries" && (
-          <LibrariesTab
-            activeLibraryTab={activeLibraryTab}
+        {activeTab === "registration" && (
+          <RegistrationTab
+            activeModuleId={activeRegistrationModule}
             dashboardProps={mealWorkspaceProps}
-            cardStyle={cardStyle}
-            buttonStyle={buttonStyle}
+            panelOpen={registrationPanelOpen}
           />
         )}
-        {activeTab === "voedingslijst" && (
+        {activeTab === "lists" && (
+          <div className="companion-catalog-page-heading">
+            <h1>Mijn catalogi</h1>
+            <p>
+              Beheer hier je catalogi met voedingsmiddelen, supplementen,
+              medicatie en oefeningen.
+            </p>
+            <ModuleWorkspace
+              title="Mijn catalogi"
+              description="Beheer hier je catalogi met voedingsmiddelen, supplementen, medicatie en oefeningen."
+              modules={libraryModules}
+              activeModuleId={activeListModule}
+              onSelect={setActiveListModule}
+              hideNavigation
+            />
+          </div>
+        )}
+        {activeTab === "record" && (
+          <ModuleWorkspace
+            title="Mijn dossier"
+            modules={recordModules}
+            activeModuleId={activeRecordModule}
+            onSelect={setActiveRecordModule}
+            hideNavigation
+          />
+        )}
+        {activeTab === "lists" && activeListModule === "food" && (
           <VoedingslijstTab
             categories={categories}
             products={products}
@@ -2612,7 +2689,6 @@ Producten uit deze categorie gaan naar "Overig".`);
             dayTotals={dayTotals}
             selectedDay={selectedDay}
             showTimelineAnalysis={showTimelineAnalysis}
-            showAddButtons={showAddButtons}
             showTimelineControls={showTimelineControls}
             setShowTimelineControls={setShowTimelineControls}
             clearDailyLog={clearDailyLog}
@@ -2636,6 +2712,9 @@ Producten uit deze categorie gaan naar "Overig".`);
             addMovementEventToDay={addMovementEventToDay}
             updateMovementEvent={updateMovementEvent}
             deleteMovementEvent={deleteMovementEvent}
+            addWeightEventToDay={addWeightEventToDay}
+            updateWeightEvent={updateWeightEvent}
+            deleteWeightEvent={deleteWeightEvent}
             addSupplementEventToDay={addSupplementEventToDay}
             updateSupplementEvent={updateSupplementEvent}
             deleteSupplementEvent={deleteSupplementEvent}
@@ -2658,8 +2737,14 @@ Producten uit deze categorie gaan naar "Overig".`);
             deleteSportSupplementPlanEvent={
               deleteSportSupplementPlanEvent
             }
+            executeTrainingPlan={executeTrainingPlan}
+            takeSportSupplementPlan={takeSportSupplementPlan}
+            dailyLog={dailyLog}
             onAddMeal={openMealInputFromTimeline}
           />
+        )}
+        {activeTab === "lists" && activeListModule === "supplements" && (
+          <SupplementsTab />
         )}
       </div>
       <AppDataSyncMonitor debug={appDataSyncDebug} />

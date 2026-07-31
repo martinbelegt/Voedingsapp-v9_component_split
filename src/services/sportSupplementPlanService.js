@@ -4,6 +4,7 @@ const DAILY_LOG_COLLECTIONS = [
   "glucoseEvents",
   "glucoseBoostEvents",
   "movementEvents",
+  "weightEvents",
   "supplementEvents",
   "bowelEvents",
   "noteEvents",

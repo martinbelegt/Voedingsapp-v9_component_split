@@ -5,6 +5,7 @@ import {
   loadDailyLogFromCloud,
   loadDailyLogSyncMetadata,
   saveDailyLog,
+  saveDailyLogConflictBackup,
   saveDailyLogSyncMetadata,
   saveDailyLogToCloud,
 } from "../services/localStorageService";
@@ -14,6 +15,7 @@ jest.mock("../services/localStorageService", () => ({
   loadDailyLogFromCloud: jest.fn(),
   loadDailyLogSyncMetadata: jest.fn(),
   saveDailyLog: jest.fn(),
+  saveDailyLogConflictBackup: jest.fn(),
   saveDailyLogSyncMetadata: jest.fn(),
   saveDailyLogToCloud: jest.fn(),
 }));
@@ -54,6 +56,14 @@ describe("useDailyLog cross-device training sync", () => {
   function Harness() {
     hook = useDailyLog(date);
     return null;
+  }
+
+  function deferred() {
+    let resolve;
+    const promise = new Promise((next) => {
+      resolve = next;
+    });
+    return { promise, resolve };
   }
 
   beforeEach(() => {
@@ -127,6 +137,137 @@ describe("useDailyLog cross-device training sync", () => {
       conflict: false,
       cloud: { revision: 11 },
       local: { revision: 11 },
+    });
+  });
+
+  test.each([
+    [false, false],
+    [true, true],
+  ])(
+    "runtime start toont revision 74 en dirty %s uit geldige metadata",
+    async (dirty, expectedDirty) => {
+      const cloudLoad = deferred();
+      loadDailyLogSyncMetadata.mockReturnValue({
+        version: 1,
+        revision: 74,
+        dirty,
+      });
+      loadDailyLogFromCloud.mockReturnValue(cloudLoad.promise);
+
+      await act(async () => {
+        root.render(<Harness />);
+      });
+
+      expect(hook.syncDebug.local).toMatchObject({
+        revision: 74,
+        baselineKnown: true,
+        dirty: expectedDirty,
+      });
+    },
+  );
+
+  test("initieel conflict toont revisions, dirty, decision reason en contentverschil", async () => {
+    loadDailyLogSyncMetadata.mockReturnValue({
+      version: 1,
+      revision: 74,
+      dirty: true,
+    });
+    jest
+      .requireMock("../services/localStorageService")
+      .loadDailyLog.mockReturnValue([dayWithTraining("11:00")]);
+    loadDailyLogFromCloud.mockResolvedValue({
+      status: "success",
+      dailyLog: [dayWithTraining("10:00")],
+      revision: 75,
+      updatedAt: "2026-07-28T10:00:00.000Z",
+    });
+
+    await act(async () => {
+      root.render(<Harness />);
+      await Promise.resolve();
+    });
+
+    expect(hook.syncDebug).toMatchObject({
+      status: "conflict",
+      conflict: true,
+      cloud: { revision: 75 },
+      local: { revision: 74, baselineKnown: true, dirty: true },
+      decision: {
+        action: "compare-non-empty",
+        reason: "both-non-empty",
+        contentEqual: false,
+      },
+    });
+  });
+
+  test("handmatig cloud accepteren bewaart revision 75 voor een nieuwe runtime", async () => {
+    loadDailyLogSyncMetadata.mockReturnValue({
+      version: 1,
+      revision: 74,
+      dirty: true,
+    });
+    jest
+      .requireMock("../services/localStorageService")
+      .loadDailyLog.mockReturnValue([dayWithTraining("11:00")]);
+    loadDailyLogFromCloud.mockResolvedValue({
+      status: "success",
+      dailyLog: [dayWithTraining("10:00")],
+      revision: 75,
+      updatedAt: "2026-07-28T10:00:00.000Z",
+    });
+
+    await act(async () => {
+      root.render(<Harness />);
+      await Promise.resolve();
+    });
+    await act(async () => {
+      await hook.acceptLatestCloudDailyLog();
+    });
+
+    expect(saveDailyLogConflictBackup).toHaveBeenCalledWith(
+      expect.any(Array),
+      { localRevision: 74, cloudRevision: 75 },
+    );
+    expect(saveDailyLogSyncMetadata).toHaveBeenLastCalledWith(75, false);
+    expect(hook.syncDebug.local).toMatchObject({
+      revision: 75,
+      baselineKnown: true,
+      dirty: false,
+    });
+
+    await act(async () => root.unmount());
+    root = createRoot(container);
+    loadDailyLogSyncMetadata.mockReturnValue({
+      version: 1,
+      revision: 75,
+      dirty: false,
+    });
+    const nextCloudLoad = deferred();
+    loadDailyLogFromCloud.mockReturnValue(nextCloudLoad.promise);
+
+    await act(async () => {
+      root.render(<Harness />);
+    });
+    expect(hook.syncDebug.local).toMatchObject({
+      revision: 75,
+      baselineKnown: true,
+      dirty: false,
+    });
+  });
+
+  test("ontbrekende metadata toont expliciet een onbekende lokale baseline", async () => {
+    loadDailyLogSyncMetadata.mockReturnValue(null);
+    const cloudLoad = deferred();
+    loadDailyLogFromCloud.mockReturnValue(cloudLoad.promise);
+
+    await act(async () => {
+      root.render(<Harness />);
+    });
+
+    expect(hook.syncDebug.local).toMatchObject({
+      revision: null,
+      baselineKnown: false,
+      dirty: null,
     });
   });
 });

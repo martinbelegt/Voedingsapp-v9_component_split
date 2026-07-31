@@ -24,6 +24,7 @@ function dayWith(collection, event, date = "2026-07-27", extra = {}) {
     glucoseEvents: [],
     glucoseBoostEvents: [],
     movementEvents: [],
+    weightEvents: [],
     supplementEvents: [],
     bowelEvents: [],
     noteEvents: [],

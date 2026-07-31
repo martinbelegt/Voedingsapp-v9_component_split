@@ -57,6 +57,16 @@ function createDurableState() {
         ],
         glucoseBoostEvents: [],
         movementEvents: [],
+        weightEvents: [
+          {
+            id: "weight-1",
+            type: "weight",
+            eventTime: "2026-07-27T07:42",
+            datetime: "2026-07-27T07:42",
+            valueKg: 78.4,
+            note: "",
+          },
+        ],
         supplementEvents: [],
         bowelEvents: [],
         noteEvents: [
@@ -113,6 +123,9 @@ test("round trip behoudt dailyLog, medische velden, tijden, IDs en timers", () =
   expect(restored.dailyLog[0].meals).toHaveLength(1);
   expect(restored.dailyLog[0].insulinEvents).toHaveLength(1);
   expect(restored.dailyLog[0].glucoseEvents).toHaveLength(1);
+  expect(restored.dailyLog[0].weightEvents).toEqual(
+    state.dailyLog[0].weightEvents,
+  );
   expect(restored.dailyLog[0].meals[0]).toMatchObject({
     id: "daily-meal-1",
     eatenAt: "2026-07-27T08:15",

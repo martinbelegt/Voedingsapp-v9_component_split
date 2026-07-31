@@ -74,20 +74,6 @@ export function DailyEventAddModal({
   };
 
   const config = {
-    insulin: {
-      title: "Toegediende insuline toevoegen",
-      label1: "Aantal eenheden",
-      placeholder1: "bijv. 4",
-      label2: "Notitie",
-      placeholder2: "bijv. dageraad / correctie / voor maaltijd",
-    },
-    glucose: {
-      title: "Glucosemeting toevoegen",
-      label1: "Glucosewaarde mmol/L",
-      placeholder1: "bijv. 7.8",
-      label2: "Notitie",
-      placeholder2: "bijv. nuchter / 1 uur na ontbijt",
-    },
     glucoseBoost: {
       title: "Glucoseboost toevoegen",
       label1: "Snelle KH gram",
@@ -96,27 +82,6 @@ export function DailyEventAddModal({
       placeholder2: "bijv. druivensuiker",
       label3: "Notitie",
       placeholder3: "bijv. hypo-correctie",
-    },
-    movement: {
-      title: "Beweging/sport toevoegen",
-      label1: "Type",
-      placeholder1: "bijv. krachttraining",
-      label2: "Belasting",
-      placeholder2: "aeroob / anaeroob / gemengd",
-      label3: "Duur minuten",
-      placeholder3: "bijv. 60",
-    },
-    bowel: {
-      title: "Stoelgang toevoegen",
-      label1: "Bristol score",
-      placeholder1: "1 t/m 7",
-    },
-    note: {
-      title: "Notitie toevoegen",
-      label1: "Notitie",
-      placeholder1: "bijv. 2 HMB pillen voor training",
-      label2: "Context",
-      placeholder2: "optioneel",
     },
     supplement: {
       title: "Supplement toevoegen",
@@ -306,7 +271,9 @@ export function DailyEventAddModal({
           </>
         )}
 
-        {(eventType === "supplement" || eventType === "movement") && (
+        {(eventType === "supplement" ||
+          eventType === "medication" ||
+          eventType === "movement") && (
           <>
             <label style={{ fontSize: 13, fontWeight: 800 }}>Herhalen</label>
 

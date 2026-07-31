@@ -4,6 +4,7 @@ export const TRAINING_TYPES = [
   "Mobiliteit en herstel",
   "Overig",
 ];
+import { normalizeTrainingPlanEvent } from "./trainingStructureService";
 
 const DAILY_LOG_COLLECTIONS = [
   "meals",
@@ -11,6 +12,7 @@ const DAILY_LOG_COLLECTIONS = [
   "glucoseEvents",
   "glucoseBoostEvents",
   "movementEvents",
+  "weightEvents",
   "supplementEvents",
   "bowelEvents",
   "noteEvents",
@@ -56,7 +58,8 @@ export function createTrainingPlanEvent(input, options = {}) {
 
   return {
     date,
-    event: {
+    event: normalizeTrainingPlanEvent({
+      ...input,
       id: makeId("training-plan-event"),
       type: "trainingPlan",
       eventTime,
@@ -67,7 +70,7 @@ export function createTrainingPlanEvent(input, options = {}) {
       createdAt:
         input?.createdAt ||
         (options.now ? options.now() : new Date()).toLocaleString("nl-NL"),
-    },
+    }),
   };
 }
 

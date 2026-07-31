@@ -3,6 +3,7 @@ export const DAILY_EVENT_COLLECTIONS = [
   "glucoseEvents",
   "glucoseBoostEvents",
   "movementEvents",
+  "weightEvents",
   "supplementEvents",
   "bowelEvents",
   "noteEvents",

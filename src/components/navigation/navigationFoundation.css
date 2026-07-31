@@ -1,0 +1,184 @@
+.companion-module-workspace {
+  display: grid;
+  gap: 0;
+}
+
+.companion-catalog-page-heading {
+  display: grid;
+  gap: 3px;
+  margin: 0 0 10px;
+  padding: 0 4px;
+}
+
+.companion-catalog-page-heading h1 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.companion-catalog-page-heading p {
+  margin: 0;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.companion-module-navigation {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.companion-module-navigation nav {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  gap: 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0 4px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+.companion-module-navigation nav::-webkit-scrollbar {
+  display: none;
+}
+
+.companion-module-navigation button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+  min-height: 28px;
+  padding: 4px 9px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #fff;
+  color: #334155;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.15;
+  white-space: nowrap;
+  scroll-snap-align: start;
+}
+
+.companion-module-navigation button:hover {
+  border-color: #8da793;
+  background: #f1f6f2;
+}
+
+.companion-module-navigation button.is-active {
+  border-color: #557a5b;
+  background: #557a5b;
+  color: #fff;
+  box-shadow: none;
+}
+
+.companion-module-navigation button > span {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.companion-module-navigation button strong {
+  font: inherit;
+}
+
+.companion-module-workspace__content:empty {
+  display: none;
+}
+
+.companion-roadmap-placeholder {
+  display: grid;
+  justify-items: start;
+  max-width: 680px;
+  min-height: 360px;
+  box-sizing: border-box;
+  padding: 42px;
+  border: 1px solid #dfe7e1;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(30, 41, 59, 0.055);
+  color: #64748b;
+}
+
+.companion-roadmap-placeholder > p {
+  margin: 0;
+  color: #557a5b;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.companion-roadmap-placeholder__icon {
+  display: grid;
+  place-content: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 18px;
+  border-radius: 14px;
+  background: #edf4ee;
+  font-size: 25px;
+}
+
+.companion-roadmap-placeholder h1 {
+  margin: 5px 0 14px;
+  color: #1e293b;
+  font-size: 27px;
+}
+
+.companion-roadmap-placeholder strong {
+  margin-bottom: 18px;
+  color: #557a5b;
+  font-size: 15px;
+}
+
+.companion-roadmap-placeholder > span {
+  margin-bottom: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.companion-roadmap-placeholder ul {
+  margin: 3px 0 14px;
+  padding-left: 20px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.companion-roadmap-placeholder hr {
+  width: 100%;
+  margin: 16px 0;
+  border: 0;
+  border-top: 1px solid #e6ece7;
+}
+
+@media (max-width: 899px) {
+  .companion-module-workspace {
+    gap: 6px;
+  }
+
+  .companion-module-navigation nav {
+    padding: 0 4px;
+  }
+
+  .companion-module-navigation button {
+    min-height: 28px;
+    padding: 4px 8px;
+  }
+
+  .companion-roadmap-placeholder {
+    min-height: 300px;
+    padding: 28px 22px;
+  }
+}

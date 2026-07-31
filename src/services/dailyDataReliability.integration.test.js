@@ -90,6 +90,17 @@ function createRealisticState() {
             type: "movement",
             eventTime: `${date}T11:00`,
             activityType: "Wandelen",
+            trainingPlanId: "training-1",
+          },
+        ],
+        weightEvents: [
+          {
+            id: "weight-1",
+            type: "weight",
+            eventTime: `${date}T07:42`,
+            datetime: `${date}T07:42`,
+            valueKg: 78.4,
+            note: "Ochtendmeting",
           },
         ],
         supplementEvents: [
@@ -99,6 +110,7 @@ function createRealisticState() {
             eventTime: `${date}T08:05`,
             name: "Creon 25.000",
             dosage: "9 capsules",
+            sportSupplementPlanId: "sport-supplement-plan-1",
           },
         ],
         bowelEvents: [
@@ -125,6 +137,18 @@ function createRealisticState() {
             type: "trainingPlan",
             eventTime: `${date}T17:00`,
             title: "Krachttraining",
+            exercises: [
+              {
+                id: "exercise-1",
+                name: "Incline Dumbbell Press",
+                order: 0,
+                sets: 3,
+                repsMin: 6,
+                repsMax: 10,
+                futureExerciseField: "preserved",
+              },
+            ],
+            futureTrainingField: "preserved",
           },
         ],
         sportSupplementPlanEvents: [
@@ -174,6 +198,7 @@ test("backup v3 round-trip bewaart volledige dagelijkse toestand en semantiek", 
     "glucoseEvents",
     "glucoseBoostEvents",
     "movementEvents",
+    "weightEvents",
     "supplementEvents",
     "bowelEvents",
     "noteEvents",
@@ -188,6 +213,7 @@ test("backup v3 round-trip bewaart volledige dagelijkse toestand en semantiek", 
     "glucoseEvents",
     "glucoseBoostEvents",
     "movementEvents",
+    "weightEvents",
     "supplementEvents",
     "bowelEvents",
     "noteEvents",
@@ -215,6 +241,21 @@ test("backup v3 round-trip bewaart volledige dagelijkse toestand en semantiek", 
     eventTime: "2026-07-27T07:55",
     unknownEventField: "preserved",
   });
+  expect(restoredDay.movementEvents[0].trainingPlanId).toBe("training-1");
+  expect(restoredDay.weightEvents[0]).toMatchObject({
+    id: "weight-1",
+    valueKg: 78.4,
+    datetime: "2026-07-27T07:42",
+  });
+  expect(restoredDay.trainingPlanEvents[0]).toMatchObject({
+    futureTrainingField: "preserved",
+    exercises: [
+      expect.objectContaining({ futureExerciseField: "preserved" }),
+    ],
+  });
+  expect(restoredDay.supplementEvents[0].sportSupplementPlanId).toBe(
+    "sport-supplement-plan-1",
+  );
 
   // Advies en werkelijk blijven onafhankelijk; legacy insuline dubbelt niet.
   expect(restoredDay.meals[0].totals.insulin).toBe(4);
@@ -242,6 +283,7 @@ test("eventmoves zijn atomair, behouden IDs en verhuizen het insulinetotaal", ()
     ["insulinEvents", "insulin-1", "07:55"],
     ["glucoseEvents", "glucose-1", "09:00"],
     ["movementEvents", "movement-1", "11:00"],
+    ["weightEvents", "weight-1", "07:42"],
     ["supplementEvents", "supplement-1", "08:05"],
   ]) {
     const result = moveDailyLogEvent({
@@ -262,6 +304,7 @@ test("eventmoves zijn atomair, behouden IDs en verhuizen het insulinetotaal", ()
   expect(source.insulinEvents).toEqual([]);
   expect(source.glucoseEvents).toEqual([]);
   expect(source.movementEvents).toEqual([]);
+  expect(source.weightEvents).toEqual([]);
   expect(source.supplementEvents).toEqual([]);
   expect(getAdministeredInsulinTotal(source)).toBe(0);
   expect(getAdministeredInsulinTotal(target)).toBe(4);
@@ -274,6 +317,7 @@ test("eventmoves zijn atomair, behouden IDs en verhuizen het insulinetotaal", ()
     ["insulinEvents", "insulin-1"],
     ["glucoseEvents", "glucose-1"],
     ["movementEvents", "movement-1"],
+    ["weightEvents", "weight-1"],
     ["supplementEvents", "supplement-1"],
   ]) {
     expect(target[collection].filter((event) => event.id === eventId)).toHaveLength(

@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import { DailyMealList } from "./DailyMealList";
 import { DailyEventAddModal } from "./DailyEventAddModal";
 import { requestNotificationPermission } from "../../services/notificationService";
-import { CompanionDateTimePicker } from "../../ui/pickers/CompanionDateTimePicker";
-import { TrainingPlanSection } from "./TrainingPlanSection";
+import { TrainingPlanModal } from "./TrainingPlanModal";
+import { ModuleNavigation } from "../navigation/ModuleNavigation";
+import { CompactEventPanel } from "../registration/CompactEventPanel";
+import { timelineRegistrationModules } from "../../data/navigationConfig";
 
 import {
   scheduleLocalAlarm,
@@ -20,7 +22,6 @@ export function DailyTab({
   dayTotals,
   selectedDay,
   showTimelineAnalysis,
-  showAddButtons,
   showTimelineControls,
   setShowTimelineControls,
   clearDailyLog,
@@ -44,6 +45,9 @@ export function DailyTab({
   addMovementEventToDay,
   updateMovementEvent,
   deleteMovementEvent,
+  addWeightEventToDay,
+  updateWeightEvent,
+  deleteWeightEvent,
   addSupplementEventToDay,
   updateSupplementEvent,
   deleteSupplementEvent,
@@ -61,10 +65,19 @@ export function DailyTab({
   addSportSupplementPlanEventToDay,
   updateSportSupplementPlanEvent,
   deleteSportSupplementPlanEvent,
+  executeTrainingPlan,
+  takeSportSupplementPlan,
+  dailyLog = [],
   onAddMeal,
 }) {
   const isMobile = window.innerWidth < 900;
   const [addEventType, setAddEventType] = useState(null);
+  const [trainingModalOpen, setTrainingModalOpen] = useState(false);
+  const [timelineRegistrationModule, setTimelineRegistrationModule] =
+    useState(null);
+  const [timelineRegistrationDirty, setTimelineRegistrationDirty] =
+    useState(false);
+  const [pendingTimelineModule, setPendingTimelineModule] = useState(null);
   const [activeAlarm, setActiveAlarm] = useState(null);
 
   const mealsForDay = selectedDay?.meals || [];
@@ -72,6 +85,7 @@ export function DailyTab({
   const glucoseEventsForDay = selectedDay?.glucoseEvents || [];
   const glucoseBoostEventsForDay = selectedDay?.glucoseBoostEvents || [];
   const movementEventsForDay = selectedDay?.movementEvents || [];
+  const weightEventsForDay = selectedDay?.weightEvents || [];
   const bowelEventsForDay = selectedDay?.bowelEvents || [];
   const totalTimelineItems =
     mealsForDay.length +
@@ -79,8 +93,10 @@ export function DailyTab({
     glucoseEventsForDay.length +
     glucoseBoostEventsForDay.length +
     movementEventsForDay.length +
+    weightEventsForDay.length +
     noteEventsForDay.length +
-    bowelEventsForDay.length;
+    bowelEventsForDay.length +
+    (selectedDay?.trainingPlanEvents || []).length;
 
   const dailyTargets = settings?.dailyTargets || {};
   const maintenanceKcal = Number(dailyTargets.maintenanceKcal) || 0;
@@ -96,14 +112,6 @@ export function DailyTab({
       : selectedDate === today
         ? "Vandaag"
         : "Archiefdag";
-
-  const formattedSelectedDate = new Date(
-    `${selectedDate}T00:00:00`,
-  ).toLocaleDateString("nl-NL", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
 
   const dayTotalTitle =
     dayMode === "Geplande dag"
@@ -186,7 +194,7 @@ export function DailyTab({
         repeat: repeat || "none",
       });
     }
-    if (eventType === "supplement") {
+    if (eventType === "supplement" || eventType === "medication") {
       addSupplementEventToDay({
         date,
         eventTime,
@@ -194,6 +202,7 @@ export function DailyTab({
         dosage: value2,
         note: value3,
         repeat: repeat || "none",
+        intakeType: eventType,
       });
     }
 
@@ -224,6 +233,52 @@ export function DailyTab({
         title: "VoedingsApp reminder",
         body: noteEvent.note || "Geplande notitie",
       });
+    }
+  }
+
+  function openTimelineRegistration(moduleId) {
+    const inlineModule = [
+      "glucose",
+      "insulin",
+      "medicine",
+      "weight",
+      "movement",
+      "bowel",
+      "note",
+    ].includes(moduleId);
+
+    if (timelineRegistrationModule && timelineRegistrationDirty) {
+      setPendingTimelineModule(
+        timelineRegistrationModule === moduleId ? "__close__" : moduleId,
+      );
+      return;
+    }
+
+    if (inlineModule) {
+      setTimelineRegistrationModule((current) =>
+        current === moduleId ? null : moduleId,
+      );
+      return;
+    }
+
+    setTimelineRegistrationModule(null);
+    if (moduleId === "meal") onAddMeal();
+    else {
+      const eventTypeMap = {
+        supplement: "supplement",
+      };
+      setAddEventType(eventTypeMap[moduleId] || moduleId);
+    }
+  }
+
+  function discardTimelineChanges() {
+    const pending = pendingTimelineModule;
+    setPendingTimelineModule(null);
+    setTimelineRegistrationDirty(false);
+    setTimelineRegistrationModule(null);
+
+    if (pending && pending !== "__close__") {
+      window.requestAnimationFrame(() => openTimelineRegistration(pending));
     }
   }
 
@@ -267,66 +322,6 @@ export function DailyTab({
 
   return (
     <div style={{ display: "grid", gap: 14 }}>
-      {/* Dagkeuze */}
-      <div
-        style={{
-          ...cardStyle,
-          background: "#eff6ff",
-          border: "1px solid #bfdbfe",
-          padding: window.innerWidth < 900 ? "6px 8px" : 16,
-        }}
-      >
-        <div
-          style={{
-            display: "grid",
-            gap: 8,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              width: "100%",
-            }}
-          >
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <CompanionDateTimePicker
-                value={selectedDate}
-                onChange={setSelectedDate}
-                mode="date"
-                label={`${dayMode} · ${formattedSelectedDate}`}
-                compact
-                contextItems={[]}
-              />
-            </div>
-
-
-            {selectedDate !== today && (
-              <button
-                type="button"
-                onClick={() => setSelectedDate(today)}
-                style={{
-                  ...buttonStyle,
-                  background: "#dbeafe",
-                  border: "1px solid #93c5fd",
-                  color: "#1d4ed8",
-                  minHeight: 32,
-                  padding: "4px 8px",
-                  borderRadius: 999,
-                  fontSize: 11,
-                  fontWeight: 800,
-                  lineHeight: 1.05,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                Vandaag
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
       {false && (
         <>
           <button
@@ -376,14 +371,109 @@ export function DailyTab({
           style={{
             display: "grid",
             gap: isMobile ? 4 : 12,
-            marginBottom:
-              showTimelineAnalysis || showAddButtons
-                ? isMobile
-                  ? 4
-                  : 10
-                : 0,
+            marginBottom: isMobile ? 4 : 10,
           }}
         >
+          <div style={{ display: "grid", gap: isMobile ? 6 : 8 }}>
+            <ModuleNavigation
+              title="Registreren op de tijdlijn"
+              modules={timelineRegistrationModules}
+              activeModuleId={timelineRegistrationModule}
+              onSelect={openTimelineRegistration}
+            />
+
+            {timelineRegistrationModule && (
+              <CompactEventPanel
+                key={timelineRegistrationModule}
+                moduleId={timelineRegistrationModule}
+                selectedDate={selectedDate}
+                onDirtyChange={setTimelineRegistrationDirty}
+                discardPrompt={pendingTimelineModule !== null}
+                onKeepEditing={() => setPendingTimelineModule(null)}
+                onDiscard={discardTimelineChanges}
+                onCancel={() => setTimelineRegistrationModule(null)}
+                onSubmit={(values) => {
+                  if (values.moduleId === "glucose") {
+                    addGlucoseEventToDay({
+                      date: values.eventTime.slice(0, 10),
+                      eventTime: values.eventTime,
+                      glucoseValue: values.value,
+                      note: [values.context, values.note]
+                        .filter(Boolean)
+                        .join(" · "),
+                    });
+                  }
+                  if (values.moduleId === "insulin") {
+                    addInsulinEventToDay({
+                      date: values.eventTime.slice(0, 10),
+                      eventTime: values.eventTime,
+                      units: values.units,
+                      insulinType: values.insulinType,
+                      note: values.note,
+                    });
+                  }
+                  if (values.moduleId === "medicine") {
+                    addSupplementEventToDay({
+                      date: values.eventTime.slice(0, 10),
+                      eventTime: values.eventTime,
+                      name: values.name,
+                      dosage: values.dosage,
+                      note: values.note,
+                      repeat: values.repeat || "none",
+                      intakeType: "medication",
+                    });
+                  }
+                  if (values.moduleId === "movement") {
+                    addMovementEventToDay({
+                      date: values.eventTime.slice(0, 10),
+                      eventTime: values.eventTime,
+                      activityType: values.activityType,
+                      durationMinutes: values.durationMinutes,
+                      intensityType: values.intensityType,
+                      note: values.note,
+                      repeat: values.repeat || "none",
+                    });
+                  }
+                  if (values.moduleId === "weight") {
+                    addWeightEventToDay({
+                      eventTime: values.eventTime,
+                      valueKg: values.valueKg,
+                      note: values.note,
+                    });
+                  }
+                  if (values.moduleId === "bowel") {
+                    addBowelEventToDay({
+                      date: values.eventTime.slice(0, 10),
+                      eventTime: values.eventTime,
+                      bristolScore: values.bristolScore,
+                      bowelColor: values.bowelColor,
+                      urgency: values.urgency,
+                      note: values.note,
+                    });
+                  }
+                  if (values.moduleId === "note") {
+                    const noteEvent = addNoteEventToDay({
+                      date: values.eventTime.slice(0, 10),
+                      eventTime: values.eventTime,
+                      note: values.note,
+                      context: values.context,
+                      alarmEnabled: true,
+                      alarmAt: values.eventTime,
+                    });
+                    scheduleLocalAlarm({
+                      id: noteEvent.id,
+                      alarmAt: noteEvent.alarmAt,
+                      title: "VoedingsApp reminder",
+                      body: noteEvent.note || "Geplande notitie",
+                    });
+                  }
+                  setTimelineRegistrationDirty(false);
+                  setTimelineRegistrationModule(null);
+                }}
+              />
+            )}
+          </div>
+
           {showTimelineAnalysis && (
             <div
               style={{
@@ -461,7 +551,7 @@ export function DailyTab({
                       paddingLeft: 10,
                     }}
                   >
-                    <strong>Toegediende insuline:</strong>{" "}
+                    <strong>Insuline:</strong>{" "}
                     {administeredInsulin}E /{" "}
                     <strong>insulineadvies:</strong> {advisedInsulin}E ·{" "}
                     {insulinDiffLabel}
@@ -516,126 +606,7 @@ export function DailyTab({
             </div>
           )}
 
-          {showAddButtons && (
-            <div
-              style={{
-                display: "flex",
-                gap: isMobile ? 4 : 8,
-                flexWrap: "wrap",
-                alignItems: "stretch",
-                marginTop: isMobile ? 2 : 6,
-              }}
-            >
-              <button
-                onClick={() => setAddEventType("glucoseBoost")}
-                style={{
-                  ...buttonStyle,
-                  background: "#fff7ed",
-                  border: "1px solid #fdba74",
-                  color: "#c2410c",
-                  minHeight: isMobile ? 30 : 42,
-                  padding: isMobile ? "4px 6px" : "8px 10px",
-                  borderRadius: isMobile ? 6 : 12,
-                  fontSize: isMobile ? 12 : 13,
-                  fontWeight: 700,
-                  flex: "1 1 calc(50% - 8px)",
-                  lineHeight: isMobile ? 1.05 : undefined,
-                }}
-              >
-                ⚡ Glucoseboost
-              </button>
-
-              <button
-                onClick={() => setAddEventType("movement")}
-                style={{
-                  ...buttonStyle,
-                  background: "#ecfeff",
-                  border: "1px solid #67e8f9",
-                  color: "#0e7490",
-                  minHeight: isMobile ? 30 : 42,
-                  padding: isMobile ? "4px 6px" : "8px 10px",
-                  borderRadius: isMobile ? 6 : 12,
-                  fontSize: isMobile ? 12 : 13,
-                  fontWeight: 700,
-                  flex: "1 1 calc(50% - 8px)",
-                  lineHeight: isMobile ? 1.05 : undefined,
-                }}
-              >
-                + Beweging/sport
-              </button>
-
-              <button
-                onClick={() => setAddEventType("bowel")}
-                style={{
-                  ...buttonStyle,
-                  background: "#fef3c7",
-                  border: "1px solid #fcd34d",
-                  color: "#92400e",
-                  minHeight: isMobile ? 30 : 42,
-                  padding: isMobile ? "4px 6px" : "8px 10px",
-                  borderRadius: isMobile ? 6 : 12,
-                  fontSize: isMobile ? 12 : 13,
-                  fontWeight: 700,
-                  flex: "1 1 calc(50% - 8px)",
-                  lineHeight: isMobile ? 1.05 : undefined,
-                }}
-              >
-                + Stoelgang
-              </button>
-
-              <button
-                onClick={() => setAddEventType("note")}
-                style={{
-                  ...buttonStyle,
-                  background: "#f8fafc",
-                  border: "1px solid #cbd5e1",
-                  color: "#334155",
-                  minHeight: isMobile ? 30 : 42,
-                  padding: isMobile ? "4px 6px" : "8px 10px",
-                  borderRadius: isMobile ? 6 : 12,
-                  fontSize: isMobile ? 12 : 13,
-                  fontWeight: 700,
-                  flex: "1 1 calc(50% - 8px)",
-                  lineHeight: isMobile ? 1.05 : undefined,
-                }}
-              >
-                + Notitie
-              </button>
-
-              <button
-                onClick={() => setAddEventType("supplement")}
-                style={{
-                  ...buttonStyle,
-                  background: "#ede9fe",
-                  border: "1px solid #c4b5fd",
-                  color: "#5b21b6",
-                  minHeight: isMobile ? 30 : 42,
-                  padding: isMobile ? "4px 6px" : "8px 10px",
-                  borderRadius: isMobile ? 6 : 12,
-                  fontSize: isMobile ? 12 : 13,
-                  fontWeight: 700,
-                  flex: "1 1 calc(50% - 8px)",
-                  lineHeight: isMobile ? 1.05 : undefined,
-                }}
-              >
-                + Supplement
-              </button>
-            </div>
-          )}
         </div>
-
-        <TrainingPlanSection
-          selectedDate={selectedDate}
-          trainingPlans={selectedDay?.trainingPlanEvents || []}
-          isMobile={isMobile}
-          onAdd={addTrainingPlanEventToDay}
-          onUpdate={updateTrainingPlanEvent}
-          onDelete={deleteTrainingPlanEvent}
-          supplementPlans={selectedDay?.sportSupplementPlanEvents || []}
-          onAddSupplementPlan={addSportSupplementPlanEventToDay}
-          onUpdateSupplementPlan={updateSportSupplementPlanEvent}
-          onDeleteSupplementPlan={deleteSportSupplementPlanEvent}
-        />
 
         {/* Chronologische lijst */}
         <DailyMealList
@@ -657,10 +628,24 @@ export function DailyTab({
           movementEventsForDay={movementEventsForDay}
           updateMovementEvent={updateMovementEvent}
           deleteMovementEvent={deleteMovementEvent}
+          weightEventsForDay={weightEventsForDay}
+          updateWeightEvent={updateWeightEvent}
+          deleteWeightEvent={deleteWeightEvent}
+          trainingPlansForDay={selectedDay?.trainingPlanEvents || []}
+          updateTrainingPlanEvent={updateTrainingPlanEvent}
+          deleteTrainingPlanEvent={deleteTrainingPlanEvent}
+          dailyLog={dailyLog}
+          executeTrainingPlan={executeTrainingPlan}
           supplementEventsForDay={selectedDay?.supplementEvents || []}
+          supplementPlansForDay={
+            selectedDay?.sportSupplementPlanEvents || []
+          }
           addSupplementEventToDay={addSupplementEventToDay}
           updateSupplementEvent={updateSupplementEvent}
           deleteSupplementEvent={deleteSupplementEvent}
+          updateSupplementPlanEvent={updateSportSupplementPlanEvent}
+          deleteSupplementPlanEvent={deleteSportSupplementPlanEvent}
+          takeSupplementPlan={takeSportSupplementPlan}
           bowelEventsForDay={bowelEventsForDay}
           updateBowelEvent={updateBowelEvent}
           deleteBowelEvent={deleteBowelEvent}
@@ -673,12 +658,25 @@ export function DailyTab({
           setAddEventType={setAddEventType}
           totalTimelineItems={totalTimelineItems}
           selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          today={today}
           selectedDay={selectedDay}
           clearDailyLog={clearDailyLog}
           fillDailyRepeats={fillDailyRepeats}
           onAddMeal={onAddMeal}
         />
       </div>
+
+      <TrainingPlanModal
+        open={trainingModalOpen}
+        selectedDate={selectedDate}
+        training={null}
+        onClose={() => setTrainingModalOpen(false)}
+        onSave={(values) => {
+          addTrainingPlanEventToDay(values);
+          setTrainingModalOpen(false);
+        }}
+      />
 
       {/* Uniform event toevoegen */}
       {addEventType && (

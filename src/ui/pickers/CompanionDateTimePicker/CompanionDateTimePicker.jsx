@@ -238,7 +238,7 @@ function StepperField({ label, value, onAdjust, disabled, compact = false }) {
         style={{
           display: "grid",
           gridTemplateColumns: compact
-            ? "22px minmax(22px, 1fr) 22px"
+            ? "44px minmax(32px, 1fr) 44px"
             : "38px 1fr 38px",
           gap: compact ? 2 : 6,
           alignItems: "center",
@@ -250,7 +250,7 @@ function StepperField({ label, value, onAdjust, disabled, compact = false }) {
           onClick={() => onAdjust(-1)}
           aria-label={`${label} verlagen`}
           style={{
-            minHeight: compact ? 24 : 38,
+            minHeight: compact ? 44 : 38,
             minWidth: 0,
             padding: 0,
             borderRadius: compact ? 7 : 12,
@@ -267,7 +267,7 @@ function StepperField({ label, value, onAdjust, disabled, compact = false }) {
         </button>
         <div
           style={{
-            minHeight: compact ? 24 : 38,
+            minHeight: compact ? 44 : 38,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -285,7 +285,7 @@ function StepperField({ label, value, onAdjust, disabled, compact = false }) {
           onClick={() => onAdjust(1)}
           aria-label={`${label} verhogen`}
           style={{
-            minHeight: compact ? 24 : 38,
+            minHeight: compact ? 44 : 38,
             minWidth: 0,
             padding: 0,
             borderRadius: compact ? 7 : 12,
@@ -422,6 +422,11 @@ export function CompanionDateTimePicker({
   presentation,
   defaultOpen,
   contextItems = DEMO_CONTEXT_ITEMS,
+  popoverAnchorRef,
+  seamlessCompact = false,
+  compactTriggerHeight = 44,
+  popoverMinWidth = 0,
+  centerPopover = false,
 }) {
   const safeMode = VALID_MODES.has(mode) ? mode : "datetime";
   const resolvedPresentation =
@@ -509,6 +514,16 @@ export function CompanionDateTimePicker({
   const showDate = safeMode === "date" || safeMode === "datetime";
   const showTime = safeMode === "time" || safeMode === "datetime";
   const visibleContextItems = compact ? [] : contextItems;
+  const stackCompactDateFields =
+    compact && typeof window !== "undefined" && window.innerWidth < 480;
+  const visibleQuickChoices = quickChoices(safeMode).filter(
+    (choice) =>
+      !(
+        isCompactPresentation &&
+        (safeMode === "date" || safeMode === "datetime") &&
+        choice.key !== "now"
+      ),
+  );
 
   useEffect(() => {
     setIsOpen(defaultOpen ?? resolvedPresentation === "expanded");
@@ -529,7 +544,8 @@ export function CompanionDateTimePicker({
     const trigger = triggerRef.current;
     if (!trigger || typeof window === "undefined") return;
 
-    const rect = trigger.getBoundingClientRect();
+    const anchor = popoverAnchorRef?.current || trigger;
+    const rect = anchor.getBoundingClientRect();
     const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
     const viewportHeight =
       window.innerHeight || document.documentElement.clientHeight;
@@ -537,12 +553,17 @@ export function CompanionDateTimePicker({
     const popoverGap = 0;
     const width = Math.max(
       0,
-      Math.min(rect.width, viewportWidth - viewportMargin * 2),
+      Math.min(
+        Math.max(rect.width, popoverMinWidth),
+        viewportWidth - viewportMargin * 2,
+      ),
     );
-    const left = Math.min(
-      Math.max(rect.left, viewportMargin),
-      Math.max(viewportMargin, viewportWidth - width - viewportMargin),
-    );
+    const left = centerPopover
+      ? Math.max(viewportMargin, (viewportWidth - width) / 2)
+      : Math.min(
+          Math.max(rect.left, viewportMargin),
+          Math.max(viewportMargin, viewportWidth - width - viewportMargin),
+        );
     const availableBelow =
       viewportHeight - rect.bottom - popoverGap - viewportMargin;
     const availableAbove = rect.top - popoverGap - viewportMargin;
@@ -598,23 +619,31 @@ export function CompanionDateTimePicker({
       }}
       style={{
         width: "100%",
-        minHeight: compact ? 34 : 56,
+        minHeight: compact ? compactTriggerHeight : 56,
         boxSizing: "border-box",
         display: "grid",
         gridTemplateColumns: compact
-          ? "minmax(0, 1fr) 14px"
+          ? seamlessCompact
+            ? "minmax(0, 1fr)"
+            : "minmax(0, 1fr) 14px"
           : "34px minmax(0, 1fr) auto",
-        gap: compact ? 6 : 12,
+        gap: compact ? (seamlessCompact ? 0 : 6) : 12,
         alignItems: "center",
-        padding: compact ? "4px 8px 4px 10px" : "11px 14px",
+        padding: compact
+          ? seamlessCompact
+            ? "2px 4px"
+            : "4px 8px 4px 10px"
+          : "11px 14px",
         borderRadius: compact
-          ? isOpen
+          ? seamlessCompact
+            ? 0
+            : isOpen
             ? popoverRect?.placement === "above"
               ? "0 0 7px 7px"
               : "7px 7px 0 0"
             : 7
           : 18,
-        border: `1px solid ${COLORS.borderStrong}`,
+        border: seamlessCompact ? 0 : `1px solid ${COLORS.borderStrong}`,
         borderTopColor:
           compact && isOpen && popoverRect?.placement === "above"
             ? COLORS.border
@@ -623,12 +652,14 @@ export function CompanionDateTimePicker({
           compact && isOpen && popoverRect?.placement !== "above"
             ? COLORS.border
             : COLORS.borderStrong,
-        background: COLORS.value,
+        background: seamlessCompact ? "transparent" : COLORS.value,
         color: COLORS.text,
         cursor: disabled ? "not-allowed" : "pointer",
         fontFamily: FONT_STACK,
         textAlign: "left",
-        boxShadow: compact
+        boxShadow: seamlessCompact
+          ? "none"
+          : compact
           ? "0 1px 2px rgba(15, 23, 42, 0.04)"
           : "0 6px 18px rgba(15, 23, 42, 0.05)",
       }}
@@ -670,11 +701,11 @@ export function CompanionDateTimePicker({
         <span
           style={{
             color: COLORS.text,
-            fontSize: compact ? 13 : 18,
+            fontSize: compact ? (seamlessCompact ? 11 : 13) : 18,
             fontWeight: compact ? 700 : 800,
             lineHeight: compact ? 1.05 : 1.2,
             overflow: "hidden",
-            textOverflow: "ellipsis",
+            textOverflow: seamlessCompact ? "clip" : "ellipsis",
             whiteSpace: "nowrap",
           }}
         >
@@ -683,6 +714,7 @@ export function CompanionDateTimePicker({
       </span>
       <span
         style={{
+          display: seamlessCompact ? "none" : "block",
           color: COLORS.primaryDark,
           fontSize: compact ? 12 : 18,
           fontWeight: compact ? 700 : 800,
@@ -711,6 +743,7 @@ export function CompanionDateTimePicker({
             : "85vh"
           : "none",
         overflowY: compact ? "auto" : "visible",
+        overflowX: compact ? "hidden" : "visible",
         boxSizing: "border-box",
         border: `1px solid ${COLORS.border}`,
         borderTop:
@@ -845,17 +878,18 @@ export function CompanionDateTimePicker({
         ))}
       </div>
 
-      <div
-        style={{
-          display: compact ? "grid" : "flex",
-          gap: compact ? 4 : 8,
-          gridTemplateColumns: compact
-            ? `repeat(${Math.min(quickChoices(safeMode).length, 3)}, minmax(0, 1fr))`
-            : undefined,
-          flexWrap: "wrap",
-        }}
-      >
-        {quickChoices(safeMode).map((choice) => (
+      {visibleQuickChoices.length > 0 ? (
+        <div
+          style={{
+            display: compact ? "grid" : "flex",
+            gap: compact ? 4 : 8,
+            gridTemplateColumns: compact
+              ? `repeat(${Math.min(visibleQuickChoices.length, 3)}, minmax(0, 1fr))`
+              : undefined,
+            flexWrap: "wrap",
+          }}
+        >
+          {visibleQuickChoices.map((choice) => (
           <button
             key={choice.key}
             type="button"
@@ -864,7 +898,7 @@ export function CompanionDateTimePicker({
             onMouseEnter={() => setHoveredChoice(choice.key)}
             onMouseLeave={() => setHoveredChoice(null)}
             style={{
-              minHeight: compact ? 28 : 44,
+              minHeight: 44,
               minWidth: 0,
               padding: compact ? "4px 3px" : "10px 14px",
               borderRadius: compact ? 8 : 14,
@@ -886,8 +920,9 @@ export function CompanionDateTimePicker({
           >
             {choice.label}
           </button>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : null}
 
       <div
         style={{
@@ -926,7 +961,9 @@ export function CompanionDateTimePicker({
                 display: "grid",
                 gap: compact ? 3 : 8,
                 gridTemplateColumns: compact
-                  ? "repeat(3, minmax(0, 1fr))"
+                  ? stackCompactDateFields
+                    ? "1fr"
+                    : "repeat(3, minmax(0, 1fr))"
                   : "repeat(auto-fit, minmax(112px, 1fr))",
               }}
             >
@@ -1055,7 +1092,7 @@ export function CompanionDateTimePicker({
           type="button"
           onClick={() => setIsOpen(false)}
           style={{
-            minHeight: 32,
+            minHeight: 44,
             borderRadius: 9,
             border: `1px solid ${COLORS.border}`,
             background: COLORS.veryLight,

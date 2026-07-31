@@ -2,6 +2,11 @@ import React, { useMemo, useState } from "react";
 import { CompanionButton } from "../../ui/buttons/CompanionButton";
 import { TrainingPlanModal } from "./TrainingPlanModal";
 import { SportSupplementPlanModal } from "./SportSupplementPlanModal";
+import { PlannedExecutionModal } from "./PlannedExecutionModal";
+import {
+  isSportSupplementPlanTaken,
+  isTrainingPlanExecuted,
+} from "../../services/plannedExecutionService";
 
 function displayTime(eventTime) {
   const time = String(eventTime || "").slice(11, 16);
@@ -19,6 +24,9 @@ export function TrainingPlanSection({
   onAddSupplementPlan,
   onUpdateSupplementPlan,
   onDeleteSupplementPlan,
+  dailyLog = [],
+  onExecuteTraining,
+  onTakeSupplement,
 }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTraining, setEditingTraining] = useState(null);
@@ -26,6 +34,11 @@ export function TrainingPlanSection({
     open: false,
     training: null,
     plan: null,
+  });
+  const [executionModal, setExecutionModal] = useState({
+    open: false,
+    kind: null,
+    item: null,
   });
   const sortedPlans = useMemo(
     () =>
@@ -79,11 +92,13 @@ export function TrainingPlanSection({
   }
 
   function renderSupplementPlan(plan, compact = false) {
+    const taken = isSportSupplementPlanTaken(dailyLog, plan.id);
     return (
       <div
         key={plan.id}
         style={{
-          display: "flex",
+          display: isMobile ? "grid" : "flex",
+          gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : undefined,
           justifyContent: "space-between",
           gap: 8,
           padding: compact ? "7px 0" : "7px 9px",
@@ -116,8 +131,47 @@ export function TrainingPlanSection({
             Gepland · niet ingenomen
           </div>
         </div>
-        {!isMobile && (
-          <div style={{ display: "flex", gap: 5, alignItems: "start" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: 5,
+            alignItems: "start",
+            flexWrap: "wrap",
+            justifyContent: "flex-end",
+          }}
+        >
+          {taken ? (
+            <span
+              style={{
+                padding: "7px 9px",
+                borderRadius: 9,
+                background: "#dcfce7",
+                color: "#166534",
+                fontWeight: 850,
+                whiteSpace: "nowrap",
+              }}
+            >
+              Ingenomen ✓
+            </span>
+          ) : (
+            <CompanionButton
+              size={isMobile ? "md" : "sm"}
+              variant="primary"
+              fullWidth={isMobile}
+              data-execution-action="supplement"
+              onClick={() =>
+                setExecutionModal({
+                  open: true,
+                  kind: "supplement",
+                  item: plan,
+                })
+              }
+            >
+              Ingenomen
+            </CompanionButton>
+          )}
+          {!isMobile && (
+            <>
             <CompanionButton
               size="sm"
               onClick={() =>
@@ -144,8 +198,9 @@ export function TrainingPlanSection({
             >
               Verwijder
             </CompanionButton>
-          </div>
-        )}
+            </>
+          )}
+        </div>
       </div>
     );
   }
@@ -252,6 +307,39 @@ export function TrainingPlanSection({
                     {training.note}
                   </div>
                 ) : null}
+                <div style={{ marginTop: 10 }}>
+                  {isTrainingPlanExecuted(dailyLog, training.id) ? (
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        padding: "8px 11px",
+                        borderRadius: 10,
+                        background: "#dcfce7",
+                        color: "#166534",
+                        fontSize: 13,
+                        fontWeight: 850,
+                      }}
+                    >
+                      Uitgevoerd ✓
+                    </span>
+                  ) : (
+                    <CompanionButton
+                      variant="primary"
+                      size={isMobile ? "md" : "sm"}
+                      fullWidth={isMobile}
+                      data-execution-action="training"
+                      onClick={() =>
+                        setExecutionModal({
+                          open: true,
+                          kind: "training",
+                          item: training,
+                        })
+                      }
+                    >
+                      Als uitgevoerd registreren
+                    </CompanionButton>
+                  )}
+                </div>
                 {plansForTraining(training.id).length > 0 ? (
                   <div style={{ marginTop: 10 }}>
                     <div
@@ -379,6 +467,22 @@ export function TrainingPlanSection({
           />
         </>
       )}
+      <PlannedExecutionModal
+        open={executionModal.open}
+        kind={executionModal.kind}
+        item={executionModal.item}
+        onClose={() =>
+          setExecutionModal({ open: false, kind: null, item: null })
+        }
+        onSave={(values) => {
+          if (executionModal.kind === "training") {
+            onExecuteTraining(executionModal.item, values);
+          } else {
+            onTakeSupplement(executionModal.item, values);
+          }
+          setExecutionModal({ open: false, kind: null, item: null });
+        }}
+      />
     </section>
   );
 }

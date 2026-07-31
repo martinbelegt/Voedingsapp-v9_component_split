@@ -27,6 +27,11 @@ import {
   createSportSupplementPlanEvent,
   removeSportSupplementPlanEvent,
 } from "../services/sportSupplementPlanService";
+import {
+  registerSportSupplementPlanIntake,
+  registerTrainingPlanExecution,
+} from "../services/plannedExecutionService";
+import { createWeightEvent } from "../services/weightEventService";
 
 function round2(n) {
   return Math.round((n + Number.EPSILON) * 100) / 100;
@@ -52,6 +57,7 @@ function createEmptyDay(date) {
     glucoseEvents: [],
     glucoseBoostEvents: [],
     movementEvents: [],
+    weightEvents: [],
     supplementEvents: [],
     bowelEvents: [],
     noteEvents: [],
@@ -69,6 +75,7 @@ function normalizeDay(day = {}) {
     glucoseEvents: day.glucoseEvents || [],
     glucoseBoostEvents: day.glucoseBoostEvents || [],
     movementEvents: day.movementEvents || [],
+    weightEvents: day.weightEvents || [],
     supplementEvents: day.supplementEvents || [],
     bowelEvents: day.bowelEvents || [],
     noteEvents: day.noteEvents || [],
@@ -84,6 +91,7 @@ function hasDayContent(day = {}) {
     (day.glucoseEvents || []).length > 0 ||
     (day.glucoseBoostEvents || []).length > 0 ||
     (day.movementEvents || []).length > 0 ||
+    (day.weightEvents || []).length > 0 ||
     (day.supplementEvents || []).length > 0 ||
     (day.bowelEvents || []).length > 0 ||
     (day.noteEvents || []).length > 0 ||
@@ -107,6 +115,7 @@ function countDailyLogEvents(days = []) {
       (day.glucoseEvents || []).length +
       (day.glucoseBoostEvents || []).length +
       (day.movementEvents || []).length +
+      (day.weightEvents || []).length +
       (day.supplementEvents || []).length +
       (day.bowelEvents || []).length +
       (day.noteEvents || []).length +
@@ -118,13 +127,20 @@ function countDailyLogEvents(days = []) {
 
 const isDevelopment = process.env.NODE_ENV === "development";
 
-function createSyncDebugState(localDailyLog = []) {
+function createSyncDebugState(localDailyLog = [], syncMetadata = null) {
   const localDays = Array.isArray(localDailyLog) ? localDailyLog.length : 0;
+  const hasKnownRevision = Number.isInteger(syncMetadata?.revision);
+  const hasKnownDirtyState = typeof syncMetadata?.dirty === "boolean";
 
   return {
     source: "Local",
     status: "loading",
     conflict: false,
+    decision: {
+      action: "pending",
+      reason: null,
+      contentEqual: null,
+    },
     cloud: {
       revision: null,
       days: null,
@@ -133,7 +149,9 @@ function createSyncDebugState(localDailyLog = []) {
       lastSuccessfulSaveAt: null,
     },
     local: {
-      revision: null,
+      revision: hasKnownRevision ? syncMetadata.revision : null,
+      baselineKnown: hasKnownRevision,
+      dirty: hasKnownDirtyState ? syncMetadata.dirty : null,
       days: localDays,
       events: Array.isArray(localDailyLog)
         ? countDailyLogEvents(localDailyLog)
@@ -212,7 +230,7 @@ export function useDailyLog(selectedDate) {
     sortDaysNewestFirst((loadDailyLog() || []).map(normalizeDay)),
   );
   const [syncDebug, setSyncDebug] = useState(() =>
-    createSyncDebugState(dailyLog),
+    createSyncDebugState(dailyLog, initialSyncMetadata.current),
   );
   const [cloudLoaded, setCloudLoaded] = useState(false);
   const hasHydratedCloudData = useRef(false);
@@ -243,6 +261,12 @@ export function useDailyLog(selectedDate) {
         const localChangedDuringLoad =
           localChangeVersion.current !== mutationVersionAtLoadStart;
         const currentLocalLog = dailyLog;
+        const comparableCloudLog = Array.isArray(cloudResult.dailyLog)
+          ? sortDaysNewestFirst(cloudResult.dailyLog.map(normalizeDay))
+          : null;
+        const contentEqual = comparableCloudLog
+          ? areJsonValuesEqual(currentLocalLog, comparableCloudLog)
+          : null;
         const decision = decideInitialArrayAuthority({
           localValue: currentLocalLog,
           cloudResult,
@@ -258,6 +282,7 @@ export function useDailyLog(selectedDate) {
           action: decision.action,
           status: decision.status,
           reason: decision.reason,
+          contentEqual,
         });
 
         if (
@@ -273,6 +298,11 @@ export function useDailyLog(selectedDate) {
             ...prev,
             status: "error",
             source: "Local",
+            decision: {
+              action: decision.action,
+              reason: decision.reason,
+              contentEqual,
+            },
           }));
           setCloudLoaded(true);
           return;
@@ -287,6 +317,11 @@ export function useDailyLog(selectedDate) {
             status: decision.status,
             source: "Local",
             conflict: decision.status === "conflict",
+            decision: {
+              action: decision.action,
+              reason: decision.reason,
+              contentEqual,
+            },
             cloud: {
               ...prev.cloud,
               revision: Number.isInteger(cloudResult.revision)
@@ -299,6 +334,12 @@ export function useDailyLog(selectedDate) {
                 ? countDailyLogEvents(cloudResult.dailyLog)
                 : null,
               updatedAt: cloudResult.updatedAt || null,
+            },
+            local: {
+              ...prev.local,
+              revision: loadedRevision.current,
+              baselineKnown: Number.isInteger(loadedRevision.current),
+              dirty: hasLocalUserChange.current,
             },
           }));
           setCloudLoaded(true);
@@ -315,21 +356,31 @@ export function useDailyLog(selectedDate) {
           decision.action === "compare-non-empty" &&
           !areJsonValuesEqual(currentLocalLog, normalizedCloudLog)
         ) {
-          loadedRevision.current = Number.isInteger(cloudResult.revision)
-            ? cloudResult.revision
-            : null;
           cloudWriteBlockedByConflict.current = true;
           setSyncDebug((prev) => ({
             ...prev,
             status: "conflict",
             source: "Local",
             conflict: true,
+            decision: {
+              action: decision.action,
+              reason: decision.reason,
+              contentEqual,
+            },
             cloud: {
               ...prev.cloud,
-              revision: loadedRevision.current,
+              revision: Number.isInteger(cloudResult.revision)
+                ? cloudResult.revision
+                : null,
               days: normalizedCloudLog.length,
               events: cloudEventCount,
               updatedAt: cloudResult.updatedAt,
+            },
+            local: {
+              ...prev.local,
+              revision: loadedRevision.current,
+              baselineKnown: Number.isInteger(loadedRevision.current),
+              dirty: hasLocalUserChange.current,
             },
           }));
           console.warn(
@@ -368,6 +419,11 @@ export function useDailyLog(selectedDate) {
           status: "synced",
           source: "Cloud",
           conflict: false,
+          decision: {
+            action: decision.action,
+            reason: decision.reason,
+            contentEqual,
+          },
           cloud: {
             ...prev.cloud,
             revision: loadedRevision.current,
@@ -378,6 +434,8 @@ export function useDailyLog(selectedDate) {
           local: {
             ...prev.local,
             revision: loadedRevision.current,
+            baselineKnown: true,
+            dirty: false,
             days: normalizedCloudLog.length,
             events: cloudEventCount,
             lastSaveAt: localSaveAt,
@@ -512,6 +570,8 @@ export function useDailyLog(selectedDate) {
             local: {
               ...prev.local,
               revision: result.revision,
+              baselineKnown: true,
+              dirty: hasNewerLocalChange,
               days: localDayCount,
               events: localEventCount,
             },
@@ -562,6 +622,8 @@ export function useDailyLog(selectedDate) {
             local: {
               ...prev.local,
               revision: expectedRevision,
+              baselineKnown: true,
+              dirty: true,
               days: localDayCount,
               events: localEventCount,
             },
@@ -591,6 +653,15 @@ export function useDailyLog(selectedDate) {
     hasLocalUserChange.current = true;
     localChangeVersion.current += 1;
     saveDailyLogSyncMetadata(loadedRevision.current, true);
+    setSyncDebug((prev) => ({
+      ...prev,
+      local: {
+        ...prev.local,
+        revision: loadedRevision.current,
+        baselineKnown: Number.isInteger(loadedRevision.current),
+        dirty: true,
+      },
+    }));
     logSyncRuntime("local mutation marked dirty", {
       knownRevision: loadedRevision.current,
       changeVersion: localChangeVersion.current,
@@ -922,7 +993,7 @@ export function useDailyLog(selectedDate) {
       id: createId("movement-event"),
       type: "movement",
       eventTime: input.eventTime || new Date().toISOString(),
-      activityType: input.activityType || "Krachttraining",
+      activityType: input.activityType || "Beweging",
       intensityType: input.intensityType || "Gemengd",
       durationMinutes: input.durationMinutes || "",
       note: input.note || "",
@@ -941,6 +1012,22 @@ export function useDailyLog(selectedDate) {
     deleteEntryFromSelectedDay("movementEvents", eventId);
   }
 
+  function addWeightEventToDay(input) {
+    const { date, event } = createWeightEvent(input, { createId });
+    return addEntryToDay({ ...input, date }, "weightEvents", event);
+  }
+
+  function updateWeightEvent(eventId, updates) {
+    updateOrMoveEntry("weightEvents", eventId, {
+      ...updates,
+      ...(updates.eventTime ? { datetime: updates.eventTime } : {}),
+    });
+  }
+
+  function deleteWeightEvent(eventId) {
+    deleteEntryFromSelectedDay("weightEvents", eventId);
+  }
+
   function addSupplementEventToDay(input) {
     const eventEntry = {
       id: createId("supplement-event"),
@@ -949,6 +1036,7 @@ export function useDailyLog(selectedDate) {
       name: input.name || "",
       dosage: input.dosage || "",
       note: input.note || "",
+      intakeType: input.intakeType || "supplement",
       createdAt: new Date().toLocaleString("nl-NL"),
       repeat: input.repeat || "none",
     };
@@ -1036,6 +1124,20 @@ export function useDailyLog(selectedDate) {
 
   function deleteSportSupplementPlanEvent(eventId) {
     setDailyLog((prev) => removeSportSupplementPlanEvent(prev, eventId));
+  }
+
+  function executeTrainingPlan(training, input) {
+    setDailyLog((prev) =>
+      registerTrainingPlanExecution(prev, training, input, { createId })
+        .dailyLog,
+    );
+  }
+
+  function takeSportSupplementPlan(plan, input) {
+    setDailyLog((prev) =>
+      registerSportSupplementPlanIntake(prev, plan, input, { createId })
+        .dailyLog,
+    );
   }
 
   function fillDailyRepeats() {
@@ -1181,6 +1283,11 @@ export function useDailyLog(selectedDate) {
       status: "synced",
       source: "Cloud",
       conflict: false,
+      decision: {
+        action: "use-cloud",
+        reason: "manual-accept-latest-cloud",
+        contentEqual: areJsonValuesEqual(dailyLog, normalizedCloudLog),
+      },
       cloud: {
         ...prev.cloud,
         revision: loadedRevision.current,
@@ -1191,6 +1298,8 @@ export function useDailyLog(selectedDate) {
       local: {
         ...prev.local,
         revision: loadedRevision.current,
+        baselineKnown: true,
+        dirty: false,
         days: normalizedCloudLog.length,
         events: cloudEventCount,
         lastSaveAt: new Date().toISOString(),
@@ -1233,6 +1342,10 @@ export function useDailyLog(selectedDate) {
     updateMovementEvent,
     deleteMovementEvent,
 
+    addWeightEventToDay,
+    updateWeightEvent,
+    deleteWeightEvent,
+
     addSupplementEventToDay,
     updateSupplementEvent,
     deleteSupplementEvent,
@@ -1252,5 +1365,8 @@ export function useDailyLog(selectedDate) {
     addSportSupplementPlanEventToDay,
     updateSportSupplementPlanEvent,
     deleteSportSupplementPlanEvent,
+
+    executeTrainingPlan,
+    takeSportSupplementPlan,
   };
 }

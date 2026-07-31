@@ -246,6 +246,34 @@ training. Ze kunnen met `trainingPlanId` aan een training gekoppeld zijn, maar
 blijven zelfstandige planning. `supplementEvents` zijn werkelijk geregistreerde
 innames. Een supplementplanning wordt nooit automatisch als inname geregistreerd.
 
+Werkelijke uitvoering blijft een apart event. Een `movementEvent` kan via
+`trainingPlanId` verwijzen naar de oorspronkelijke trainingsplanning. Een
+`supplementEvent` kan via `sportSupplementPlanId` verwijzen naar de oorspronkelijke
+supplementplanning. De status uitgevoerd/ingenomen wordt uit deze relaties
+afgeleid en wordt niet als tweede statusveld in de planning opgeslagen.
+
 De gebruiker bepaalt zijn of haar gezondheidsdoelen.
 
 Companion ondersteunt de weg daar naartoe.
+# Geplande trainingsstructuur
+
+Een `trainingPlanEvent` is uitsluitend een geplande training. De bestaande
+velden `id`, `type`, `eventTime`, `title`, `trainingType`, `durationMinutes`,
+`note` en `createdAt` blijven geldig. `exercises` is een optionele lijst; een
+legacytraining zonder deze lijst blijft een volwaardig trainingsplan.
+
+Een item in `trainingPlanEvent.exercises[]` heeft minimaal `id` en `name`.
+Ondersteunde optionele planningsvelden zijn `section`, `order`, `sets`,
+`repsMin`, `repsMax`, `weight`, `weightUnit`, `tempo`, `restSecondsMin`,
+`restSecondsMax`, `intensityType`, `rir`, `rpe`, `toFailure` en `note`.
+Onbekende toekomstige velden worden bij normaliseren, bewerken, verplaatsen,
+sync en backup/herstel behouden.
+
+Een `movementEvent` blijft de werkelijke uitvoering op trainingsniveau.
+Geplande gewichten, sets en herhalingen zijn geen prestaties en mogen niet als
+werkelijke analyse-input worden gebruikt. Uitgevoerde sets en herhalingen per
+oefening vallen buiten S3.1.
+
+De afzonderlijke oefeningsvelden zijn bewust geschikt voor toekomstige
+analyse, trainersmonitoring en print/PDF zonder vrije notitietekst te hoeven
+parsen.

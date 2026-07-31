@@ -14,6 +14,7 @@ export function DailyTimelineItem({
   onToggle,
   compact = false,
   indentLevel = 0,
+  itemType,
 }) {
   const isMobile =
     window.innerWidth < 900 || /iPhone|Android/i.test(navigator.userAgent);
@@ -26,6 +27,7 @@ export function DailyTimelineItem({
 
   return (
     <div
+      data-timeline-item={itemType}
       style={{
         marginBottom: isMobile ? 4 : 6,
         marginLeft: indentLevel > 0 ? indentPx : 0,
@@ -81,6 +83,7 @@ export function DailyTimelineItem({
                 fontSize: isMobile ? 10.5 : 12,
                 color: "#64748b",
                 lineHeight: 1.15,
+                whiteSpace: "pre-line",
               }}
             >
               {subtitle}
