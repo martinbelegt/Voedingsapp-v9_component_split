@@ -59,24 +59,6 @@ const EVENT_CONFIG = {
     }),
     validate: () => ({}),
   },
-  supplement: {
-    icon: "\u{1F48A}",
-    title: "Supplement op tijdlijn zetten",
-    initialValues: () => ({
-      name: "",
-      dosage: "",
-      unit: "",
-      note: "",
-    }),
-    validate: (values) => {
-      const errors = {};
-      if (!values.name?.trim()) errors.name = "Vul een supplementnaam in.";
-      if (values.dosage !== "" && Number(values.dosage) < 0) {
-        errors.dosage = "Dosering mag niet negatief zijn.";
-      }
-      return errors;
-    },
-  },
   weight: {
     icon: "\u2696\uFE0F",
     title: term("weight", "register"),
@@ -309,43 +291,6 @@ export function CompactEventPanel({
               <option value="none">Niet herhalen</option>
               <option value="daily">Dagelijks</option>
             </select>
-          </Field>
-          <Field label="Notitie" optional>
-            <input
-              value={values.note}
-              onChange={(event) => update("note", event.target.value)}
-            />
-          </Field>
-        </>
-      );
-    }
-
-    if (moduleId === "supplement") {
-      return (
-        <>
-          <Field label="Supplementnaam" error={errors.name}>
-            <input
-              ref={firstInputRef}
-              value={values.name}
-              onChange={(event) => update("name", event.target.value)}
-            />
-          </Field>
-          <Field label="Dosering" error={errors.dosage}>
-            <input
-              type="number"
-              min="0"
-              step="any"
-              inputMode="decimal"
-              value={values.dosage}
-              onChange={(event) => update("dosage", event.target.value)}
-            />
-          </Field>
-          <Field label="Doseringseenheid">
-            <input
-              value={values.unit}
-              onChange={(event) => update("unit", event.target.value)}
-              placeholder="bijv. capsules"
-            />
           </Field>
           <Field label="Notitie" optional>
             <input

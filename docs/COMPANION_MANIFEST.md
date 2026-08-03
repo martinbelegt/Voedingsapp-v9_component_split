@@ -141,6 +141,83 @@ Registreren legt de werkelijkheid vast. Begrijpen plaatst gebeurtenissen in hun 
 
 De cyclus heeft geen vast beginpunt en geen definitief einde. Een gebruiker kan instappen waar de behoefte ligt. Companion helpt de stappen met elkaar te verbinden en bewaakt dat iedere nieuwe ronde voortbouwt op wat eerder is geleerd.
 
+## Gebruikersacties en mentale modellen
+
+Companion maakt een strikt onderscheid tussen **bewaren** en **uitvoeren**. Deze handelingen hebben voor de gebruiker een andere betekenis en leiden daarom altijd tot een andere uitkomst. De gebruikte actietaal maakt dat verschil overal expliciet.
+
+### Bewaren
+
+**Bewaren** betekent: iets opslaan in de persoonlijke omgeving van de gebruiker, zodat het later opnieuw kan worden gebruikt.
+
+Voorbeelden zijn:
+
+- een nieuw voedingsmiddel opslaan;
+- een supplement wijzigen;
+- een routine opslaan;
+- een categorie toevoegen;
+- een standaardontbijt bewaren.
+
+Companion gebruikt voor deze handeling altijd het werkwoord **Opslaan** of **Wijzigingen bewaren**.
+
+Bewaren plaatst nooit iets op de tijdlijn. Een opgeslagen bouwsteen, samenstelling of routine is beschikbaar voor later gebruik, maar is nog geen gebeurtenis die daadwerkelijk heeft plaatsgevonden.
+
+### Uitvoeren
+
+**Uitvoeren** betekent: iets daadwerkelijk registreren als gebeurtenis van vandaag.
+
+Voorbeelden zijn:
+
+- voeding eten;
+- een supplement innemen;
+- medicatie gebruiken;
+- een routine uitvoeren.
+
+Wanneer de uitkomst het toevoegen van een gebeurtenis aan de tijdlijn is, gebruikt Companion overal dezelfde primaire actie:
+
+**Zet op tijdlijn**
+
+Wanneer wijzigingen eerst moeten worden opgeslagen, luidt de gecombineerde primaire actie:
+
+**Wijzigingen bewaren en zet op tijdlijn**
+
+Companion gebruikt **Registreren** niet als primaire gebruikersactie wanneer het uiteindelijke resultaat het toevoegen aan de tijdlijn is. Registreren kan het onderliggende systeemgedrag beschrijven, maar **Zet op tijdlijn** verwoordt voor de gebruiker concreet wat er gebeurt.
+
+### Algemene UX-regel
+
+Alles wat vanuit **Mijn catalogi**, **Samenstellen** of **Mijn routines** wordt gekozen of opgebouwd, eindigt bij uitvoering met dezelfde primaire actie: **Zet op tijdlijn**.
+
+**Catalogi bouwen routines. Mijn routines voert routines uit.**
+
+Dit is het vaste fundament voor routine-UX. De inhoud van een routine wordt samengesteld uit bouwstenen in **Mijn catalogi**. **Mijn routines** is vervolgens de centrale plek om routines te bekijken, plannen, beheren en bewust uit te voeren. De uitvoeromgeving verandert de inhoud van een routine niet.
+
+Daardoor hoeft de gebruiker niet per module een nieuw actiemodel te leren. Ongeacht waar iets is gevonden, gemaakt of voorbereid, blijft het onderscheid hetzelfde: bewaren maakt het herbruikbaar; op de tijdlijn zetten maakt het onderdeel van de werkelijkheid van vandaag.
+
+Een routine is daarbij geen macro. Zij is een persoonlijke gezondheidsgewoonte die de gebruiker ondersteunt en ruimte laat om onderdelen wel of niet uit te voeren. Companion registreert een routine of onderdeel nooit automatisch; de gebruiker bevestigt altijd wat daadwerkelijk op de tijdlijn wordt gezet.
+
+### Hoofdstructuur van Companion
+
+Iedere hoofdmodule heeft één duidelijke primaire verantwoordelijkheid:
+
+- **Tijdlijn** → dagelijkse gebeurtenissen bekijken en toevoegen;
+- **Samenstellen** → nieuwe voeding, supplementen en later andere samengestelde items maken;
+- **Mijn routines** → vaste dagelijkse routines bekijken, plannen, beheren en uitvoeren, zonder daar hun inhoud samen te stellen;
+- **Mijn catalogi** → persoonlijke bibliotheken beheren;
+- **Mijn dossier** → terugkijken, analyseren en trends volgen;
+- **Mijn profiel** → persoonlijke instellingen en modules beheren.
+
+Hoofdmodules vermijden overlap. Een mogelijkheid kan vanuit meerdere plekken bereikbaar zijn wanneer dat de gebruiker helpt, maar de verantwoordelijkheid voor beheer, uitvoering of historie blijft herkenbaar bij één module liggen.
+
+### Leidraad voor toekomstige UX-beslissingen
+
+Iedere nieuwe module, functie en primaire actie wordt aan de volgende vragen getoetst:
+
+- **Beheer ik hier informatie?** → **Opslaan**.
+- **Voer ik hier iets uit?** → **Zet op tijdlijn**.
+- **Bekijk ik historie?** → **Mijn dossier**.
+- **Beheer ik bouwstenen?** → **Mijn catalogi**.
+
+Deze leidraad blijft gelden wanneer Companion groeit en nieuwe soorten catalogi, routines, analyses, begeleiding of andere modules krijgt. Nieuwe functionaliteit sluit aan op het bestaande mentale model in plaats van een nieuw, overlappend actiemodel te introduceren.
+
 ## Ontwerpprincipes
 
 ### Companion helpt bij wat de gebruiker wil of moet gaan doen

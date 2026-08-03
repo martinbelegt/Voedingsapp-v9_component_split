@@ -50,7 +50,7 @@ test("geplande training voorkomt lege melding en blijft in compacte tijdlijn zic
   });
 
   expect(container.textContent).toContain("Borsttraining");
-  expect(container.textContent).toContain(
+  expect(container.textContent).not.toContain(
     "Incline Dumbbell Press · 3 × 6–10",
   );
   expect(container.textContent).not.toContain(
@@ -58,6 +58,14 @@ test("geplande training voorkomt lege melding en blijft in compacte tijdlijn zic
   );
   expect(container.textContent).not.toContain("+ Maaltijd");
   expect(container.textContent).toContain("📅 Gepland");
+
+  const expandAll = container.querySelector(
+    'button[aria-label="Alles uitklappen"]',
+  );
+  await act(async () => expandAll.click());
+  expect(container.textContent).toContain(
+    "Incline Dumbbell Press · 3 × 6–10",
+  );
 
   await act(async () =>
     container.querySelector('[data-timeline-item="training"] > div').click(),

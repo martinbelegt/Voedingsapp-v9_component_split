@@ -45,8 +45,10 @@ function normalizeTotals(totals = {}) {
     fat: round2(Number(totals.fat) || 0),
     kcal: round2(Number(totals.kcal) || 0),
     insulin: round2(Number(totals.insulin) || 0),
+    creon35: Number(totals.creon35) || Number(totals.best?.c35) || 0,
     creon25: Number(totals.creon25) || Number(totals.best?.c25) || 0,
     creon10: Number(totals.creon10) || Number(totals.best?.c10) || 0,
+    creon5: Number(totals.creon5) || Number(totals.best?.c5) || 0,
   };
 }
 

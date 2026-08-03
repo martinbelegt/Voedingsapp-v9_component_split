@@ -8,7 +8,7 @@ import SupplementImageManager, {
   SupplementImage,
 } from "./SupplementImageManager";
 import { getPrimarySupplementImage } from "../../services/supplementImageService";
-import { CompactEventPanel } from "../registration/CompactEventPanel";
+import SupplementTimelinePanel from "./SupplementTimelinePanel";
 
 function Field({ label, error, wide, children }) {
   return (
@@ -113,9 +113,7 @@ export default function SupplementDetailEditor({
       </div>
 
       {timelinePanelOpen && (
-        <CompactEventPanel
-          moduleId="supplement"
-          selectedDate={timelineDefaults.date}
+        <SupplementTimelinePanel
           initialEventTime={timelineDefaults.eventTime}
           initialValues={timelineDefaults.values}
           onCancel={() => {

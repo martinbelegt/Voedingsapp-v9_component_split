@@ -43,6 +43,10 @@ import { useMealTimers } from "./hooks/useMealTimers";
 import { calculateMealRows } from "./services/mealRowCalculationService";
 import { CompanionDesignLab } from "./dev/CompanionDesignLab";
 import { FoundationPlayground } from "./dev/FoundationPlayground";
+import { RoutinesWorkspace } from "./components/routines/RoutinesWorkspace";
+import { CatalogRoutineBuilder } from "./components/routines/CatalogRoutineBuilder";
+import { useRoutines } from "./hooks/useRoutines";
+import { buildRoutineRegistrations } from "./services/routineService";
 
 import {
   getCategoryById,
@@ -926,6 +930,26 @@ export default function App() {
     overwriteSavedMeal,
   } = useSavedMeals();
 
+  const { routines, addRoutine, updateRoutine, deleteRoutine } = useRoutines();
+
+  function registerRoutine(routine, checkedIds) {
+    const registrations = buildRoutineRegistrations(
+      routine,
+      checkedIds,
+      { products, supplements: loadSupplementCatalog().items },
+    );
+
+    registrations.forEach(({ type, input }) => {
+      if (type === "food") addMealToDay(input);
+      if (type === "supplement") addSupplementEventToDay(input);
+    });
+
+    if (registrations.length) {
+      setSelectedDate(registrations[0].input.date);
+    }
+    return registrations.length;
+  }
+
   useEffect(() => {
     const sources = [
       productsSource,
@@ -1420,6 +1444,12 @@ export default function App() {
     setDayMealDate(selectedDate);
     setLogCurrentMealToDay(true);
     setActiveRegistrationModule("meal");
+    setRegistrationPanelOpen(true);
+    setActiveTab("registration");
+  }
+
+  function openSupplementInputFromTimeline() {
+    setActiveRegistrationModule("supplement");
     setRegistrationPanelOpen(true);
     setActiveTab("registration");
   }
@@ -2552,7 +2582,26 @@ Producten uit deze categorie gaan naar "Overig".`);
           <RegistrationTab
             activeModuleId={activeRegistrationModule}
             dashboardProps={mealWorkspaceProps}
+            supplementProps={{
+              selectedDate,
+              onAddToTimeline: (input) => {
+                addSupplementEventToDay(input);
+                setSelectedDate(input.date);
+                setActiveTab("daily");
+              },
+            }}
             panelOpen={registrationPanelOpen}
+          />
+        )}
+        {activeTab === "routines" && (
+          <RoutinesWorkspace
+            routines={routines}
+            products={products}
+            supplements={loadSupplementCatalog().items}
+            onUpdateRoutine={updateRoutine}
+            onDeleteRoutine={deleteRoutine}
+            onRegister={registerRoutine}
+            dailyLog={dailyLog}
           />
         )}
         {activeTab === "lists" && (
@@ -2564,6 +2613,12 @@ Producten uit deze categorie gaan naar "Overig".`);
               activeModuleId={activeListModule}
               onSelect={setActiveListModule}
               hideNavigation
+            />
+            <CatalogRoutineBuilder
+              activeModuleId={activeListModule}
+              products={products}
+              supplements={loadSupplementCatalog().items}
+              onCreateRoutine={addRoutine}
             />
           </div>
         )}
@@ -2748,6 +2803,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             takeSportSupplementPlan={takeSportSupplementPlan}
             dailyLog={dailyLog}
             onAddMeal={openMealInputFromTimeline}
+            onAddSupplement={openSupplementInputFromTimeline}
           />
         )}
         {activeTab === "lists" && activeListModule === "supplements" && (

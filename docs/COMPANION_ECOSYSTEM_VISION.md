@@ -15,6 +15,20 @@ samenwerken.
 Het uitgangspunt is steeds hetzelfde: Companion maakt complexe informatie
 bruikbaar in het dagelijks leven, zonder de gebruiker te overweldigen.
 
+Het ecosysteem bestaat uit zes elkaar versterkende pijlers:
+
+- persoonlijke registratie;
+- persoonlijke catalogi;
+- Mijn dossier;
+- Companion Community;
+- Marketplace;
+- AI-assistent.
+
+Companion beheert daarmee niet alleen persoonlijke gezondheidsgegevens. Het
+platform kan mensen met vergelijkbare doelen, ervaringen of aandoeningen op
+een veilige manier met elkaar verbinden. De gebruiker houdt daarbij altijd de
+regie over wat persoonlijk blijft en wat bewust wordt gedeeld.
+
 # De Companion Knowledge Base
 
 De Companion Knowledge Base is een steeds verder groeiende kennisbibliotheek.
@@ -171,24 +185,103 @@ Deze bibliotheken maken Companion steeds persoonlijker en verminderen
 herhaaldelijk invoerwerk. Wat iemand vaker gebruikt, wordt eenvoudig opnieuw
 vindbaar en toepasbaar.
 
-# Community
+# Companion Community
 
-Gebruikers kunnen ervoor kiezen delen van hun bibliotheken beschikbaar te maken
-voor anderen.
+Companion Community is een volwaardige pijler van het ecosysteem. De community
+verbindt mensen die leven met vergelijkbare aandoeningen, werken aan dezelfde
+doelen of praktische ervaring hebben met dezelfde dagelijkse uitdagingen.
 
-Dat kan bijvoorbeeld gaan om:
-
-- trainingsschema's;
-- supplementlijsten;
-- maaltijdcollecties;
-- oefeningencollecties.
-
-Andere gebruikers kunnen gedeelde inhoud gratis gebruiken. Zo kan praktische
-kennis worden doorgegeven zonder dat iedere gebruiker opnieuw vanaf nul hoeft
-te beginnen.
-
+De community is geen openbaar verlengstuk van het persoonlijke dossier.
 Delen is altijd een bewuste keuze. Privé-informatie wordt niet automatisch
-community-inhoud en de herkomst van gedeelde kennis blijft zichtbaar.
+community-inhoud en gebruikers bepalen zelf binnen welke omgeving zij iets
+beschikbaar stellen.
+
+## Gesloten communities
+
+Gebruikers kunnen zich aansluiten bij besloten groepen. Zo ontstaat een veilige
+en herkenbare omgeving waarin informatie en ervaringen binnen een duidelijke
+context worden gedeeld.
+
+Voorbeelden zijn groepen rond:
+
+- diabetes type 1;
+- diabetes type 2;
+- diabetes type 3c;
+- pancreasaandoeningen;
+- darmziekten;
+- krachttraining;
+- afvallen;
+- spieropbouw;
+- ouderen;
+- hart- en vaatziekten;
+- COPD.
+
+Later kunnen groepen ook worden aangemaakt rond specifieke doelstellingen,
+zoals:
+
+- spiermassa opbouwen;
+- marathontraining;
+- gezond ouder worden;
+- leven zonder pancreas.
+
+Toegang, zichtbaarheid en moderatie sluiten aan op het doel en de gevoeligheid
+van iedere groep.
+
+## Kennis vóór discussie
+
+Companion wil geen traditioneel forum worden. De volgorde is bewust:
+
+**Kennis → Ervaringen → Discussie**
+
+Per onderwerp ziet een gebruiker bijvoorbeeld:
+
+- officiële informatie;
+- persoonlijke ervaringen;
+- veelgestelde vragen;
+- praktische tips;
+- discussies.
+
+De gebruiker krijgt eerst houvast en context, daarna praktijkervaring en pas
+vervolgens het gesprek. Zo blijft de kwaliteit van informatie hoog en wordt
+voorkomen dat de luidste mening automatisch de belangrijkste bron wordt.
+
+## Slim gekoppeld aan de catalogi
+
+Producten uit persoonlijke catalogi kunnen later worden verbonden met relevante
+communitykennis. Bij een supplement kan Companion bijvoorbeeld tonen:
+
+- hoeveel gebruikers het gebruiken;
+- meest voorkomende combinaties;
+- ervaringen;
+- aandachtspunten;
+- veelgestelde vragen;
+- aanbevolen innamemomenten.
+
+Deze informatie is geen medisch advies. Zij geeft verzamelde praktijkervaring
+weer, met een duidelijk zichtbare herkomst en passende context.
+
+## Community-bibliotheken
+
+Gebruikers kunnen ervoor kiezen complete bibliotheken of collecties beschikbaar
+te maken voor anderen. Dat kan bijvoorbeeld gaan om:
+
+- supplementencatalogi;
+- voedingslijsten;
+- oefenprogramma's;
+- maaltijdcollecties;
+- symptoomlijsten;
+- protocollen.
+
+Een bibliotheek kan zijn:
+
+- privé;
+- gedeeld met vrienden of familie;
+- gedeeld binnen een groep;
+- openbaar.
+
+Andere gebruikers kunnen gedeelde inhoud gebruiken zonder opnieuw vanaf nul te
+hoeven beginnen. De oorspronkelijke maker, de deelcontext en het
+kwaliteitsniveau blijven daarbij zichtbaar.
 
 # Marketplace (lange termijn)
 
@@ -203,6 +296,15 @@ Voorbeelden zijn:
 - supplementengidsen;
 - specialistische bibliotheken.
 
+Gebruikers en makers kunnen later:
+
+- gratis bibliotheken publiceren;
+- betaalde bibliotheken aanbieden;
+- complete supplementencatalogi verkopen;
+- trainingsprogramma's publiceren;
+- voedingscollecties publiceren;
+- protocollen publiceren.
+
 Companion faciliteert de distributie en maakt de inhoud vindbaar binnen een
 vertrouwde gebruikerservaring.
 
@@ -214,30 +316,67 @@ De Marketplace moet waarde toevoegen aan het ecosysteem zonder de
 basiservaring te veranderen in een advertentieomgeving. Kwaliteit, transparantie
 en relevantie staan boven verkoopdruk.
 
+Companion wordt daarmee een platform waarop kennis kan groeien. Waardevolle
+inhoud kan worden onderhouden, verbeterd en opnieuw gebruikt, terwijl de
+gebruiker altijd kan zien wie de maker is en onder welke voorwaarden de inhoud
+wordt aangeboden.
+
 # Kwaliteitsniveaus
 
 Companion maakt altijd zichtbaar waar informatie vandaan komt en welk
-kwaliteitsniveau zij heeft.
+kwaliteitsniveau zij heeft. Iedere bijdrage krijgt een herkenbare herkomst.
 
-## 🟢 Officieel Companion
+## Official
 
 Inhoud die door Companion wordt samengesteld, gecontroleerd en onderhouden.
 Herkomst, context en eventuele beperkingen zijn duidelijk.
 
-## 🔵 Community
+## Professional
+
+Inhoud die afkomstig is van een erkende professional. De professionele rol,
+herkomst en reikwijdte van de bijdrage zijn herkenbaar.
+
+## Community
 
 Inhoud die vrijwillig door gebruikers wordt gedeeld. De maker en communitystatus
 zijn herkenbaar, zodat deze inhoud niet met officiële Companion-informatie
 wordt verward.
 
-## 🟣 Premium
+## Premium
 
-Hoogwaardige betaalde inhoud van makers, professionals of specialistische
-partijen. De aanbieder, prijs en aard van de inhoud zijn vooraf duidelijk.
+Commerciële of gespecialiseerde bibliotheken van makers, professionals of
+specialistische partijen. De aanbieder, prijs en aard van de inhoud zijn vooraf
+duidelijk.
 
 Deze niveaus voorkomen dat populariteit, betaling en betrouwbaarheid als
 hetzelfde worden behandeld. De gebruiker weet altijd waar informatie vandaan
 komt.
+
+# AI als verbindende laag
+
+De AI-assistent helpt de verschillende onderdelen van Companion in samenhang te
+gebruiken. AI analyseert niet alleen persoonlijke gegevens, maar kan later ook
+verbanden leggen tussen:
+
+- eigen registraties;
+- persoonlijke catalogi;
+- dossierhistorie;
+- communityervaringen;
+- officiële kennis.
+
+Daarmee kan AI informatie op het juiste moment vindbaar en begrijpelijk maken,
+zonder verschillende soorten bewijs of ervaring met elkaar te verwarren.
+
+AI maakt altijd duidelijk onderscheid tussen:
+
+- medische kennis;
+- officiële richtlijnen;
+- gebruikerservaringen;
+- persoonlijke observaties.
+
+De AI-assistent presenteert verbanden en mogelijke aandachtspunten, maar maakt
+de herkomst zichtbaar en behandelt communityervaring nooit automatisch als
+medisch feit of persoonlijk advies.
 
 # Ontwerpfilosofie
 
@@ -268,27 +407,36 @@ behoefte aan heeft.
 
 # Lange termijn
 
-Companion bestaat op lange termijn uit vier elkaar versterkende delen:
+Companion bestaat op lange termijn uit zes elkaar versterkende pijlers:
 
-## Software-engine
+## Persoonlijke registratie
 
-De persoonlijke dagelijkse ervaring die helpt plannen, registreren, begrijpen
-en bijsturen.
+De dagelijkse ervaring die helpt plannen, registreren, begrijpen en bijsturen.
 
-## Knowledge Base
+## Persoonlijke catalogi
 
-De gestructureerde kennislaag die informatie herkenbaar, betrouwbaar en
-bruikbaar maakt.
+De eigen, herbruikbare kennis van de gebruiker over voeding, supplementen,
+maaltijden, oefeningen en toekomstige catalogusgestuurde onderdelen.
 
-## Community
+## Mijn dossier
 
-De omgeving waarin gebruikers vrijwillig kennis, collecties en praktische
-ervaring beschikbaar kunnen stellen.
+De persoonlijke historie die registraties en relevante gezondheidsinformatie
+in de tijd begrijpelijk en terugvindbaar maakt.
+
+## Companion Community
+
+De veilige omgeving waarin gebruikers kennis, collecties en praktische
+ervaring kunnen delen met mensen in een vergelijkbare context.
 
 ## Marketplace
 
-De plek waar makers en professionals hoogwaardige inhoud kunnen aanbieden en
-een duurzaam bereik kunnen opbouwen.
+De plek waar gebruikers, makers en professionals gratis of betaalde
+bibliotheken kunnen publiceren en een duurzaam bereik kunnen opbouwen.
+
+## AI-assistent
+
+De verbindende laag die persoonlijke gegevens, catalogi, dossierhistorie,
+officiële kennis en communityervaring in de juiste context samenbrengt.
 
 Samen vormen zij het Companion Ecosysteem.
 
@@ -296,5 +444,17 @@ Het ecosysteem groeit rond de gebruiker, maar de gebruiker behoudt de regie.
 Persoonlijke informatie blijft persoonlijk, herkomst blijft zichtbaar en iedere
 uitbreiding moet bijdragen aan betere dagelijkse keuzes en begrijpelijke
 begeleiding.
+
+De Companion Knowledge Base ondersteunt deze pijlers als gestructureerde
+kennislaag. Zij maakt informatie herkenbaar, betrouwbaar en herbruikbaar zonder
+de herkomst of persoonlijke context uit het oog te verliezen.
+
+# Afsluitend kernprincipe
+
+Companion wil niet de grootste gezondheidsdatabase worden.
+
+Companion wil de meest bruikbare persoonlijke gezondheidsomgeving worden,
+waarin persoonlijke registratie, eigen kennis, gedeelde ervaring en
+intelligente ondersteuning op een natuurlijke manier samenkomen.
 
 Dit document beschrijft uitsluitend de toekomstvisie van Companion.

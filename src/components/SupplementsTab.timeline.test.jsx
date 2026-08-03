@@ -92,11 +92,11 @@ describe("Supplementen direct op de tijdlijn", () => {
     expect(container.querySelector(".supplement-editor__section input").value).toBe("HMB");
   });
 
-  test("compact paneel gebruikt defaults en levert een snapshot aan", async () => {
+  test("registratiepaneel gebruikt defaults en levert een snapshot aan", async () => {
     const onAddToTimeline = await renderTab();
     await act(async () => button(container, "Zet op tijdlijn").click());
 
-    const panel = container.querySelector('[data-compact-event="supplement"]');
+    const panel = container.querySelector('[data-supplement-registration]');
     expect(panel).toBeTruthy();
     expect(panel.querySelector('input[type="number"]').value).toBe("3");
     expect(panel.textContent).toContain("Doseringseenheid");

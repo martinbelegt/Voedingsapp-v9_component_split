@@ -69,6 +69,7 @@ export function DailyTab({
   takeSportSupplementPlan,
   dailyLog = [],
   onAddMeal,
+  onAddSupplement,
 }) {
   const isMobile = window.innerWidth < 900;
   const [addEventType, setAddEventType] = useState(null);
@@ -263,12 +264,8 @@ export function DailyTab({
 
     setTimelineRegistrationModule(null);
     if (moduleId === "meal") onAddMeal();
-    else {
-      const eventTypeMap = {
-        supplement: "supplement",
-      };
-      setAddEventType(eventTypeMap[moduleId] || moduleId);
-    }
+    else if (moduleId === "supplement") onAddSupplement();
+    else setAddEventType(moduleId);
   }
 
   function discardTimelineChanges() {

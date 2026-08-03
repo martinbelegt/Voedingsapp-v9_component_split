@@ -33,6 +33,7 @@ describe("navigation foundation", () => {
     expect(mainNavigation.map((item) => item.label)).toEqual([
       "Tijdlijn",
       "Samenstellen",
+      "Mijn routines",
       "Mijn catalogi",
       "Mijn dossier",
       "Mijn profiel",

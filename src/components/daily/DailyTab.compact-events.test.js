@@ -11,7 +11,7 @@ function changeInput(input, value) {
   input.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
-function Harness({ onWeight, onMovement }) {
+function Harness({ onWeight, onMovement, onSupplement }) {
   const [selectedDay, setSelectedDay] = useState({
     date: "2026-07-31",
     meals: [],
@@ -103,6 +103,7 @@ function Harness({ onWeight, onMovement }) {
       takeSportSupplementPlan={noop}
       dailyLog={[]}
       onAddMeal={noop}
+      onAddSupplement={onSupplement}
     />
   );
 }
@@ -112,6 +113,7 @@ describe("compacte dagelijkse events", () => {
   let root;
   let onWeight;
   let onMovement;
+  let onSupplement;
 
   beforeEach(async () => {
     globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -121,8 +123,15 @@ describe("compacte dagelijkse events", () => {
     root = createRoot(container);
     onWeight = jest.fn();
     onMovement = jest.fn();
+    onSupplement = jest.fn();
     await act(async () =>
-      root.render(<Harness onWeight={onWeight} onMovement={onMovement} />),
+      root.render(
+        <Harness
+          onWeight={onWeight}
+          onMovement={onMovement}
+          onSupplement={onSupplement}
+        />,
+      ),
     );
   });
 
@@ -180,6 +189,16 @@ describe("compacte dagelijkse events", () => {
     );
     expect(container.querySelector('[data-compact-event="movement"]')).toBeNull();
     expect(container.textContent).toContain("Wandelen");
+  });
+
+  test("supplement opent de catalogusroute en nooit een compact paneel", async () => {
+    const supplementButton = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent.includes("Supplement"),
+    );
+    await act(async () => supplementButton.click());
+
+    expect(onSupplement).toHaveBeenCalledTimes(1);
+    expect(container.querySelector('[data-compact-event="supplement"]')).toBeNull();
   });
 
   test("annuleren met gewichtswijziging bewaart niets", async () => {

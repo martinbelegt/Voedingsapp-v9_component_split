@@ -22,6 +22,20 @@ import {
 import { term } from "../../config/terminology";
 import { formatWeightKg } from "../../services/weightEventService";
 
+export function formatCreonAdvice(totals = {}) {
+  const doses = [
+    [Number(totals.creon35 ?? totals.best?.c35) || 0, "35.000"],
+    [Number(totals.creon25) || 0, "25.000"],
+    [Number(totals.creon10) || 0, "10.000"],
+    [Number(totals.creon5 ?? totals.best?.c5) || 0, "5.000"],
+  ].filter(([count]) => count > 0);
+
+  if (doses.length === 0) return "Geen Creon nodig";
+  return `Creonadvies ${doses
+    .map(([count, strength]) => (count === 1 ? strength : `${count}×${strength}`))
+    .join(" + ")}`;
+}
+
 export function DailyMealList({
   mealsForDay = [],
   insulinEventsForDay = [],
@@ -89,6 +103,7 @@ export function DailyMealList({
   const [timelineOrder, setTimelineOrder] = useState("newest");
 
   const [visibleTypes, setVisibleTypes] = useState({
+    routineExecution: true,
     meal: true,
     insulinAdvice: true,
     insulin: true,
@@ -126,7 +141,7 @@ export function DailyMealList({
     });
   }
 
-  const timelineItems = [
+  const rawTimelineItems = [
     ...mealsForDay.map((meal) => ({
       id: meal.id,
       itemType: "meal",
@@ -225,6 +240,29 @@ export function DailyMealList({
 
     return timeB - timeA;
   });
+
+  const routineGroups = new Map();
+  rawTimelineItems.forEach((item) => {
+    const source = item.meal || item.event;
+    const execution = source?.routineExecution;
+    if (!execution || !["meal", "supplement"].includes(item.itemType)) return;
+    const existing = routineGroups.get(execution.id) || { execution, children: [], time: item.time };
+    existing.children.push(item);
+    routineGroups.set(execution.id, existing);
+  });
+
+  const timelineItems = [
+    ...rawTimelineItems.filter((item) => {
+      const source = item.meal || item.event;
+      return !source?.routineExecution || !["meal", "supplement"].includes(item.itemType);
+    }),
+    ...Array.from(routineGroups.values()).map((group) => ({
+      id: group.execution.id,
+      itemType: "routineExecution",
+      time: group.time,
+      group,
+    })),
+  ];
 
   function getFilteredTimelineItems() {
     if (timelineFilter === "all") return timelineItems;
@@ -834,6 +872,39 @@ export function DailyMealList({
         </div>
       ) : (
         visibleTimelineItems.map((item, index) => {
+          const itemCompact =
+            compactTimeline || !expandedIds.includes(item.id);
+
+          if (item.itemType === "routineExecution") {
+            const { execution, children } = item.group;
+            return (
+              <DailyTimelineItem
+                key={item.id}
+                itemType="routine"
+                compact={itemCompact}
+                expanded={expandedIds.includes(item.id)}
+                onToggle={() => toggleExpanded(item.id)}
+                icon={execution.icon || "☀️"}
+                title={`${execution.name} · ${children.length} onderdelen`}
+                timeLabel={formatTime(item.time)}
+                subtitle="Uitgevoerde routine"
+                accentColor={execution.color || "#557a5b"}
+                backgroundColor="#f2f7f3"
+                borderColor="#b9cbbb"
+                detailContent={
+                  <div style={{ display: "grid", gap: 5 }}>
+                    {children.map((child) => (
+                      <div key={child.id} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "5px 7px", borderRadius: 6, background: "#fff" }}>
+                        <span>{child.itemType === "meal" ? "🍽️" : "💊"} {child.itemType === "meal" ? (child.meal.rows?.map((row) => products.find((product) => product.id === row.productId)?.name).filter(Boolean).join(", ") || child.meal.name) : (child.event.supplementName || child.event.name)}</span>
+                        <small>{child.itemType === "meal" ? "Voeding" : "Supplement"}</small>
+                      </div>
+                    ))}
+                  </div>
+                }
+              />
+            );
+          }
+
           if (item.itemType === "meal") {
             return (
               <DailyMealCard
@@ -845,7 +916,7 @@ export function DailyMealList({
                 onUpdateTime={updateMealTime}
                 onUpdateMedicalLog={updateMealMedicalLog}
                 buttonStyle={buttonStyle}
-                compact={compactTimeline}
+                compact={itemCompact}
                 expanded={expandedIds.includes(item.id)}
               />
             );
@@ -858,13 +929,13 @@ export function DailyMealList({
               <DailyTimelineItem
                 key={item.id}
                 indentLevel={0}
-                compact={true}
+                compact={itemCompact}
                 icon="💡"
-                title={`💡 Insulineadvies NovoRapid ${
+                title={`💡 Insulineadvies ${
                   meal.totals?.insulin != null
                     ? Math.round(Number(meal.totals.insulin) * 100) / 100
                     : "?"
-                }E`}
+                }E      💊 ${formatCreonAdvice(meal.totals)}`}
                 timeLabel={formatTime(meal.eatenAt)}
                 subtitle={null}
                 accentColor="#166534"
@@ -891,7 +962,7 @@ export function DailyMealList({
                 } ${event.units}E`}
                 timeLabel={formatTime(event.eventTime)}
                 subtitle={null}
-                compact={true}
+                compact={itemCompact}
                 accentColor="#1d4ed8"
                 backgroundColor="#eff6ff"
                 borderColor="#93c5fd"
@@ -949,7 +1020,7 @@ export function DailyMealList({
                 title={`${event.glucoseValue} mmol/L`}
                 timeLabel={formatTime(event.eventTime)}
                 subtitle={null}
-                compact={true}
+                compact={itemCompact}
                 accentColor={glucoseColors.accent}
                 backgroundColor={glucoseColors.background}
                 borderColor={glucoseColors.border}
@@ -968,7 +1039,7 @@ export function DailyMealList({
                 indentLevel={2}
                 expanded={expandedIds.includes(event.id)}
                 onToggle={() => setDetailEvent({ type: "glucoseBoost", event })}
-                compact={true}
+                compact={itemCompact}
                 icon="⚡"
                 title={`⚡ +${event.kh || "?"}g snelle KH`}
                 timeLabel={formatTime(event.eventTime)}
@@ -996,7 +1067,7 @@ export function DailyMealList({
                 key={event.id}
                 expanded={expandedIds.includes(event.id)}
                 onToggle={() => setDetailEvent({ type: "movement", event })}
-                compact={compactTimeline}
+                compact={itemCompact}
                 icon={
                   event.activityType?.toLowerCase().includes("kracht")
                     ? "🟠🏋️"
@@ -1030,7 +1101,7 @@ export function DailyMealList({
                 key={event.id}
                 expanded={false}
                 onToggle={() => setDetailEvent({ type: "weight", event })}
-                compact={false}
+                compact={itemCompact}
                 icon="⚖️"
                 title={`Gewicht · ${formatWeightKg(event.valueKg)} kg`}
                 timeLabel={formatTime(event.eventTime || event.datetime)}
@@ -1057,7 +1128,7 @@ export function DailyMealList({
               <DailyTimelineItem
                 key={event.id}
                 itemType="training"
-                compact={false}
+                compact={itemCompact}
                 icon="🏋️"
                 title={event.title || "Training"}
                 timeLabel={formatTime(event.eventTime)}
@@ -1097,7 +1168,7 @@ export function DailyMealList({
               <DailyTimelineItem
                 key={event.id}
                 indentLevel={1}
-                compact={compactTimeline}
+                compact={itemCompact}
                 icon="💊"
                 title={`${event.supplementName || event.name || (isMedication ? "Medicatie / Creon" : "Supplement")}${
                   dosage ? ` · ${dosage}` : ""
@@ -1122,7 +1193,7 @@ export function DailyMealList({
                 indentLevel={1}
                 expanded={false}
                 onToggle={() => setDetailEvent({ type: "bowel", event })}
-                compact={true}
+                compact={itemCompact}
                 icon="🚽"
                 title={`Bristol ${event.bristolScore}`}
                 timeLabel={formatTime(event.eventTime)}
@@ -1146,7 +1217,7 @@ export function DailyMealList({
                 indentLevel={1}
                 expanded={expandedIds.includes(event.id)}
                 onToggle={() => setDetailEvent({ type: "note", event })}
-                compact={compactTimeline}
+                compact={itemCompact}
                 icon={event.alarmEnabled ? "🔔📝" : "📝"}
                 title={event.note || "Notitie"}
                 timeLabel={formatTime(event.eventTime)}
@@ -1265,7 +1336,7 @@ export function DailyMealList({
             return (
               <DailyTimelineItem
                 key={event.id}
-                compact={false}
+                compact={itemCompact}
                 icon="💊"
                 title={`${event.name || "Supplement"}${
                   event.amount || event.unit

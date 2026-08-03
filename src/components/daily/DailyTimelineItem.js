@@ -57,6 +57,9 @@ export function DailyTimelineItem({
               color: accentColor,
               fontSize: isMobile ? 12 : compact ? 13 : 14,
               lineHeight: isMobile ? 1.12 : 1.2,
+              overflow: compact ? "hidden" : undefined,
+              textOverflow: compact ? "ellipsis" : undefined,
+              whiteSpace: compact ? "nowrap" : undefined,
             }}
           >
             {timeLabel ? (

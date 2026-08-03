@@ -42,8 +42,10 @@ export function buildMealSnapshot({
       timingAdvice: totals.timingAdvice,
       personalTimingAdvice: totals.personalTimingAdvice,
       effectiveFat: totals.effectiveFat,
+      creon35: totals.best.c35,
       creon25: totals.best.c25,
       creon10: totals.best.c10,
+      creon5: totals.best.c5,
     },
   };
 }

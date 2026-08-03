@@ -3,6 +3,7 @@ import { term } from "../config/terminology";
 export const mainNavigation = [
   { id: "daily", label: "Tijdlijn", color: "#0891b2" },
   { id: "registration", label: "Samenstellen", color: "#7c3aed" },
+  { id: "routines", label: "Mijn routines", color: "#557a5b" },
   { id: "lists", label: "Mijn catalogi", color: "#16a34a" },
   { id: "record", label: "Mijn dossier", color: "#b45309" },
   { id: "settings", label: "Mijn profiel", color: "#475569" },
@@ -10,7 +11,7 @@ export const mainNavigation = [
 
 export const registrationModules = [
   { id: "meal", icon: "🍽️", label: term("food"), available: true },
-  { id: "supplement", icon: "💊", label: "Supplementen" },
+  { id: "supplement", icon: "💊", label: "Supplementen", available: true },
 ];
 
 export const libraryModules = [

@@ -38,10 +38,16 @@ test("gewicht verschijnt met Nederlandse kommaweergave op de tijdlijn", async ()
 
   expect(container.textContent).toContain("Gewicht · 78,4 kg");
   expect(container.textContent).toContain("07:42");
-  expect(container.textContent).toContain("Ochtendmeting");
+  expect(container.textContent).not.toContain("Ochtendmeting");
   expect(container.textContent).not.toContain(
     "Geen tijdlijnmomenten opgeslagen",
   );
+
+  const expandAll = container.querySelector(
+    'button[aria-label="Alles uitklappen"]',
+  );
+  await act(async () => expandAll.click());
+  expect(container.textContent).toContain("Ochtendmeting");
 
   await act(async () => root.unmount());
   container.remove();
