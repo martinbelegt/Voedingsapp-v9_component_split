@@ -198,6 +198,10 @@ Een routine is daarbij geen macro. Zij is een persoonlijke gezondheidsgewoonte d
 
 **Een catalogus is een selectielijst, geen informatieblad.**
 
+Companion volgt waar mogelijk bewezen interactiepatronen uit veelgebruikte software. Gebruikers hoeven geen nieuwe bediening te leren wanneer bestaande patronen al effectief zijn.
+
+Een catalogus is primair een snelle selectielijst. Detailinformatie wordt inline geopend binnen dezelfde lijst en niet in een afzonderlijk scherm of losse modal. De lijst blijft de vaste context: een item klapt tijdelijk open, duwt de volgende regels naar beneden en sluit zodra een ander item wordt geopend.
+
 De primaire taak van iedere catalogus is een bouwsteen snel herkennen, selecteren en gebruiken. Daarom toont iedere catalogusregel maximaal één regel met alleen:
 
 - een pictogram;

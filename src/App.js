@@ -997,8 +997,24 @@ export default function App() {
       ...catalog,
       items: catalog.items.map((candidate) => candidate.id === item.id ? {
         ...candidate,
-        product: { ...candidate.product, name: draft.name, brand: draft.brand },
-        personal: { ...candidate.personal, dosage: draft.dosage },
+        product: {
+          ...candidate.product,
+          name: draft.name,
+          brand: draft.brand,
+          productName: draft.productName,
+          form: draft.form,
+          amountPerUnit: draft.amountPerUnit,
+          unit: draft.unit,
+          description: draft.description,
+        },
+        personal: {
+          ...candidate.personal,
+          dosage: draft.dosage,
+          dosageUnit: draft.dosageUnit,
+          usageMoment: draft.usageMoment,
+          purpose: draft.purpose,
+          notes: draft.notes,
+        },
         meta: { ...candidate.meta, updatedAt: new Date().toISOString() },
       } : candidate),
     });
@@ -2690,6 +2706,7 @@ Producten uit deze categorie gaan naar "Overig".`);
           <CatalogFramework
             config={{
               title: "Voeding", icon: "🥗", itemIcon: "🍽️",
+              editorTitle: "Uitgebreide Voeding-editor",
               getName: (item) => item.name || "Naam nog invullen",
               getSearchText: (item) => [item.name, item.packName].filter(Boolean).join(" "),
               getCategoryIds: (item) => item.categoryId ? [item.categoryId] : [],
@@ -2703,14 +2720,24 @@ Producten uit deze categorie gaan naar "Overig".`);
                 { label: "Vet / 100 g", value: (item) => item.fat100 },
                 { label: "Kcal / 100 g", value: (item) => item.kcal100 },
               ],
-              editFields: [{ key: "name", label: "Naam" }, { key: "portion", label: "Portie" }, { key: "portionGram", label: "Gram per portie" }],
-              toDraft: (item) => ({ name: item.name, portion: item.portion, portionGram: item.portionGram }),
+              editFields: [
+                { key: "name", label: "Naam" },
+                { key: "portion", label: "Standaardportie" },
+                { key: "portionGram", label: "Gram per portie", type: "number" },
+                { key: "kh100", label: "Koolhydraten / 100 g", type: "number" },
+                { key: "protein100", label: "Eiwit / 100 g", type: "number" },
+                { key: "fat100", label: "Vet / 100 g", type: "number" },
+                { key: "kcal100", label: "Kcal / 100 g", type: "number" },
+                { key: "gi", label: "Glycemische index" },
+                { key: "packName", label: "Lijst / pakket" },
+              ],
+              toDraft: (item) => ({ name: item.name, portion: item.portion, portionGram: item.portionGram, kh100: item.kh100, protein100: item.protein100, fat100: item.fat100, kcal100: item.kcal100, gi: item.gi, packName: item.packName }),
             }}
             items={products}
             categories={categories}
             onPutOnTimeline={putFoodOnTimeline}
             onAddToRoutine={(item) => seedRoutineFromCatalog("food", item.id)}
-            onSave={(item, draft) => updateProduct(item.id, { ...draft, portionGram: Number(draft.portionGram) || 0 })}
+            onSave={(item, draft) => updateProduct(item.id, { ...draft, portionGram: Number(draft.portionGram) || 0, kh100: Number(draft.kh100) || 0, protein100: Number(draft.protein100) || 0, fat100: Number(draft.fat100) || 0, kcal100: Number(draft.kcal100) || 0 })}
             onDelete={(item) => { if (window.confirm(`${item.name} verwijderen?`)) removeProductFromStore(item.id); }}
           />
         )}
@@ -2719,6 +2746,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             key={`supplements-${supplementCatalogRevision}`}
             config={{
               title: "Supplementen", icon: "💊", itemIcon: "💊",
+              editorTitle: "Uitgebreide Supplementeditor",
               getName: (item) => item.product?.name || "Naam nog invullen",
               getSearchText: (item) => [item.product?.name, item.product?.brand, item.product?.productName].filter(Boolean).join(" "),
               getCategoryIds: (item) => item.product?.categoryIds || [],
@@ -2731,8 +2759,13 @@ Producten uit deze categorie gaan naar "Overig".`);
                 { label: "Gebruiksmoment", value: (item) => item.personal?.usageMoment },
                 { label: "Notitie", value: (item) => item.personal?.notes },
               ],
-              editFields: [{ key: "name", label: "Naam" }, { key: "brand", label: "Merk" }, { key: "dosage", label: "Standaarddosering" }],
-              toDraft: (item) => ({ name: item.product?.name, brand: item.product?.brand, dosage: item.personal?.dosage }),
+              editFields: [
+                { key: "name", label: "Naam" }, { key: "brand", label: "Merk" }, { key: "productName", label: "Productnaam" },
+                { key: "form", label: "Vorm" }, { key: "amountPerUnit", label: "Hoeveelheid per eenheid" }, { key: "unit", label: "Eenheid" },
+                { key: "dosage", label: "Standaarddosering" }, { key: "dosageUnit", label: "Doseringseenheid" }, { key: "usageMoment", label: "Gebruiksmoment" },
+                { key: "purpose", label: "Doel", wide: true }, { key: "description", label: "Beschrijving", multiline: true, wide: true }, { key: "notes", label: "Persoonlijke notitie", multiline: true, wide: true },
+              ],
+              toDraft: (item) => ({ name: item.product?.name, brand: item.product?.brand, productName: item.product?.productName, form: item.product?.form, amountPerUnit: item.product?.amountPerUnit, unit: item.product?.unit, description: item.product?.description, dosage: item.personal?.dosage, dosageUnit: item.personal?.dosageUnit, usageMoment: item.personal?.usageMoment, purpose: item.personal?.purpose, notes: item.personal?.notes }),
             }}
             items={loadSupplementCatalog().items}
             categories={loadSupplementCatalog().categories}
@@ -2746,6 +2779,7 @@ Producten uit deze categorie gaan naar "Overig".`);
           <CatalogFramework
             config={{
               title: activeListModule === "medication" ? "Medicatie" : "Oefeningen",
+              editorTitle: activeListModule === "medication" ? "Uitgebreide Medicatie-editor" : "Uitgebreide Oefeningeditor",
               icon: activeListModule === "medication" ? "💊" : "💪",
               itemIcon: activeListModule === "medication" ? "💊" : "🏋️",
               getName: (item) => item.name,

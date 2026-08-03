@@ -15,7 +15,7 @@ const config = {
   toDraft: (item) => ({ name: item.name }),
 };
 
-test("uniforme catalogus is een éénregelige selectielijst met drie vaste acties en toetsenborddetails", async () => {
+test("catalogus houdt twee snelle acties en opent steeds één inline editor", async () => {
   globalThis.IS_REACT_ACT_ENVIRONMENT = true;
   const container = document.createElement("div");
   document.body.appendChild(container);
@@ -39,13 +39,22 @@ test("uniforme catalogus is een éénregelige selectielijst met drie vaste actie
 
   const rows = container.querySelectorAll('[role="option"]');
   expect(rows).toHaveLength(2);
-  expect(rows[0].querySelectorAll("button")).toHaveLength(3);
+  expect(rows[0].querySelectorAll("button")).toHaveLength(2);
   expect(rows[0].textContent).toContain("Havermout");
   expect(rows[0].textContent).toContain("Granen");
 
   await act(async () => rows[0].dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true })));
+  expect(container.querySelectorAll(".catalog-framework__inline-editor")).toHaveLength(1);
   expect(container.textContent).toContain("Portie");
   expect(container.textContent).toContain("40 g");
+
+  await act(async () => rows[1].dispatchEvent(new MouseEvent("click", { bubbles: true })));
+  expect(container.querySelectorAll(".catalog-framework__inline-editor")).toHaveLength(1);
+  expect(container.textContent).toContain("150 g");
+  expect(container.textContent).not.toContain("40 g");
+
+  await act(async () => rows[1].dispatchEvent(new MouseEvent("click", { bubbles: true })));
+  expect(container.querySelectorAll(".catalog-framework__inline-editor")).toHaveLength(0);
 
   await act(async () => root.unmount());
   container.remove();
