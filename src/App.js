@@ -6,8 +6,6 @@ import React, {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-import VoedingslijstTab from "./components/VoedingslijstTab";
-import SupplementsTab from "./components/SupplementsTab";
 import { RegistrationTab } from "./components/LibrariesTab";
 import {
   ModuleNavigation,
@@ -45,6 +43,7 @@ import { CompanionDesignLab } from "./dev/CompanionDesignLab";
 import { FoundationPlayground } from "./dev/FoundationPlayground";
 import { RoutinesWorkspace } from "./components/routines/RoutinesWorkspace";
 import { CatalogRoutineBuilder } from "./components/routines/CatalogRoutineBuilder";
+import CatalogFramework from "./components/catalog/CatalogFramework";
 import { useRoutines } from "./hooks/useRoutines";
 import { buildRoutineRegistrations } from "./services/routineService";
 
@@ -743,6 +742,8 @@ export default function App() {
   const [pendingRegistrationModule, setPendingRegistrationModule] =
     useState(null);
   const [activeListModule, setActiveListModule] = useState("food");
+  const [routineCatalogSeed, setRoutineCatalogSeed] = useState(null);
+  const [supplementCatalogRevision, setSupplementCatalogRevision] = useState(0);
   const [activeRecordModule, setActiveRecordModule] = useState("medication");
   const [activeDevTab, setActiveDevTab] = useState("playground");
   const isMobile =
@@ -948,6 +949,67 @@ export default function App() {
       setSelectedDate(registrations[0].input.date);
     }
     return registrations.length;
+  }
+
+  function seedRoutineFromCatalog(type, catalogItemId) {
+    setRoutineCatalogSeed({ type, catalogItemId, nonce: Date.now() });
+  }
+
+  function putFoodOnTimeline(product) {
+    const grams = Number(product.portionGram) || 100;
+    const factor = grams / 100;
+    addMealToDay({
+      date: selectedDate,
+      name: product.name,
+      mealMoment: "neutral",
+      eatenAt: `${selectedDate}T${new Date().toTimeString().slice(0, 5)}`,
+      rows: [{ id: createId("catalog-row"), productId: product.id, mode: "portion", amount: "1" }],
+      totals: {
+        kh: (Number(product.kh100) || 0) * factor,
+        protein: (Number(product.protein100) || 0) * factor,
+        fat: (Number(product.fat100) || 0) * factor,
+        kcal: (Number(product.kcal100) || 0) * factor,
+      },
+    });
+    setActiveTab("daily");
+  }
+
+  function putSupplementOnTimeline(supplement) {
+    const nowTime = new Date().toTimeString().slice(0, 5);
+    addSupplementEventToDay({
+      date: selectedDate,
+      eventTime: `${selectedDate}T${nowTime}`,
+      name: supplement.product?.name || "Supplement",
+      supplementName: supplement.product?.name || "Supplement",
+      supplementId: supplement.id,
+      dosage: supplement.personal?.dosage || "",
+      unit: supplement.personal?.dosageUnit || "",
+      note: supplement.personal?.notes || "",
+      brand: supplement.product?.brand || "",
+      productName: supplement.product?.productName || "",
+    });
+    setActiveTab("daily");
+  }
+
+  function updateSupplementFromCatalog(item, draft) {
+    const catalog = loadSupplementCatalog();
+    saveSupplementCatalog({
+      ...catalog,
+      items: catalog.items.map((candidate) => candidate.id === item.id ? {
+        ...candidate,
+        product: { ...candidate.product, name: draft.name, brand: draft.brand },
+        personal: { ...candidate.personal, dosage: draft.dosage },
+        meta: { ...candidate.meta, updatedAt: new Date().toISOString() },
+      } : candidate),
+    });
+    setSupplementCatalogRevision((value) => value + 1);
+  }
+
+  function deleteSupplementFromCatalog(item) {
+    if (!window.confirm(`${item.product?.name || "Dit supplement"} verwijderen?`)) return;
+    const catalog = loadSupplementCatalog();
+    saveSupplementCatalog({ ...catalog, items: catalog.items.filter(({ id }) => id !== item.id) });
+    setSupplementCatalogRevision((value) => value + 1);
   }
 
   useEffect(() => {
@@ -2606,19 +2668,12 @@ Producten uit deze categorie gaan naar "Overig".`);
         )}
         {activeTab === "lists" && (
           <div className="companion-catalog-page-heading">
-            <ModuleWorkspace
-              title="Mijn catalogi"
-              description="Beheer hier je catalogi met voedingsmiddelen, supplementen, medicatie en oefeningen."
-              modules={libraryModules}
-              activeModuleId={activeListModule}
-              onSelect={setActiveListModule}
-              hideNavigation
-            />
             <CatalogRoutineBuilder
               activeModuleId={activeListModule}
               products={products}
               supplements={loadSupplementCatalog().items}
               onCreateRoutine={addRoutine}
+              initialSelection={routineCatalogSeed}
             />
           </div>
         )}
@@ -2632,58 +2687,77 @@ Producten uit deze categorie gaan naar "Overig".`);
           />
         )}
         {activeTab === "lists" && activeListModule === "food" && (
-          <VoedingslijstTab
+          <CatalogFramework
+            config={{
+              title: "Voeding", icon: "🥗", itemIcon: "🍽️",
+              getName: (item) => item.name || "Naam nog invullen",
+              getSearchText: (item) => [item.name, item.packName].filter(Boolean).join(" "),
+              getCategoryIds: (item) => item.categoryId ? [item.categoryId] : [],
+              getCategoryLabel: (item, options) => options.find(({ id }) => id === item.categoryId)?.name || "",
+              detailFields: [
+                { label: "Categorie", value: (item) => categories.find(({ id }) => id === item.categoryId)?.name },
+                { label: "Portie", value: (item) => item.portion },
+                { label: "Gram per portie", value: (item) => item.portionGram },
+                { label: "Koolhydraten / 100 g", value: (item) => item.kh100 },
+                { label: "Eiwit / 100 g", value: (item) => item.protein100 },
+                { label: "Vet / 100 g", value: (item) => item.fat100 },
+                { label: "Kcal / 100 g", value: (item) => item.kcal100 },
+              ],
+              editFields: [{ key: "name", label: "Naam" }, { key: "portion", label: "Portie" }, { key: "portionGram", label: "Gram per portie" }],
+              toDraft: (item) => ({ name: item.name, portion: item.portion, portionGram: item.portionGram }),
+            }}
+            items={products}
             categories={categories}
-            products={products}
-            editingProductId={editingProductId}
-            productSearch={productSearch}
-            setProductSearch={setProductSearch}
-            searchedProducts={searchedProducts}
-            newProduct={newProduct}
-            setNewProduct={setNewProduct}
-            addProduct={addProduct}
-            resetNewProductForm={resetNewProductForm}
-            toggleFavorite={toggleFavorite}
-            copyProductToCurrentPack={copyProductToCurrentPack}
-            deleteProduct={deleteProduct}
-            sortConfig={sortConfig}
-            requestSort={requestSort}
-            categoryDraftName={categoryDraftName}
-            setCategoryDraftName={setCategoryDraftName}
-            addCategory={addCategory}
-            renameCategory={renameCategory}
-            deleteCategory={deleteCategory}
-            productModalOpen={productModalOpen}
-            openNewProductModal={openNewProductModal}
-            openEditProductModal={openEditProductModal}
-            closeProductModal={closeProductModal}
-            activePackNames={activePackNames}
-            activePackFilter={activePackFilter}
-            setActivePackFilter={setActivePackFilter}
-            packFilterOptions={packFilterOptions}
-            packFilteredProducts={packFilteredProducts}
-            deleteCurrentPackList={deleteCurrentPackList}
-            exportCurrentPack={exportCurrentPack}
-            createNewPackList={createNewPackList}
-            productImportFileRef={productImportFileRef}
-            importBackupFromFile={importBackupFromFile}
-            getCategoryColor={getCategoryColor}
-            getCategoryName={getCategoryName}
-            getGiClassMeta={getGiClassMeta}
-            getTimingLabel={getTimingLabel}
-            getAbsorptionMeta={getAbsorptionMeta}
-            giClassOptions={giClassOptions}
-            timingOptions={timingOptions}
-            absorptionProfileOptions={absorptionProfileOptions}
-            MEAL_MOMENTS={MEAL_MOMENTS}
-            buttonStyle={buttonStyle}
-            primaryButtonStyle={primaryButtonStyle}
-            cardStyle={cardStyle}
-            inputStyle={inputStyle}
-            labelStyle={labelStyle}
-            sectionBadgeStyle={sectionBadgeStyle}
-            convertPer100ToPerPortion={convertPer100ToPerPortion}
-            convertPerPortionToPer100={convertPerPortionToPer100}
+            onPutOnTimeline={putFoodOnTimeline}
+            onAddToRoutine={(item) => seedRoutineFromCatalog("food", item.id)}
+            onSave={(item, draft) => updateProduct(item.id, { ...draft, portionGram: Number(draft.portionGram) || 0 })}
+            onDelete={(item) => { if (window.confirm(`${item.name} verwijderen?`)) removeProductFromStore(item.id); }}
+          />
+        )}
+        {activeTab === "lists" && activeListModule === "supplements" && (
+          <CatalogFramework
+            key={`supplements-${supplementCatalogRevision}`}
+            config={{
+              title: "Supplementen", icon: "💊", itemIcon: "💊",
+              getName: (item) => item.product?.name || "Naam nog invullen",
+              getSearchText: (item) => [item.product?.name, item.product?.brand, item.product?.productName].filter(Boolean).join(" "),
+              getCategoryIds: (item) => item.product?.categoryIds || [],
+              getCategoryLabel: (item, options) => options.find(({ id }) => id === item.product?.categoryIds?.[0])?.name || "",
+              detailFields: [
+                { label: "Merk", value: (item) => item.product?.brand },
+                { label: "Product", value: (item) => item.product?.productName },
+                { label: "Vorm", value: (item) => item.product?.form },
+                { label: "Standaarddosering", value: (item) => [item.personal?.dosage, item.personal?.dosageUnit].filter(Boolean).join(" ") },
+                { label: "Gebruiksmoment", value: (item) => item.personal?.usageMoment },
+                { label: "Notitie", value: (item) => item.personal?.notes },
+              ],
+              editFields: [{ key: "name", label: "Naam" }, { key: "brand", label: "Merk" }, { key: "dosage", label: "Standaarddosering" }],
+              toDraft: (item) => ({ name: item.product?.name, brand: item.product?.brand, dosage: item.personal?.dosage }),
+            }}
+            items={loadSupplementCatalog().items}
+            categories={loadSupplementCatalog().categories}
+            onPutOnTimeline={putSupplementOnTimeline}
+            onAddToRoutine={(item) => seedRoutineFromCatalog("supplement", item.id)}
+            onSave={updateSupplementFromCatalog}
+            onDelete={deleteSupplementFromCatalog}
+          />
+        )}
+        {activeTab === "lists" && ["medication", "exercises"].includes(activeListModule) && (
+          <CatalogFramework
+            config={{
+              title: activeListModule === "medication" ? "Medicatie" : "Oefeningen",
+              icon: activeListModule === "medication" ? "💊" : "💪",
+              itemIcon: activeListModule === "medication" ? "💊" : "🏋️",
+              getName: (item) => item.name,
+              getSearchText: (item) => item.name || "",
+              getCategoryIds: () => [],
+              getCategoryLabel: () => "",
+              detailFields: [], editFields: [], toDraft: () => ({}),
+              emptyMessage: "Deze catalogus is voorbereid en wordt later gevuld.",
+            }}
+            items={[]}
+            onPutOnTimeline={() => {}}
+            onAddToRoutine={() => {}}
           />
         )}
         {activeTab === "settings" && (
@@ -2804,16 +2878,6 @@ Producten uit deze categorie gaan naar "Overig".`);
             dailyLog={dailyLog}
             onAddMeal={openMealInputFromTimeline}
             onAddSupplement={openSupplementInputFromTimeline}
-          />
-        )}
-        {activeTab === "lists" && activeListModule === "supplements" && (
-          <SupplementsTab
-            selectedDate={selectedDate}
-            onAddToTimeline={(input) => {
-              addSupplementEventToDay(input);
-              setSelectedDate(input.date);
-              setActiveTab("daily");
-            }}
           />
         )}
       </div>

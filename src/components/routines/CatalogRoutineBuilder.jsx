@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { createRoutineItem } from "../../services/routineService";
 import "./catalogRoutineBuilder.css";
 
@@ -14,6 +14,7 @@ export function CatalogRoutineBuilder({
   products,
   supplements,
   onCreateRoutine,
+  initialSelection,
 }) {
   const [open, setOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -26,6 +27,13 @@ export function CatalogRoutineBuilder({
   });
 
   const type = TYPE_BY_MODULE[activeModuleId];
+
+  useEffect(() => {
+    if (!initialSelection?.catalogItemId || initialSelection.type !== type) return;
+    setSelectedIds([initialSelection.catalogItemId]);
+    setStep("details");
+    setOpen(true);
+  }, [initialSelection, type]);
   const options = useMemo(() => {
     if (type === "food") return products.map((item) => ({ id: item.id, label: item.name }));
     if (type === "supplement") return supplements.map((item) => ({ id: item.id, label: item.product?.name || "Supplement" }));

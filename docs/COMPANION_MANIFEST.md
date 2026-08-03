@@ -194,6 +194,21 @@ Daardoor hoeft de gebruiker niet per module een nieuw actiemodel te leren. Ongea
 
 Een routine is daarbij geen macro. Zij is een persoonlijke gezondheidsgewoonte die de gebruiker ondersteunt en ruimte laat om onderdelen wel of niet uit te voeren. Companion registreert een routine of onderdeel nooit automatisch; de gebruiker bevestigt altijd wat daadwerkelijk op de tijdlijn wordt gezet.
 
+### Een catalogus is een selectielijst
+
+**Een catalogus is een selectielijst, geen informatieblad.**
+
+De primaire taak van iedere catalogus is een bouwsteen snel herkennen, selecteren en gebruiken. Daarom toont iedere catalogusregel maximaal één regel met alleen:
+
+- een pictogram;
+- de naam;
+- indien nuttig een subtiele categoriebadge;
+- de vaste acties **Zet op tijdlijn**, **Toevoegen aan routine** en **Details**.
+
+Aanvullende eigenschappen, uitleg en beheerfuncties verschijnen uitsluitend wanneer de gebruiker bewust **Details** kiest. Bewerken, verwijderen en ander beheer staan nooit rechtstreeks in de selectielijst.
+
+Voeding is de referentiecatalogus voor layout en gedrag. Supplementen, medicatie, oefeningen en toekomstige domeinen gebruiken hetzelfde Catalog Framework: dezelfde toolbar, filterbalk, lijstregels, actiebalk, detailweergave, toetsenbordnavigatie en visuele maten. Domeinspecifieke verschillen worden als configuratie toegevoegd en leiden niet tot een afzonderlijke catalogus-UX.
+
 ### Hoofdstructuur van Companion
 
 Iedere hoofdmodule heeft één duidelijke primaire verantwoordelijkheid:
