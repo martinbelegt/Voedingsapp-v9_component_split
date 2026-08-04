@@ -213,12 +213,18 @@ Aanvullende eigenschappen, uitleg en beheerfuncties verschijnen uitsluitend wann
 
 Voeding is de referentiecatalogus voor layout en gedrag. Supplementen, medicatie, oefeningen en toekomstige domeinen gebruiken hetzelfde Catalog Framework: dezelfde toolbar, filterbalk, lijstregels, actiebalk, detailweergave, toetsenbordnavigatie en visuele maten. Domeinspecifieke verschillen worden als configuratie toegevoegd en leiden niet tot een afzonderlijke catalogus-UX.
 
+### Eén route per volledige catalogusworkflow
+
+Wanneer een catalogus een volledige selectie- en uitvoerworkflow ondersteunt, bestaat daarvoor binnen Companion slechts één route. Dubbele routes worden bewust vermeden.
+
+Catalogi vormen de centrale plaats voor het beheren, selecteren en uitvoeren van catalogusitems.
+
 ### Hoofdstructuur van Companion
 
 Iedere hoofdmodule heeft één duidelijke primaire verantwoordelijkheid:
 
 - **Tijdlijn** → dagelijkse gebeurtenissen bekijken en toevoegen;
-- **Samenstellen** → nieuwe voeding, supplementen en later andere samengestelde items maken;
+- **Samenstellen** → nieuwe voeding samenstellen; deze voedingsroute blijft bestaan totdat de resterende exclusieve functies na een gebruiksproef zijn beoordeeld;
 - **Mijn routines** → vaste dagelijkse routines bekijken, plannen, beheren en uitvoeren, zonder daar hun inhoud samen te stellen;
 - **Mijn catalogi** → persoonlijke bibliotheken beheren;
 - **Mijn dossier** → terugkijken, analyseren en trends volgen;

@@ -10,6 +10,7 @@ import SupplementImageManager, {
 } from "./SupplementImageManager";
 import { getPrimarySupplementImage } from "../../services/supplementImageService";
 import SupplementTimelinePanel from "./SupplementTimelinePanel";
+import "../library/libraryWorkspace.css";
 
 function Field({ label, error, wide, children }) {
   return (

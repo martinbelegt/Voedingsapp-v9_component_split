@@ -110,3 +110,42 @@ test("catalogus houdt drie snelle acties, bevestigt verwijderen en opent steeds 
   container.remove();
   globalThis.IS_REACT_ACT_ENVIRONMENT = false;
 });
+
+test("een nieuw catalogusitem wordt binnen dezelfde catalogus bewerkt en kan worden geannuleerd", async () => {
+  globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  const onSave = jest.fn();
+  const createConfig = {
+    ...config,
+    title: "Supplementen",
+    createItem: () => ({ id: "new-supplement", name: "Nieuw supplement", categoryId: "", portion: "" }),
+  };
+
+  await act(async () => root.render(
+    <CatalogFramework
+      config={createConfig}
+      items={[]}
+      onPutOnTimeline={jest.fn()}
+      onAddToRoutine={jest.fn()}
+      onToggleFavorite={jest.fn()}
+      onSave={onSave}
+    />,
+  ));
+
+  const addButton = Array.from(container.querySelectorAll("button")).find((item) => item.textContent.includes("Supplement toevoegen"));
+  await act(async () => addButton.click());
+  expect(container.querySelectorAll(".catalog-framework__inline-editor")).toHaveLength(1);
+  expect(container.querySelector('[role="option"]').textContent).toContain("Nieuw supplement");
+
+  const cancelButton = Array.from(container.querySelectorAll("button")).find((item) => item.textContent === "Annuleren");
+  await act(async () => cancelButton.click());
+  expect(container.querySelectorAll(".catalog-framework__inline-editor")).toHaveLength(0);
+  expect(container.querySelectorAll('[role="option"]')).toHaveLength(0);
+  expect(onSave).not.toHaveBeenCalled();
+
+  await act(async () => root.unmount());
+  container.remove();
+  globalThis.IS_REACT_ACT_ENVIRONMENT = false;
+});

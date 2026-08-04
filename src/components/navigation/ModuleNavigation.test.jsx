@@ -40,7 +40,7 @@ describe("navigation foundation", () => {
       "Kenniscentrum",
       "Mijn profiel",
     ]);
-    expect(registrationModules).toHaveLength(2);
+    expect(registrationModules).toHaveLength(1);
     expect(libraryModules).toHaveLength(4);
     expect(timelineRegistrationModules.map((item) => item.label)).toEqual([
       "Voeding",
@@ -65,11 +65,8 @@ describe("navigation foundation", () => {
     expect(registrationModules.find((item) => item.id === "meal").label).toBe(
       "Voeding",
     );
-    expect(libraryModules.map((item) => item.label)).toEqual([
+    expect(registrationModules.map((item) => item.label)).toEqual([
       "Voeding",
-      "Supplementen",
-      "Medicatie",
-      "Oefeningen",
     ]);
     expect(
       libraryModules.some((module) =>
@@ -95,14 +92,10 @@ describe("navigation foundation", () => {
       ),
     );
 
-    expect(container.querySelectorAll("button")).toHaveLength(2);
-    const supplementButton = Array.from(
-      container.querySelectorAll("button"),
-    ).find(
-      (button) => button.textContent.includes("Supplementen"),
-    );
-    await act(async () => supplementButton.click());
-    expect(onSelect).toHaveBeenCalledWith("supplement");
+    expect(container.querySelectorAll("button")).toHaveLength(1);
+    const foodButton = container.querySelector("button");
+    await act(async () => foodButton.click());
+    expect(onSelect).toHaveBeenCalledWith("meal");
   });
 
   test("one reusable placeholder renders roadmap and module details", async () => {

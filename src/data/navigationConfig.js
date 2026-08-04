@@ -13,7 +13,6 @@ export const mainNavigation = [
 
 export const registrationModules = [
   { id: "meal", icon: "🍽️", label: term("food"), available: true },
-  { id: "supplement", icon: "💊", label: "Supplementen", available: true },
 ];
 
 export const libraryModules = [

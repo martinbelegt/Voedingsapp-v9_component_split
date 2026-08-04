@@ -748,7 +748,6 @@ export default function App() {
     useState(null);
   const [activeListModule, setActiveListModule] = useState("food");
   const [routineCatalogSeed, setRoutineCatalogSeed] = useState(null);
-  const [supplementCreateRequest, setSupplementCreateRequest] = useState(null);
   const [activeRecordModule, setActiveRecordModule] = useState("medication");
   const [activeDevTab, setActiveDevTab] = useState("playground");
   const isMobile =
@@ -1026,7 +1025,9 @@ export default function App() {
       const saved = sanitizeSupplement(draft);
       setSupplementCatalog((catalog) => ({
         ...catalog,
-        items: catalog.items.map((candidate) => candidate.id === item.id ? saved : candidate),
+        items: catalog.items.some((candidate) => candidate.id === item.id)
+          ? catalog.items.map((candidate) => candidate.id === item.id ? saved : candidate)
+          : [saved, ...catalog.items],
       }));
       return;
     }
@@ -1574,9 +1575,8 @@ export default function App() {
   }
 
   function openSupplementInputFromTimeline() {
-    setActiveRegistrationModule("supplement");
-    setRegistrationPanelOpen(true);
-    setActiveTab("registration");
+    setActiveListModule("supplements");
+    setActiveTab("lists");
   }
 
   function selectRegistrationModule(moduleId) {
@@ -2707,17 +2707,6 @@ Producten uit deze categorie gaan naar "Overig".`);
           <RegistrationTab
             activeModuleId={activeRegistrationModule}
             dashboardProps={mealWorkspaceProps}
-            supplementProps={{
-              selectedDate,
-              catalog: supplementCatalog,
-              onCatalogChange: setSupplementCatalog,
-              createRequestId: supplementCreateRequest,
-              onAddToTimeline: (input) => {
-                addSupplementEventToDay(input);
-                setSelectedDate(input.date);
-                setActiveTab("daily");
-              },
-            }}
             panelOpen={registrationPanelOpen}
           />
         )}
@@ -2803,6 +2792,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             config={{
               title: "Supplementen", icon: "💊", itemIcon: "💊",
               editorTitle: "Uitgebreide Supplementeditor",
+              createItem: () => createSupplement(),
               getName: (item) => item.product?.name || "Naam nog invullen",
               getSearchText: (item) => [item.product?.name, item.product?.brand, item.product?.productName].filter(Boolean).join(" "),
               getCategoryIds: (item) => item.product?.categoryIds || [],
@@ -2830,11 +2820,10 @@ Producten uit deze categorie gaan naar "Overig".`);
             categories={supplementCatalog.categories}
             onPutOnTimeline={putSupplementOnTimeline}
             onAddToRoutine={(item) => seedRoutineFromCatalog("supplement", item.id)}
-            onAddNew={() => { setSupplementCreateRequest(Date.now()); setActiveRegistrationModule("supplement"); setRegistrationPanelOpen(true); setActiveTab("registration"); }}
             onToggleFavorite={toggleSupplementFavorite}
             onSave={updateSupplementFromCatalog}
             onDelete={deleteSupplementFromCatalog}
-            renderEditor={({ item, draft, setDraft, save, cancel }) => (
+            renderEditor={({ item, isNew, draft, setDraft, save, cancel }) => (
               <>
               <div className="catalog-framework__back-row">
                 <button type="button" onClick={() => {
@@ -2846,11 +2835,11 @@ Producten uit deze categorie gaan naar "Overig".`);
               <SupplementDetailEditor
                 draft={draft}
                 errors={{}}
-                isNew={false}
+                isNew={isNew}
                 onChange={setDraft}
                 onSave={() => save(draft)}
                 onCancel={cancel}
-                onDelete={() => {
+                onDelete={isNew ? undefined : () => {
                   if (window.confirm(`${draft.product.name || "Dit supplement"} verwijderen?`)) {
                     deleteSupplementFromCatalog(item);
                   }

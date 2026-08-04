@@ -12,19 +12,22 @@ export default function CatalogFramework({ config, items, categories = [], saved
   const [catalogView, setCatalogView] = useState("products");
   const [draft, setDraft] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [newItem, setNewItem] = useState(null);
   const rowRefs = useRef(new Map());
   const editorRef = useRef(null);
 
+  const catalogItems = useMemo(() => newItem ? [newItem, ...items] : items, [items, newItem]);
+
   const filteredItems = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("nl");
-    const result = items.filter((item) => {
+    const result = catalogItems.filter((item) => {
       const itemCategories = config.getCategoryIds(item);
       return (categoryId === "all" || itemCategories.includes(categoryId)) &&
         (!favoritesOnly || config.isFavorite(item)) &&
         (!normalizedQuery || config.getSearchText(item).toLocaleLowerCase("nl").includes(normalizedQuery));
     }).sort((a, b) => config.getName(a).localeCompare(config.getName(b), "nl", { sensitivity: "base" }) * (sortDirection === "asc" ? 1 : -1));
     return result;
-  }, [items, query, categoryId, config, sortDirection, favoritesOnly]);
+  }, [catalogItems, query, categoryId, config, sortDirection, favoritesOnly]);
 
   const filteredMeals = useMemo(() => {
     if (catalogView !== "meals") return [];
@@ -49,11 +52,11 @@ export default function CatalogFramework({ config, items, categories = [], saved
   const totalCount = showingMeals ? savedMeals.length : showingCategories ? categories.length + 1 : items.length;
 
   useEffect(() => {
-    if (openId && !items.some(({ id }) => id === openId)) {
+    if (openId && newItem?.id !== openId && !items.some(({ id }) => id === openId)) {
       setOpenId(null);
       setDraft(null);
     }
-  }, [items, openId]);
+  }, [items, newItem, openId]);
 
   useEffect(() => {
     if (!openId) return;
@@ -71,9 +74,25 @@ export default function CatalogFramework({ config, items, categories = [], saved
     setDraft(config.toDraft(item));
   }
 
+  function startNew() {
+    if (!config.createItem) {
+      onAddNew?.();
+      return;
+    }
+    const item = config.createItem();
+    setCatalogView("products");
+    setQuery("");
+    setCategoryId("all");
+    setNewItem(item);
+    setSelectedId(item.id);
+    setOpenId(item.id);
+    setDraft(config.toDraft(item));
+  }
+
   function toggle(item) {
     setDeleteConfirmId(null);
     if (openId === item.id) {
+      if (newItem?.id === item.id) setNewItem(null);
       setOpenId(null);
       setDraft(null);
     } else {
@@ -85,6 +104,7 @@ export default function CatalogFramework({ config, items, categories = [], saved
     if (!["ArrowDown", "ArrowUp", "Enter", "Escape"].includes(event.key)) return;
     event.preventDefault();
     if (event.key === "Escape") {
+      setNewItem(null);
       setOpenId(null);
       setDraft(null);
       return;
@@ -103,12 +123,14 @@ export default function CatalogFramework({ config, items, categories = [], saved
 
   function save(item) {
     onSave?.(item, draft);
+    setNewItem(null);
     setOpenId(null);
     setDraft(null);
   }
 
   function showCatalogView(view) {
     setCatalogView((current) => current === view ? "products" : view);
+    setNewItem(null);
     setOpenId(null);
     setDraft(null);
   }
@@ -138,7 +160,7 @@ export default function CatalogFramework({ config, items, categories = [], saved
         onShowCategories={() => showCatalogView("categories")}
         catalogLabel={config.title}
         addLabel={`${config.title === "Supplementen" ? "Supplement" : config.title} toevoegen`}
-        onAddNew={onAddNew}
+        onAddNew={startNew}
         onToggleAlphabetical={() => setSortDirection((value) => value === "asc" ? "desc" : "asc")}
         searchPlaceholder={showingMeals ? "Zoek in maaltijden" : showingCategories ? "Zoek in categorieën" : `Zoek in ${config.title.toLowerCase()}`}
       />
@@ -194,14 +216,17 @@ export default function CatalogFramework({ config, items, categories = [], saved
                 <article ref={editorRef} className="catalog-framework__inline-editor" aria-label={`${config.editorTitle || "Editor"} ${config.getName(item)}`}>
                   {renderEditor ? renderEditor({
                     item,
+                    isNew: newItem?.id === item.id,
                     draft,
                     setDraft,
                     save: (candidate = draft) => {
                       onSave?.(item, candidate);
+                      setNewItem(null);
                       setOpenId(null);
                       setDraft(null);
                     },
                     cancel: () => {
+                      setNewItem(null);
                       setOpenId(null);
                       setDraft(null);
                     },
@@ -209,7 +234,7 @@ export default function CatalogFramework({ config, items, categories = [], saved
                   <header>
                     <div><span>{config.editorTitle || "Cataloguseditor"}</span><h2>{config.itemIcon} {config.getName(item)}</h2></div>
                     <div className="catalog-framework__editor-actions">
-                      <button type="button" onClick={() => { setOpenId(null); setDraft(null); }}>Annuleren</button>
+                      <button type="button" onClick={() => { setNewItem(null); setOpenId(null); setDraft(null); }}>Annuleren</button>
                       <button type="button" className="is-save" onClick={() => save(item)} disabled={!onSave}>Wijzigingen bewaren</button>
                       {safeExternalUrl(draft.orderUrl) && <a className="is-order" href={safeExternalUrl(draft.orderUrl)} target="_blank" rel="noreferrer">Bestellen</a>}
                       <button type="button" className="is-primary" onClick={() => onPutOnTimeline(item)}>Zet op tijdlijn</button>
