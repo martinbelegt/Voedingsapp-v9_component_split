@@ -31,7 +31,7 @@ export const SUPPLEMENT_FORMS = [
   "anders",
 ];
 
-export const SUPPLEMENT_UNITS = ["mg", "g", "µg", "ml", "IE", "anders"];
+export const SUPPLEMENT_UNITS = ["mg", "g", "µg", "mcg", "ml", "IE", "IU", "anders"];
 
 export function getSupplementCategoryLabel(
   categoryId,
@@ -47,6 +47,18 @@ export function getSupplementCategoryLabel(
 
 export function createIngredient(overrides = {}) {
   return { name: "", form: "", amount: "", unit: "mg", ...overrides };
+}
+
+export function parseSupplementPrice(value) {
+  const normalized = String(value ?? "").trim().replace(/\s/g, "").replace("€", "").replace(",", ".");
+  if (!normalized) return null;
+  const amount = Number(normalized);
+  return Number.isFinite(amount) ? amount : NaN;
+}
+
+export function formatSupplementPrice(value) {
+  const amount = parseSupplementPrice(value);
+  return amount === null || Number.isNaN(amount) ? "" : amount.toFixed(2).replace(".", ",");
 }
 
 export function createSupplement(overrides = {}) {
@@ -65,6 +77,8 @@ export function createSupplement(overrides = {}) {
       amountPerUnit: "",
       unit: "mg",
       unitsPerPackage: "",
+      price: "",
+      orderUrl: "",
       ingredients: [],
       description: "",
       barcode: "",
@@ -113,9 +127,10 @@ export function validateSupplement(supplement) {
   [
     ["amountPerUnit", product.amountPerUnit],
     ["unitsPerPackage", product.unitsPerPackage],
+    ["price", parseSupplementPrice(product.price)],
     ["dosage", supplement?.personal?.dosage],
   ].forEach(([key, value]) => {
-    if (value !== "" && Number(value) < 0) {
+    if (value !== "" && value !== null && (Number.isNaN(Number(value)) || Number(value) < 0)) {
       errors[key] = "Waarde mag niet negatief zijn.";
     }
   });
@@ -137,6 +152,7 @@ export function sanitizeSupplement(supplement) {
     product: {
       ...supplement.product,
       name: supplement.product.name.trim(),
+      price: formatSupplementPrice(supplement.product.price),
       categoryIds: [
         ...new Set(
           (supplement.product.categoryIds || [])
@@ -234,13 +250,14 @@ function migrateLegacySupplement(item, categories = DEFAULT_SUPPLEMENT_CATEGORIE
 export function migrateSupplements(
   items,
   categories = DEFAULT_SUPPLEMENT_CATEGORIES,
+  { includeStarters = true } = {},
 ) {
   const migrated = Array.isArray(items)
     ? items.map((item) => migrateLegacySupplement(item, categories))
     : [];
   const unique = [];
   const seen = new Set();
-  [...migrated, ...STARTER_SUPPLEMENTS].forEach((item) => {
+  [...migrated, ...(includeStarters ? STARTER_SUPPLEMENTS : [])].forEach((item) => {
     const identity = item.id || item.product.name.trim().toLocaleLowerCase("nl");
     if (!identity || seen.has(identity)) return;
     seen.add(identity);
@@ -251,11 +268,13 @@ export function migrateSupplements(
 
 export function migrateSupplementCatalog(raw) {
   const sourceItems = Array.isArray(raw) ? raw : raw?.items;
+  const hasStoredItems = Array.isArray(sourceItems);
   const sourceCategories = Array.isArray(raw?.categories)
     ? raw.categories
     : DEFAULT_SUPPLEMENT_CATEGORIES;
   const categories = [];
   const seenNames = new Set();
+  const seenIds = new Set();
   const inferredCategories = (sourceItems || [])
     .map((item) => item?.product?.category || item?.category)
     .filter(Boolean)
@@ -273,10 +292,12 @@ export function migrateSupplementCatalog(raw) {
     const normalized = name.toLocaleLowerCase("nl");
     if (!name || seenNames.has(normalized)) return;
     seenNames.add(normalized);
+    const fallbackId = `supp-category-${normalized.replace(/[^a-z0-9]+/g, "-")}`;
+    const requestedId = String(category?.id || "").trim() || fallbackId;
+    const id = seenIds.has(requestedId) ? `${requestedId}-${normalized.replace(/[^a-z0-9]+/g, "-")}` : requestedId;
+    seenIds.add(id);
     categories.push({
-      id:
-        String(category?.id || "").trim() ||
-        `supp-category-${normalized.replace(/[^a-z0-9]+/g, "-")}`,
+      id,
       name,
       createdAt: category?.createdAt || new Date().toISOString(),
     });
@@ -295,7 +316,11 @@ export function migrateSupplementCatalog(raw) {
       : { ...item, categoryId };
   });
 
-  const items = migrateSupplements(itemsWithResolvedCategoryNames, categories).map((item) =>
+  const items = migrateSupplements(
+    itemsWithResolvedCategoryNames,
+    categories,
+    { includeStarters: !hasStoredItems },
+  ).map((item) =>
     createSupplement({
       ...item,
       product: {

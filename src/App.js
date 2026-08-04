@@ -44,8 +44,13 @@ import { FoundationPlayground } from "./dev/FoundationPlayground";
 import { RoutinesWorkspace } from "./components/routines/RoutinesWorkspace";
 import { CatalogRoutineBuilder } from "./components/routines/CatalogRoutineBuilder";
 import CatalogFramework from "./components/catalog/CatalogFramework";
+import SupplementDetailEditor from "./components/supplements/SupplementDetailEditor";
 import { useRoutines } from "./hooks/useRoutines";
+import { useSupplementCatalog } from "./hooks/useSupplementCatalog";
 import { buildRoutineRegistrations } from "./services/routineService";
+import { CommunityPage } from "./components/community/CommunityPage";
+import { KnowledgeCenter } from "./components/knowledge/KnowledgeCenter";
+import { createSupplement, formatSupplementPrice, sanitizeSupplement } from "./data/supplements";
 
 import {
   getCategoryById,
@@ -743,7 +748,7 @@ export default function App() {
     useState(null);
   const [activeListModule, setActiveListModule] = useState("food");
   const [routineCatalogSeed, setRoutineCatalogSeed] = useState(null);
-  const [supplementCatalogRevision, setSupplementCatalogRevision] = useState(0);
+  const [supplementCreateRequest, setSupplementCreateRequest] = useState(null);
   const [activeRecordModule, setActiveRecordModule] = useState("medication");
   const [activeDevTab, setActiveDevTab] = useState("playground");
   const isMobile =
@@ -785,10 +790,14 @@ export default function App() {
     settings,
     settingsSource,
     settingsCloudDebug,
+    syncStatus: settingsSyncStatus,
     setSettings,
     updateSettings,
     resetSettings,
   } = useSettings();
+
+  const { catalog: supplementCatalog, setCatalog: setSupplementCatalog } =
+    useSupplementCatalog({ settings, settingsSyncStatus, setSettings });
 
   useEffect(() => {
     const backup = loadFoodListsBackup();
@@ -937,7 +946,7 @@ export default function App() {
     const registrations = buildRoutineRegistrations(
       routine,
       checkedIds,
-      { products, supplements: loadSupplementCatalog().items },
+      { products, supplements: supplementCatalog.items },
     );
 
     registrations.forEach(({ type, input }) => {
@@ -974,6 +983,27 @@ export default function App() {
     setActiveTab("daily");
   }
 
+  function putSavedMealOnTimeline(meal) {
+    const mealRows = (meal.rows || [])
+      .filter((row) => row.productId)
+      .map((row) => ({ ...row, id: createId("catalog-meal-row") }));
+    const calculatedRows = calculateMealRows(mealRows, products, parseDecimalInput, round2);
+    addMealToDay({
+      date: selectedDate,
+      name: meal.name,
+      mealMoment: "neutral",
+      eatenAt: `${selectedDate}T${new Date().toTimeString().slice(0, 5)}`,
+      rows: mealRows,
+      totals: {
+        kh: round2(calculatedRows.reduce((total, row) => total + (row.kh || 0), 0)),
+        protein: round2(calculatedRows.reduce((total, row) => total + (row.protein || 0), 0)),
+        fat: round2(calculatedRows.reduce((total, row) => total + (row.fat || 0), 0)),
+        kcal: round2(calculatedRows.reduce((total, row) => total + (row.kcal || 0), 0)),
+      },
+    });
+    setActiveTab("daily");
+  }
+
   function putSupplementOnTimeline(supplement) {
     const nowTime = new Date().toTimeString().slice(0, 5);
     addSupplementEventToDay({
@@ -992,8 +1022,15 @@ export default function App() {
   }
 
   function updateSupplementFromCatalog(item, draft) {
-    const catalog = loadSupplementCatalog();
-    saveSupplementCatalog({
+    if (draft?.product && draft?.personal) {
+      const saved = sanitizeSupplement(draft);
+      setSupplementCatalog((catalog) => ({
+        ...catalog,
+        items: catalog.items.map((candidate) => candidate.id === item.id ? saved : candidate),
+      }));
+      return;
+    }
+    setSupplementCatalog((catalog) => ({
       ...catalog,
       items: catalog.items.map((candidate) => candidate.id === item.id ? {
         ...candidate,
@@ -1006,6 +1043,8 @@ export default function App() {
           amountPerUnit: draft.amountPerUnit,
           unit: draft.unit,
           description: draft.description,
+          price: formatSupplementPrice(draft.price),
+          orderUrl: draft.orderUrl,
         },
         personal: {
           ...candidate.personal,
@@ -1017,15 +1056,23 @@ export default function App() {
         },
         meta: { ...candidate.meta, updatedAt: new Date().toISOString() },
       } : candidate),
-    });
-    setSupplementCatalogRevision((value) => value + 1);
+    }));
   }
 
   function deleteSupplementFromCatalog(item) {
-    if (!window.confirm(`${item.product?.name || "Dit supplement"} verwijderen?`)) return;
-    const catalog = loadSupplementCatalog();
-    saveSupplementCatalog({ ...catalog, items: catalog.items.filter(({ id }) => id !== item.id) });
-    setSupplementCatalogRevision((value) => value + 1);
+    setSupplementCatalog((catalog) => ({
+      ...catalog,
+      items: catalog.items.filter(({ id }) => id !== item.id),
+    }));
+  }
+
+  function toggleSupplementFavorite(item) {
+    setSupplementCatalog((catalog) => ({
+      ...catalog,
+      items: catalog.items.map((candidate) => candidate.id === item.id
+        ? { ...candidate, meta: { ...candidate.meta, favorite: !candidate.meta?.favorite, updatedAt: new Date().toISOString() } }
+        : candidate),
+    }));
   }
 
   useEffect(() => {
@@ -2662,6 +2709,9 @@ Producten uit deze categorie gaan naar "Overig".`);
             dashboardProps={mealWorkspaceProps}
             supplementProps={{
               selectedDate,
+              catalog: supplementCatalog,
+              onCatalogChange: setSupplementCatalog,
+              createRequestId: supplementCreateRequest,
               onAddToTimeline: (input) => {
                 addSupplementEventToDay(input);
                 setSelectedDate(input.date);
@@ -2675,7 +2725,7 @@ Producten uit deze categorie gaan naar "Overig".`);
           <RoutinesWorkspace
             routines={routines}
             products={products}
-            supplements={loadSupplementCatalog().items}
+            supplements={supplementCatalog.items}
             onUpdateRoutine={updateRoutine}
             onDeleteRoutine={deleteRoutine}
             onRegister={registerRoutine}
@@ -2687,7 +2737,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             <CatalogRoutineBuilder
               activeModuleId={activeListModule}
               products={products}
-              supplements={loadSupplementCatalog().items}
+              supplements={supplementCatalog.items}
               onCreateRoutine={addRoutine}
               initialSelection={routineCatalogSeed}
             />
@@ -2702,6 +2752,8 @@ Producten uit deze categorie gaan naar "Overig".`);
             hideNavigation
           />
         )}
+        {activeTab === "community" && <CommunityPage />}
+        {activeTab === "knowledge" && <KnowledgeCenter />}
         {activeTab === "lists" && activeListModule === "food" && (
           <CatalogFramework
             config={{
@@ -2711,6 +2763,7 @@ Producten uit deze categorie gaan naar "Overig".`);
               getSearchText: (item) => [item.name, item.packName].filter(Boolean).join(" "),
               getCategoryIds: (item) => item.categoryId ? [item.categoryId] : [],
               getCategoryLabel: (item, options) => options.find(({ id }) => id === item.categoryId)?.name || "",
+              isFavorite: (item) => Boolean(item.favorite),
               detailFields: [
                 { label: "Categorie", value: (item) => categories.find(({ id }) => id === item.categoryId)?.name },
                 { label: "Portie", value: (item) => item.portion },
@@ -2735,15 +2788,18 @@ Producten uit deze categorie gaan naar "Overig".`);
             }}
             items={products}
             categories={categories}
+            savedMeals={savedMeals}
             onPutOnTimeline={putFoodOnTimeline}
+            onPutMealOnTimeline={putSavedMealOnTimeline}
             onAddToRoutine={(item) => seedRoutineFromCatalog("food", item.id)}
+            onAddNew={() => { setActiveRegistrationModule("meal"); setRegistrationPanelOpen(true); setActiveTab("registration"); }}
+            onToggleFavorite={(item) => updateProduct(item.id, { favorite: !item.favorite })}
             onSave={(item, draft) => updateProduct(item.id, { ...draft, portionGram: Number(draft.portionGram) || 0, kh100: Number(draft.kh100) || 0, protein100: Number(draft.protein100) || 0, fat100: Number(draft.fat100) || 0, kcal100: Number(draft.kcal100) || 0 })}
-            onDelete={(item) => { if (window.confirm(`${item.name} verwijderen?`)) removeProductFromStore(item.id); }}
+            onDelete={(item) => removeProductFromStore(item.id)}
           />
         )}
         {activeTab === "lists" && activeListModule === "supplements" && (
           <CatalogFramework
-            key={`supplements-${supplementCatalogRevision}`}
             config={{
               title: "Supplementen", icon: "💊", itemIcon: "💊",
               editorTitle: "Uitgebreide Supplementeditor",
@@ -2751,10 +2807,12 @@ Producten uit deze categorie gaan naar "Overig".`);
               getSearchText: (item) => [item.product?.name, item.product?.brand, item.product?.productName].filter(Boolean).join(" "),
               getCategoryIds: (item) => item.product?.categoryIds || [],
               getCategoryLabel: (item, options) => options.find(({ id }) => id === item.product?.categoryIds?.[0])?.name || "",
+              isFavorite: (item) => Boolean(item.meta?.favorite),
               detailFields: [
                 { label: "Merk", value: (item) => item.product?.brand },
                 { label: "Product", value: (item) => item.product?.productName },
                 { label: "Vorm", value: (item) => item.product?.form },
+                { label: "Prijs per verpakking", value: (item) => item.product?.price === "" || item.product?.price == null ? "" : `€ ${formatSupplementPrice(item.product.price)}` },
                 { label: "Standaarddosering", value: (item) => [item.personal?.dosage, item.personal?.dosageUnit].filter(Boolean).join(" ") },
                 { label: "Gebruiksmoment", value: (item) => item.personal?.usageMoment },
                 { label: "Notitie", value: (item) => item.personal?.notes },
@@ -2762,17 +2820,73 @@ Producten uit deze categorie gaan naar "Overig".`);
               editFields: [
                 { key: "name", label: "Naam" }, { key: "brand", label: "Merk" }, { key: "productName", label: "Productnaam" },
                 { key: "form", label: "Vorm" }, { key: "amountPerUnit", label: "Hoeveelheid per eenheid" }, { key: "unit", label: "Eenheid" },
+                { key: "price", label: "Prijs per verpakking", type: "text", inputMode: "decimal", prefix: "€", format: formatSupplementPrice }, { key: "orderUrl", label: "Besteladres", type: "url" },
                 { key: "dosage", label: "Standaarddosering" }, { key: "dosageUnit", label: "Doseringseenheid" }, { key: "usageMoment", label: "Gebruiksmoment" },
                 { key: "purpose", label: "Doel", wide: true }, { key: "description", label: "Beschrijving", multiline: true, wide: true }, { key: "notes", label: "Persoonlijke notitie", multiline: true, wide: true },
               ],
-              toDraft: (item) => ({ name: item.product?.name, brand: item.product?.brand, productName: item.product?.productName, form: item.product?.form, amountPerUnit: item.product?.amountPerUnit, unit: item.product?.unit, description: item.product?.description, dosage: item.personal?.dosage, dosageUnit: item.personal?.dosageUnit, usageMoment: item.personal?.usageMoment, purpose: item.personal?.purpose, notes: item.personal?.notes }),
+              toDraft: (item) => createSupplement(item),
             }}
-            items={loadSupplementCatalog().items}
-            categories={loadSupplementCatalog().categories}
+            items={supplementCatalog.items}
+            categories={supplementCatalog.categories}
             onPutOnTimeline={putSupplementOnTimeline}
             onAddToRoutine={(item) => seedRoutineFromCatalog("supplement", item.id)}
+            onAddNew={() => { setSupplementCreateRequest(Date.now()); setActiveRegistrationModule("supplement"); setRegistrationPanelOpen(true); setActiveTab("registration"); }}
+            onToggleFavorite={toggleSupplementFavorite}
             onSave={updateSupplementFromCatalog}
             onDelete={deleteSupplementFromCatalog}
+            renderEditor={({ item, draft, setDraft, save, cancel }) => (
+              <>
+              <div className="catalog-framework__back-row">
+                <button type="button" onClick={() => {
+                  const isDirty = JSON.stringify(draft) !== JSON.stringify(item);
+                  if (isDirty && !window.confirm("Niet-opgeslagen wijzigingen verwerpen?")) return;
+                  cancel();
+                }}>← Terug naar lijst</button>
+              </div>
+              <SupplementDetailEditor
+                draft={draft}
+                errors={{}}
+                isNew={false}
+                onChange={setDraft}
+                onSave={() => save(draft)}
+                onCancel={cancel}
+                onDelete={() => {
+                  if (window.confirm(`${draft.product.name || "Dit supplement"} verwijderen?`)) {
+                    deleteSupplementFromCatalog(item);
+                  }
+                }}
+                onOpenTimelinePanel={() => true}
+                onTimelineSubmit={(values) => {
+                  const saved = sanitizeSupplement(draft);
+                  updateSupplementFromCatalog(item, saved);
+                  addSupplementEventToDay({
+                    date: values.eventTime.slice(0, 10),
+                    eventTime: values.eventTime,
+                    name: values.name,
+                    supplementName: saved.product.name,
+                    supplementId: saved.id,
+                    dosage: values.dosage,
+                    unit: values.unit,
+                    note: values.note,
+                    brand: saved.product.brand,
+                    productName: saved.product.productName,
+                  });
+                  setActiveTab("daily");
+                }}
+                timelineDefaults={{
+                  eventTime: `${selectedDate}T${new Date().toTimeString().slice(0, 5)}`,
+                  values: {
+                    name: draft.product.name,
+                    dosage: draft.personal.dosage,
+                    unit: draft.personal.dosageUnit,
+                    note: draft.personal.notes,
+                  },
+                }}
+                isDirty={JSON.stringify(draft) !== JSON.stringify(item)}
+                categories={supplementCatalog.categories}
+              />
+              </>
+            )}
           />
         )}
         {activeTab === "lists" && ["medication", "exercises"].includes(activeListModule) && (
@@ -2786,12 +2900,14 @@ Producten uit deze categorie gaan naar "Overig".`);
               getSearchText: (item) => item.name || "",
               getCategoryIds: () => [],
               getCategoryLabel: () => "",
+              isFavorite: () => false,
               detailFields: [], editFields: [], toDraft: () => ({}),
               emptyMessage: "Deze catalogus is voorbereid en wordt later gevuld.",
             }}
             items={[]}
             onPutOnTimeline={() => {}}
             onAddToRoutine={() => {}}
+            onToggleFavorite={() => {}}
           />
         )}
         {activeTab === "settings" && (

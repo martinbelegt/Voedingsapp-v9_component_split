@@ -69,8 +69,9 @@ function timelineDateTime(date, usageMoment) {
   return `${date}T${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 }
 
-export default function SupplementsTab({ selectedDate, onAddToTimeline }) {
-  const [catalog, setCatalog] = useState(() => loadSupplementCatalog());
+export default function SupplementsTab({ selectedDate, onAddToTimeline, catalog: controlledCatalog, onCatalogChange, createRequestId }) {
+  const [localCatalog, setLocalCatalog] = useState(() => loadSupplementCatalog());
+  const catalog = controlledCatalog || localCatalog;
   const { items: supplements, categories } = catalog;
   const [selectedId, setSelectedId] = useState(() => catalog.items[0]?.id || null);
   const [draft, setDraft] = useState(null);
@@ -78,10 +79,19 @@ export default function SupplementsTab({ selectedDate, onAddToTimeline }) {
   const [errors, setErrors] = useState({});
   const [showCategories, setShowCategories] = useState(false);
   const timelineCandidateRef = useRef(null);
+  const handledCreateRequestRef = useRef(null);
 
   useEffect(() => {
-    saveSupplementCatalog(catalog);
-  }, [catalog]);
+    if (!controlledCatalog) saveSupplementCatalog(localCatalog);
+  }, [controlledCatalog, localCatalog]);
+
+  const setCatalog = (update) => {
+    if (onCatalogChange) {
+      onCatalogChange(update);
+    } else {
+      setLocalCatalog(update);
+    }
+  };
 
   const setSupplements = (update) =>
     setCatalog((current) => ({
@@ -105,6 +115,12 @@ export default function SupplementsTab({ selectedDate, onAddToTimeline }) {
     setErrors({});
     timelineCandidateRef.current = null;
   }
+
+  useEffect(() => {
+    if (createRequestId === null || createRequestId === undefined || handledCreateRequestRef.current === createRequestId) return;
+    handledCreateRequestRef.current = createRequestId;
+    startNewSupplement();
+  }, [createRequestId]);
 
   function saveDraft(candidate = draft) {
     const result = validateSupplement(candidate);

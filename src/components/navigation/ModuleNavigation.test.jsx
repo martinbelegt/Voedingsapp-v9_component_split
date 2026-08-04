@@ -36,6 +36,8 @@ describe("navigation foundation", () => {
       "Mijn routines",
       "Mijn catalogi",
       "Mijn dossier",
+      "Onze community",
+      "Kenniscentrum",
       "Mijn profiel",
     ]);
     expect(registrationModules).toHaveLength(2);

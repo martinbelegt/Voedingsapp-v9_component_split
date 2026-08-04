@@ -122,4 +122,24 @@ describe("Supplementen direct op de tijdlijn", () => {
     expect(window.confirm.mock.calls[0][0]).toContain("HMB verwijderen?");
     expect(window.confirm.mock.calls[0][0]).toContain("Tijdlijn blijven bewaard");
   });
+
+  test("samenstellen schrijft verwijderen naar de gedeelde catalogus", async () => {
+    jest.spyOn(window, "confirm").mockReturnValue(true);
+    const catalog = loadSupplementCatalog();
+    const onCatalogChange = jest.fn();
+    await act(async () => root.render(
+      <SupplementsTab
+        selectedDate="2026-07-31"
+        catalog={catalog}
+        onCatalogChange={onCatalogChange}
+      />,
+    ));
+
+    await act(async () => button(container, "Verwijderen").click());
+    expect(onCatalogChange).toHaveBeenCalledTimes(1);
+    const update = onCatalogChange.mock.calls[0][0];
+    const updated = update(catalog);
+    expect(updated.items).toHaveLength(catalog.items.length - 1);
+    expect(updated.items.some(({ id }) => id === "supp-hmb")).toBe(false);
+  });
 });

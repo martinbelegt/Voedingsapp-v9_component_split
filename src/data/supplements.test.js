@@ -1,6 +1,7 @@
 import {
   createIngredient,
   createSupplement,
+  formatSupplementPrice,
   migrateSupplements,
   migrateSupplementCatalog,
   sanitizeSupplement,
@@ -77,5 +78,18 @@ describe("supplement model", () => {
       },
     }));
     expect(sanitized.product.categoryIds).toEqual(["vitamins", "minerals"]);
+  });
+
+  test("bewaart prijs en besteladres en weigert een negatieve prijs", () => {
+    const supplement = createSupplement({
+      product: { name: "Magnesium", form: "capsule", price: "12.95", orderUrl: "https://voorbeeld.nl/magnesium" },
+    });
+    expect(sanitizeSupplement(supplement).product).toMatchObject({
+      price: "12,95",
+      orderUrl: "https://voorbeeld.nl/magnesium",
+    });
+    expect(validateSupplement(createSupplement({ product: { name: "Magnesium", form: "capsule", price: -1 } })).errors.price).toBeTruthy();
+    expect(formatSupplementPrice("€ 12.95")).toBe("12,95");
+    expect(formatSupplementPrice("12,9")).toBe("12,90");
   });
 });

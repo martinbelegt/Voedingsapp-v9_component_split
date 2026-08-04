@@ -6,6 +6,8 @@ export const mainNavigation = [
   { id: "routines", label: "Mijn routines", color: "#557a5b" },
   { id: "lists", label: "Mijn catalogi", color: "#16a34a" },
   { id: "record", label: "Mijn dossier", color: "#b45309" },
+  { id: "community", label: "Onze community", color: "#a65338" },
+  { id: "knowledge", label: "Kenniscentrum", color: "#557a5b" },
   { id: "settings", label: "Mijn profiel", color: "#475569" },
 ];
 

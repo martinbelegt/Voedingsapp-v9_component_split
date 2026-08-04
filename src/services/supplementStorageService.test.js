@@ -27,3 +27,18 @@ test("uses a safe fallback for invalid local storage data", () => {
   expect(loaded.length).toBeGreaterThan(0);
   expect(loaded.some((item) => item.id === "supp-vitamin-d3")).toBe(true);
 });
+
+test("voegt een verwijderd startsupplement na opslaan niet opnieuw toe", () => {
+  const withoutVitaminD = loadSupplements().filter(
+    (item) => item.id !== "supp-vitamin-d3",
+  );
+
+  expect(saveSupplements(withoutVitaminD)).toBe(true);
+  expect(loadSupplements().some((item) => item.id === "supp-vitamin-d3"))
+    .toBe(false);
+});
+
+test("bewaart een bewust leeg gemaakte supplementcatalogus", () => {
+  expect(saveSupplements([])).toBe(true);
+  expect(loadSupplements()).toEqual([]);
+});

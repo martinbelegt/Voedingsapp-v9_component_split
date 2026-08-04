@@ -373,4 +373,18 @@ export async function saveAppDataToCloud(key, value) {
   return true;
 }
 
+export async function saveSupplementCatalogToCloud(catalog) {
+  const current = await loadAppDataFromCloud("settings");
+  if (current.status !== "success" || !current.value || typeof current.value !== "object" || Array.isArray(current.value)) {
+    console.error("saveSupplementCatalogToCloud error: instellingen konden niet veilig worden geladen");
+    return false;
+  }
+
+  return saveAppDataToCloud("settings", {
+    ...current.value,
+    supplementCatalog: catalog,
+    supplementCatalogSyncVersion: 1,
+  });
+}
+
 export { STORAGE_KEYS };

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   createIngredient,
+  formatSupplementPrice,
   SUPPLEMENT_FORMS,
   SUPPLEMENT_UNITS,
 } from "../../data/supplements";
@@ -23,6 +24,17 @@ function Field({ label, error, wide, children }) {
 function updatePath(draft, path, value) {
   const [group, key] = path;
   return { ...draft, [group]: { ...draft[group], [key]: value } };
+}
+
+function getSafeOrderUrl(value) {
+  const input = String(value || "").trim();
+  if (!input) return "";
+  try {
+    const url = new URL(/^https?:\/\//i.test(input) ? input : `https://${input}`);
+    return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+  } catch {
+    return "";
+  }
 }
 
 export default function SupplementDetailEditor({
@@ -70,6 +82,7 @@ export default function SupplementDetailEditor({
   }
 
   const primaryImage = getPrimarySupplementImage(product.images);
+  const orderUrl = getSafeOrderUrl(product.orderUrl);
 
   return (
     <form
@@ -105,6 +118,11 @@ export default function SupplementDetailEditor({
         <span />
         <button type="button" onClick={onCancel}>Annuleren</button>
         <button className="is-save" type="submit">Wijzigingen bewaren</button>
+        {orderUrl && (
+          <a className="supplement-editor__order" href={orderUrl} target="_blank" rel="noreferrer">
+            Bestellen
+          </a>
+        )}
         <button className="is-primary" type="button" onClick={() => {
           if (onOpenTimelinePanel?.() !== false) setTimelinePanelOpen(true);
         }}>
@@ -184,6 +202,12 @@ export default function SupplementDetailEditor({
           </Field>
           <Field label="Eenheden per verpakking" error={errors.unitsPerPackage}>
             <input type="number" min="0" step="1" value={product.unitsPerPackage} onChange={set(["product", "unitsPerPackage"])} />
+          </Field>
+          <Field label="Prijs per verpakking" error={errors.price}>
+            <span className="supplement-price-input"><b>€</b><input type="text" inputMode="decimal" value={product.price} onChange={set(["product", "price"])} onBlur={() => onChange(updatePath(draft, ["product", "price"], formatSupplementPrice(product.price)))} placeholder="0,00" /></span>
+          </Field>
+          <Field label="Besteladres">
+            <input type="url" value={product.orderUrl} onChange={set(["product", "orderUrl"])} placeholder="https://webwinkel.nl/product" />
           </Field>
         </div>
       </section>
