@@ -50,6 +50,8 @@ import { useSupplementCatalog } from "./hooks/useSupplementCatalog";
 import { buildRoutineRegistrations } from "./services/routineService";
 import { CommunityPage } from "./components/community/CommunityPage";
 import { KnowledgeCenter } from "./components/knowledge/KnowledgeCenter";
+import MealBuilder, { createMealDraft } from "./components/meals/MealBuilder";
+import MealDraftWarning from "./components/meals/MealDraftWarning";
 import { createSupplement, formatSupplementPrice, sanitizeSupplement } from "./data/supplements";
 
 import {
@@ -747,6 +749,10 @@ export default function App() {
   const [pendingRegistrationModule, setPendingRegistrationModule] =
     useState(null);
   const [activeListModule, setActiveListModule] = useState("food");
+  const [activeMealDraft, setActiveMealDraft] = useState(null);
+  const mealDraftBaselineRef = useRef(null);
+  const pendingMealNavigationRef = useRef(null);
+  const [showMealDraftWarning, setShowMealDraftWarning] = useState(false);
   const [routineCatalogSeed, setRoutineCatalogSeed] = useState(null);
   const [activeRecordModule, setActiveRecordModule] = useState("medication");
   const [activeDevTab, setActiveDevTab] = useState("playground");
@@ -1001,6 +1007,55 @@ export default function App() {
       },
     });
     setActiveTab("daily");
+  }
+
+  function saveMealFromCatalog(meal) {
+    setSavedMeals((current) => current.some(({ id }) => id === meal.id)
+      ? current.map((candidate) => candidate.id === meal.id ? meal : candidate)
+      : [meal, ...current]);
+    setActiveMealDraft(null);
+    mealDraftBaselineRef.current = null;
+  }
+
+  function beginMealBuilder(meal) {
+    const draft = createMealDraft(meal);
+    mealDraftBaselineRef.current = JSON.stringify(draft);
+    setActiveMealDraft(draft);
+  }
+
+  function createCatalogCategory(name) {
+    const normalizedName = name.trim();
+    if (!normalizedName || categories.some((category) => (category.name || "").toLocaleLowerCase("nl") === normalizedName.toLocaleLowerCase("nl"))) return;
+    addCategoryToStore({
+      id: `cat-custom-${Date.now()}`,
+      name: normalizedName,
+      color: CATEGORY_FALLBACK_COLORS[categories.length % CATEGORY_FALLBACK_COLORS.length],
+    });
+  }
+
+  function navigateWithMealProtection(action) {
+    if (activeMealDraft && JSON.stringify(activeMealDraft) !== mealDraftBaselineRef.current) {
+      pendingMealNavigationRef.current = action;
+      setShowMealDraftWarning(true);
+      return;
+    }
+    setActiveMealDraft(null);
+    mealDraftBaselineRef.current = null;
+    action();
+  }
+
+  function selectListModule(moduleId) {
+    if (moduleId === "food") setActiveListModule(moduleId);
+    else navigateWithMealProtection(() => setActiveListModule(moduleId));
+  }
+
+  function discardMealDraftAndContinue() {
+    const action = pendingMealNavigationRef.current;
+    pendingMealNavigationRef.current = null;
+    setShowMealDraftWarning(false);
+    setActiveMealDraft(null);
+    mealDraftBaselineRef.current = null;
+    action?.();
   }
 
   function putSupplementOnTimeline(supplement) {
@@ -1567,11 +1622,8 @@ export default function App() {
   }
 
   function openMealInputFromTimeline() {
-    setDayMealDate(selectedDate);
-    setLogCurrentMealToDay(true);
-    setActiveRegistrationModule("meal");
-    setRegistrationPanelOpen(true);
-    setActiveTab("registration");
+    setActiveListModule("food");
+    setActiveTab("lists");
   }
 
   function openSupplementInputFromTimeline() {
@@ -2120,13 +2172,17 @@ Producten uit deze categorie gaan naar "Overig".`);
   }
 
   function activateMainNavigationItem(item) {
-    if (item.devTab) {
-      setActiveDevTab(item.devTab);
-      setActiveTab(item.tab);
-      return;
-    }
+    const activate = () => {
+      if (item.devTab) {
+        setActiveDevTab(item.devTab);
+        setActiveTab(item.tab);
+        return;
+      }
+      setActiveTab(item.id);
+    };
 
-    setActiveTab(item.id);
+    if ((item.tab || item.id) === "lists") activate();
+    else navigateWithMealProtection(activate);
   }
 
   function activateTimelineHome() {
@@ -2270,7 +2326,7 @@ Producten uit deze categorie gaan naar "Overig".`);
           title="Mijn catalogi"
           modules={libraryModules}
           activeModuleId={activeListModule}
-          onSelect={setActiveListModule}
+          onSelect={selectListModule}
         />
       );
     }
@@ -2780,6 +2836,11 @@ Producten uit deze categorie gaan naar "Overig".`);
             savedMeals={savedMeals}
             onPutOnTimeline={putFoodOnTimeline}
             onPutMealOnTimeline={putSavedMealOnTimeline}
+            onSaveMeal={saveMealFromCatalog}
+            activeMealDraft={activeMealDraft}
+            onBeginMeal={beginMealBuilder}
+            onCreateCategory={createCatalogCategory}
+            renderMealBuilder={({ onSave, onCancel }) => <MealBuilder draft={activeMealDraft} onDraftChange={setActiveMealDraft} products={products} categories={categories} settings={settings} onSave={onSave} onCancel={onCancel} />}
             onAddToRoutine={(item) => seedRoutineFromCatalog("food", item.id)}
             onAddNew={() => { setActiveRegistrationModule("meal"); setRegistrationPanelOpen(true); setActiveTab("registration"); }}
             onToggleFavorite={(item) => updateProduct(item.id, { favorite: !item.favorite })}
@@ -3025,6 +3086,15 @@ Producten uit deze categorie gaan naar "Overig".`);
         syncDebug={syncDebug}
         onAcceptLatestCloud={acceptLatestCloudDailyLog}
       />
+      {showMealDraftWarning && (
+        <MealDraftWarning
+          onContinue={() => {
+            pendingMealNavigationRef.current = null;
+            setShowMealDraftWarning(false);
+          }}
+          onDiscard={discardMealDraftAndContinue}
+        />
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { act } from "react";
+import React, { act, useState } from "react";
 import { createRoot } from "react-dom/client";
 import CatalogFramework from "./CatalogFramework";
 
@@ -56,7 +56,7 @@ test("catalogus houdt drie snelle acties, bevestigt verwijderen en opent steeds 
 
   const categoriesButton = Array.from(container.querySelectorAll("button")).find((button) => button.textContent.includes("Categorieën"));
   await act(async () => categoriesButton.click());
-  expect(categoriesButton.textContent).toBe("Voeding");
+  expect(categoriesButton.textContent).toBe("Categorieën");
   expect(container.querySelector('[aria-label="Catalogusfilters"]')).toBeNull();
   expect(container.querySelectorAll(".catalog-framework__category-row")).toHaveLength(3);
 
@@ -71,14 +71,15 @@ test("catalogus houdt drie snelle acties, bevestigt verwijderen en opent steeds 
 
   const mealsButton = Array.from(container.querySelectorAll("button")).find((button) => button.textContent.includes("Maaltijden"));
   await act(async () => mealsButton.click());
-  expect(mealsButton.textContent).toBe("Producten");
+  expect(mealsButton.getAttribute("aria-pressed")).toBe("true");
   expect(container.textContent).toContain("Mijn ontbijt");
   const mealTimelineButton = container.querySelector('[aria-label="Zet Mijn ontbijt op tijdlijn"]');
   await act(async () => mealTimelineButton.click());
   expect(onMealTimeline).toHaveBeenCalledWith(expect.objectContaining({ id: "meal-1" }));
 
-  await act(async () => mealsButton.click());
-  expect(mealsButton.textContent).toBe("Maaltijden");
+  const productsButton = Array.from(container.querySelectorAll("button")).find((button) => button.textContent === "Producten");
+  await act(async () => productsButton.click());
+  expect(productsButton.getAttribute("aria-pressed")).toBe("true");
   rows = container.querySelectorAll('[role="option"]');
 
   await act(async () => rows[0].querySelector('button[title="Voeg toe aan favorieten"]').click());
@@ -144,6 +145,33 @@ test("een nieuw catalogusitem wordt binnen dezelfde catalogus bewerkt en kan wor
   expect(container.querySelectorAll(".catalog-framework__inline-editor")).toHaveLength(0);
   expect(container.querySelectorAll('[role="option"]')).toHaveLength(0);
   expect(onSave).not.toHaveBeenCalled();
+
+  await act(async () => root.unmount());
+  container.remove();
+  globalThis.IS_REACT_ACT_ENVIRONMENT = false;
+});
+
+test("maaltijden openen inline met toetsenbord en de toevoegknop start dezelfde builder", async () => {
+  globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  function Harness() {
+    const [mealDraft, setMealDraft] = useState(null);
+    return <CatalogFramework config={config} items={[]} savedMeals={[{ id: "meal-1", name: "Ontbijt", rows: [] }]} onPutOnTimeline={jest.fn()} onPutMealOnTimeline={jest.fn()} onAddToRoutine={jest.fn()} onToggleFavorite={jest.fn()} onSave={jest.fn()} activeMealDraft={mealDraft} onBeginMeal={(meal) => setMealDraft(meal ? { ...meal } : { id: "new", name: "", rows: [] })} renderMealBuilder={({ onCancel }) => <div data-testid="meal-builder"><span>{mealDraft?.name || "Nieuwe maaltijd"}</span><button type="button" onClick={onCancel}>Sluiten</button></div>} onSaveMeal={jest.fn()} />;
+  }
+
+  await act(async () => root.render(<Harness />));
+  const mealsButton = Array.from(container.querySelectorAll("button")).find((button) => button.textContent === "Maaltijden");
+  await act(async () => mealsButton.click());
+  const mealRow = container.querySelector('[role="option"]');
+  await act(async () => mealRow.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true })));
+  expect(container.querySelector('[data-testid="meal-builder"]').textContent).toContain("Ontbijt");
+  await act(async () => container.querySelector('[data-testid="meal-builder"] button').click());
+  const returnToMeal = Array.from(container.querySelectorAll("button")).find((button) => button.textContent.includes("Terug naar maaltijd"));
+  expect(returnToMeal).toBeTruthy();
+  await act(async () => returnToMeal.click());
+  expect(container.querySelector('[data-testid="meal-builder"]').textContent).toContain("Ontbijt");
 
   await act(async () => root.unmount());
   container.remove();

@@ -213,11 +213,21 @@ Aanvullende eigenschappen, uitleg en beheerfuncties verschijnen uitsluitend wann
 
 Voeding is de referentiecatalogus voor layout en gedrag. Supplementen, medicatie, oefeningen en toekomstige domeinen gebruiken hetzelfde Catalog Framework: dezelfde toolbar, filterbalk, lijstregels, actiebalk, detailweergave, toetsenbordnavigatie en visuele maten. Domeinspecifieke verschillen worden als configuratie toegevoegd en leiden niet tot een afzonderlijke catalogus-UX.
 
+De navigatie kiest de lijst. De eerste vaste lijstregel maakt een nieuw item. Daardoor blijven navigatie en creatie overal herkenbaar gescheiden, onafhankelijk van sorteren, zoeken en filteren.
+
 ### Eén route per volledige catalogusworkflow
 
 Wanneer een catalogus een volledige selectie- en uitvoerworkflow ondersteunt, bestaat daarvoor binnen Companion slechts één route. Dubbele routes worden bewust vermeden.
 
 Catalogi vormen de centrale plaats voor het beheren, selecteren en uitvoeren van catalogusitems.
+
+### Samengestelde objecten gebruiken het Selection Builder Framework
+
+Een samengesteld object wordt opgebouwd uit bestaande catalogusitems via het Selection Builder Framework.
+
+Catalogi leveren onderdelen. Builders combineren onderdelen tot nieuwe objecten.
+
+Het framework houdt de selectie en de broncatalogus gelijktijdig zichtbaar. Daardoor kan de gebruiker onderdelen zoeken, toevoegen, aanpassen en verwijderen zonder een modal, aparte pagina of onderbreking van de werkcontext. Maaltijden vormen de eerste implementatie; routines, trainingsschema's en medicatieschema's kunnen later dezelfde interactiestructuur gebruiken.
 
 ### Hoofdstructuur van Companion
 

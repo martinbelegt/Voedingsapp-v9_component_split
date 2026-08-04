@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import CatalogToolbar from "./CatalogToolbar";
 import "./catalogFramework.css";
 
-export default function CatalogFramework({ config, items, categories = [], savedMeals = [], onPutOnTimeline, onPutMealOnTimeline, onAddToRoutine, onToggleFavorite, onAddNew, onSave, onDelete, renderEditor }) {
+export default function CatalogFramework({ config, items, categories = [], savedMeals = [], onPutOnTimeline, onPutMealOnTimeline, onAddToRoutine, onToggleFavorite, onAddNew, onSave, onDelete, renderEditor, renderMealBuilder, onSaveMeal, activeMealDraft, onBeginMeal, onCreateCategory }) {
   const [query, setQuery] = useState("");
   const [categoryId, setCategoryId] = useState("all");
   const [selectedId, setSelectedId] = useState(null);
@@ -13,6 +13,9 @@ export default function CatalogFramework({ config, items, categories = [], saved
   const [draft, setDraft] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [newItem, setNewItem] = useState(null);
+  const [mealBuilderVisible, setMealBuilderVisible] = useState(false);
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [categoryName, setCategoryName] = useState("");
   const rowRefs = useRef(new Map());
   const editorRef = useRef(null);
 
@@ -129,8 +132,9 @@ export default function CatalogFramework({ config, items, categories = [], saved
   }
 
   function showCatalogView(view) {
-    setCatalogView((current) => current === view ? "products" : view);
+    setCatalogView(view);
     setNewItem(null);
+    setMealBuilderVisible(false);
     setOpenId(null);
     setDraft(null);
   }
@@ -153,22 +157,24 @@ export default function CatalogFramework({ config, items, categories = [], saved
         onQueryChange={setQuery}
         sortDirection={sortDirection}
         favoritesOnly={favoritesOnly}
-        onToggleFavorites={() => setFavoritesOnly((value) => !value)}
+        onToggleFavorites={() => { setCatalogView("products"); setMealBuilderVisible(false); setFavoritesOnly((value) => showingMeals ? true : !value); }}
         activeView={catalogView}
         showMeals={Boolean(onPutMealOnTimeline)}
+        onShowProducts={() => { setFavoritesOnly(false); showCatalogView("products"); }}
         onShowMeals={() => showCatalogView("meals")}
         onShowCategories={() => showCatalogView("categories")}
-        catalogLabel={config.title}
-        addLabel={`${config.title === "Supplementen" ? "Supplement" : config.title} toevoegen`}
-        onAddNew={startNew}
         onToggleAlphabetical={() => setSortDirection((value) => value === "asc" ? "desc" : "asc")}
         searchPlaceholder={showingMeals ? "Zoek in maaltijden" : showingCategories ? "Zoek in categorieën" : `Zoek in ${config.title.toLowerCase()}`}
       />
-      <div className="catalog-framework__summary"><span>★ favoriet · T tijdlijn · R routine</span><span>{visibleCount} van {totalCount} items</span><span>Klik: openen/sluiten · ↑↓ navigeren · Enter openen · Esc sluiten</span></div>
+      {!mealBuilderVisible && <div className="catalog-framework__summary"><span>★ favoriet · T tijdlijn · R routine</span><span>{visibleCount} van {totalCount} items</span><span>Klik: openen/sluiten · ↑↓ navigeren · Enter openen · Esc sluiten</span></div>}
+      {renderMealBuilder && mealBuilderVisible && activeMealDraft ? renderMealBuilder({ onSave: (meal) => { onSaveMeal?.(meal); setMealBuilderVisible(false); }, onCancel: () => setMealBuilderVisible(false) }) :
       <div className="catalog-framework__list" role="listbox" aria-label={`${config.title} selectielijst`}>
+        {!showingCategories && (showingMeals ? Boolean(renderMealBuilder) : Boolean(config.createItem || onAddNew)) && <button type="button" className="catalog-framework__create-row" onClick={() => { if (showingMeals && renderMealBuilder) { if (!activeMealDraft) onBeginMeal?.(null); setMealBuilderVisible(true); } else startNew(); }}>{showingMeals ? (activeMealDraft ? "← Terug naar maaltijd" : "＋ Maaltijd toevoegen") : `＋ ${config.title === "Supplementen" ? "Supplement" : config.title} toevoegen`}</button>}
         {!visibleCount && <div className="catalog-framework__empty">{showingMeals ? "Geen samengestelde maaltijden gevonden." : showingCategories ? "Geen categorieën gevonden." : (config.emptyMessage || "Geen items gevonden.")}</div>}
         {showingCategories && (
           <>
+            <button type="button" className="catalog-framework__create-row" onClick={() => setAddingCategory((value) => !value)}>＋ Categorie toevoegen</button>
+            {addingCategory && onCreateCategory && <form className="catalog-framework__category-create" onSubmit={(event) => { event.preventDefault(); if (!categoryName.trim()) return; onCreateCategory(categoryName.trim()); setCategoryName(""); setAddingCategory(false); }}><input value={categoryName} onChange={(event) => setCategoryName(event.target.value)} placeholder="Nieuwe categorienaam" aria-label="Nieuwe categorienaam" autoFocus /><button type="submit">Opslaan</button></form>}
             <div className={`catalog-framework__row catalog-framework__category-row${categoryId === "all" ? " is-selected" : ""}`} role="option" aria-selected={categoryId === "all"} tabIndex="0" onClick={() => { setCategoryId("all"); setCatalogView("products"); }}>
               <div className="catalog-framework__category-icon" aria-hidden="true">#</div><strong>Alles</strong><small className="catalog-framework__badge">{items.length} items</small>
             </div>
@@ -179,13 +185,14 @@ export default function CatalogFramework({ config, items, categories = [], saved
           </>
         )}
         {showingMeals && filteredMeals.map((meal) => (
-          <div key={meal.id} className="catalog-framework__row catalog-framework__meal-row" role="option" aria-selected="false" tabIndex="-1">
+          <div key={meal.id} className="catalog-framework__row catalog-framework__meal-row" role="option" aria-selected="false" tabIndex="0" onClick={() => { onBeginMeal?.(meal); setMealBuilderVisible(true); }} onKeyDown={(event) => { if (event.key === "Enter") { onBeginMeal?.(meal); setMealBuilderVisible(true); } }}>
             <div className="catalog-framework__row-actions" onClick={(event) => event.stopPropagation()}>
               <span aria-hidden="true" />
               <button type="button" onClick={() => onPutMealOnTimeline?.(meal)} aria-label={`Zet ${meal.name} op tijdlijn`} title="Zet op tijdlijn">T</button>
             </div>
             <strong title={meal.name}>{meal.name}</strong>
             <small className="catalog-framework__badge">{meal.rows?.filter((row) => row.productId).length || 0} onderdelen</small>
+            {renderMealBuilder && <button type="button" className="catalog-framework__meal-edit" onClick={(event) => { event.stopPropagation(); onBeginMeal?.(meal); setMealBuilderVisible(true); }}>Bewerken</button>}
           </div>
         ))}
         {!showingMeals && !showingCategories && filteredItems.map((item, index) => {
@@ -263,7 +270,7 @@ export default function CatalogFramework({ config, items, categories = [], saved
             </React.Fragment>
           );
         })}
-      </div>
+      </div>}
     </section>
   );
 }
