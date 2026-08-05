@@ -677,6 +677,38 @@
   text-transform: none;
 }
 
+.supplement-editor__note {
+  margin: 16px 0 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #f8faf8;
+  color: #334155;
+  font-size: 12px;
+}
+
+.supplement-link-field {
+  display: grid;
+  gap: 8px;
+}
+
+.supplement-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #eef6ef;
+  color: #2f5b39;
+  border: 1px solid #d3e5d4;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.supplement-link-button:hover {
+  background: #e4f1e6;
+}
+
 .supplement-ingredients {
   display: grid;
   gap: 8px;

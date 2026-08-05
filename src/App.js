@@ -53,6 +53,7 @@ import { KnowledgeCenter } from "./components/knowledge/KnowledgeCenter";
 import MealBuilder, { createMealDraft } from "./components/meals/MealBuilder";
 import MealDraftWarning from "./components/meals/MealDraftWarning";
 import { createSupplement, formatSupplementPrice, sanitizeSupplement } from "./data/supplements";
+import SupplementImportModal from "./components/supplements/SupplementImportModal";
 
 import {
   getCategoryById,
@@ -124,6 +125,13 @@ import {
   loadSupplementCatalog,
   saveSupplementCatalog,
 } from "./services/supplementStorageService";
+import {
+  parseSupplementImportJson,
+  assertSingleSupplementObject,
+  buildSupplementImportResult,
+  createNewSupplementVariant,
+  appendSupplementToCatalog,
+} from "./services/supplementImportService";
 
 import {
   removeBaseProducts,
@@ -803,6 +811,71 @@ export default function App() {
 
   const { catalog: supplementCatalog, setCatalog: setSupplementCatalog } =
     useSupplementCatalog({ settings, settingsSyncStatus, setSettings });
+  const supplementImportFileRef = useRef(null);
+  const [supplementImportModalOpen, setSupplementImportModalOpen] = useState(false);
+  const [supplementImportResult, setSupplementImportResult] = useState(null);
+  const [supplementImportError, setSupplementImportError] = useState("");
+
+  function resetSupplementImport() {
+    setSupplementImportModalOpen(false);
+    setSupplementImportResult(null);
+    setSupplementImportError("");
+  }
+
+  function handleSupplementImportFile(event) {
+    const file = event.target?.files?.[0];
+    if (!file) {
+      event.target.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const raw = parseSupplementImportJson(reader.result);
+        const item = assertSingleSupplementObject(raw);
+        const result = buildSupplementImportResult(
+          item,
+          supplementCatalog.categories,
+          supplementCatalog.items,
+        );
+        setSupplementImportResult(result);
+        setSupplementImportError("");
+        setSupplementImportModalOpen(true);
+      } catch (error) {
+        setSupplementImportError(
+          error?.message || "Ongeldige import. Kies een geldig supplementbestand.",
+        );
+        setSupplementImportResult(null);
+        setSupplementImportModalOpen(false);
+      } finally {
+        event.target.value = "";
+      }
+    };
+    reader.onerror = () => {
+      setSupplementImportError("Lezen van het JSON-bestand is mislukt.");
+      setSupplementImportResult(null);
+      setSupplementImportModalOpen(false);
+      event.target.value = "";
+    };
+    reader.readAsText(file, "utf-8");
+  }
+
+  function handleConfirmSupplementImport() {
+    if (!supplementImportResult?.candidate) return;
+    setSupplementCatalog((catalog) =>
+      appendSupplementToCatalog(catalog, supplementImportResult.candidate),
+    );
+    resetSupplementImport();
+  }
+
+  function handleImportSupplementAsNew() {
+    if (!supplementImportResult) return;
+    const newSupplement = createNewSupplementVariant(supplementImportResult);
+    if (!newSupplement) return;
+    setSupplementCatalog((catalog) => appendSupplementToCatalog(catalog, newSupplement));
+    resetSupplementImport();
+  }
 
   useEffect(() => {
     const backup = loadFoodListsBackup();
@@ -2849,8 +2922,38 @@ Producten uit deze categorie gaan naar "Overig".`);
           />
         )}
         {activeTab === "lists" && activeListModule === "supplements" && (
-          <CatalogFramework
-            config={{
+          <>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
+              <button
+                type="button"
+                onClick={() => supplementImportFileRef.current?.click()}
+                style={{
+                  ...buttonStyle,
+                  padding: "7px 10px",
+                  fontSize: 12,
+                  background: "#f0fdf4",
+                  border: "1px solid #bbf7d0",
+                  color: "#166534",
+                  fontWeight: 700,
+                }}
+              >
+                Supplement importeren
+              </button>
+              {supplementImportError ? (
+                <span style={{ color: "#b91c1c", fontSize: 13 }}>
+                  {supplementImportError}
+                </span>
+              ) : null}
+            </div>
+            <input
+              ref={supplementImportFileRef}
+              type="file"
+              accept="application/json,.json"
+              onChange={handleSupplementImportFile}
+              style={{ display: "none" }}
+            />
+            <CatalogFramework
+              config={{
               title: "Supplementen", icon: "💊", itemIcon: "💊",
               editorTitle: "Uitgebreide Supplementeditor",
               createItem: () => createSupplement(),
@@ -2871,7 +2974,7 @@ Producten uit deze categorie gaan naar "Overig".`);
               editFields: [
                 { key: "name", label: "Naam" }, { key: "brand", label: "Merk" }, { key: "productName", label: "Productnaam" },
                 { key: "form", label: "Vorm" }, { key: "amountPerUnit", label: "Hoeveelheid per eenheid" }, { key: "unit", label: "Eenheid" },
-                { key: "price", label: "Prijs per verpakking", type: "text", inputMode: "decimal", prefix: "€", format: formatSupplementPrice }, { key: "orderUrl", label: "Besteladres", type: "url" },
+                { key: "price", label: "Prijs per verpakking", type: "text", inputMode: "decimal", prefix: "€", format: formatSupplementPrice }, { key: "orderUrl", label: "BestelLink", type: "url" },
                 { key: "dosage", label: "Standaarddosering" }, { key: "dosageUnit", label: "Doseringseenheid" }, { key: "usageMoment", label: "Gebruiksmoment" },
                 { key: "purpose", label: "Doel", wide: true }, { key: "description", label: "Beschrijving", multiline: true, wide: true }, { key: "notes", label: "Persoonlijke notitie", multiline: true, wide: true },
               ],
@@ -2938,6 +3041,15 @@ Producten uit deze categorie gaan naar "Overig".`);
               </>
             )}
           />
+          <SupplementImportModal
+            open={supplementImportModalOpen}
+            categories={supplementCatalog.categories}
+            importResult={supplementImportResult}
+            onClose={resetSupplementImport}
+            onConfirm={handleConfirmSupplementImport}
+            onImportAsNew={handleImportSupplementAsNew}
+          />
+          </>
         )}
         {activeTab === "lists" && ["medication", "exercises"].includes(activeListModule) && (
           <CatalogFramework

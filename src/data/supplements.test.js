@@ -31,6 +31,14 @@ describe("supplement model", () => {
     });
   });
 
+  test("creates new supplements as inactive by default", () => {
+    const supplement = createSupplement({ product: { name: "Zink", form: "tablet" } });
+    expect(supplement.personal.status).toBe("inactive");
+    expect(supplement.product.recommendedIntake).toBe("");
+    expect(supplement.product.maxSafeIntake).toBe("");
+    expect(supplement.product.manufacturerAdvice).toBe("");
+  });
+
   test("searches nested active ingredients", () => {
     const supplement = createSupplement({
       product: {

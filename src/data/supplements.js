@@ -84,9 +84,12 @@ export function createSupplement(overrides = {}) {
       barcode: "",
       imageUrl: "",
       images: [],
+      recommendedIntake: "",
+      maxSafeIntake: "",
+      manufacturerAdvice: "",
     },
     personal: {
-      status: "active",
+      status: "inactive",
       dosage: "",
       dosageUnit: "",
       usageMoment: "",

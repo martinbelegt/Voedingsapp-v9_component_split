@@ -110,6 +110,10 @@ export default function SupplementDetailEditor({
         </div>
       </header>
 
+      <div className="supplement-editor__note">
+        ❗ = minimaal nodig om een supplement te kunnen gebruiken.
+      </div>
+
       <div className="supplement-editor__actions" aria-label="Supplementacties">
         {!isNew && (
           <button className="is-danger" type="button" onClick={onDelete}>
@@ -119,11 +123,6 @@ export default function SupplementDetailEditor({
         <span />
         <button type="button" onClick={onCancel}>Annuleren</button>
         <button className="is-save" type="submit">Wijzigingen bewaren</button>
-        {orderUrl && (
-          <a className="supplement-editor__order" href={orderUrl} target="_blank" rel="noreferrer">
-            Bestellen
-          </a>
-        )}
         <button className="is-primary" type="button" onClick={() => {
           if (onOpenTimelinePanel?.() !== false) setTimelinePanelOpen(true);
         }}>
@@ -148,7 +147,7 @@ export default function SupplementDetailEditor({
       <section className="supplement-editor__section">
         <h2>Identiteit</h2>
         <div className="supplement-editor__grid">
-          <Field label="Naam *" error={errors.name}>
+          <Field label="Naam ❗" error={errors.name}>
             <input value={product.name} onChange={set(["product", "name"])} />
           </Field>
           <div className="supplement-field is-wide">
@@ -187,11 +186,17 @@ export default function SupplementDetailEditor({
       <section className="supplement-editor__section">
         <h2>Productvorm</h2>
         <div className="supplement-editor__grid">
-          <Field label="Vorm *" error={errors.form}>
+          <Field label="Vorm ❗" error={errors.form}>
             <select value={product.form} onChange={set(["product", "form"])}>
               <option value="">Kies een vorm</option>
               {SUPPLEMENT_FORMS.map((form) => <option key={form}>{form}</option>)}
             </select>
+          </Field>
+          <Field label="Aanbevolen dagelijkse hoeveelheid (RI)">
+            <input value={product.recommendedIntake} onChange={set(["product", "recommendedIntake"])} placeholder="bijv. 10 mg" />
+          </Field>
+          <Field label="Maximaal veilige dagelijkse inname (UL)">
+            <input value={product.maxSafeIntake} onChange={set(["product", "maxSafeIntake"])} placeholder="bijv. 25 mg" />
           </Field>
           <Field label="Hoeveelheid per eenheid" error={errors.amountPerUnit}>
             <input type="number" min="0" step="any" value={product.amountPerUnit} onChange={set(["product", "amountPerUnit"])} />
@@ -207,8 +212,20 @@ export default function SupplementDetailEditor({
           <Field label="Prijs per verpakking" error={errors.price}>
             <span className="supplement-price-input"><b>€</b><input type="text" inputMode="decimal" value={product.price} onChange={set(["product", "price"])} onBlur={() => onChange(updatePath(draft, ["product", "price"], formatSupplementPrice(product.price)))} placeholder="0,00" /></span>
           </Field>
-          <Field label="Besteladres">
-            <input type="url" value={product.orderUrl} onChange={set(["product", "orderUrl"])} placeholder="https://webwinkel.nl/product" />
+          <Field label="BestelLink">
+            <div className="supplement-link-field">
+              <input type="url" value={product.orderUrl} onChange={set(["product", "orderUrl"])} placeholder="https://webwinkel.nl/product" />
+              {orderUrl && (
+                <a
+                  className="supplement-link-button"
+                  href={orderUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Open productpagina
+                </a>
+              )}
+            </div>
           </Field>
         </div>
       </section>
@@ -268,6 +285,9 @@ export default function SupplementDetailEditor({
         <div className="supplement-editor__grid">
           <Field label="Korte omschrijving" wide>
             <textarea rows="3" value={product.description} onChange={set(["product", "description"])} />
+          </Field>
+          <Field label="Aanbevolen gebruik fabrikant" wide>
+            <textarea rows="3" value={product.manufacturerAdvice} onChange={set(["product", "manufacturerAdvice"])} placeholder="Neem dagelijks 1 tablet na een maaltijd." />
           </Field>
           <Field label="Barcode">
             <input value={product.barcode} onChange={set(["product", "barcode"])} />
