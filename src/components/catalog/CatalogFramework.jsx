@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import CatalogToolbar from "./CatalogToolbar";
+import CatalogActionBar from "./CatalogActionBar";
 import "./catalogFramework.css";
 
-export default function CatalogFramework({ config, items, categories = [], savedMeals = [], onPutOnTimeline, onPutMealOnTimeline, onAddToRoutine, onToggleFavorite, onAddNew, onSave, onDelete, renderEditor, renderMealBuilder, onSaveMeal, activeMealDraft, onBeginMeal, onCreateCategory }) {
+export default function CatalogFramework({ config, items, categories = [], savedMeals = [], onPutOnTimeline, onPutMealOnTimeline, onAddToRoutine, onToggleFavorite, onAddNew, onImport, onExport, actionBarMessage, showActionBar = false, addLabel, onAddAction, onSave, onDelete, renderEditor, renderMealBuilder, onSaveMeal, activeMealDraft, onBeginMeal, onCreateCategory, routineActions = null }) {
   const [query, setQuery] = useState("");
   const [categoryId, setCategoryId] = useState("all");
   const [selectedId, setSelectedId] = useState(null);
@@ -92,6 +93,35 @@ export default function CatalogFramework({ config, items, categories = [], saved
     setDraft(config.toDraft(item));
   }
 
+  function resolveAddAction() {
+    if (catalogView === "meals" && renderMealBuilder) {
+      if (!activeMealDraft) onBeginMeal?.(null);
+      setMealBuilderVisible(true);
+      return "meal-builder";
+    }
+
+    if (catalogView === "categories") {
+      setAddingCategory(true);
+      return "category-creator";
+    }
+
+    if (showingMeals || catalogView === "products") {
+      if (onAddAction) {
+        onAddAction();
+        return "custom";
+      }
+      startNew();
+      return "new-item";
+    }
+
+    startNew();
+    return "new-item";
+  }
+
+  function handleAdd() {
+    resolveAddAction();
+  }
+
   function toggle(item) {
     setDeleteConfirmId(null);
     if (openId === item.id) {
@@ -150,6 +180,17 @@ export default function CatalogFramework({ config, items, categories = [], saved
     }
   }
 
+  function getAddLabel() {
+    if (catalogView === "meals") return "＋ Maaltijd toevoegen";
+    if (catalogView === "categories") return "＋ Categorie toevoegen";
+    if (addLabel) return addLabel;
+    if (config.title === "Supplementen") return "＋ Supplement toevoegen";
+    if (config.title === "Voeding") return "＋ Voeding toevoegen";
+    return `＋ ${config.title} toevoegen`;
+  }
+
+  const resolvedAddLabel = getAddLabel();
+
   return (
     <section className="catalog-framework" aria-label={`${config.title} catalogus`}>
       <CatalogToolbar
@@ -165,13 +206,28 @@ export default function CatalogFramework({ config, items, categories = [], saved
         onShowCategories={() => showCatalogView("categories")}
         onToggleAlphabetical={() => setSortDirection((value) => value === "asc" ? "desc" : "asc")}
         searchPlaceholder={showingMeals ? "Zoek in maaltijden" : showingCategories ? "Zoek in categorieën" : `Zoek in ${config.title.toLowerCase()}`}
+        showSupplementSwitch={config.title === "Supplementen"}
       />
+      {showActionBar && (
+        <CatalogActionBar
+          onAdd={onAddAction ?? handleAdd}
+          onImport={onImport}
+          onExport={onExport}
+          message={actionBarMessage}
+          addLabel={resolvedAddLabel}
+          routineActions={routineActions}
+        />
+      )}
       {!mealBuilderVisible && <div className="catalog-framework__summary"><span>★ favoriet · T tijdlijn · R routine</span><span>{visibleCount} van {totalCount} items</span><span>Klik: openen/sluiten · ↑↓ navigeren · Enter openen · Esc sluiten</span></div>}
       {renderMealBuilder && mealBuilderVisible && activeMealDraft ? renderMealBuilder({ onSave: (meal) => { onSaveMeal?.(meal); setMealBuilderVisible(false); }, onCancel: () => setMealBuilderVisible(false) }) :
       <div className="catalog-framework__list" role="listbox" aria-label={`${config.title} selectielijst`}>
-        {!showingCategories && (showingMeals ? Boolean(renderMealBuilder) : Boolean(config.createItem || onAddNew)) && <button type="button" className="catalog-framework__create-row" onClick={() => { if (showingMeals && renderMealBuilder) { if (!activeMealDraft) onBeginMeal?.(null); setMealBuilderVisible(true); } else startNew(); }}>{showingMeals ? (activeMealDraft ? "← Terug naar maaltijd" : "＋ Maaltijd toevoegen") : `＋ ${config.title === "Supplementen" ? "Supplement" : config.title} toevoegen`}</button>}
+        {!showActionBar && !showingCategories && (showingMeals ? Boolean(renderMealBuilder) : Boolean(config.createItem || onAddNew)) && (
+          <button type="button" className="catalog-framework__create-row" onClick={handleAdd}>
+            {showingMeals ? (activeMealDraft ? "← Terug naar maaltijd" : "＋ Maaltijd toevoegen") : getAddLabel()}
+          </button>
+        )}
         {!visibleCount && <div className="catalog-framework__empty">{showingMeals ? "Geen samengestelde maaltijden gevonden." : showingCategories ? "Geen categorieën gevonden." : (config.emptyMessage || "Geen items gevonden.")}</div>}
-        {showingCategories && (
+        {showingCategories && !showActionBar && (
           <>
             <button type="button" className="catalog-framework__create-row" onClick={() => setAddingCategory((value) => !value)}>＋ Categorie toevoegen</button>
             {addingCategory && onCreateCategory && <form className="catalog-framework__category-create" onSubmit={(event) => { event.preventDefault(); if (!categoryName.trim()) return; onCreateCategory(categoryName.trim()); setCategoryName(""); setAddingCategory(false); }}><input value={categoryName} onChange={(event) => setCategoryName(event.target.value)} placeholder="Nieuwe categorienaam" aria-label="Nieuwe categorienaam" autoFocus /><button type="submit">Opslaan</button></form>}

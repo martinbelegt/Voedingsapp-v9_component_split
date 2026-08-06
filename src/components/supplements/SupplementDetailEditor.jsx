@@ -12,9 +12,13 @@ import { getPrimarySupplementImage } from "../../services/supplementImageService
 import SupplementTimelinePanel from "./SupplementTimelinePanel";
 import "../library/libraryWorkspace.css";
 
-function Field({ label, error, wide, children }) {
+function Field({ label, error, required, wide, children }) {
+  const isRequiredError =
+    required || (error && (label === "Naam" || label === "Vorm"));
   return (
-    <label className={`supplement-field${wide ? " is-wide" : ""}`}>
+    <label
+      className={`supplement-field${wide ? " is-wide" : ""}${isRequiredError ? " supplement-field--required-error" : ""}`}
+    >
       <span>{label}</span>
       {children}
       {error && <small className="supplement-field__error">{error}</small>}
@@ -31,7 +35,9 @@ function getSafeOrderUrl(value) {
   const input = String(value || "").trim();
   if (!input) return "";
   try {
-    const url = new URL(/^https?:\/\//i.test(input) ? input : `https://${input}`);
+    const url = new URL(
+      /^https?:\/\//i.test(input) ? input : `https://${input}`,
+    );
     return ["http:", "https:"].includes(url.protocol) ? url.href : "";
   } catch {
     return "";
@@ -67,10 +73,11 @@ export default function SupplementDetailEditor({
 
   function removeIngredient(index) {
     onChange(
-      updatePath(draft, [
-        "product",
-        "ingredients",
-      ], product.ingredients.filter((_, itemIndex) => itemIndex !== index)),
+      updatePath(
+        draft,
+        ["product", "ingredients"],
+        product.ingredients.filter((_, itemIndex) => itemIndex !== index),
+      ),
     );
   }
 
@@ -105,13 +112,24 @@ export default function SupplementDetailEditor({
           {primaryImage ? (
             <SupplementImage image={primaryImage} alt={product.name} />
           ) : (
-            <><b>＋</b><small>Afbeelding</small></>
+            <>
+              <b>＋</b>
+              <small>Afbeelding</small>
+            </>
           )}
         </div>
       </header>
 
       <div className="supplement-editor__note">
-        ❗ = minimaal nodig om een supplement te kunnen gebruiken.
+        <strong>
+          De gekleurde velden zijn verplicht om het supplement in de catalogus
+          op te nemen.
+        </strong>
+        {(!draft.product.name || !draft.product.form) && (
+          <p className="supplement-editor__help">
+            Vul Naam en Vorm in voordat je het supplement opslaat.
+          </p>
+        )}
       </div>
 
       <div className="supplement-editor__actions" aria-label="Supplementacties">
@@ -121,12 +139,22 @@ export default function SupplementDetailEditor({
           </button>
         )}
         <span />
-        <button type="button" onClick={onCancel}>Annuleren</button>
-        <button className="is-save" type="submit">Wijzigingen bewaren</button>
-        <button className="is-primary" type="button" onClick={() => {
-          if (onOpenTimelinePanel?.() !== false) setTimelinePanelOpen(true);
-        }}>
-          {isDirty ? "Wijzigingen bewaren en op tijdlijn zetten" : "Zet op tijdlijn"}
+        <button type="button" onClick={onCancel}>
+          Annuleren
+        </button>
+        <button className="is-save" type="submit">
+          Wijzigingen bewaren
+        </button>
+        <button
+          className="is-primary"
+          type="button"
+          onClick={() => {
+            if (onOpenTimelinePanel?.() !== false) setTimelinePanelOpen(true);
+          }}
+        >
+          {isDirty
+            ? "Wijzigingen bewaren en op tijdlijn zetten"
+            : "Zet op tijdlijn"}
         </button>
       </div>
 
@@ -147,7 +175,11 @@ export default function SupplementDetailEditor({
       <section className="supplement-editor__section">
         <h2>Identiteit</h2>
         <div className="supplement-editor__grid">
-          <Field label="Naam ❗" error={errors.name}>
+          <Field
+            label="Naam"
+            error={errors.name}
+            required={!product.name?.trim()}
+          >
             <input value={product.name} onChange={set(["product", "name"])} />
           </Field>
           <div className="supplement-field is-wide">
@@ -169,13 +201,22 @@ export default function SupplementDetailEditor({
             <input value={product.brand} onChange={set(["product", "brand"])} />
           </Field>
           <Field label="Productnaam">
-            <input value={product.productName} onChange={set(["product", "productName"])} />
+            <input
+              value={product.productName}
+              onChange={set(["product", "productName"])}
+            />
           </Field>
           <Field label="Alternatieve naam">
-            <input value={product.alternativeName} onChange={set(["product", "alternativeName"])} />
+            <input
+              value={product.alternativeName}
+              onChange={set(["product", "alternativeName"])}
+            />
           </Field>
           <Field label="Persoonlijke status">
-            <select value={personal.status} onChange={set(["personal", "status"])}>
+            <select
+              value={personal.status}
+              onChange={set(["personal", "status"])}
+            >
               <option value="active">Actief</option>
               <option value="inactive">Niet actief</option>
             </select>
@@ -186,35 +227,72 @@ export default function SupplementDetailEditor({
       <section className="supplement-editor__section">
         <h2>Productvorm</h2>
         <div className="supplement-editor__grid">
-          <Field label="Vorm ❗" error={errors.form}>
+          <Field
+            label="Vorm"
+            error={errors.form}
+            required={!product.form?.trim()}
+          >
             <select value={product.form} onChange={set(["product", "form"])}>
               <option value="">Kies een vorm</option>
-              {SUPPLEMENT_FORMS.map((form) => <option key={form}>{form}</option>)}
+              {SUPPLEMENT_FORMS.map((form) => (
+                <option key={form}>{form}</option>
+              ))}
             </select>
           </Field>
-          <Field label="Aanbevolen dagelijkse hoeveelheid (RI)">
-            <input value={product.recommendedIntake} onChange={set(["product", "recommendedIntake"])} placeholder="bijv. 10 mg" />
-          </Field>
-          <Field label="Maximaal veilige dagelijkse inname (UL)">
-            <input value={product.maxSafeIntake} onChange={set(["product", "maxSafeIntake"])} placeholder="bijv. 25 mg" />
-          </Field>
           <Field label="Hoeveelheid per eenheid" error={errors.amountPerUnit}>
-            <input type="number" min="0" step="any" value={product.amountPerUnit} onChange={set(["product", "amountPerUnit"])} />
+            <input
+              type="number"
+              min="0"
+              step="any"
+              value={product.amountPerUnit}
+              onChange={set(["product", "amountPerUnit"])}
+            />
           </Field>
           <Field label="Eenheid">
             <select value={product.unit} onChange={set(["product", "unit"])}>
-              {SUPPLEMENT_UNITS.map((unit) => <option key={unit}>{unit}</option>)}
+              {SUPPLEMENT_UNITS.map((unit) => (
+                <option key={unit}>{unit}</option>
+              ))}
             </select>
           </Field>
           <Field label="Eenheden per verpakking" error={errors.unitsPerPackage}>
-            <input type="number" min="0" step="1" value={product.unitsPerPackage} onChange={set(["product", "unitsPerPackage"])} />
+            <input
+              type="number"
+              min="0"
+              step="1"
+              value={product.unitsPerPackage}
+              onChange={set(["product", "unitsPerPackage"])}
+            />
           </Field>
           <Field label="Prijs per verpakking" error={errors.price}>
-            <span className="supplement-price-input"><b>€</b><input type="text" inputMode="decimal" value={product.price} onChange={set(["product", "price"])} onBlur={() => onChange(updatePath(draft, ["product", "price"], formatSupplementPrice(product.price)))} placeholder="0,00" /></span>
+            <span className="supplement-price-input">
+              <b>€</b>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={product.price}
+                onChange={set(["product", "price"])}
+                onBlur={() =>
+                  onChange(
+                    updatePath(
+                      draft,
+                      ["product", "price"],
+                      formatSupplementPrice(product.price),
+                    ),
+                  )
+                }
+                placeholder="0,00"
+              />
+            </span>
           </Field>
           <Field label="BestelLink">
             <div className="supplement-link-field">
-              <input type="url" value={product.orderUrl} onChange={set(["product", "orderUrl"])} placeholder="https://webwinkel.nl/product" />
+              <input
+                type="url"
+                value={product.orderUrl}
+                onChange={set(["product", "orderUrl"])}
+                placeholder="https://webwinkel.nl/product"
+              />
               {orderUrl && (
                 <a
                   className="supplement-link-button"
@@ -231,29 +309,112 @@ export default function SupplementDetailEditor({
       </section>
 
       <section className="supplement-editor__section">
+        <h2>Aanbevolen hoeveelheden</h2>
+        <div className="supplement-editor__grid">
+          <Field label="Referentie-inname (RI)">
+            <input
+              value={product.recommendedIntake}
+              onChange={set(["product", "recommendedIntake"])}
+              placeholder="bijv. 10 mg"
+            />
+          </Field>
+          <Field label="Maximaal veilige dagelijkse inname (UL)">
+            <input
+              value={product.maxSafeIntake}
+              onChange={set(["product", "maxSafeIntake"])}
+              placeholder="bijv. 25 mg"
+            />
+          </Field>
+          <Field label="Aanbevolen gebruik fabrikant" wide>
+            <textarea
+              rows="3"
+              value={product.manufacturerAdvice}
+              onChange={set(["product", "manufacturerAdvice"])}
+              placeholder="Neem dagelijks 1 tablet na een maaltijd."
+            />
+          </Field>
+        </div>
+      </section>
+
+      <section className="supplement-editor__section">
         <div className="supplement-editor__section-title">
           <h2>Werkzame stoffen</h2>
-          <button type="button" onClick={() => onChange(updatePath(draft, ["product", "ingredients"], [...product.ingredients, createIngredient()]))}>+ Werkzame stof</button>
+          <button
+            type="button"
+            onClick={() =>
+              onChange(
+                updatePath(
+                  draft,
+                  ["product", "ingredients"],
+                  [...product.ingredients, createIngredient()],
+                ),
+              )
+            }
+          >
+            + Werkzame stof
+          </button>
         </div>
-        {product.ingredients.length === 0 && <p className="supplement-editor__hint">Nog geen werkzame stoffen toegevoegd.</p>}
+        {product.ingredients.length === 0 && (
+          <p className="supplement-editor__hint">
+            Nog geen werkzame stoffen toegevoegd.
+          </p>
+        )}
         <div className="supplement-ingredients">
           {product.ingredients.map((ingredient, index) => (
-            <div className="supplement-ingredient" key={`${index}-${ingredient.name}`}>
+            <div
+              className="supplement-ingredient"
+              key={`${index}-${ingredient.name}`}
+            >
               <Field label="Stof">
-                <input value={ingredient.name} onChange={(event) => updateIngredient(index, "name", event.target.value)} />
+                <input
+                  value={ingredient.name}
+                  onChange={(event) =>
+                    updateIngredient(index, "name", event.target.value)
+                  }
+                />
               </Field>
               <Field label="Vorm / verbinding">
-                <input value={ingredient.form} onChange={(event) => updateIngredient(index, "form", event.target.value)} />
+                <input
+                  value={ingredient.form}
+                  onChange={(event) =>
+                    updateIngredient(index, "form", event.target.value)
+                  }
+                />
               </Field>
-              <Field label="Hoeveelheid" error={errors[`ingredient-${index}-amount`]}>
-                <input type="number" min="0" step="any" value={ingredient.amount} onChange={(event) => updateIngredient(index, "amount", event.target.value)} />
+              <Field
+                label="Hoeveelheid"
+                error={errors[`ingredient-${index}-amount`]}
+              >
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
+                  value={ingredient.amount}
+                  onChange={(event) =>
+                    updateIngredient(index, "amount", event.target.value)
+                  }
+                />
               </Field>
               <Field label="Eenheid">
-                <select value={ingredient.unit} onChange={(event) => updateIngredient(index, "unit", event.target.value)}>
-                  {SUPPLEMENT_UNITS.map((unit) => <option key={unit}>{unit}</option>)}
+                <select
+                  value={ingredient.unit}
+                  onChange={(event) =>
+                    updateIngredient(index, "unit", event.target.value)
+                  }
+                >
+                  {SUPPLEMENT_UNITS.map((unit) => (
+                    <option key={unit}>{unit}</option>
+                  ))}
                 </select>
               </Field>
-              <button className="supplement-ingredient__remove" type="button" onClick={() => removeIngredient(index)} aria-label={`Verwijder werkzame stof ${index + 1}`}>×</button>
+              <button
+                className="supplement-ingredient__remove"
+                type="button"
+                onClick={() => removeIngredient(index)}
+                aria-label={`Verwijder werkzame stof ${index + 1}`}
+              >
+                ×
+              </button>
             </div>
           ))}
         </div>
@@ -263,19 +424,39 @@ export default function SupplementDetailEditor({
         <h2>Persoonlijk gebruik</h2>
         <div className="supplement-editor__grid">
           <Field label="Eigen dosering" error={errors.dosage}>
-            <input type="number" min="0" step="any" value={personal.dosage} onChange={set(["personal", "dosage"])} />
+            <input
+              type="number"
+              min="0"
+              step="any"
+              value={personal.dosage}
+              onChange={set(["personal", "dosage"])}
+            />
           </Field>
           <Field label="Eigen doseereenheid">
-            <input value={personal.dosageUnit} onChange={set(["personal", "dosageUnit"])} placeholder="bijv. capsules" />
+            <input
+              value={personal.dosageUnit}
+              onChange={set(["personal", "dosageUnit"])}
+              placeholder="bijv. capsules"
+            />
           </Field>
           <Field label="Gebruiksmoment">
-            <input value={personal.usageMoment} onChange={set(["personal", "usageMoment"])} />
+            <input
+              value={personal.usageMoment}
+              onChange={set(["personal", "usageMoment"])}
+            />
           </Field>
           <Field label="Gebruiksdoel">
-            <input value={personal.purpose} onChange={set(["personal", "purpose"])} />
+            <input
+              value={personal.purpose}
+              onChange={set(["personal", "purpose"])}
+            />
           </Field>
           <Field label="Persoonlijke notities" wide>
-            <textarea rows="3" value={personal.notes} onChange={set(["personal", "notes"])} />
+            <textarea
+              rows="3"
+              value={personal.notes}
+              onChange={set(["personal", "notes"])}
+            />
           </Field>
         </div>
       </section>
@@ -284,23 +465,28 @@ export default function SupplementDetailEditor({
         <h2>Productinformatie</h2>
         <div className="supplement-editor__grid">
           <Field label="Korte omschrijving" wide>
-            <textarea rows="3" value={product.description} onChange={set(["product", "description"])} />
-          </Field>
-          <Field label="Aanbevolen gebruik fabrikant" wide>
-            <textarea rows="3" value={product.manufacturerAdvice} onChange={set(["product", "manufacturerAdvice"])} placeholder="Neem dagelijks 1 tablet na een maaltijd." />
+            <textarea
+              rows="3"
+              value={product.description}
+              onChange={set(["product", "description"])}
+            />
           </Field>
           <Field label="Barcode">
-            <input value={product.barcode} onChange={set(["product", "barcode"])} />
+            <input
+              value={product.barcode}
+              onChange={set(["product", "barcode"])}
+            />
           </Field>
           <Field label="Afbeeldingen" wide>
             <SupplementImageManager
               images={product.images}
-              onChange={(images) => onChange(updatePath(draft, ["product", "images"], images))}
+              onChange={(images) =>
+                onChange(updatePath(draft, ["product", "images"], images))
+              }
             />
           </Field>
         </div>
       </section>
-
     </form>
   );
 }

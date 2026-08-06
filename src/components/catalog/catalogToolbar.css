@@ -30,10 +30,21 @@
 }
 
 .catalog-toolbar button:hover,
+.catalog-toolbar button:focus-visible,
 .catalog-toolbar button.is-active {
   border-color: #a65338;
   background: #fbf1ed;
   color: #7a3522;
+  outline: 2px solid #7aa06d;
+  outline-offset: 2px;
+}
+
+.catalog-toolbar button:active {
+  background: #f4dfd6;
+}
+
+.catalog-toolbar button:visited {
+  color: inherit;
 }
 
 .catalog-toolbar button.catalog-toolbar__meal-switch {
@@ -99,5 +110,5 @@
 @media (max-width: 899px) {
   .catalog-toolbar { padding: 6px 5px; scrollbar-width: none; }
   .catalog-toolbar button { height: 28px; min-width: 28px; padding: 1px 4px; }
-  .catalog-toolbar label { position: sticky; right: 0; background: #eef7f0; }
+  .catalog-toolbar label { flex: 1 1 180px; min-width: 140px; position: sticky; right: 0; background: #eef7f0; }
 }

@@ -151,6 +151,78 @@ test("een nieuw catalogusitem wordt binnen dezelfde catalogus bewerkt en kan wor
   globalThis.IS_REACT_ACT_ENVIRONMENT = false;
 });
 
+test("de actieknop voor voeding opent de nieuwe-productflow vanuit de catalogusactiebar", async () => {
+  globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  const onAddAction = jest.fn();
+
+  await act(async () => root.render(
+    <CatalogFramework
+      config={{ ...config, title: "Voeding" }}
+      items={[]}
+      showActionBar
+      addLabel="＋ Voeding toevoegen"
+      onAddAction={onAddAction}
+      onImport={jest.fn()}
+      onExport={jest.fn()}
+      onPutOnTimeline={jest.fn()}
+      onAddToRoutine={jest.fn()}
+      onToggleFavorite={jest.fn()}
+    />,
+  ));
+
+  const addButton = Array.from(container.querySelectorAll("button")).find((button) => button.textContent.includes("Voeding toevoegen"));
+  await act(async () => addButton.click());
+  expect(onAddAction).toHaveBeenCalledTimes(1);
+
+  await act(async () => root.unmount());
+  container.remove();
+  globalThis.IS_REACT_ACT_ENVIRONMENT = false;
+});
+
+test("de actieknop past zich aan op basis van de actieve catalogusweergave", async () => {
+  globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+
+  await act(async () => root.render(
+    <CatalogFramework
+      config={{ ...config, title: "Voeding" }}
+      items={[]}
+      showActionBar
+      addLabel="＋ Voeding toevoegen"
+      onImport={jest.fn()}
+      onExport={jest.fn()}
+      onPutOnTimeline={jest.fn()}
+      onPutMealOnTimeline={jest.fn()}
+      onAddToRoutine={jest.fn()}
+      onToggleFavorite={jest.fn()}
+      savedMeals={[{ id: "meal-1", name: "Ontbijt", rows: [] }]}
+      renderMealBuilder={() => <div />}
+      activeMealDraft={null}
+      onBeginMeal={jest.fn()}
+    />,
+  ));
+
+  const addButton = Array.from(container.querySelectorAll("button")).find((button) => button.textContent.includes("Voeding toevoegen"));
+  expect(addButton).toBeTruthy();
+
+  const mealsButton = Array.from(container.querySelectorAll("button")).find((button) => button.textContent === "Maaltijden");
+  await act(async () => mealsButton.click());
+  expect(container.querySelector('.catalog-action-bar__button--primary').textContent).toContain("Maaltijd toevoegen");
+
+  const categoriesButton = Array.from(container.querySelectorAll("button")).find((button) => button.textContent === "Categorieën");
+  await act(async () => categoriesButton.click());
+  expect(container.querySelector('.catalog-action-bar__button--primary').textContent).toContain("Categorie toevoegen");
+
+  await act(async () => root.unmount());
+  container.remove();
+  globalThis.IS_REACT_ACT_ENVIRONMENT = false;
+});
+
 test("maaltijden openen inline met toetsenbord en de toevoegknop start dezelfde builder", async () => {
   globalThis.IS_REACT_ACT_ENVIRONMENT = true;
   const container = document.createElement("div");

@@ -663,6 +663,20 @@
   text-transform: none;
 }
 
+.supplement-field--required-error input,
+.supplement-field--required-error select,
+.supplement-field--required-error textarea {
+  border-color: #fca5a5;
+  box-shadow: inset 0 0 0 1px rgba(248, 113, 113, 0.2);
+  background: #fff5f5;
+}
+
+.supplement-field.supplement-field--required-error input,
+.supplement-field.supplement-field--required-error select,
+.supplement-field.supplement-field--required-error textarea {
+  background: #fff5f5;
+}
+
 .supplement-field input:focus,
 .supplement-field select:focus,
 .supplement-field textarea:focus {
@@ -684,6 +698,12 @@
   background: #f8faf8;
   color: #334155;
   font-size: 12px;
+}
+
+.supplement-editor__help {
+  margin: 8px 0 0;
+  color: #7f1d1d;
+  font-size: 11px;
 }
 
 .supplement-link-field {

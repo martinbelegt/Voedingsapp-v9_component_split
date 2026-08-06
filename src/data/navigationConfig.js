@@ -2,9 +2,8 @@ import { term } from "../config/terminology";
 
 export const mainNavigation = [
   { id: "daily", label: "Tijdlijn", color: "#0891b2" },
-  { id: "registration", label: "Samenstellen", color: "#7c3aed" },
-  { id: "routines", label: "Mijn routines", color: "#557a5b" },
   { id: "lists", label: "Mijn catalogi", color: "#16a34a" },
+  { id: "routines", label: "Mijn routines", color: "#557a5b" },
   { id: "record", label: "Mijn dossier", color: "#b45309" },
   { id: "community", label: "Onze community", color: "#a65338" },
   { id: "knowledge", label: "Kenniscentrum", color: "#557a5b" },

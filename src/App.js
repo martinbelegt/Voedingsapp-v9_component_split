@@ -815,6 +815,7 @@ export default function App() {
   const [supplementImportModalOpen, setSupplementImportModalOpen] = useState(false);
   const [supplementImportResult, setSupplementImportResult] = useState(null);
   const [supplementImportError, setSupplementImportError] = useState("");
+  const [catalogActionMessage, setCatalogActionMessage] = useState("");
 
   function resetSupplementImport() {
     setSupplementImportModalOpen(false);
@@ -2851,15 +2852,7 @@ Producten uit deze categorie gaan naar "Overig".`);
           />
         )}
         {activeTab === "lists" && (
-          <div className="companion-catalog-page-heading">
-            <CatalogRoutineBuilder
-              activeModuleId={activeListModule}
-              products={products}
-              supplements={supplementCatalog.items}
-              onCreateRoutine={addRoutine}
-              initialSelection={routineCatalogSeed}
-            />
-          </div>
+          <div className="companion-catalog-page-heading" />
         )}
         {activeTab === "record" && (
           <ModuleWorkspace
@@ -2874,6 +2867,11 @@ Producten uit deze categorie gaan naar "Overig".`);
         {activeTab === "knowledge" && <KnowledgeCenter />}
         {activeTab === "lists" && activeListModule === "food" && (
           <CatalogFramework
+            showActionBar={true}
+            addLabel="＋ Voeding toevoegen"
+            onImport={() => setCatalogActionMessage("Importeren wordt in een volgende Companion-sprint toegevoegd.")}
+            onExport={() => setCatalogActionMessage("Exporteren wordt in een volgende Companion-sprint toegevoegd.")}
+            actionBarMessage={catalogActionMessage}
             config={{
               title: "Voeding", icon: "🥗", itemIcon: "🍽️",
               editorTitle: "Uitgebreide Voeding-editor",
@@ -2915,7 +2913,13 @@ Producten uit deze categorie gaan naar "Overig".`);
             onCreateCategory={createCatalogCategory}
             renderMealBuilder={({ onSave, onCancel }) => <MealBuilder draft={activeMealDraft} onDraftChange={setActiveMealDraft} products={products} categories={categories} settings={settings} onSave={onSave} onCancel={onCancel} />}
             onAddToRoutine={(item) => seedRoutineFromCatalog("food", item.id)}
-            onAddNew={() => { setActiveRegistrationModule("meal"); setRegistrationPanelOpen(true); setActiveTab("registration"); }}
+            onAddAction={() => { setActiveListModule("food"); setActiveTab("lists"); openNewProductModal(); }}
+            routineActions={(
+              <>
+                <button type="button" className="catalog-action-bar__button" onClick={() => seedRoutineFromCatalog("food", null)}>Toevoegen aan routine</button>
+                <button type="button" className="catalog-action-bar__button" onClick={() => setRoutineCatalogSeed({ type: "food", nonce: Date.now() })}>Nieuwe routine maken</button>
+              </>
+            )}
             onToggleFavorite={(item) => updateProduct(item.id, { favorite: !item.favorite })}
             onSave={(item, draft) => updateProduct(item.id, { ...draft, portionGram: Number(draft.portionGram) || 0, kh100: Number(draft.kh100) || 0, protein100: Number(draft.protein100) || 0, fat100: Number(draft.fat100) || 0, kcal100: Number(draft.kcal100) || 0 })}
             onDelete={(item) => removeProductFromStore(item.id)}
@@ -2923,28 +2927,6 @@ Producten uit deze categorie gaan naar "Overig".`);
         )}
         {activeTab === "lists" && activeListModule === "supplements" && (
           <>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
-              <button
-                type="button"
-                onClick={() => supplementImportFileRef.current?.click()}
-                style={{
-                  ...buttonStyle,
-                  padding: "7px 10px",
-                  fontSize: 12,
-                  background: "#f0fdf4",
-                  border: "1px solid #bbf7d0",
-                  color: "#166534",
-                  fontWeight: 700,
-                }}
-              >
-                Supplement importeren
-              </button>
-              {supplementImportError ? (
-                <span style={{ color: "#b91c1c", fontSize: 13 }}>
-                  {supplementImportError}
-                </span>
-              ) : null}
-            </div>
             <input
               ref={supplementImportFileRef}
               type="file"
@@ -2953,6 +2935,13 @@ Producten uit deze categorie gaan naar "Overig".`);
               style={{ display: "none" }}
             />
             <CatalogFramework
+              showActionBar={true}
+              onImport={() => {
+                setCatalogActionMessage("");
+                supplementImportFileRef.current?.click();
+              }}
+              onExport={() => setCatalogActionMessage("Exporteren wordt in een volgende Companion-sprint toegevoegd.")}
+              actionBarMessage={catalogActionMessage}
               config={{
               title: "Supplementen", icon: "💊", itemIcon: "💊",
               editorTitle: "Uitgebreide Supplementeditor",
@@ -2984,6 +2973,12 @@ Producten uit deze categorie gaan naar "Overig".`);
             categories={supplementCatalog.categories}
             onPutOnTimeline={putSupplementOnTimeline}
             onAddToRoutine={(item) => seedRoutineFromCatalog("supplement", item.id)}
+            routineActions={(
+              <>
+                <button type="button" className="catalog-action-bar__button" onClick={() => seedRoutineFromCatalog("supplement", null)}>Toevoegen aan routine</button>
+                <button type="button" className="catalog-action-bar__button" onClick={() => setRoutineCatalogSeed({ type: "supplement", nonce: Date.now() })}>Nieuwe routine maken</button>
+              </>
+            )}
             onToggleFavorite={toggleSupplementFavorite}
             onSave={updateSupplementFromCatalog}
             onDelete={deleteSupplementFromCatalog}
@@ -3053,6 +3048,11 @@ Producten uit deze categorie gaan naar "Overig".`);
         )}
         {activeTab === "lists" && ["medication", "exercises"].includes(activeListModule) && (
           <CatalogFramework
+            showActionBar={true}
+            addLabel={activeListModule === "medication" ? "＋ Medicatie toevoegen" : "＋ Oefening toevoegen"}
+            onImport={() => setCatalogActionMessage("Importeren wordt in een volgende Companion-sprint toegevoegd.")}
+            onExport={() => setCatalogActionMessage("Exporteren wordt in een volgende Companion-sprint toegevoegd.")}
+            actionBarMessage={catalogActionMessage}
             config={{
               title: activeListModule === "medication" ? "Medicatie" : "Oefeningen",
               editorTitle: activeListModule === "medication" ? "Uitgebreide Medicatie-editor" : "Uitgebreide Oefeningeditor",
@@ -3067,6 +3067,12 @@ Producten uit deze categorie gaan naar "Overig".`);
               emptyMessage: "Deze catalogus is voorbereid en wordt later gevuld.",
             }}
             items={[]}
+            routineActions={(
+              <>
+                <button type="button" className="catalog-action-bar__button" onClick={() => setCatalogActionMessage("Routineacties voor deze catalogus volgen later.")}>Toevoegen aan routine</button>
+                <button type="button" className="catalog-action-bar__button" onClick={() => setCatalogActionMessage("Routineacties voor deze catalogus volgen later.")}>Nieuwe routine maken</button>
+              </>
+            )}
             onPutOnTimeline={() => {}}
             onAddToRoutine={() => {}}
             onToggleFavorite={() => {}}

@@ -32,9 +32,8 @@ describe("navigation foundation", () => {
   test("uses the intended configurable main navigation", () => {
     expect(mainNavigation.map((item) => item.label)).toEqual([
       "Tijdlijn",
-      "Samenstellen",
-      "Mijn routines",
       "Mijn catalogi",
+      "Mijn routines",
       "Mijn dossier",
       "Onze community",
       "Kenniscentrum",
