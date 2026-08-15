@@ -36,6 +36,34 @@ export function formatCreonAdvice(totals = {}) {
     .join(" + ")}`;
 }
 
+export function groupSupplementTimelineItems(items) {
+  const supplementGroups = new Map();
+
+  items.forEach((item) => {
+    if (item.itemType !== "supplement") return;
+    const key = item.time || `missing-time-${item.id}`;
+    const group = supplementGroups.get(key) || [];
+    group.push(item);
+    supplementGroups.set(key, group);
+  });
+
+  return items.flatMap((item) => {
+    if (item.itemType !== "supplement") return [item];
+
+    const key = item.time || `missing-time-${item.id}`;
+    const group = supplementGroups.get(key);
+    if (!group || group[0] !== item) return [];
+    if (group.length === 1) return [item];
+
+    return [{
+      id: `supplement-group-${key}`,
+      itemType: "supplementGroup",
+      time: item.time,
+      group: { children: group },
+    }];
+  });
+}
+
 export function DailyMealList({
   mealsForDay = [],
   insulinEventsForDay = [],
@@ -251,7 +279,7 @@ export function DailyMealList({
     routineGroups.set(execution.id, existing);
   });
 
-  const timelineItems = [
+  const timelineItems = groupSupplementTimelineItems([
     ...rawTimelineItems.filter((item) => {
       const source = item.meal || item.event;
       return !source?.routineExecution || !["meal", "supplement"].includes(item.itemType);
@@ -262,7 +290,7 @@ export function DailyMealList({
       time: group.time,
       group,
     })),
-  ];
+  ]);
 
   function getFilteredTimelineItems() {
     if (timelineFilter === "all") return timelineItems;
@@ -270,7 +298,9 @@ export function DailyMealList({
     if (timelineFilter === "movementOnly") {
       return timelineItems.filter(
         (item) =>
-          item.itemType === "movement" || item.itemType === "supplement",
+          item.itemType === "movement" ||
+          item.itemType === "supplement" ||
+          item.itemType === "supplementGroup",
       );
     }
 
@@ -328,7 +358,11 @@ export function DailyMealList({
   }
 
   const visibleTimelineItems = getSortedTimelineItems(
-    getFilteredTimelineItems().filter((item) => visibleTypes[item.itemType]),
+    getFilteredTimelineItems().filter((item) =>
+      item.itemType === "supplementGroup"
+        ? visibleTypes.supplement
+        : visibleTypes[item.itemType],
+    ),
   );
 
   function getSportPhaseLabel(item) {
@@ -1180,6 +1214,92 @@ export function DailyMealList({
                 borderColor="#c4b5fd"
                 actions={null}
                 onToggle={() => setDetailEvent({ type: "supplement", event })}
+              />
+            );
+          }
+
+          if (item.itemType === "supplementGroup") {
+            const events = item.group.children.map((child) => child.event);
+            const summaries = events.map((event) => {
+              const name = event.supplementName || event.name || "Supplement";
+              const dosage = [event.dosage || event.amount, event.unit]
+                .filter(Boolean)
+                .join(" ");
+              return [name, dosage].filter(Boolean).join(" ");
+            });
+
+            return (
+              <DailyTimelineItem
+                key={item.id}
+                itemType="supplement-group"
+                indentLevel={1}
+                compact={itemCompact}
+                expanded={expandedIds.includes(item.id)}
+                onToggle={() => toggleExpanded(item.id)}
+                icon="💊"
+                title={`Supplementen — ${summaries.join(" · ")}`}
+                timeLabel={formatTime(item.time)}
+                subtitle={`${events.length} afzonderlijke registraties`}
+                accentColor="#6d28d9"
+                backgroundColor="#f5f3ff"
+                borderColor="#c4b5fd"
+                detailContent={
+                  <div data-supplement-group-items style={{ display: "grid", gap: 3, fontFamily: "inherit" }}>
+                    {events.map((event) => {
+                      const dosage = [event.dosage || event.amount, event.unit]
+                        .filter(Boolean)
+                        .join(" ");
+                      const name = event.supplementName || event.name || "Supplement";
+
+                      return (
+                        <div
+                          key={event.id}
+                          data-supplement-registration-id={event.id}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            gap: 8,
+                            padding: "3px 6px",
+                            borderRadius: 6,
+                            background: "rgba(255,255,255,0.72)",
+                            color: "#5b21b6",
+                            fontSize: 11,
+                            lineHeight: 1.25,
+                          }}
+                        >
+                          <span style={{ minWidth: 0, overflowWrap: "anywhere" }}>
+                            <strong style={{ fontWeight: 750 }}>{name}</strong>
+                            {dosage ? <span style={{ marginLeft: 5, color: "#7c3aed", fontWeight: 500 }}>{dosage}</span> : null}
+                          </span>
+                          <span style={{ display: "flex", gap: 5 }}>
+                            <button
+                              type="button"
+                              data-supplement-edit={event.id}
+                              onClick={() => {
+                                setEditingEvent(event);
+                                setEditingType("supplement");
+                              }}
+                            >
+                              Wijzig
+                            </button>
+                            <button
+                              type="button"
+                              data-supplement-delete={event.id}
+                              onClick={() => {
+                                if (window.confirm("Dit item verwijderen?")) {
+                                  deleteSupplementEvent(event.id);
+                                }
+                              }}
+                            >
+                              Wis
+                            </button>
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                }
               />
             );
           }

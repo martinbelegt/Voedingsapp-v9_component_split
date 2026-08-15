@@ -21,3 +21,18 @@ export function createSupplementEvent(input, options = {}) {
     repeat: input.repeat || "none",
   };
 }
+
+export function buildSupplementTimelineInputs(supplements, eventTime) {
+  return supplements.map((supplement) => ({
+    date: eventTime.slice(0, 10),
+    eventTime,
+    name: supplement.product?.name || "Supplement",
+    supplementName: supplement.product?.name || "Supplement",
+    supplementId: supplement.id,
+    dosage: supplement.personal?.dosage || "",
+    unit: supplement.personal?.dosageUnit || "",
+    note: supplement.personal?.notes || "",
+    brand: supplement.product?.brand || "",
+    productName: supplement.product?.productName || "",
+  }));
+}

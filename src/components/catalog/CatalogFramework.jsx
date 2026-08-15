@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import CatalogToolbar from "./CatalogToolbar";
 import CatalogActionBar from "./CatalogActionBar";
+import { CompanionDateTimePicker } from "../../ui/pickers/CompanionDateTimePicker";
 import "./catalogFramework.css";
 
-export default function CatalogFramework({ config, items, categories = [], savedMeals = [], onPutOnTimeline, onPutMealOnTimeline, onAddToRoutine, onToggleFavorite, onAddNew, onImport, onExport, actionBarMessage, showActionBar = false, addLabel, onAddAction, onSave, onDelete, renderEditor, renderMealBuilder, onSaveMeal, activeMealDraft, onBeginMeal, onCreateCategory, routineActions = null }) {
+export default function CatalogFramework({ config, items, categories = [], savedMeals = [], onPutOnTimeline, onPutMealOnTimeline, onAddToRoutine, onToggleFavorite, onAddNew, onImport, onExport, actionBarMessage, showActionBar = false, addLabel, onAddAction, onSave, onDelete, renderEditor, renderMealBuilder, onSaveMeal, activeMealDraft, onBeginMeal, onCreateCategory, routineActions = null, timelineMultiSelect = null }) {
   const [query, setQuery] = useState("");
   const [categoryId, setCategoryId] = useState("all");
   const [selectedId, setSelectedId] = useState(null);
@@ -17,6 +18,9 @@ export default function CatalogFramework({ config, items, categories = [], saved
   const [mealBuilderVisible, setMealBuilderVisible] = useState(false);
   const [addingCategory, setAddingCategory] = useState(false);
   const [categoryName, setCategoryName] = useState("");
+  const [timelineSelectedIds, setTimelineSelectedIds] = useState([]);
+  const [timelinePlacementOpen, setTimelinePlacementOpen] = useState(false);
+  const [timelineEventTime, setTimelineEventTime] = useState("");
   const rowRefs = useRef(new Map());
   const editorRef = useRef(null);
 
@@ -54,6 +58,9 @@ export default function CatalogFramework({ config, items, categories = [], saved
   const showingCategories = catalogView === "categories";
   const visibleCount = showingMeals ? filteredMeals.length : showingCategories ? filteredCategories.length + 1 : filteredItems.length;
   const totalCount = showingMeals ? savedMeals.length : showingCategories ? categories.length + 1 : items.length;
+  const timelineSelectedItems = timelineSelectedIds
+    .map((id) => items.find((item) => item.id === id))
+    .filter(Boolean);
 
   useEffect(() => {
     if (openId && newItem?.id !== openId && !items.some(({ id }) => id === openId)) {
@@ -61,6 +68,10 @@ export default function CatalogFramework({ config, items, categories = [], saved
       setDraft(null);
     }
   }, [items, newItem, openId]);
+
+  useEffect(() => {
+    setTimelineSelectedIds((current) => current.filter((id) => items.some((item) => item.id === id)));
+  }, [items]);
 
   useEffect(() => {
     if (!openId) return;
@@ -120,6 +131,39 @@ export default function CatalogFramework({ config, items, categories = [], saved
 
   function handleAdd() {
     resolveAddAction();
+  }
+
+  function handleTimelineAction(item) {
+    if (!timelineMultiSelect) {
+      onPutOnTimeline(item);
+      return;
+    }
+
+    setTimelineSelectedIds((current) =>
+      current.includes(item.id)
+        ? current.filter((id) => id !== item.id)
+        : [...current, item.id],
+    );
+  }
+
+  function openTimelinePlacement() {
+    setTimelineEventTime(timelineMultiSelect?.getInitialEventTime?.() || "");
+    setTimelinePlacementOpen(true);
+  }
+
+  function submitTimelinePlacement() {
+    if (!timelineEventTime || !timelineSelectedItems.length) return;
+    timelineMultiSelect.onSubmit(timelineSelectedItems, timelineEventTime);
+    setTimelineSelectedIds([]);
+    setTimelinePlacementOpen(false);
+  }
+
+  function handleTimelinePlacementAction() {
+    if (timelinePlacementOpen) {
+      submitTimelinePlacement();
+      return;
+    }
+    openTimelinePlacement();
   }
 
   function toggle(item) {
@@ -219,6 +263,27 @@ export default function CatalogFramework({ config, items, categories = [], saved
         />
       )}
       {!mealBuilderVisible && <div className="catalog-framework__summary"><span>★ favoriet · T tijdlijn · R routine</span><span>{visibleCount} van {totalCount} items</span><span>Klik: openen/sluiten · ↑↓ navigeren · Enter openen · Esc sluiten</span></div>}
+      {timelineMultiSelect && timelineSelectedItems.length > 0 && (
+        <div className="catalog-framework__timeline-selection" aria-label="Tijdlijnselectie">
+          <strong>{timelineSelectedItems.length} geselecteerd</strong>
+          <button type="button" onClick={handleTimelinePlacementAction}>Plaats op tijdlijn</button>
+        </div>
+      )}
+      {timelineMultiSelect && timelinePlacementOpen && timelineSelectedItems.length > 0 && (
+        <div className="catalog-framework__timeline-placement" role="dialog" aria-label="Plaats selectie op tijdlijn">
+          <CompanionDateTimePicker
+            mode="datetime"
+            value={timelineEventTime}
+            onChange={setTimelineEventTime}
+            compact
+            presentation="expanded"
+            label="Datum en tijd voor selectie"
+          />
+          <div className="catalog-framework__timeline-placement-actions">
+            <button type="button" onClick={() => setTimelinePlacementOpen(false)}>Annuleren</button>
+          </div>
+        </div>
+      )}
       {renderMealBuilder && mealBuilderVisible && activeMealDraft ? renderMealBuilder({ onSave: (meal) => { onSaveMeal?.(meal); setMealBuilderVisible(false); }, onCancel: () => setMealBuilderVisible(false) }) :
       <div className="catalog-framework__list" role="listbox" aria-label={`${config.title} selectielijst`}>
         {!showActionBar && !showingCategories && (showingMeals ? Boolean(renderMealBuilder) : Boolean(config.createItem || onAddNew)) && (
@@ -269,7 +334,7 @@ export default function CatalogFramework({ config, items, categories = [], saved
               >
                 <div className="catalog-framework__row-actions" onClick={(event) => event.stopPropagation()}>
                   <button type="button" className={config.isFavorite(item) ? "is-favorite" : ""} onClick={() => onToggleFavorite(item)} aria-label={config.isFavorite(item) ? `Verwijder ${config.getName(item)} uit favorieten` : `Voeg ${config.getName(item)} toe aan favorieten`} title={config.isFavorite(item) ? "Verwijder uit favorieten" : "Voeg toe aan favorieten"}>{config.isFavorite(item) ? "★" : "☆"}</button>
-                  <button type="button" onClick={() => onPutOnTimeline(item)} aria-label={`Zet ${config.getName(item)} op tijdlijn`} title="Zet op tijdlijn">T</button>
+                  <button type="button" className={timelineSelectedIds.includes(item.id) ? "is-timeline-selected" : ""} aria-pressed={timelineMultiSelect ? timelineSelectedIds.includes(item.id) : undefined} onClick={() => handleTimelineAction(item)} aria-label={`Zet ${config.getName(item)} op tijdlijn`} title="Zet op tijdlijn">T</button>
                   <button type="button" onClick={() => onAddToRoutine(item)} aria-label={`Voeg ${config.getName(item)} toe aan routine`} title="Toevoegen aan routine">R</button>
                 </div>
                 <strong title={config.getName(item)}>{config.getName(item)}</strong>

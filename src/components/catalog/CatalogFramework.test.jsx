@@ -249,3 +249,72 @@ test("maaltijden openen inline met toetsenbord en de toevoegknop start dezelfde 
   container.remove();
   globalThis.IS_REACT_ACT_ENVIRONMENT = false;
 });
+
+test("T ondersteunt tijdelijke multi-select en één gezamenlijke tijdlijnplaatsing", async () => {
+  globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  const onSubmit = jest.fn();
+  const items = [
+    { id: "supp-1", name: "Collagen + Vitamin C", categoryId: "supplements" },
+    { id: "supp-2", name: "Creatine Monohydrate Creapure®", categoryId: "supplements" },
+    { id: "supp-3", name: "HMB", categoryId: "supplements" },
+  ];
+
+  await act(async () => root.render(
+    <CatalogFramework
+      config={{ ...config, title: "Supplementen" }}
+      items={items}
+      onPutOnTimeline={jest.fn()}
+      onAddToRoutine={jest.fn()}
+      onToggleFavorite={jest.fn()}
+      timelineMultiSelect={{
+        getInitialEventTime: () => "2026-08-15T08:00",
+        onSubmit,
+      }}
+    />,
+  ));
+
+  expect(container.querySelector('[aria-label="Tijdlijnselectie"]')).toBeNull();
+  const timelineButton = (name) => Array.from(container.querySelectorAll('button[title="Zet op tijdlijn"]'))
+    .find((button) => button.getAttribute("aria-label") === `Zet ${name} op tijdlijn`);
+
+  await act(async () => timelineButton("Collagen + Vitamin C").click());
+  expect(timelineButton("Collagen + Vitamin C").getAttribute("aria-pressed")).toBe("true");
+  expect(container.querySelector('[aria-label="Tijdlijnselectie"]').textContent).toContain("1 geselecteerd");
+
+  await act(async () => timelineButton("Creatine Monohydrate Creapure®").click());
+  expect(container.querySelector('[aria-label="Tijdlijnselectie"]').textContent).toContain("2 geselecteerd");
+
+  await act(async () => timelineButton("Creatine Monohydrate Creapure®").click());
+  expect(timelineButton("Creatine Monohydrate Creapure®").getAttribute("aria-pressed")).toBe("false");
+  expect(container.querySelector('[aria-label="Tijdlijnselectie"]').textContent).toContain("1 geselecteerd");
+
+  await act(async () => timelineButton("Creatine Monohydrate Creapure®").click());
+  await act(async () => timelineButton("HMB").click());
+  expect(container.querySelector('[aria-label="Tijdlijnselectie"]').textContent).toContain("3 geselecteerd");
+
+  const placeSelection = container.querySelector('[aria-label="Tijdlijnselectie"] button');
+  await act(async () => placeSelection.click());
+  expect(container.querySelector('[aria-label="Plaats selectie op tijdlijn"]')).toBeTruthy();
+  expect(Array.from(container.querySelectorAll("button")).filter((button) => button.textContent === "Plaats op tijdlijn")).toHaveLength(1);
+
+  const cancel = Array.from(container.querySelectorAll('.catalog-framework__timeline-placement-actions button'))
+    .find((button) => button.textContent === "Annuleren");
+  await act(async () => cancel.click());
+  expect(onSubmit).not.toHaveBeenCalled();
+  expect(container.querySelector('[aria-label="Tijdlijnselectie"]').textContent).toContain("3 geselecteerd");
+
+  await act(async () => placeSelection.click());
+  await act(async () => placeSelection.click());
+
+  expect(onSubmit).toHaveBeenCalledTimes(1);
+  expect(onSubmit).toHaveBeenCalledWith(items, "2026-08-15T08:00");
+  expect(container.querySelector('[aria-label="Tijdlijnselectie"]')).toBeNull();
+  expect(container.querySelectorAll('.is-timeline-selected')).toHaveLength(0);
+
+  await act(async () => root.unmount());
+  container.remove();
+  globalThis.IS_REACT_ACT_ENVIRONMENT = false;
+});

@@ -35,6 +35,7 @@ import { calculateMealTotals } from "./services/mealTotalsService";
 import { TestLogSection } from "./components/TestLogSection";
 import { parseDecimalInput } from "./utils/numberUtils";
 import { createId } from "./services/idService";
+import { buildSupplementTimelineInputs } from "./services/supplementEventService";
 import { scrollRefIntoView } from "./services/scrollService";
 import { useTestLog } from "./hooks/useTestLog";
 import { useMealTimers } from "./hooks/useMealTimers";
@@ -1146,6 +1147,12 @@ export default function App() {
       brand: supplement.product?.brand || "",
       productName: supplement.product?.productName || "",
     });
+    setActiveTab("daily");
+  }
+
+  function putSupplementsOnTimeline(supplements, eventTime) {
+    buildSupplementTimelineInputs(supplements, eventTime).forEach(addSupplementEventToDay);
+    setSelectedDate(eventTime.slice(0, 10));
     setActiveTab("daily");
   }
 
@@ -2972,6 +2979,10 @@ Producten uit deze categorie gaan naar "Overig".`);
             items={supplementCatalog.items}
             categories={supplementCatalog.categories}
             onPutOnTimeline={putSupplementOnTimeline}
+            timelineMultiSelect={{
+              getInitialEventTime: () => `${selectedDate}T${new Date().toTimeString().slice(0, 5)}`,
+              onSubmit: putSupplementsOnTimeline,
+            }}
             onAddToRoutine={(item) => seedRoutineFromCatalog("supplement", item.id)}
             routineActions={(
               <>

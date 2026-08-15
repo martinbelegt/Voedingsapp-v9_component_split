@@ -195,7 +195,7 @@ function adjustDatePart(parts, key, direction) {
   );
 }
 
-function adjustTimePart(parts, key, direction) {
+export function adjustTimePart(parts, key, direction) {
   const currentTimeValue = buildTimeValue(parts) || currentTime();
   const [hour, minute] = currentTimeValue.split(":").map(Number);
   const date = new Date();
@@ -205,7 +205,7 @@ function adjustTimePart(parts, key, direction) {
   date.setMilliseconds(0);
 
   if (key === "hour") date.setHours(date.getHours() + direction);
-  if (key === "minute") date.setMinutes(date.getMinutes() + direction * 5);
+  if (key === "minute") date.setMinutes(date.getMinutes() + direction);
 
   return createTimeParts(`${pad2(date.getHours())}:${pad2(date.getMinutes())}`);
 }

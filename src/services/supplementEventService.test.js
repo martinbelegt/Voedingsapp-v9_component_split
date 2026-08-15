@@ -1,4 +1,4 @@
-import { createSupplementEvent } from "./supplementEventService";
+import { buildSupplementTimelineInputs, createSupplementEvent } from "./supplementEventService";
 
 test("maakt een leesbare, zelfstandige supplement-snapshot", () => {
   const catalogItem = {
@@ -45,4 +45,23 @@ test("catalogusverwijdering heeft geen invloed op het gemaakte event", () => {
   catalog.splice(0, 1);
   expect(catalog).toHaveLength(0);
   expect(event.supplementName).toBe("Vitamine D3");
+});
+
+test("multi-select maakt afzonderlijke events met exact dezelfde timestamp", () => {
+  const timestamp = "2026-08-15T08:00";
+  const inputs = buildSupplementTimelineInputs([
+    { id: "supp-1", product: { name: "Collagen + Vitamin C" }, personal: { dosage: "1", dosageUnit: "scoop" } },
+    { id: "supp-2", product: { name: "Creatine Monohydrate Creapure®" }, personal: { dosage: "5", dosageUnit: "g" } },
+    { id: "supp-3", product: { name: "HMB" }, personal: { dosage: "3", dosageUnit: "capsules" } },
+  ], timestamp);
+  let id = 0;
+  const events = inputs.map((input) => createSupplementEvent(input, {
+    createId: () => `event-${++id}`,
+    now: new Date("2026-08-15T06:00:00Z"),
+  }));
+
+  expect(events).toHaveLength(3);
+  expect(events.map((event) => event.id)).toEqual(["event-1", "event-2", "event-3"]);
+  expect(events.map((event) => event.eventTime)).toEqual([timestamp, timestamp, timestamp]);
+  expect(events.map((event) => event.supplementId)).toEqual(["supp-1", "supp-2", "supp-3"]);
 });
