@@ -16,15 +16,16 @@ function formatLastExecution(routineId, dailyLog) {
   return new Date(dates[0]).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
-export function RoutinesWorkspace({ routines, products, supplements, dailyLog = [], onUpdateRoutine, onDeleteRoutine, onRegister }) {
+export function RoutinesWorkspace({ routines, products, supplements, exercises = [], dailyLog = [], onUpdateRoutine, onDeleteRoutine, onRegister }) {
   const [executingId, setExecutingId] = useState(null);
   const [checkedIds, setCheckedIds] = useState([]);
   const [message, setMessage] = useState("");
   const executing = routines.find(({ id }) => id === executingId) || null;
-  const resolvedItems = useMemo(() => (executing?.items || []).map((item) => ({ item, resolved: resolveRoutineItem(item, { products, supplements }) })), [executing, products, supplements]);
+  const catalogs = useMemo(() => ({ products, supplements, exercises }), [products, supplements, exercises]);
+  const resolvedItems = useMemo(() => (executing?.items || []).map((item) => ({ item, resolved: resolveRoutineItem(item, catalogs) })), [executing, catalogs]);
 
   function openChecklist(routine) {
-    const available = routine.items.filter((item) => resolveRoutineItem(item, { products, supplements })).map(({ id }) => id);
+    const available = routine.items.filter((item) => resolveRoutineItem(item, catalogs)).map(({ id }) => id);
     setCheckedIds(available);
     setExecutingId(routine.id);
     setMessage("");

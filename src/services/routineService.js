@@ -96,6 +96,10 @@ export function resolveRoutineItem(item, catalogs) {
       ? { item, catalogItem: supplement, label: supplement.product?.name || "Supplement" }
       : null;
   }
+  if (item.type === "exercise") {
+    const exercise = (catalogs.exercises || []).find(({ id }) => id === item.catalogItemId);
+    return exercise ? { item, catalogItem: exercise, label: exercise.name || "Oefening" } : null;
+  }
   return null;
 }
 
@@ -134,6 +138,23 @@ export function buildRoutineRegistrations(routine, checkedIds, catalogs, now = n
             note: item.defaultNote,
             brand: catalogItem.product?.brand || "",
             productName: catalogItem.product?.productName || "",
+            routineExecution,
+          },
+        };
+      }
+
+      if (item.type === "exercise") {
+        return {
+          type: "exercise",
+          input: {
+            date: eventTime.toISOString().slice(0, 10),
+            eventTime: eventTime.toISOString(),
+            activityType: label,
+            exerciseName: label,
+            exerciseId: catalogItem.id,
+            personalDosage: item.defaultAmount || catalogItem.personalDosage || "",
+            side: catalogItem.side || "Niet van toepassing",
+            note: item.defaultNote || catalogItem.notes || "",
             routineExecution,
           },
         };

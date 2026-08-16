@@ -4,7 +4,7 @@ import CatalogActionBar from "./CatalogActionBar";
 import { CompanionDateTimePicker } from "../../ui/pickers/CompanionDateTimePicker";
 import "./catalogFramework.css";
 
-export default function CatalogFramework({ config, items, categories = [], savedMeals = [], onPutOnTimeline, onPutMealOnTimeline, onAddToRoutine, onToggleFavorite, onAddNew, onImport, onExport, actionBarMessage, showActionBar = false, addLabel, onAddAction, onSave, onDelete, renderEditor, renderMealBuilder, onSaveMeal, activeMealDraft, onBeginMeal, onCreateCategory, routineActions = null, timelineMultiSelect = null }) {
+export default function CatalogFramework({ config, items, categories = [], savedMeals = [], onPutOnTimeline, onPutMealOnTimeline, onAddToRoutine, onToggleFavorite, onAddNew, onImport, onExport, actionBarMessage, showActionBar = false, addLabel, onAddAction, onSave, onDelete, renderEditor, renderMealBuilder, onSaveMeal, activeMealDraft, onBeginMeal, onCreateCategory, routineActions = null, timelineMultiSelect = null, openItemId = null }) {
   const [query, setQuery] = useState("");
   const [categoryId, setCategoryId] = useState("all");
   const [selectedId, setSelectedId] = useState(null);
@@ -78,6 +78,18 @@ export default function CatalogFramework({ config, items, categories = [], saved
     const frame = window.requestAnimationFrame(() => editorRef.current?.scrollIntoView?.({ behavior: "smooth", block: "nearest" }));
     return () => window.cancelAnimationFrame(frame);
   }, [openId]);
+
+  useEffect(() => {
+    if (!openItemId) return;
+    const item = items.find(({ id }) => id === openItemId);
+    if (!item) return;
+    setCatalogView("products");
+    setQuery("");
+    setCategoryId("all");
+    setSelectedId(item.id);
+    setOpenId(item.id);
+    setDraft(config.toDraft(item));
+  }, [openItemId, items, config]);
 
   function select(item) {
     setSelectedId(item.id);

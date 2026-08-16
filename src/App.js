@@ -36,6 +36,7 @@ import { TestLogSection } from "./components/TestLogSection";
 import { parseDecimalInput } from "./utils/numberUtils";
 import { createId } from "./services/idService";
 import { buildSupplementTimelineInputs } from "./services/supplementEventService";
+import { buildExerciseTimelineInputs } from "./services/exerciseEventService";
 import { scrollRefIntoView } from "./services/scrollService";
 import { useTestLog } from "./hooks/useTestLog";
 import { useMealTimers } from "./hooks/useMealTimers";
@@ -48,13 +49,18 @@ import CatalogFramework from "./components/catalog/CatalogFramework";
 import SupplementDetailEditor from "./components/supplements/SupplementDetailEditor";
 import { useRoutines } from "./hooks/useRoutines";
 import { useSupplementCatalog } from "./hooks/useSupplementCatalog";
+import { useExerciseCatalog } from "./hooks/useExerciseCatalog";
 import { buildRoutineRegistrations } from "./services/routineService";
 import { CommunityPage } from "./components/community/CommunityPage";
 import { KnowledgeCenter } from "./components/knowledge/KnowledgeCenter";
 import MealBuilder, { createMealDraft } from "./components/meals/MealBuilder";
 import MealDraftWarning from "./components/meals/MealDraftWarning";
 import { createSupplement, formatSupplementPrice, sanitizeSupplement } from "./data/supplements";
+import { createExercise, sanitizeExercise } from "./data/exercises";
+import ExerciseDetailEditor from "./components/exercises/ExerciseDetailEditor";
+import ExerciseImportModal from "./components/exercises/ExerciseImportModal";
 import SupplementImportModal from "./components/supplements/SupplementImportModal";
+import { appendExerciseToCatalog, assertSingleExerciseObject, buildExerciseImportResult, createNewExerciseVariant, parseExerciseImportJson } from "./services/exerciseImportService";
 
 import {
   getCategoryById,
@@ -812,11 +818,59 @@ export default function App() {
 
   const { catalog: supplementCatalog, setCatalog: setSupplementCatalog } =
     useSupplementCatalog({ settings, settingsSyncStatus, setSettings });
+  const { catalog: exerciseCatalog, setCatalog: setExerciseCatalog } = useExerciseCatalog();
+  const exerciseImportFileRef = useRef(null);
+  const [exerciseImportResult, setExerciseImportResult] = useState(null);
+  const [exerciseImportError, setExerciseImportError] = useState("");
+  const [exerciseCatalogOpenId, setExerciseCatalogOpenId] = useState(null);
   const supplementImportFileRef = useRef(null);
   const [supplementImportModalOpen, setSupplementImportModalOpen] = useState(false);
   const [supplementImportResult, setSupplementImportResult] = useState(null);
   const [supplementImportError, setSupplementImportError] = useState("");
   const [catalogActionMessage, setCatalogActionMessage] = useState("");
+
+  function resetExerciseImport() {
+    setExerciseImportResult(null);
+    setExerciseImportError("");
+  }
+
+  function handleExerciseImportFile(event) {
+    const file = event.target?.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const raw = assertSingleExerciseObject(parseExerciseImportJson(reader.result));
+        setExerciseImportResult(buildExerciseImportResult(raw, exerciseCatalog.categories, exerciseCatalog.items));
+        setExerciseImportError("");
+      } catch (error) {
+        setExerciseImportError(error.message || "Importeren is mislukt.");
+        setExerciseImportResult(null);
+      }
+      event.target.value = "";
+    };
+    reader.onerror = () => setExerciseImportError("Lezen van het JSON-bestand is mislukt.");
+    reader.readAsText(file);
+  }
+
+  function confirmExerciseImport(asNew = false) {
+    const exercise = asNew ? createNewExerciseVariant(exerciseImportResult) : exerciseImportResult?.candidate;
+    if (!exercise || !exerciseImportResult?.validation?.valid) return;
+    setExerciseCatalog((catalog) => appendExerciseToCatalog(catalog, exercise));
+    resetExerciseImport();
+  }
+
+  function openExerciseFromTimeline(exerciseId) {
+    setExerciseCatalogOpenId(exerciseId);
+    setActiveListModule("exercises");
+    setActiveTab("lists");
+  }
+
+  function openExerciseCatalogFromTimeline() {
+    setExerciseCatalogOpenId(null);
+    setActiveListModule("exercises");
+    setActiveTab("lists");
+  }
 
   function resetSupplementImport() {
     setSupplementImportModalOpen(false);
@@ -1026,12 +1080,13 @@ export default function App() {
     const registrations = buildRoutineRegistrations(
       routine,
       checkedIds,
-      { products, supplements: supplementCatalog.items },
+      { products, supplements: supplementCatalog.items, exercises: exerciseCatalog.items },
     );
 
     registrations.forEach(({ type, input }) => {
       if (type === "food") addMealToDay(input);
       if (type === "supplement") addSupplementEventToDay(input);
+      if (type === "exercise") addMovementEventToDay(input);
     });
 
     if (registrations.length) {
@@ -1135,18 +1190,11 @@ export default function App() {
 
   function putSupplementOnTimeline(supplement) {
     const nowTime = new Date().toTimeString().slice(0, 5);
-    addSupplementEventToDay({
-      date: selectedDate,
-      eventTime: `${selectedDate}T${nowTime}`,
-      name: supplement.product?.name || "Supplement",
-      supplementName: supplement.product?.name || "Supplement",
-      supplementId: supplement.id,
-      dosage: supplement.personal?.dosage || "",
-      unit: supplement.personal?.dosageUnit || "",
-      note: supplement.personal?.notes || "",
-      brand: supplement.product?.brand || "",
-      productName: supplement.product?.productName || "",
-    });
+    const [input] = buildSupplementTimelineInputs(
+      [supplement],
+      `${selectedDate}T${nowTime}`,
+    );
+    addSupplementEventToDay(input);
     setActiveTab("daily");
   }
 
@@ -1154,6 +1202,39 @@ export default function App() {
     buildSupplementTimelineInputs(supplements, eventTime).forEach(addSupplementEventToDay);
     setSelectedDate(eventTime.slice(0, 10));
     setActiveTab("daily");
+  }
+
+  function putExercisesOnTimeline(exercises, eventTime) {
+    buildExerciseTimelineInputs(exercises, eventTime).forEach(addMovementEventToDay);
+    setSelectedDate(eventTime.slice(0, 10));
+    setActiveTab("daily");
+  }
+
+  function putExerciseOnTimeline(exercise) {
+    putExercisesOnTimeline([exercise], `${selectedDate}T${new Date().toTimeString().slice(0, 5)}`);
+  }
+
+  function updateExerciseFromCatalog(item, draft) {
+    const saved = sanitizeExercise(draft);
+    setExerciseCatalog((catalog) => ({
+      ...catalog,
+      items: catalog.items.some((candidate) => candidate.id === item.id)
+        ? catalog.items.map((candidate) => candidate.id === item.id ? saved : candidate)
+        : [saved, ...catalog.items],
+    }));
+  }
+
+  function deleteExerciseFromCatalog(item) {
+    setExerciseCatalog((catalog) => ({ ...catalog, items: catalog.items.filter(({ id }) => id !== item.id) }));
+  }
+
+  function toggleExerciseFavorite(item) {
+    setExerciseCatalog((catalog) => ({
+      ...catalog,
+      items: catalog.items.map((candidate) => candidate.id === item.id
+        ? { ...candidate, favorite: !candidate.favorite, updatedAt: new Date().toISOString() }
+        : candidate),
+    }));
   }
 
   function updateSupplementFromCatalog(item, draft) {
@@ -2852,6 +2933,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             routines={routines}
             products={products}
             supplements={supplementCatalog.items}
+            exercises={exerciseCatalog.items}
             onUpdateRoutine={updateRoutine}
             onDeleteRoutine={deleteRoutine}
             onRegister={registerRoutine}
@@ -2859,7 +2941,16 @@ Producten uit deze categorie gaan naar "Overig".`);
           />
         )}
         {activeTab === "lists" && (
-          <div className="companion-catalog-page-heading" />
+          <div className="companion-catalog-page-heading">
+            <CatalogRoutineBuilder
+              activeModuleId={activeListModule}
+              products={products}
+              supplements={supplementCatalog.items}
+              exercises={exerciseCatalog.items}
+              onCreateRoutine={addRoutine}
+              initialSelection={routineCatalogSeed}
+            />
+          </div>
         )}
         {activeTab === "record" && (
           <ModuleWorkspace
@@ -2963,7 +3054,7 @@ Producten uit deze categorie gaan naar "Overig".`);
                 { label: "Product", value: (item) => item.product?.productName },
                 { label: "Vorm", value: (item) => item.product?.form },
                 { label: "Prijs per verpakking", value: (item) => item.product?.price === "" || item.product?.price == null ? "" : `€ ${formatSupplementPrice(item.product.price)}` },
-                { label: "Standaarddosering", value: (item) => [item.personal?.dosage, item.personal?.dosageUnit].filter(Boolean).join(" ") },
+                { label: "Eigen dosering", value: (item) => [item.personal?.dosage, item.personal?.dosageUnit].filter(Boolean).join(" ") },
                 { label: "Gebruiksmoment", value: (item) => item.personal?.usageMoment },
                 { label: "Notitie", value: (item) => item.personal?.notes },
               ],
@@ -3057,18 +3148,72 @@ Producten uit deze categorie gaan naar "Overig".`);
           />
           </>
         )}
-        {activeTab === "lists" && ["medication", "exercises"].includes(activeListModule) && (
+        {activeTab === "lists" && activeListModule === "exercises" && (
+          <>
+          <input ref={exerciseImportFileRef} type="file" accept="application/json,.json" onChange={handleExerciseImportFile} style={{ display: "none" }} />
+          <CatalogFramework
+            showActionBar
+            addLabel="＋ Oefening toevoegen"
+            onImport={() => { setCatalogActionMessage(""); setExerciseImportError(""); exerciseImportFileRef.current?.click(); }}
+            onExport={() => setCatalogActionMessage("Exporteren wordt in een volgende Companion-sprint toegevoegd.")}
+            actionBarMessage={exerciseImportError || catalogActionMessage}
+            openItemId={exerciseCatalogOpenId}
+            config={{
+              title: "Oefeningen", icon: "💪", itemIcon: "🏋️", editorTitle: "Uitgebreide Oefeningeditor",
+              createItem: () => createExercise(),
+              getName: (item) => item.name || "Naam nog invullen",
+              getSearchText: (item) => [item.name, item.goal, item.bodyRegion, item.equipment, item.notes].filter(Boolean).join(" "),
+              getCategoryIds: (item) => item.category ? [item.category] : [],
+              getCategoryLabel: (item, options) => options.find(({ id }) => id === item.category)?.name || "",
+              isFavorite: (item) => Boolean(item.favorite),
+              detailFields: [], editFields: [], toDraft: (item) => createExercise(item),
+              emptyMessage: "Nog geen oefeningen. Voeg een oefening toe of importeer later de eerste records.",
+            }}
+            items={exerciseCatalog.items}
+            categories={exerciseCatalog.categories}
+            onPutOnTimeline={putExerciseOnTimeline}
+            timelineMultiSelect={{
+              getInitialEventTime: () => `${selectedDate}T${new Date().toTimeString().slice(0, 5)}`,
+              onSubmit: putExercisesOnTimeline,
+            }}
+            onAddToRoutine={(item) => seedRoutineFromCatalog("exercise", item.id)}
+            routineActions={<>
+              <button type="button" className="catalog-action-bar__button" onClick={() => seedRoutineFromCatalog("exercise", null)}>Toevoegen aan routine</button>
+              <button type="button" className="catalog-action-bar__button" onClick={() => setRoutineCatalogSeed({ type: "exercise", nonce: Date.now() })}>Nieuwe routine maken</button>
+            </>}
+            onToggleFavorite={toggleExerciseFavorite}
+            onSave={updateExerciseFromCatalog}
+            onDelete={deleteExerciseFromCatalog}
+            renderEditor={({ item, draft, setDraft, save, cancel }) => <ExerciseDetailEditor
+              draft={draft}
+              categories={exerciseCatalog.categories}
+              onChange={setDraft}
+              onSave={() => save(draft)}
+              onCancel={cancel}
+              onDelete={() => { if (window.confirm(`${draft.name || "Deze oefening"} verwijderen?`)) deleteExerciseFromCatalog(item); }}
+            />}
+          />
+          <ExerciseImportModal
+            open={Boolean(exerciseImportResult)}
+            result={exerciseImportResult}
+            onClose={resetExerciseImport}
+            onConfirm={() => confirmExerciseImport(false)}
+            onImportAsNew={() => confirmExerciseImport(true)}
+          />
+          </>
+        )}
+        {activeTab === "lists" && activeListModule === "medication" && (
           <CatalogFramework
             showActionBar={true}
-            addLabel={activeListModule === "medication" ? "＋ Medicatie toevoegen" : "＋ Oefening toevoegen"}
+            addLabel="＋ Medicatie toevoegen"
             onImport={() => setCatalogActionMessage("Importeren wordt in een volgende Companion-sprint toegevoegd.")}
             onExport={() => setCatalogActionMessage("Exporteren wordt in een volgende Companion-sprint toegevoegd.")}
             actionBarMessage={catalogActionMessage}
             config={{
-              title: activeListModule === "medication" ? "Medicatie" : "Oefeningen",
-              editorTitle: activeListModule === "medication" ? "Uitgebreide Medicatie-editor" : "Uitgebreide Oefeningeditor",
-              icon: activeListModule === "medication" ? "💊" : "💪",
-              itemIcon: activeListModule === "medication" ? "💊" : "🏋️",
+              title: "Medicatie",
+              editorTitle: "Uitgebreide Medicatie-editor",
+              icon: "💊",
+              itemIcon: "💊",
               getName: (item) => item.name,
               getSearchText: (item) => item.name || "",
               getCategoryIds: () => [],
@@ -3159,6 +3304,8 @@ Producten uit deze categorie gaan naar "Overig".`);
             clearDailyLog={clearDailyLog}
             fillDailyRepeats={fillDailyRepeats}
             products={products}
+            exercises={exerciseCatalog.items}
+            onOpenExercise={openExerciseFromTimeline}
             deleteMealFromDay={deleteMealFromDay}
             updateMealTime={updateMealTime}
             updateMealMedicalLog={updateMealMedicalLog}
@@ -3207,6 +3354,7 @@ Producten uit deze categorie gaan naar "Overig".`);
             dailyLog={dailyLog}
             onAddMeal={openMealInputFromTimeline}
             onAddSupplement={openSupplementInputFromTimeline}
+            onAddExercise={openExerciseCatalogFromTimeline}
           />
         )}
       </div>

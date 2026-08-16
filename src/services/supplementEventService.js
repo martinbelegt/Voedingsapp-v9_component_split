@@ -23,14 +23,16 @@ export function createSupplementEvent(input, options = {}) {
 }
 
 export function buildSupplementTimelineInputs(supplements, eventTime) {
+  // A catalog recommendation describes the product, not what the user takes.
+  // Timeline registrations therefore read exclusively from personal usage.
   return supplements.map((supplement) => ({
     date: eventTime.slice(0, 10),
     eventTime,
     name: supplement.product?.name || "Supplement",
     supplementName: supplement.product?.name || "Supplement",
     supplementId: supplement.id,
-    dosage: supplement.personal?.dosage || "",
-    unit: supplement.personal?.dosageUnit || "",
+    dosage: supplement.personal?.dosage ?? "",
+    unit: supplement.personal?.dosageUnit ?? "",
     note: supplement.personal?.notes || "",
     brand: supplement.product?.brand || "",
     productName: supplement.product?.productName || "",

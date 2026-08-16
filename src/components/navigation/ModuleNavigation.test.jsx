@@ -42,13 +42,14 @@ describe("navigation foundation", () => {
     expect(registrationModules).toHaveLength(1);
     expect(libraryModules).toHaveLength(4);
     expect(timelineRegistrationModules.map((item) => item.label)).toEqual([
-      "Voeding",
-      "Supplement",
-      "Medicatie",
       "Insuline",
       "Glucose",
-      "Gewicht",
+      "Voeding",
+      "Supplement",
+      "Oefening",
       "Beweging",
+      "Medicatie",
+      "Gewicht",
       "Stoelgang",
       "Notitie",
     ]);

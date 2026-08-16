@@ -13,6 +13,7 @@ export function CatalogRoutineBuilder({
   activeModuleId,
   products,
   supplements,
+  exercises = [],
   onCreateRoutine,
   initialSelection,
 }) {
@@ -37,8 +38,9 @@ export function CatalogRoutineBuilder({
   const options = useMemo(() => {
     if (type === "food") return products.map((item) => ({ id: item.id, label: item.name }));
     if (type === "supplement") return supplements.map((item) => ({ id: item.id, label: item.product?.name || "Supplement" }));
+    if (type === "exercise") return exercises.map((item) => ({ id: item.id, label: item.name || "Oefening" }));
     return [];
-  }, [type, products, supplements]);
+  }, [type, products, supplements, exercises]);
 
   function close() {
     setOpen(false);

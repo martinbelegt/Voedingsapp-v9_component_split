@@ -79,3 +79,18 @@ test("alleen aangevinkte bestaande catalogusitems worden registratie-input", () 
     },
   });
 });
+
+test("een oefening blijft via het bestaande routinepad een losse uitvoering", () => {
+  const routine = createRoutine({
+    name: "Schouderroutine",
+    items: [createRoutineItem({ id: "exercise-item", type: "exercise", catalogItemId: "exercise-1" })],
+  }, { createId: idFactory });
+  const [registration] = buildRoutineRegistrations(routine, ["exercise-item"], {
+    products: [], supplements: [],
+    exercises: [{ id: "exercise-1", name: "Externe rotatie", personalDosage: "20 seconden × 1", side: "Links", notes: "Rustig" }],
+  }, new Date("2026-08-16T10:00:00.000Z"));
+  expect(registration).toMatchObject({
+    type: "exercise",
+    input: { exerciseId: "exercise-1", exerciseName: "Externe rotatie", personalDosage: "20 seconden × 1", side: "Links" },
+  });
+});

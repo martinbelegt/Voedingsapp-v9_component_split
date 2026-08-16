@@ -22,13 +22,14 @@ export const libraryModules = [
 ];
 
 export const timelineRegistrationModules = [
-  { id: "meal", icon: "🍽️", label: term("food") },
-  { id: "supplement", icon: "💊", label: term("supplement") },
-  { id: "medicine", icon: "💊", label: term("medication") },
   { id: "insulin", icon: "💉", label: term("insulin") },
   { id: "glucose", icon: "🩸", label: term("glucose") },
-  { id: "weight", icon: "⚖️", label: term("weight") },
+  { id: "meal", icon: "🍽️", label: term("food") },
+  { id: "supplement", icon: "💊", label: term("supplement") },
+  { id: "exercise", icon: "💪", label: "Oefening" },
   { id: "movement", icon: "🚶", label: "Beweging" },
+  { id: "medicine", icon: "💊", label: term("medication") },
+  { id: "weight", icon: "⚖️", label: term("weight") },
   { id: "bowel", icon: "🚽", label: "Stoelgang" },
   { id: "note", icon: "📝", label: term("note") },
 ];

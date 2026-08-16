@@ -318,3 +318,23 @@ test("T ondersteunt tijdelijke multi-select en één gezamenlijke tijdlijnplaats
   container.remove();
   globalThis.IS_REACT_ACT_ENVIRONMENT = false;
 });
+
+test("een catalogusrecord kan via id direct worden geopend", async () => {
+  globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  await act(async () => root.render(<CatalogFramework
+    config={config}
+    items={[{ id: "exercise-1", name: "Externe rotatie", categoryId: "movement" }]}
+    openItemId="exercise-1"
+    onPutOnTimeline={jest.fn()}
+    onAddToRoutine={jest.fn()}
+    onToggleFavorite={jest.fn()}
+  />));
+  expect(container.querySelector('[role="option"]').getAttribute("aria-expanded")).toBe("true");
+  expect(container.querySelector(".catalog-framework__inline-editor")).toBeTruthy();
+  await act(async () => root.unmount());
+  container.remove();
+  globalThis.IS_REACT_ACT_ENVIRONMENT = false;
+});

@@ -27,6 +27,8 @@ export function DailyTab({
   clearDailyLog,
   fillDailyRepeats,
   products,
+  exercises = [],
+  onOpenExercise,
   deleteMealFromDay,
   updateMealTime,
   updateMealMedicalLog,
@@ -70,6 +72,7 @@ export function DailyTab({
   dailyLog = [],
   onAddMeal,
   onAddSupplement,
+  onAddExercise,
 }) {
   const isMobile = window.innerWidth < 900;
   const [addEventType, setAddEventType] = useState(null);
@@ -265,6 +268,7 @@ export function DailyTab({
     setTimelineRegistrationModule(null);
     if (moduleId === "meal") onAddMeal();
     else if (moduleId === "supplement") onAddSupplement();
+    else if (moduleId === "exercise") onAddExercise();
     else setAddEventType(moduleId);
   }
 
@@ -610,6 +614,8 @@ export function DailyTab({
           mealsForDay={mealsForDay}
           selectedDay={selectedDay}
           products={products}
+          exercises={exercises}
+          onOpenExercise={onOpenExercise}
           deleteMealFromDay={deleteMealFromDay}
           updateMealTime={updateMealTime}
           updateMealMedicalLog={updateMealMedicalLog}

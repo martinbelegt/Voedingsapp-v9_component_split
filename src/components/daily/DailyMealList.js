@@ -69,6 +69,8 @@ export function DailyMealList({
   insulinEventsForDay = [],
   selectedDay,
   products,
+  exercises = [],
+  onOpenExercise,
   deleteMealFromDay,
   updateMealTime,
   updateMealMedicalLog,
@@ -1111,16 +1113,16 @@ export function DailyMealList({
                   event.durationMinutes ? ` · ${event.durationMinutes} min` : ""
                 }`}
                 timeLabel={formatTime(event.eventTime)}
-                subtitle={`${phasePrefix(item)}${
-                  event.intensityType || "Belasting onbekend"
-                }${event.note ? ` · ${event.note}` : ""}`}
+                subtitle={event.exerciseId
+                  ? [phasePrefix(item), event.personalDosage, event.side, event.note].filter(Boolean).join(" · ")
+                  : `${phasePrefix(item)}${event.intensityType || "Belasting onbekend"}${event.note ? ` · ${event.note}` : ""}`}
                 accentColor="#4c1d95"
                 backgroundColor="#f5f3ff"
                 borderColor="#c4b5fd"
                 actions={null}
                 detailContent={
                   <div style={{ fontSize: 13, color: "#334155" }}>
-                    Beweging/sportmoment in metabole tijdlijn.
+                    {event.exerciseId ? `Oefeningreferentie: ${event.exerciseId}` : "Beweging/sportmoment in metabole tijdlijn."}
                   </div>
                 }
               />
@@ -1384,6 +1386,8 @@ export function DailyMealList({
         open={Boolean(detailEvent)}
         type={detailEvent?.type}
         event={detailEvent?.event}
+        exercise={detailEvent?.event?.exerciseId ? exercises.find(({ id }) => id === detailEvent.event.exerciseId) || null : null}
+        onOpenExercise={(exerciseId) => { setDetailEvent(null); onOpenExercise?.(exerciseId); }}
         onClose={() => setDetailEvent(null)}
         onEdit={() => {
           setEditingEvent(detailEvent.event);

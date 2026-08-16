@@ -1,0 +1,69 @@
+.exercise-detail-editor__form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 0 18px;
+}
+
+.exercise-detail-editor__field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  color: #475569;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.exercise-detail-editor__field > span { line-height: 1.35; }
+
+.exercise-detail-editor__field input,
+.exercise-detail-editor__field select,
+.exercise-detail-editor__field textarea {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #fff;
+  color: #1e293b;
+  font: inherit;
+  font-size: 12px;
+}
+
+.exercise-detail-editor__field input,
+.exercise-detail-editor__field select {
+  min-height: 38px;
+  padding: 7px 9px;
+}
+
+.exercise-detail-editor__field textarea {
+  min-height: 96px;
+  padding: 9px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.exercise-detail-editor__field a {
+  align-self: flex-start;
+  color: #7a3522;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.exercise-detail-editor__actions {
+  flex-wrap: nowrap;
+  align-items: center;
+  padding-top: 2px;
+}
+
+@media (max-width: 899px) {
+  .exercise-detail-editor__form { gap: 13px; }
+  .exercise-detail-editor__actions {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+  .exercise-detail-editor__actions button { flex: 0 0 auto; }
+}

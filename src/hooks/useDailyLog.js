@@ -1000,6 +1000,11 @@ export function useDailyLog(selectedDate) {
       intensityType: input.intensityType || "Gemengd",
       durationMinutes: input.durationMinutes || "",
       note: input.note || "",
+      exerciseId: input.exerciseId || "",
+      exerciseName: input.exerciseName || "",
+      personalDosage: input.personalDosage || "",
+      side: input.side || "",
+      routineExecution: input.routineExecution || null,
       createdAt: new Date().toLocaleString("nl-NL"),
       repeat: input.repeat || "none",
     };

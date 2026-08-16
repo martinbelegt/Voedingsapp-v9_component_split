@@ -101,7 +101,7 @@ describe("bediening van een gegroepeerd supplementmoment", () => {
   let deleteSupplementEvent;
   let confirmSpy;
   const events = [
-    supplement("supp-1", "00", "Collagen + Vitamin C", "1"),
+    supplement("supp-1", "00", "R-Alfa-Liponzuur", "1"),
     supplement("supp-2", "00", "Creatine Monohydrate Creapure®", "2"),
     supplement("supp-3", "00", "Omega-3", "3"),
   ];
@@ -147,13 +147,13 @@ describe("bediening van een gegroepeerd supplementmoment", () => {
     expect(container.querySelectorAll('[data-timeline-item="supplement-group"]')).toHaveLength(1);
     expect(group.textContent).toContain("💊");
     expect(group.textContent).toContain(
-      "Supplementen — Collagen + Vitamin C 1 capsule · Creatine Monohydrate Creapure® 2 capsule · Omega-3 3 capsule",
+      "Supplementen — R-Alfa-Liponzuur 1 capsule · Creatine Monohydrate Creapure® 2 capsule · Omega-3 3 capsule",
     );
 
     await act(async () => group.firstElementChild.click());
 
     expect(group.querySelectorAll("[data-supplement-registration-id]")).toHaveLength(3);
-    expect(group.textContent).toContain("Collagen + Vitamin C1 capsule");
+    expect(group.textContent).toContain("R-Alfa-Liponzuur1 capsule");
     expect(group.textContent).toContain("2 capsule");
     expect(group.textContent).toContain("3 capsule");
     const longName = group.querySelector('[data-supplement-registration-id="supp-2"] strong');

@@ -11,7 +11,7 @@ function changeInput(input, value) {
   input.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
-function Harness({ onWeight, onMovement, onSupplement }) {
+function Harness({ onWeight, onMovement, onSupplement, onExercise }) {
   const [selectedDay, setSelectedDay] = useState({
     date: "2026-07-31",
     meals: [],
@@ -104,6 +104,7 @@ function Harness({ onWeight, onMovement, onSupplement }) {
       dailyLog={[]}
       onAddMeal={noop}
       onAddSupplement={onSupplement}
+      onAddExercise={onExercise}
     />
   );
 }
@@ -114,6 +115,7 @@ describe("compacte dagelijkse events", () => {
   let onWeight;
   let onMovement;
   let onSupplement;
+  let onExercise;
 
   beforeEach(async () => {
     globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -124,12 +126,14 @@ describe("compacte dagelijkse events", () => {
     onWeight = jest.fn();
     onMovement = jest.fn();
     onSupplement = jest.fn();
+    onExercise = jest.fn();
     await act(async () =>
       root.render(
         <Harness
           onWeight={onWeight}
           onMovement={onMovement}
           onSupplement={onSupplement}
+          onExercise={onExercise}
         />,
       ),
     );
@@ -199,6 +203,21 @@ describe("compacte dagelijkse events", () => {
 
     expect(onSupplement).toHaveBeenCalledTimes(1);
     expect(container.querySelector('[data-compact-event="supplement"]')).toBeNull();
+  });
+
+  test("oefening opent de catalogusroute terwijl beweging een vrij invoerpaneel houdt", async () => {
+    const exerciseButton = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent.includes("Oefening"),
+    );
+    await act(async () => exerciseButton.click());
+    expect(onExercise).toHaveBeenCalledTimes(1);
+    expect(container.querySelector('[data-compact-event="exercise"]')).toBeNull();
+
+    const movementButton = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent.includes("Beweging"),
+    );
+    await act(async () => movementButton.click());
+    expect(container.querySelector('[data-compact-event="movement"]')).not.toBeNull();
   });
 
   test("annuleren met gewichtswijziging bewaart niets", async () => {
